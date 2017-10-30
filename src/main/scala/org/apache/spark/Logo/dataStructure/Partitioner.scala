@@ -1,16 +1,16 @@
 package org.apache.spark.Logo.dataStructure
 
-import org.apache.spark.Partitioner
+import org.apache.spark.{HashPartitioner, Partitioner}
 import org.apache.spark.util.Utils
 
 class CustomPartitioner();
 
 
 class PointToNumConverter(val parts:List[Int]){
-  def convertToNum(point:List[Int]) = point.zipWithIndex.map(f => f._1*parts.dropRight(f._2+1).product).sum
+  def convertToNum(point:List[Int]) = point.zipWithIndex.map(f => f._1*parts.dropRight(1).drop(f._2).product).sum
 }
 
-class SlotPartitioner(val p1: Int, val slotNum:Int) extends Partitioner{
+class SlotPartitioner(val p1: Int, val slotNum:Int, var partitioner: Partitioner = null) extends Partitioner{
   override def numPartitions = p1
 
   override def getPartition(key: Any) = key match {
@@ -18,47 +18,88 @@ class SlotPartitioner(val p1: Int, val slotNum:Int) extends Partitioner{
       if (listKey.length < slotNum+1){
         throw new Exception("slotNum must be smaller or equal to the total slots of the key")
       }
-      Utils.nonNegativeMod(listKey(slotNum).hashCode(),p1)
+
+      partitioner match {
+        case null =>  Utils.nonNegativeMod(listKey(slotNum).hashCode(),p1)
+        case _ => partitioner.getPartition(listKey(slotNum))
+      }
+
+
+
+    }
+    case tupleKey:Tuple1[Any] => {
+      partitioner match {
+        case null => Utils.nonNegativeMod(tupleKey.productElement(slotNum).hashCode(),p1)
+        case _ => partitioner.getPartition(tupleKey.productElement(slotNum))
+      }
+    }
+    case tupleKey:Tuple2[Any,Any] => {
+      partitioner match {
+        case null => Utils.nonNegativeMod(tupleKey.productElement(slotNum).hashCode(),p1)
+        case _ => partitioner.getPartition(tupleKey.productElement(slotNum))
+      }
+    }
+    case tupleKey:Tuple3[Any,Any,Any] => {
+      partitioner match {
+        case null => Utils.nonNegativeMod(tupleKey.productElement(slotNum).hashCode(),p1)
+        case _ => partitioner.getPartition(tupleKey.productElement(slotNum))
+      }
+    }
+    case tupleKey:Tuple4[Any,Any,Any,Any] => {
+      partitioner match {
+        case null => Utils.nonNegativeMod(tupleKey.productElement(slotNum).hashCode(),p1)
+        case _ => partitioner.getPartition(tupleKey.productElement(slotNum))
+      }
     }
     case _ => throw new Exception("Input must be List or Tuple")
   }
 }
 
 
-class CompositeParitioner(val partitioners:List[Partitioner]) extends Partitioner{
+class CompositeParitioner(val partitioners:List[Partitioner], val sizeLimits:List[Int] = null) extends Partitioner{
   override def numPartitions = partitioners.foldLeft(1)((x,y) => x*y.numPartitions)
   val paritionNumsMap = partitioners.map(_.numPartitions).zipWithIndex.map(_.swap).toMap
-  val converter = new PointToNumConverter(partitioners.map(_.numPartitions))
+  lazy val converter = sizeLimits match {
+    case null => new PointToNumConverter(partitioners.map(_.numPartitions))
+    case _ => new PointToNumConverter(partitioners.zipWithIndex.map(f => sizeLimitsMap(f._2)))
+  }
+
+  lazy val sizeLimitsMap:Map[Int,Int] = sizeLimits match {
+    case null => null
+    case _ => sizeLimits.zipWithIndex.map(_.swap).toMap
+  }
+
 
   override def getPartition(key: Any) = key match {
     case listKey:List[Any] => {
-      converter.convertToNum(partitioners.map(f => f.getPartition(key)))
+//      println(partitioners.map(f => f.getPartition(key)))
+//      println(converter.parts)
+      sizeLimitsMap match {
+        case null => converter.convertToNum(partitioners.map(f => f.getPartition(key)))
+        case _ => converter.convertToNum(partitioners.zipWithIndex.map(f => Utils.nonNegativeMod(f._1.getPartition(key),sizeLimitsMap(f._2))))
+      }
     }
-
+    case tupleKey:Tuple2[Any,Any] => {
+      sizeLimitsMap match {
+        case null => converter.convertToNum(partitioners.map(f => f.getPartition(key)))
+        case _ => converter.convertToNum(partitioners.zipWithIndex.map(f => Utils.nonNegativeMod(f._1.getPartition(key),sizeLimitsMap(f._2))))
+      }
+    }
+    case tupleKey:Tuple3[Any,Any,Any] => {
+      sizeLimitsMap match {
+        case null => converter.convertToNum(partitioners.map(f => f.getPartition(key)))
+        case _ => converter.convertToNum(partitioners.zipWithIndex.map(f => Utils.nonNegativeMod(f._1.getPartition(key),sizeLimitsMap(f._2))))
+      }
+    }
+    case tupleKey:Tuple4[Any,Any,Any,Any] => {
+      sizeLimitsMap match {
+        case null => converter.convertToNum(partitioners.map(f => f.getPartition(key)))
+        case _ => converter.convertToNum(partitioners.zipWithIndex.map(f => Utils.nonNegativeMod(f._1.getPartition(key),sizeLimitsMap(f._2))))
+      }
+    }
     case _ => throw new Exception("Input must be List or Tuple")
   }
 }
 
 
-
-
-class HashPartitioner2(val p1: Int, val p2:Int) extends Partitioner {
-  require(p1*p2 >= 0, s"Number of partitions ($p1*$p2) cannot be negative.")
-
-  def numPartitions: Int = p1*p2
-
-  def getPartition(key: Any): Int = key match {
-    case null => 0
-    case tuple:Tuple2[Any,Any] => Utils.nonNegativeMod(tuple._1.hashCode,p1)*p1+Utils.nonNegativeMod(tuple._2.hashCode,p2)
-    case _ => throw new Exception("Input must be Tuple2")
-  }
-
-  override def equals(other: Any): Boolean = other match {
-    case h: HashPartitioner2 =>
-      h.numPartitions == numPartitions
-    case _ =>
-      false
-  }
-
-  override def hashCode: Int = numPartitions
-}
+class HashPartitioner2(val p1: Int, val p2:Int) extends CompositeParitioner(List(new SlotPartitioner(p1,0),new SlotPartitioner(p2,1))) {}
