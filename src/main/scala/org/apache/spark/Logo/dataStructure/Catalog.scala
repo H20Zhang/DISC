@@ -5,13 +5,17 @@ import org.apache.spark.rdd.RDD
 import scala.collection.mutable
 
 class Catalog {
-  val rddMap:mutable.Map[String,RDD[ListLogoBlock[_]]] = mutable.Map()
+  val rddMap:mutable.Map[String,RDD[LogoBlock[_]]] = mutable.Map()
 
-  def addRDD(name:String , rdd:RDD[ListLogoBlock[_]]): Unit ={
+  def putLogo(name:String , rdd:RDD[LogoBlock[_]]): Unit ={
     rddMap += ((name,rdd))
   }
 
-  def deleteRDD(name:String): Unit ={
+  def getLogo(name:String) ={
+    rddMap(name)
+  }
+
+  def removeLogo(name:String): Unit ={
     rddMap -= name
   }
 

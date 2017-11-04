@@ -9,7 +9,7 @@ import scala.reflect.ClassTag
 
 abstract class LogoBlock[A:ClassTag](val schema: LogoSchema, val metaData: LogoMetaData, val rawData:A){}
 
-class rowLogoBlock[A:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawData:List[A]) extends LogoBlock(schema, metaData, rawData){}
+class RowLogoBlock[A:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawData:List[A]) extends LogoBlock(schema, metaData, rawData){}
 
 //
 ////special case for edge with one hole

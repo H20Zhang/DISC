@@ -65,22 +65,22 @@ class dataStructureTest extends FunSuite {
     val compositeParitioner2D1 = new CompositeParitioner(List(slotPartitioner0,slotPartitioner1))
     val compositeParitioner2D2 = new CompositeParitioner(List(slotPartitioner1,slotPartitioner2))
     val compositeParitioner3D = new CompositeParitioner(List(slotPartitioner0,slotPartitioner1,slotPartitioner2))
-    val compositeParitioner2D2D = new CompositeParitioner(List(compositeParitioner2D1,compositeParitioner2D2))
-    val limitsCompositePartitioner2D2D = new CompositeParitioner(List(compositeParitioner2D1,compositeParitioner2D2), List(20,20))
+//    val compositeParitioner2D2D = new CompositeParitioner(List(compositeParitioner2D1,compositeParitioner2D2))
+//    val limitsCompositePartitioner2D2D = new CompositeParitioner(List(compositeParitioner2D1,compositeParitioner2D2), List(20,20))
 
 
     val key1 = List(24,35,27)
-    assert(compositeParitioner2D1.getPartition(key1) == 4*20+5)
-    assert(compositeParitioner2D2.getPartition(key1) == 5*10+2)
-    assert(compositeParitioner3D.getPartition(key1) == 4*20*10+5*10+2)
-    assert(compositeParitioner2D2D.getPartition(key1) == 85*20*10+52)
-    assert(limitsCompositePartitioner2D2D.getPartition(key1) == 5*20+12)
+    assert(compositeParitioner2D1.getPartition(key1) == 4*10+5)
+    assert(compositeParitioner2D2.getPartition(key1) == 5*25+2)
+    assert(compositeParitioner3D.getPartition(key1) == 4*10*25+5*25+2)
+//    assert(compositeParitioner2D2D.getPartition(key1) == 85*20*10+52)
+//    assert(limitsCompositePartitioner2D2D.getPartition(key1) == 5*20+12)
 
     val key2 = (24,35,27)
-    assert(compositeParitioner2D1.getPartition(key2) == 4*20+5)
-    assert(compositeParitioner2D2.getPartition(key2) == 5*10+2)
-    assert(compositeParitioner3D.getPartition(key2) == 4*20*10+5*10+2)
-    assert(compositeParitioner2D2D.getPartition(key2) == 85*20*10+52)
+    assert(compositeParitioner2D1.getPartition(key2) == 4*10+5)
+    assert(compositeParitioner2D2.getPartition(key2) == 5*25+2)
+    assert(compositeParitioner3D.getPartition(key2) == 4*10*25+5*25+2)
+//    assert(compositeParitioner2D2D.getPartition(key2) == 85*20*10+52)
 
 
 

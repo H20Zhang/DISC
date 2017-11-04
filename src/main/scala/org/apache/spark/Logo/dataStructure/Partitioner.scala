@@ -1,15 +1,18 @@
 package org.apache.spark.Logo.dataStructure
 
+import org.apache.spark.Logo.utlis.PointToNumConverter
 import org.apache.spark.{HashPartitioner, Partitioner}
 import org.apache.spark.util.Utils
+
+import scala.collection.mutable.ArrayBuffer
 
 class CustomPartitioner();
 
 
-class PointToNumConverter(val parts:List[Int]){
-  def convertToNum(point:List[Int]) = point.zipWithIndex.map(f => f._1*parts.dropRight(1).drop(f._2).product).sum
-}
-
+/**
+ * @param p1 numPartition for this slotPartitioner
+ * @param slotNum listKey(slotNum) will be used for generate hash
+ */
 class SlotPartitioner(val p1: Int, val slotNum:Int, var partitioner: Partitioner = null) extends Partitioner{
   override def numPartitions = p1
 
@@ -56,7 +59,34 @@ class SlotPartitioner(val p1: Int, val slotNum:Int, var partitioner: Partitioner
 }
 
 
-class CompositeParitioner(val partitioners:List[Partitioner], val sizeLimits:List[Int] = null) extends Partitioner{
+/**
+
+
+  @param partitioners partitioners used to compose compositePartitioner, each of the paritioner will be
+                      called on listKey and in total they generate a hashKeyList, then hashKeyList will be converted
+                      to a 10 based number
+
+  @example
+How to understand the composite paritioner,
+
+For example, if we have a p1:slotPartitioner and p2:slotPartitioner, each of which has NumPartitioner 10 and 25.
+Then the composite partitioner can be understand as a multiplier,
+
+for key 10 20
+it base is 10 and 25
+
+so to convert it to 10 based system,
+
+it is 10*25+20
+
+ */
+
+
+class CompositeParitioner(val partitioners:List[SlotPartitioner], val sizeLimits:List[Int] = null) extends Partitioner{
+
+  require(partitioners.map(_.slotNum).sorted.zip(partitioners.map(_.slotNum)).forall(f => f._1 == f._2), s"slotNum of partitioner must be in ascending order " +
+    s"current order is ${partitioners.map(_.slotNum)}, expected order is ${partitioners.map(_.slotNum).sorted}")
+
   override def numPartitions = partitioners.foldLeft(1)((x,y) => x*y.numPartitions)
   val paritionNumsMap = partitioners.map(_.numPartitions).zipWithIndex.map(_.swap).toMap
   lazy val converter = sizeLimits match {
