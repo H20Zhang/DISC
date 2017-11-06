@@ -14,17 +14,24 @@ import scala.reflect.ClassTag
 
 abstract class RowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: RDD[(A,B)]) {
 
-  var partitioner:Partitioner = _
-  var edgeConnections:List[(Int,Int)] = _
+  var _edges:List[(Int,Int)] = _
+  var _keySizeMap:Map[Int,Int] = _
 
-  def setParitioner(partitioner: Partitioner) ={
-    this.partitioner = partitioner
+
+  lazy val schema = LogoSchema(_edges,_keySizeMap)
+  lazy val _partitioner:Partitioner = schema.partitioner
+
+  def setEdges(edges:List[(Int,Int)]) = {
+    this._edges = edges
     this
   }
-  def setEdgeConnection(edges:List[(Int,Int)]) = {
-    this.edgeConnections = edges
+
+  def setKeySizeMap(keySizeMap:Map[Int,Int]) = {
+    _keySizeMap = keySizeMap
     this
   }
+
+
   def build():RDD[RowLogoBlock[(A,B)]]
 }
 
@@ -42,7 +49,7 @@ abstract class RowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: RDD[(A,B)]) {
 class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(List[Int],A)], nodeSize:Int) extends RowLogoRDDMaker(rdd){
 
   val sc = rdd.sparkContext
-  val keyCol = partitioner match {
+  val keyCol = _partitioner match {
     case s:SlotPartitioner => List(s.slotNum)
     case c:CompositeParitioner => c.partitioners.map(_.slotNum)
   }
@@ -54,7 +61,7 @@ class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(List[Int],A)], nodeSize:Int) ex
     var sentry:List[(List[Int],A)] = null
     var sentryRDD:RDD[(List[Int],A)] = null
 
-    partitioner match {
+    _partitioner match {
       case s:SlotPartitioner => {
         val slotNum = s.slotNum
         val p1 = s.p1
@@ -76,17 +83,17 @@ class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(List[Int],A)], nodeSize:Int) ex
 
   def build(): RDD[RowLogoBlock[(List[Int],A)]] ={
     val sentryRDD = generateSentry
-    val baseList = partitioner match {
+    val baseList = _partitioner match {
       case s:SlotPartitioner => List(s.p1)
       case c:CompositeParitioner => c.partitioners.map(_.p1)
     }
 
     val sentriedRDD = rdd.union(sentryRDD)
-    sentriedRDD.partitionBy(partitioner)
+    sentriedRDD.partitionBy(_partitioner)
     sentriedRDD.mapPartitionsWithIndex[RowLogoBlock[(List[Int],A)]]{case (index,f) =>
       val converter = new PointToNumConverter(baseList)
       val numList = converter.NumToList(index)
-      val blockGenerator = new rowBlockGenerator[A](partitioner,edgeConnections,baseList,index,keyCol,nodeSize,f)
+      val blockGenerator = new rowBlockGenerator(schema,index,f)
       val block = blockGenerator.generate()
       Iterator(block)
     }

@@ -88,7 +88,8 @@ class CompositeParitioner(val partitioners:List[SlotPartitioner], val sizeLimits
     s"current order is ${partitioners.map(_.slotNum)}, expected order is ${partitioners.map(_.slotNum).sorted}")
 
   override def numPartitions = partitioners.foldLeft(1)((x,y) => x*y.numPartitions)
-  val paritionNumsMap = partitioners.map(_.numPartitions).zipWithIndex.map(_.swap).toMap
+  lazy val paritionNumsMap = partitioners.map(_.numPartitions)
+  lazy val keyColMap = partitioners.map(_.slotNum)
   lazy val converter = sizeLimits match {
     case null => new PointToNumConverter(partitioners.map(_.numPartitions))
     case _ => new PointToNumConverter(partitioners.zipWithIndex.map(f => sizeLimitsMap(f._2)))
