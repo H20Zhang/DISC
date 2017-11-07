@@ -1,4 +1,4 @@
-package org.apache.spark.Logo.dataStructure
+package org.apache.spark.Logo.Physical.dataStructure
 import org.apache.spark.graphx.VertexId
 
 import scala.reflect.ClassTag
@@ -7,7 +7,7 @@ import scala.reflect.ClassTag
 
 
 
-abstract class LogoBlock[A:ClassTag](val schema: LogoSchema, val metaData: LogoMetaData, val rawData:A){}
+abstract class LogoBlock[A:ClassTag](val schema: LogoSchema, val metaData: LogoMetaData, val rawData:A) extends Serializable{}
 
 class RowLogoBlock[A:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawData:List[A]) extends LogoBlock(schema, metaData, rawData){}
 

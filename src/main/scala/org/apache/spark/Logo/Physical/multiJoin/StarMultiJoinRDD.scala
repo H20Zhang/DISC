@@ -1,9 +1,9 @@
-package org.apache.spark.Logo.multiJoin
+package org.apache.spark.Logo.Physical.multiJoin
 
 import java.io.{IOException, ObjectOutputStream}
 
 import org.apache.spark._
-import Logo.dataStructure.HashPartitioner2
+import org.apache.spark.Logo.Physical.dataStructure.HashPartitioner2
 import org.apache.spark.rdd.RDD
 import org.apache.spark.util.Utils
 

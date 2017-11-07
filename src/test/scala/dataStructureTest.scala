@@ -1,6 +1,6 @@
-package org.apache.spark.Logo.dataStructure
+package org.apache.spark.Logo.Physical.dataStructure
 
-import org.apache.spark.Logo.multiJoin.StarJoin
+import org.apache.spark.Logo.Physical.multiJoin.StarJoin
 import org.apache.spark.sql.SparkSession
 import org.scalatest.FunSuite
 
@@ -82,15 +82,7 @@ class dataStructureTest extends FunSuite {
     assert(compositeParitioner3D.getPartition(key2) == 4*10*25+5*25+2)
 //    assert(compositeParitioner2D2D.getPartition(key2) == 85*20*10+52)
 
-
-
-
-
-
   }
-
-
-
 
 
 

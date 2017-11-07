@@ -1,11 +1,16 @@
-import org.apache.spark.Logo.Maker.{PartitionerMaker, rowBlockGenerator}
-import org.apache.spark.Logo.dataStructure.LogoSchema
-import org.scalatest.FunSuite
+import org.apache.log4j.{Level, Logger}
+import org.apache.spark.HashPartitioner
+import org.apache.spark.Logo.Physical.Maker.{PartitionerMaker, SimpleRowLogoRDDMaker, rowBlockGenerator}
+import org.apache.spark.Logo.Physical.dataStructure.LogoSchema
+import org.apache.spark.Logo.Physical.utlis.TestUtil
+import org.apache.spark.sql.SparkSession
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class BlockMakerTest extends FunSuite{
+class BlockMakerTest extends FunSuite with BeforeAndAfterAll{
+
+  val (spark,sc) = SparkSingle.getSpark()
 
   test("LogoBlockGenerator"){
-
 
     val edges = List((0,1),(0,2),(1,2))
     val keySizeMap = Map((0,3),(1,3))
@@ -27,10 +32,39 @@ class BlockMakerTest extends FunSuite{
 
   test("LogoRDDMaker"){
 
+    val data = List.range(0,10).map(f => (f,f)).map(f => (List(f._1,f._2),1))
+
+
+    val rawRDD = sc.parallelize(data)
+
+    val edges = List((0,1))
+    val keySizeMap = Map((0,3),(1,3))
+
+    val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD).setEdges(edges).setKeySizeMap(keySizeMap)
+
+    val logoRDD = logoRDDMaker.build()
+
+    //length match
+    val collectedBlock = logoRDD.collect()
+    val lengthList = List(4,0,0,0,3,0,0,0,3)
+    assert(TestUtil.listEqual(collectedBlock.map(f => f.metaData.numberOfParts),lengthList),"each block's size must match")
+
+    //index match
+    val indexList = logoRDD.mapPartitionsWithIndex{case (index,list) =>
+      Iterator(index)
+    }.collect()
+    val indexList1 = List(0,1,2,3,4,5,6,7,8)
+    assert(TestUtil.listEqual(indexList,indexList1),"each block's index must appear")
   }
 
   test("PartitionerMaker"){
     val compositeParitioner = PartitionerMaker().setSlotMapping(List(0,1)).setSlotSize(List(3,3)).build()
     assert(compositeParitioner.numPartitions == 9)
   }
+
+
+  override def afterAll(): Unit = {
+    SparkSingle.close()
+  }
+
 }

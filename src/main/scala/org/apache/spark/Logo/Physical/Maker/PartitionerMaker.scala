@@ -1,6 +1,6 @@
-package org.apache.spark.Logo.Maker
+package org.apache.spark.Logo.Physical.Maker
 
-import org.apache.spark.Logo.dataStructure.{CompositeParitioner, SlotPartitioner}
+import org.apache.spark.Logo.Physical.dataStructure.{CompositeParitioner, SlotPartitioner}
 
 case class PartitionerMaker() {
 

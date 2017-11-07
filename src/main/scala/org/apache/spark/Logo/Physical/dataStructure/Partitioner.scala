@@ -1,6 +1,6 @@
-package org.apache.spark.Logo.dataStructure
+package org.apache.spark.Logo.Physical.dataStructure
 
-import org.apache.spark.Logo.utlis.PointToNumConverter
+import org.apache.spark.Logo.Physical.utlis.PointToNumConverter
 import org.apache.spark.{HashPartitioner, Partitioner}
 import org.apache.spark.util.Utils
 

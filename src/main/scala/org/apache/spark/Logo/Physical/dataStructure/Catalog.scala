@@ -1,4 +1,4 @@
-package org.apache.spark.Logo.dataStructure
+package org.apache.spark.Logo.Physical.dataStructure
 
 import org.apache.spark.rdd.RDD
 

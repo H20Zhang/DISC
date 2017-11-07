@@ -1,4 +1,4 @@
-import org.apache.spark.Logo.utlis.{ListGenerator, PointToNumConverter}
+import org.apache.spark.Logo.Physical.utlis.{ListGenerator, PointToNumConverter}
 import org.scalatest.FunSuite
 
 class UtilsTest extends FunSuite{
@@ -20,7 +20,6 @@ class UtilsTest extends FunSuite{
 
     assert(list3.zip(list4).forall(p => (p._1.diff(p._2).length == 0)))
 
-
     //test fill list
     val emptyList = ListGenerator.fillList(0,10)
     assert(emptyList.size == 10)
@@ -34,6 +33,7 @@ class UtilsTest extends FunSuite{
       List(1,0),List(1,1),List(1,2),
       List(2,0),List(2,1),List(2,2)
     )
+
     assert(cartersianList.zip(cartersianList1).forall(p => (p._1.diff(p._2).length == 0)))
 
     //test fill cartersian list
