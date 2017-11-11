@@ -2,7 +2,7 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.spark.HashPartitioner
 import org.apache.spark.Logo.Physical.Maker.{PartitionerMaker, SimpleRowLogoRDDMaker, rowBlockGenerator}
 import org.apache.spark.Logo.Physical.dataStructure.LogoSchema
-import org.apache.spark.Logo.Physical.utlis.TestUtil
+import org.apache.spark.Logo.Physical.utlis.{SparkSingle, TestUtil}
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
@@ -15,7 +15,6 @@ class BlockMakerTest extends FunSuite with BeforeAndAfterAll{
     val edges = List((0,1),(0,2),(1,2))
     val keySizeMap = Map((0,3),(1,3))
     val schema = LogoSchema(edges, keySizeMap)
-
 
     val index = schema.partitioner.getPartition(List(0,1,2))
 

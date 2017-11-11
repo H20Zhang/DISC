@@ -1,3 +1,5 @@
+package org.apache.spark.Logo.Physical.utlis
+
 import org.apache.spark.sql.SparkSession
 
 object SparkSingle {
@@ -12,9 +14,6 @@ object SparkSingle {
     counter += 1
     (spark,sc)
   }
-
-
-
 
   def close(): Unit ={
     counter -= 1

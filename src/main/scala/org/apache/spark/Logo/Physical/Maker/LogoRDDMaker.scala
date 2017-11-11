@@ -32,6 +32,8 @@ abstract class RowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: RDD[(A,B)]) ext
     this
   }
 
+  def getSchema = _schema
+
 
   def build():RDD[RowLogoBlock[(A,B)]]
 }
