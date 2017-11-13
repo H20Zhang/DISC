@@ -1,4 +1,4 @@
-package org.apache.spark.Logo.Physical.multiJoin
+package org.apache.spark.Logo.Physical.Joiner.multiJoin
 
 import java.io.{IOException, ObjectOutputStream}
 

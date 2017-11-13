@@ -1,6 +1,6 @@
 import TestData.TestLogoRDDData
 import org.apache.spark.Logo.Physical.Builder.{Catalog, LogoRDDReference, RowLogoRDDReference}
-import org.apache.spark.Logo.Physical.dataStructure.RowLogoBlock
+import org.apache.spark.Logo.Physical.dataStructure.{LogoBlockRef, RowLogoBlock}
 import org.apache.spark.Logo.Physical.utlis.TestUtil
 import org.apache.spark.rdd.RDD
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
@@ -11,7 +11,7 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
 
     val (edgeLogoRDD,schema) = TestLogoRDDData.edgeLogoRDD
 
-    val ref = RowLogoRDDReference(edgeLogoRDD,schema)
+    val ref = RowLogoRDDReference(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
 
     //put test
     Catalog.putLogo("edge",ref)
@@ -22,7 +22,7 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
 
     //type transtion
     val edge = ref1 match {
-      case r: RowLogoRDDReference[RowLogoBlock[(scala.List[Int], Int)]] => r.logoRDD
+      case r: RowLogoRDDReference => r.logoRDD
     }
 
     //delete test

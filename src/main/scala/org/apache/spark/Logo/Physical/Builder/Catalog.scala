@@ -1,6 +1,6 @@
 package org.apache.spark.Logo.Physical.Builder
 
-import org.apache.spark.Logo.Physical.dataStructure.{LogoBlock, LogoSchema, RowLogoBlock}
+import org.apache.spark.Logo.Physical.dataStructure.{LogoBlock, LogoBlockRef, LogoSchema, RowLogoBlock}
 import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable
@@ -38,11 +38,10 @@ object Catalog {
     _catalog.rddMap -= name
   }
 
-
 }
 
-class LogoRDDReference()
-case class RowLogoRDDReference[A:ClassTag](logoRDD:RDD[RowLogoBlock[A]], schema: LogoSchema) extends LogoRDDReference
+class LogoRDDReference(logoRDD:RDD[LogoBlockRef], schema: LogoSchema)
+case class RowLogoRDDReference(logoRDD:RDD[LogoBlockRef], schema: LogoSchema) extends LogoRDDReference(logoRDD, schema)
 
 
 

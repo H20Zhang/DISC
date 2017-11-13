@@ -5,11 +5,14 @@ import scala.reflect.ClassTag
 
 
 
+trait LogoBlockRef
 
-
-abstract class LogoBlock[A:ClassTag](val schema: LogoSchema, val metaData: LogoMetaData, val rawData:A) extends Serializable{}
+abstract class LogoBlock[A:ClassTag](val schema: LogoSchema, val metaData: LogoMetaData, val rawData:A) extends LogoBlockRef with Serializable{}
 
 class RowLogoBlock[A:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawData:List[A]) extends LogoBlock(schema, metaData, rawData){}
+
+class CompressedLogoBlock[A:ClassTag, B:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawEdge:List[B], crystals:List[(String,List[B])], rawAttr:A)
+
 
 //
 ////special case for edge with one hole

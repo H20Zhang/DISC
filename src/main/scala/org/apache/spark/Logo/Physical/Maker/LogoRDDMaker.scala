@@ -58,7 +58,7 @@ class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(List[Int],A)]) extends RowLogoR
 
     val slotNums = partitioner.partitioners.map(_.slotNum)
     val baseList = partitioner.partitioners.map(_.p1)
-    sentryNode = ListGenerator.fillListListIntoSlots(ListGenerator.cartersianList(baseList),_nodeSize,slotNums)
+    sentryNode = ListGenerator.fillListListIntoSlots(ListGenerator.cartersianSizeList(baseList),_nodeSize,slotNums)
     sentry = sentryNode.map((_,null.asInstanceOf[A]))
     sentryRDD = sc.parallelize(sentry)
 

@@ -37,7 +37,7 @@ object ListGenerator {
 
 
 
-  private def cartersianList(size:Int):List[Int] = {
+  private def cartersianSizeList(size:Int):List[Int] = {
     List.range(0,size)
   }
 
@@ -49,7 +49,7 @@ object ListGenerator {
     * @param sizeList sizeLimit of each slot
     * @return generate a catersian list that will have all combination of number that is below sizeLimit for each slot
     */
-  def cartersianList(sizeList:List[Int]):List[List[Int]] = {
+  def cartersianSizeList(sizeList:List[Int]):List[List[Int]] = {
     sizeList.size match {
       case 0 => {
         throw new Exception("sizeList must not be empty")
@@ -59,10 +59,25 @@ object ListGenerator {
       }
       case _ => {
         val newSizeList = sizeList.drop(1)
-        val startList = cartersianList(List(sizeList(0)))
-        newSizeList.foldLeft(startList)((x,y) => crossProduct[Int](x,cartersianList(y)))
+        val startList = cartersianSizeList(List(sizeList(0)))
+        newSizeList.foldLeft(startList)((x,y) => crossProduct[Int](x,cartersianSizeList(y)))
       }
     }
+  }
+
+  def constrainedCartersianSizeList(sizeList:List[Int], slotMapping:List[Int], targetList:List[Int]) = {
+    fillCartersianListIntoTargetList(cartersianSizeList(sizeList),targetList.length, slotMapping,targetList)
+  }
+
+
+  def fillListIntoTargetList(list:List[Int], totalSlot:Int, slotMapping:List[Int], targetList:List[Int]) = {
+    val resultList = targetList.toArray
+    slotMapping.zipWithIndex.foreach{case (z,index) => resultList(z) = list(index)}
+    resultList.toList
+  }
+
+  def fillCartersianListIntoTargetList(catersianList:List[List[Int]], totalSlot:Int, slotMapping:List[Int], targetList:List[Int]) ={
+    catersianList.map(list => fillListIntoTargetList(list,totalSlot,slotMapping,targetList))
   }
 
   /**
@@ -77,20 +92,11 @@ object ListGenerator {
     * @return
     */
   def fillListIntoSlots(list:List[Int], totalSlot:Int, slotMapping:List[Int]):List[Int] = {
-    val resultList = fillList(0,totalSlot).toArray
-    slotMapping.zipWithIndex.foreach{case (z,index) => resultList(z) = list(index)}
-    resultList.toList
+    fillListIntoTargetList(list,totalSlot,slotMapping,fillList(0,totalSlot))
   }
-
-
-
 
   def fillListListIntoSlots(catersianList:List[List[Int]], totalSlot:Int, slotMapping:List[Int]): List[List[Int]] ={
-    catersianList.map(list => fillListIntoSlots(list,totalSlot,slotMapping))
+    fillCartersianListIntoTargetList(catersianList,totalSlot,slotMapping,fillList(0,totalSlot))
   }
-
-
-
-
 
 }

@@ -1,6 +1,7 @@
 package org.apache.spark.Logo.Physical.dataStructure
 
 import org.apache.spark.Logo.Physical.Maker.PartitionerMaker
+import org.apache.spark.Logo.Physical.utlis.PointToNumConverter
 import org.apache.spark.Partitioner
 
 sealed trait LogoColType
@@ -17,11 +18,25 @@ class LogoSchema (edges:List[(Int,Int)],keySizeMap:Map[Int,Int]) extends Seriali
     .setSlotSize(slotSize)
     .build()
 
+  @transient lazy val baseList = slotSize
+  @transient lazy val converter = new PointToNumConverter(baseList)
+
+  //assume we sorted the keyCol and get their value as a list
+  def keyToIndex(key:List[Int]) = converter.convertToNum(key)
+
+  def IndexToKey(num:Int) = converter.NumToList(num)
 
   override def clone(): AnyRef = {
     new LogoSchema(edges,keySizeMap)
   }
 }
+
+class CompositeLogoSchema(schema:LogoSchema,
+                          oldSchemas:List[LogoSchema],
+                          keyMapping:List[List[Int]]) {
+
+}
+
 
 object LogoSchema{
   def apply(edges:List[(Int,Int)],keySizeMap:Map[Int,Int]): LogoSchema = {

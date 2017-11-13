@@ -27,7 +27,7 @@ class UtilsTest extends FunSuite{
 
     // test generate catersian list
     val sizeList = List(3,3)
-    val cartersianList = ListGenerator.cartersianList(sizeList)
+    val cartersianList = ListGenerator.cartersianSizeList(sizeList)
     val cartersianList1 = List(
       List(0,0),List(0,1),List(0,2),
       List(1,0),List(1,1),List(1,2),

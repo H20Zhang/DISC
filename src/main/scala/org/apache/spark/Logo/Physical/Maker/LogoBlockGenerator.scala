@@ -7,8 +7,7 @@ import spire.ClassTag
 
 abstract class LogoBlockGenerator[A:ClassTag, B:ClassTag](val schema: LogoSchema, val index:Int, val data:Iterator[A]) {
   lazy val baseList = schema.slotSize
-  lazy val converter = new PointToNumConverter(baseList)
-  lazy val numList = converter.NumToList(index)
+  lazy val numList =schema.IndexToKey(index)
   lazy val numParts = filteredData.length
   var filteredData:List[A] = _
 
