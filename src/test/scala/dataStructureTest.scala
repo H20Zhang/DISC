@@ -1,6 +1,7 @@
 package org.apache.spark.Logo.Physical.dataStructure
 
 import org.apache.spark.Logo.Physical.Joiner.multiJoin.StarJoin
+import org.apache.spark.Logo.Physical.utlis.TestUtil
 import org.apache.spark.sql.SparkSession
 import org.scalatest.FunSuite
 
@@ -81,6 +82,40 @@ class dataStructureTest extends FunSuite {
     assert(compositeParitioner2D2.getPartition(key2) == 5*25+2)
     assert(compositeParitioner3D.getPartition(key2) == 4*10*25+5*25+2)
 //    assert(compositeParitioner2D2D.getPartition(key2) == 85*20*10+52)
+
+  }
+
+  test("LogoSchema"){
+
+    //logoSchema
+    val edges = List((0,1),(1,2),(2,0))
+    val keySizeMap = Map((0,3),(1,3),(2,3))
+    val triangleSchema = LogoSchema(edges,keySizeMap)
+
+    //compositeLogoSchema
+    val intersectionKeyMappings = List(
+      Map((0,0),(1,1)),
+      Map((0,1),(1,2),(2,0)),
+      Map((0,2),(2,0))
+    )
+
+    val edges1 = List((0,1),(1,2),(0,2))
+    val keySizeMap1 = Map((0,3),(1,3),(2,3))
+    val triangleSchema1 = LogoSchema(edges1,keySizeMap1)
+
+    //for three triangle pattern, as the edges are directed, the last triangle is actually different from the other two
+    //in the sense of the edge direction.
+    val oldSchemas = List(triangleSchema,triangleSchema,triangleSchema1)
+
+    val threeTriangleSchema = CompositeLogoSchema(oldSchemas,intersectionKeyMappings)
+
+    val edges2 = List((0,1),(1,3),(3,0),(1,2),(2,4),(4,0),(2,0))
+    val keySizeMap2 = Map((0,3),(1,3),(2,3),(3,3),(4,3))
+
+//    threeTriangleSchema.keyMapping.foreach(println)
+
+    assert(TestUtil.listEqual(edges2.sorted,threeTriangleSchema.edges.sorted), "CompositeLogo's generated edges wrong")
+    assert(TestUtil.listEqual(keySizeMap2.toList.sorted,threeTriangleSchema.keySizeMap.toList.sorted), "CompositeLogo's generate KeySizeMap wrong")
 
   }
 

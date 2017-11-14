@@ -13,7 +13,7 @@ class BlockMakerTest extends FunSuite with BeforeAndAfterAll{
   test("LogoBlockGenerator"){
 
     val edges = List((0,1),(0,2),(1,2))
-    val keySizeMap = Map((0,3),(1,3))
+    val keySizeMap = Map((0,3),(1,3),(2,3))
     val schema = LogoSchema(edges, keySizeMap)
 
     val index = schema.partitioner.getPartition(List(0,1,2))

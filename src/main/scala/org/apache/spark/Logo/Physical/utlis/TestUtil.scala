@@ -3,7 +3,18 @@ package org.apache.spark.Logo.Physical.utlis
 import scala.reflect.ClassTag
 
 object TestUtil {
-  def listEqual[A:ClassTag](lList:Seq[A], rList:Seq[A]):Boolean = lList.zip(rList).forall(f => f._1 == f._2)
+  def listEqual[A:ClassTag](lList:Seq[A], listToVerify:Seq[A], msg:String = ""):Boolean = {
+
+    val res = lList.zip(listToVerify).forall(f => f._1 == f._2)
+
+    if (res == false){
+
+      println(s"List String Equal Fail: ${msg}")
+      listToVerify.foreach(println)
+    }
+
+    res
+  }
   def objectEqual[A:ClassTag, B:ClassTag](l:A,r: B) = l == r
 
 
