@@ -12,7 +12,13 @@ case object NonKeyType extends LogoColType
 case object AttributeType extends LogoColType
 
 
-//notice key must start from zero. and key cols are consecutive
+
+
+/**
+  * @note notice key must start from zero. and key cols are consecutive
+  * @param edges edges of pattern
+  * @param keySizeMap partition size for each key slot
+  */
 class LogoSchema (val edges:List[(Int,Int)], val keySizeMap:Map[Int,Int]) extends Serializable{
 
   assert(TestUtil.listEqual(edges.flatMap(f => Iterator(f._1,f._2)).toList.distinct.sorted,keySizeMap.keys.toList.sorted), "all nodes in edge are keys and must be specified an partition number")
@@ -39,6 +45,13 @@ class LogoSchema (val edges:List[(Int,Int)], val keySizeMap:Map[Int,Int]) extend
   }
 }
 
+
+/**
+  *
+  * @param schema new schema of this composite schema
+  * @param oldSchemas old schema from which this new schema is dereived
+  * @param keyMapping key mapping from old schemas to new schemas
+  */
 class CompositeLogoSchema(schema:LogoSchema,
                           oldSchemas:List[LogoSchema],
                           val keyMapping:List[List[Int]]) extends LogoSchema(schema.edges,schema.keySizeMap){
@@ -54,19 +67,38 @@ class CompositeLogoSchema(schema:LogoSchema,
     val index = schema.partitioner.getPartition(newSpecificRow)
     index
   }
+
+
+  //TODO finish below
+  def newKeyToOldKey(newKey:List[Int]):List[List[Int]] = ???
+  def newKeyToOldIndex(newKey:List[Int]):List[Int] = ???
+  def newIndexToOldIndex(newIndex:Int):List[Int] = ???
+
 }
 
-
+/**
+  * generator for generate LogoSchema
+  */
 trait schemaGenerator{
   def generate():LogoSchema
 }
 
+/**
+  *
+  * @param edges edges of pattern
+  * @param keySizeMap partition size for each key slot
+  */
 class PlainLogoSchemaGenerator(edges:List[(Int,Int)],keySizeMap:Map[Int,Int]) extends schemaGenerator{
   override def generate() = {
     new LogoSchema(edges,keySizeMap)
   }
 }
 
+/**
+  *
+  * @param oldSchemas old schema from which this new schema is dereived
+  * @param partialKeyMappings key mapping from old schemas to new schemas
+  */
 abstract class CompositeLogoSchemaGenerator(val oldSchemas:List[LogoSchema], val partialKeyMappings:List[Map[Int,Int]]) extends schemaGenerator{
   def keyMapGenerate():List[List[Int]]
 
@@ -107,6 +139,11 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:List[LogoSchema], val
 
 
 //must ensure that intersectionKey in IntersectionKeyMapping take low number new key first.
+/**
+  *
+  * @param oldSchmeas old schema from which this new schema is dereived
+  * @param intersectionKeyMappings key mapping from old schemas to new schemas
+  */
 class SimpleCompositeLogoSchemaGenerator(oldSchmeas:List[LogoSchema], intersectionKeyMappings:List[Map[Int,Int]]) extends CompositeLogoSchemaGenerator(oldSchmeas, intersectionKeyMappings){
   override def keyMapGenerate() = {
     val oldKeys = oldSchemas.map(_.keyCol)

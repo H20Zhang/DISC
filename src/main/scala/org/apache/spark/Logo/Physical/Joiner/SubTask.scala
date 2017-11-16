@@ -48,6 +48,13 @@ case class SubTask(rddPartitions:List[Int], rdds:Seq[RDD[_]], @transient compsit
 //
 //}
 
+/**
+  *
+  * @param idx index of this partition
+  * @param subPartitions paritions id for retrieve
+  * @param rdds rdds whose parititions will be used to construct this partition
+  * @param preferredLocations prefered locations for this partition
+  */
 class SubTaskPartition(
                         idx: Int,
                         subPartitions: List[Int],

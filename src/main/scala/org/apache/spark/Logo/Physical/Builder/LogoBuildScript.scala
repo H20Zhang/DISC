@@ -1,6 +1,9 @@
 package org.apache.spark.Logo.Physical.Builder
 
-import org.apache.spark.Logo.Physical.dataStructure.{LogoBlock, RowLogoBlock}
+import org.apache.spark.Logo.Physical.Joiner.{FetchJoinRDD, SubTask}
+import org.apache.spark.Logo.Physical.dataStructure.{CompositeLogoSchema, LogoBlock, LogoBlockRef, RowLogoBlock}
+import org.apache.spark.Logo.Physical.utlis.ListGenerator
+import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
 import scala.reflect.ClassTag
@@ -9,7 +12,68 @@ class LogoBuildScript(logoSteps:List[LogoBuildScriptStep]) {}
 
 trait LogoBuildScriptStep
 
+/**
+  *
+  * @param lRDDID lRDD's ID in rdds
+  * @param lRDDSlot lRDD's slot to be snaped with rRDD's slot
+  * @param rRDDID rRDD's ID in rdds
+  * @param rRDDSlot rRDD's slot to be snaped with lRDD's slot
+  */
+case class SnapPoint(lRDDID:Int, lRDDSlot:Int, rRDDID:Int, rRDDSlot:Int)
+case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints:List[SnapPoint], handler: (List[LogoBlockRef]) => LogoBlockRef) extends LogoBuildScriptStep{
 
-case class SnapPoint(lRDDID:Int, lRDDSlot:List[Int], rRDDID:Int, rRDDSlot:List[Int])
-case class LogoBuildScriptOneOnOne[A:ClassTag, B:ClassTag, C:ClassTag](rdd1:RDD[LogoBlock[A]], rdd2:RDD[LogoBlock[B]], snapPoints:List[SnapPoint], handler: (LogoBlock[A],LogoBlock[B]) => LogoBlock[C]) extends LogoBuildScriptStep{}
-case class LogoBuildScripMultiOnOne[A:ClassTag, B:ClassTag, C:ClassTag, D:ClassTag](rdd1:RDD[LogoBlock[A]], rdd2:RDD[LogoBlock[B]], rdd3:RDD[LogoBlock[C]], snapPoints:List[SnapPoint], handler: (LogoBlock[A],LogoBlock[B], LogoBlock[C]) => LogoBlock[D]) extends LogoBuildScriptStep{}
+  lazy val schemas = logoRDDRefs.map(_.schema)
+  lazy val rdds = logoRDDRefs.map(_.logoRDD)
+  lazy val intersectionMapping = generateIntersectionMapping()
+  lazy val compositeSchema = generateCompositeSchema()
+  lazy val subtasks = generateSubTasks()
+
+  def generateIntersectionMapping():List[Map[Int,Int]] = {
+    val totalRDDNum = snapPoints.flatMap(f => Iterator(f.lRDDID,f.rRDDID)).max
+    val partialMappingTemp = new Array[Map[Int,Int]](totalRDDNum).map(f => Map[Int,Int]())
+    snapPoints.foldLeft(0){(curIndex,point) =>
+      var curIndexTemp = curIndex
+      val lRDDMap = partialMappingTemp(point.lRDDID)
+      val rRDDMap = partialMappingTemp(point.rRDDID)
+      val lPrevMapping = lRDDMap.getOrElse(point.lRDDSlot,-1)
+      val rPrevMapping = rRDDMap.getOrElse(point.rRDDSlot,-1)
+
+      if (lPrevMapping != -1 || rPrevMapping != -1){
+        if (lPrevMapping != -1){
+          val index = lPrevMapping
+          partialMappingTemp.update(point.rRDDID, rRDDMap + ((point.rRDDSlot,index)))
+        }
+
+        if (rPrevMapping != -1){
+          val index = rPrevMapping
+          partialMappingTemp.update(point.lRDDID, lRDDMap + ((point.lRDDSlot,index)))
+        }
+      } else {
+        partialMappingTemp.update(point.lRDDID, lRDDMap + ((point.lRDDSlot,curIndexTemp)))
+        partialMappingTemp.update(point.rRDDID, rRDDMap + ((point.rRDDSlot,curIndexTemp)))
+        curIndexTemp += 1
+      }
+
+      curIndexTemp}
+
+    partialMappingTemp.toList
+  }
+
+  def generateCompositeSchema() = {
+      CompositeLogoSchema(schemas,intersectionMapping)
+  }
+
+  def generateSubTasks() = {
+    val newSchemaSlots = compositeSchema.slotSize
+    val newSchemaSubTasks = ListGenerator.cartersianSizeList(newSchemaSlots)
+    val oldIndexs = newSchemaSubTasks.map(f => compositeSchema.newKeyToOldIndex(f))
+    val subtasks = oldIndexs.map(SubTask(_,rdds,compositeSchema))
+
+    subtasks
+  }
+
+  def performFetchJoin(sc:SparkContext) = {
+    new FetchJoinRDD(sc,subtasks,compositeSchema, handler,rdds)
+  }
+}
+

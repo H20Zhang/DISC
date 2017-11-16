@@ -1,7 +1,7 @@
 package org.apache.spark.Logo.Physical.Joiner
 
 import org.apache.spark.Logo.Physical.Joiner.multiJoin.subJoinPartition
-import org.apache.spark.Logo.Physical.dataStructure.{LogoBlockRef, LogoSchema}
+import org.apache.spark.Logo.Physical.dataStructure.{CompositeLogoSchema, LogoBlockRef, LogoSchema}
 import org.apache.spark.Logo.Physical.utlis.ListGenerator
 import org.apache.spark._
 import org.apache.spark.rdd.RDD
@@ -12,12 +12,10 @@ import scala.reflect.ClassTag
 
 
 class FetchJoinRDD(sc:SparkContext,
-                               subTasks:List[SubTask],
-                               schema:LogoSchema,
-                               oldSchemas:List[LogoSchema],
-                               keyMapping:List[List[Int]],
-                               var f: (List[LogoBlockRef]) => LogoBlockRef,
-                               var rdds:Seq[RDD[LogoBlockRef]]) extends RDD[LogoBlockRef](sc,rdds.map(x => new OneToOneDependency(x))){
+                   subTasks:List[SubTask],
+                   schema:CompositeLogoSchema,
+                   var f: (List[LogoBlockRef]) => LogoBlockRef,
+                   var rdds:Seq[RDD[LogoBlockRef]]) extends RDD[LogoBlockRef](sc,rdds.map(x => new OneToOneDependency(x))){
   override val partitioner = Some(schema.partitioner)
 
   override def getPartitions: Array[Partition] = {

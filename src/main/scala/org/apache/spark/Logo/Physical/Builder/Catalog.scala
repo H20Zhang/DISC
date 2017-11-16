@@ -30,8 +30,8 @@ object Catalog {
     _catalog.rddMap += ((name,rdd))
   }
 
-  def getLogo(name:String) ={
-    _catalog.rddMap(name)
+  def getLogo[A](name:String) ={
+    _catalog.getLogo(name).logoRDD.asInstanceOf[A]
   }
 
   def removeLogo(name:String): Unit ={
@@ -40,8 +40,7 @@ object Catalog {
 
 }
 
-class LogoRDDReference(logoRDD:RDD[LogoBlockRef], schema: LogoSchema)
-case class RowLogoRDDReference(logoRDD:RDD[LogoBlockRef], schema: LogoSchema) extends LogoRDDReference(logoRDD, schema)
+case class LogoRDDReference(logoRDD:RDD[LogoBlockRef], schema: LogoSchema)
 
 
 
