@@ -19,7 +19,7 @@ case object AttributeType extends LogoColType
   * @param edges edges of pattern
   * @param keySizeMap partition size for each key slot
   */
-class LogoSchema (val edges:List[(Int,Int)], val keySizeMap:Map[Int,Int]) extends Serializable{
+class LogoSchema (val edges:Seq[(Int,Int)], val keySizeMap:Map[Int,Int]) extends Serializable{
 
   assert(TestUtil.listEqual(edges.flatMap(f => Iterator(f._1,f._2)).toList.distinct.sorted,keySizeMap.keys.toList.sorted), "all nodes in edge are keys and must be specified an partition number")
 
@@ -36,7 +36,7 @@ class LogoSchema (val edges:List[(Int,Int)], val keySizeMap:Map[Int,Int]) extend
   @transient lazy val converter = new PointToNumConverter(baseList)
 
   //assume we sorted the keyCol and get their value as a list
-  def keyToIndex(key:List[Int]) = converter.convertToNum(key)
+  def keyToIndex(key:Seq[Int]) = converter.convertToNum(key)
 
   def IndexToKey(num:Int) = converter.NumToList(num)
 
@@ -53,14 +53,17 @@ class LogoSchema (val edges:List[(Int,Int)], val keySizeMap:Map[Int,Int]) extend
   * @param keyMapping key mapping from old schemas to new schemas
   */
 class CompositeLogoSchema(schema:LogoSchema,
-                          oldSchemas:List[LogoSchema],
-                          val keyMapping:List[List[Int]]) extends LogoSchema(schema.edges,schema.keySizeMap){
-  def oldKeysToNewKey(oldKey:List[List[Int]]) =
+                          oldSchemas:Seq[LogoSchema],
+                          val keyMapping:Seq[Seq[Int]]) extends LogoSchema(schema.edges,schema.keySizeMap){
+
+  @transient lazy val reverseKeyMapping = keyMapping.map(f => f.zipWithIndex.toMap)
+
+  def oldKeysToNewKey(oldKey:Seq[Seq[Int]]) =
     IndexToKey(
     oldIndexToNewIndex(
       oldKey.zipWithIndex.map(f => oldSchemas(f._2).keyToIndex(f._1))))
 
-  def oldIndexToNewIndex(oldIndex:List[Int]) = {
+  def oldIndexToNewIndex(oldIndex:Seq[Int]) = {
     val keyList = oldIndex.zipWithIndex.map(_.swap).map(f => (f._1,oldSchemas(f._1).IndexToKey(f._2)))
     val newSpecificRow = keyList.
       foldRight(ListGenerator.fillList(0,schema.nodeSize))((updateList,targetList) => ListGenerator.fillListIntoTargetList(updateList._2,schema.nodeSize,keyMapping(updateList._1),targetList) )
@@ -68,11 +71,17 @@ class CompositeLogoSchema(schema:LogoSchema,
     index
   }
 
+  def newKeyToOldKey(newKey:Seq[Int]):Seq[Seq[Int]] = {
+    keyMapping.map(f => f.map(newKey(_)))
+  }
 
-  //TODO finish below
-  def newKeyToOldKey(newKey:List[Int]):List[List[Int]] = ???
-  def newKeyToOldIndex(newKey:List[Int]):List[Int] = ???
-  def newIndexToOldIndex(newIndex:Int):List[Int] = ???
+  def newKeyToOldIndex(newKey:Seq[Int]):Seq[Int] = {
+    newKeyToOldKey(newKey).zipWithIndex.map(f => oldSchemas(f._2).keyToIndex(f._1))
+  }
+
+  def newIndexToOldIndex(newIndex:Int):Seq[Int] = {
+    newKeyToOldIndex(IndexToKey(newIndex))
+  }
 
 }
 
@@ -88,7 +97,7 @@ trait schemaGenerator{
   * @param edges edges of pattern
   * @param keySizeMap partition size for each key slot
   */
-class PlainLogoSchemaGenerator(edges:List[(Int,Int)],keySizeMap:Map[Int,Int]) extends schemaGenerator{
+class PlainLogoSchemaGenerator(edges:Seq[(Int,Int)],keySizeMap:Map[Int,Int]) extends schemaGenerator{
   override def generate() = {
     new LogoSchema(edges,keySizeMap)
   }
@@ -99,14 +108,14 @@ class PlainLogoSchemaGenerator(edges:List[(Int,Int)],keySizeMap:Map[Int,Int]) ex
   * @param oldSchemas old schema from which this new schema is dereived
   * @param partialKeyMappings key mapping from old schemas to new schemas
   */
-abstract class CompositeLogoSchemaGenerator(val oldSchemas:List[LogoSchema], val partialKeyMappings:List[Map[Int,Int]]) extends schemaGenerator{
-  def keyMapGenerate():List[List[Int]]
+abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val partialKeyMappings:Seq[Map[Int,Int]]) extends schemaGenerator{
+  def keyMapGenerate():Seq[Seq[Int]]
 
   def integrityCheck(): Unit ={
 
   }
 
-  def edgeGenerate(keyMapping: List[List[Int]]):List[(Int,Int)] = {
+  def edgeGenerate(keyMapping: Seq[Seq[Int]]):Seq[(Int,Int)] = {
     val oldEdges = oldSchemas.map(_.edges)
     oldEdges.zipWithIndex.map{f =>
       val index = f._2
@@ -115,7 +124,7 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:List[LogoSchema], val
     }.flatMap(f => f).distinct
   }
 
-  def keySizeMapGenerate(keyMapping: List[List[Int]]):Map[Int,Int] = {
+  def keySizeMapGenerate(keyMapping: Seq[Seq[Int]]):Map[Int,Int] = {
     val oldKeySizes = oldSchemas.map(_.keySizeMap)
     oldKeySizes.zipWithIndex.map{ f=>
       val index = f._2
@@ -144,7 +153,7 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:List[LogoSchema], val
   * @param oldSchmeas old schema from which this new schema is dereived
   * @param intersectionKeyMappings key mapping from old schemas to new schemas
   */
-class SimpleCompositeLogoSchemaGenerator(oldSchmeas:List[LogoSchema], intersectionKeyMappings:List[Map[Int,Int]]) extends CompositeLogoSchemaGenerator(oldSchmeas, intersectionKeyMappings){
+class SimpleCompositeLogoSchemaGenerator(oldSchmeas:Seq[LogoSchema], intersectionKeyMappings:Seq[Map[Int,Int]]) extends CompositeLogoSchemaGenerator(oldSchmeas, intersectionKeyMappings){
   override def keyMapGenerate() = {
     val oldKeys = oldSchemas.map(_.keyCol)
     val keyMapBuffer = new Array[Array[Int]](oldSchemas.length).map(f => new Array[Int](0)).zipWithIndex.map { f =>
@@ -178,13 +187,13 @@ class SimpleCompositeLogoSchemaGenerator(oldSchmeas:List[LogoSchema], intersecti
 }
 
 object LogoSchema{
-  def apply(edges:List[(Int,Int)],keySizeMap:Map[Int,Int]): LogoSchema = {
+  def apply(edges:Seq[(Int,Int)],keySizeMap:Map[Int,Int]): LogoSchema = {
     new PlainLogoSchemaGenerator(edges,keySizeMap).generate()
   }
 }
 
 object CompositeLogoSchema{
-  def apply(oldSchmeas:List[LogoSchema], IntersectionKeyMappings:List[Map[Int,Int]]) = {
+  def apply(oldSchmeas:Seq[LogoSchema], IntersectionKeyMappings:Seq[Map[Int,Int]]) = {
     new SimpleCompositeLogoSchemaGenerator(oldSchmeas,IntersectionKeyMappings).generate()
   }
 }

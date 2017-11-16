@@ -10,12 +10,12 @@ import org.apache.spark.util.Utils
 
 
 /**
-  *
+  * Representing a subtask in one LogoBuildScriptOneStep.
   * @param rddPartitions represent, this subtask require ith-rdd's jth-paritition, starting from rdd0.
   * @param rdds rdds which required by this subtask
   * @param compsiteSchema new schema for subtask's result LogoBlock
   */
-case class SubTask(rddPartitions:List[Int], rdds:Seq[RDD[_]], @transient compsiteSchema:CompositeLogoSchema) extends Serializable{
+case class SubTask(rddPartitions:Seq[Int], rdds:Seq[RDD[_]], @transient compsiteSchema:CompositeLogoSchema) extends Serializable{
 
 
   def calculateNewIdex = compsiteSchema.oldIndexToNewIndex(rddPartitions)
@@ -49,7 +49,7 @@ case class SubTask(rddPartitions:List[Int], rdds:Seq[RDD[_]], @transient compsit
 //}
 
 /**
-  *
+  * Partition used in Fetch Join, which record the other rdd's partition needed to be fetched to make this partition.
   * @param idx index of this partition
   * @param subPartitions paritions id for retrieve
   * @param rdds rdds whose parititions will be used to construct this partition
@@ -57,7 +57,7 @@ case class SubTask(rddPartitions:List[Int], rdds:Seq[RDD[_]], @transient compsit
   */
 class SubTaskPartition(
                         idx: Int,
-                        subPartitions: List[Int],
+                        subPartitions: Seq[Int],
                         @transient private val rdds: Seq[RDD[_]],
                         @transient val preferredLocations: Seq[String])
   extends Partition {

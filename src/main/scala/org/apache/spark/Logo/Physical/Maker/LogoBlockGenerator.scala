@@ -16,20 +16,16 @@ abstract class LogoBlockGenerator[A:ClassTag, B:ClassTag](val schema: LogoSchema
   def generate():B
 }
 
+
 class rowBlockGenerator[A:ClassTag](schema: LogoSchema,
                                     index:Int,
-                                    data:Iterator[(List[Int],A)]) extends LogoBlockGenerator[(List[Int],A),RowLogoBlock[(List[Int],A)]](schema,index,data) {
+                                    data:Iterator[(Seq[Int],A)]) extends LogoBlockGenerator[(Seq[Int],A),RowLogoBlock[(Seq[Int],A)]](schema,index,data) {
 
 
   filteredData = data.filter(_._2 != null).toList
-////  filteredData.toList.foreach(println)
-//
-//  println("hello")
-//  println(filteredData.toList)
-//  println(schema)
 
   override def generate() = {
-    val rowBlock = new RowLogoBlock[(List[Int],A)](schema,metaData,filteredData)
+    val rowBlock = new RowLogoBlock[(Seq[Int],A)](schema,metaData,filteredData)
     rowBlock
   }
 }

@@ -29,7 +29,7 @@ object ListGenerator {
     * @tparam T element of lList's sublist and rList
     * @return a cartersianed list
     */
-  def crossProduct[T:ClassTag](lList:List[List[T]],rList:List[T]): List[List[T]] ={
+  def crossProduct[T:ClassTag](lList:Seq[Seq[T]],rList:Seq[T]): Seq[Seq[T]] ={
     lList.flatMap(f =>
       rList.map(x => f :+ x)
     )
@@ -37,7 +37,7 @@ object ListGenerator {
 
 
 
-  private def cartersianSizeList(size:Int):List[Int] = {
+  private def cartersianSizeList(size:Int):Seq[Int] = {
     List.range(0,size)
   }
 
@@ -49,7 +49,7 @@ object ListGenerator {
     * @param sizeList sizeLimit of each slot
     * @return generate a catersian list that will have all combination of number that is below sizeLimit for each slot
     */
-  def cartersianSizeList(sizeList:List[Int]):List[List[Int]] = {
+  def cartersianSizeList(sizeList:Seq[Int]):Seq[Seq[Int]] = {
     sizeList.size match {
       case 0 => {
         throw new Exception("sizeList must not be empty")
@@ -65,18 +65,18 @@ object ListGenerator {
     }
   }
 
-  def constrainedCartersianSizeList(sizeList:List[Int], slotMapping:List[Int], targetList:List[Int]) = {
+  def constrainedCartersianSizeList(sizeList:Seq[Int], slotMapping:Seq[Int], targetList:Seq[Int]) = {
     fillCartersianListIntoTargetList(cartersianSizeList(sizeList),targetList.length, slotMapping,targetList)
   }
 
 
-  def fillListIntoTargetList(list:List[Int], totalSlot:Int, slotMapping:List[Int], targetList:List[Int]) = {
+  def fillListIntoTargetList(list:Seq[Int], totalSlot:Int, slotMapping:Seq[Int], targetList:Seq[Int]) = {
     val resultList = targetList.toArray
     slotMapping.zipWithIndex.foreach{case (z,index) => resultList(z) = list(index)}
     resultList.toList
   }
 
-  def fillCartersianListIntoTargetList(catersianList:List[List[Int]], totalSlot:Int, slotMapping:List[Int], targetList:List[Int]) ={
+  def fillCartersianListIntoTargetList(catersianList:Seq[Seq[Int]], totalSlot:Int, slotMapping:Seq[Int], targetList:Seq[Int]) ={
     catersianList.map(list => fillListIntoTargetList(list,totalSlot,slotMapping,targetList))
   }
 
@@ -91,11 +91,11 @@ object ListGenerator {
     * @param slotMapping a map between "list" position to slot position
     * @return
     */
-  def fillListIntoSlots(list:List[Int], totalSlot:Int, slotMapping:List[Int]):List[Int] = {
+  def fillListIntoSlots(list:Seq[Int], totalSlot:Int, slotMapping:Seq[Int]):Seq[Int] = {
     fillListIntoTargetList(list,totalSlot,slotMapping,fillList(0,totalSlot))
   }
 
-  def fillListListIntoSlots(catersianList:List[List[Int]], totalSlot:Int, slotMapping:List[Int]): List[List[Int]] ={
+  def fillListListIntoSlots(catersianList:Seq[Seq[Int]], totalSlot:Int, slotMapping:Seq[Int]): Seq[Seq[Int]] ={
     fillCartersianListIntoTargetList(catersianList,totalSlot,slotMapping,fillList(0,totalSlot))
   }
 

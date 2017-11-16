@@ -82,7 +82,7 @@ it is 10*25+20
  */
 
 
-class CompositeParitioner(val partitioners:List[SlotPartitioner], val sizeLimits:List[Int] = null) extends Partitioner{
+class CompositeParitioner(val partitioners:Seq[SlotPartitioner], val sizeLimits:Seq[Int] = null) extends Partitioner{
 
   require(partitioners.map(_.slotNum).sorted.zip(partitioners.map(_.slotNum)).forall(f => f._1 == f._2), s"slotNum of partitioner must be in ascending order " +
     s"current order is ${partitioners.map(_.slotNum)}, expected order is ${partitioners.map(_.slotNum).sorted}")

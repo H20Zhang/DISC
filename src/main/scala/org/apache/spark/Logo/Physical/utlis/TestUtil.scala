@@ -15,7 +15,11 @@ object TestUtil {
 
     res
   }
-  def objectEqual[A:ClassTag, B:ClassTag](l:A,r: B) = l == r
 
+  def listlistEqual[A:ClassTag](lList:Seq[Seq[A]], listToVerify:Seq[Seq[A]], msg:String = ""):Boolean = {
+    lList.zip(listToVerify).forall(f => listEqual(f._1,f._2))
+  }
+
+  def objectEqual[A:ClassTag, B:ClassTag](l:A,r: B) = l == r
 
 }

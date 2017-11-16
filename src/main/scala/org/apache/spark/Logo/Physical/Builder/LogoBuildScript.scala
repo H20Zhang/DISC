@@ -8,6 +8,11 @@ import org.apache.spark.rdd.RDD
 
 import scala.reflect.ClassTag
 
+
+/**
+  * representing the steps needed to construct an "LOGO"
+  * @param logoSteps steps used to construct an "LOGO"
+  */
 class LogoBuildScript(logoSteps:List[LogoBuildScriptStep]) {}
 
 trait LogoBuildScriptStep
@@ -20,7 +25,15 @@ trait LogoBuildScriptStep
   * @param rRDDSlot rRDD's slot to be snaped with lRDD's slot
   */
 case class SnapPoint(lRDDID:Int, lRDDSlot:Int, rRDDID:Int, rRDDSlot:Int)
-case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints:List[SnapPoint], handler: (List[LogoBlockRef]) => LogoBlockRef) extends LogoBuildScriptStep{
+
+/**
+  * Represent one step in building an "LOGO" by specifying how logoRDD are snapped into each other
+  *
+  * @param logoRDDRefs logoRDDs used to build the new logo
+  * @param snapPoints how logo's are snapped to each other
+  * @param handler how to handle the LogoBlock after the LogoBlocks are already snapped together by FetchJoin
+  */
+case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints:List[SnapPoint], handler: (Seq[LogoBlockRef]) => LogoBlockRef) extends LogoBuildScriptStep{
 
   lazy val schemas = logoRDDRefs.map(_.schema)
   lazy val rdds = logoRDDRefs.map(_.logoRDD)

@@ -2,10 +2,10 @@ package org.apache.spark.Logo.Physical.utlis
 
 import scala.collection.mutable.ArrayBuffer
 
-class PointToNumConverter(val parts:List[Int]){
+class PointToNumConverter(val parts:Seq[Int]){
 
   //convert a x variable based number to 10 based system
-  def convertToNum(point:List[Int]) = point.zipWithIndex.map{f =>
+  def convertToNum(point:Seq[Int]) = point.zipWithIndex.map{f =>
 
     val mutipliers = parts.drop(f._2+1)
 

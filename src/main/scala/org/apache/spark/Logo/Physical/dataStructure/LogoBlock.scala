@@ -9,9 +9,11 @@ trait LogoBlockRef
 
 abstract class LogoBlock[A:ClassTag](val schema: LogoSchema, val metaData: LogoMetaData, val rawData:A) extends LogoBlockRef with Serializable{}
 
-class RowLogoBlock[A:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawData:List[A]) extends LogoBlock(schema, metaData, rawData){}
+class RowLogoBlock[A:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawData:Seq[A]) extends LogoBlock(schema, metaData, rawData){}
 
-class CompressedLogoBlock[A:ClassTag, B:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawEdge:List[B], crystals:List[(String,List[B])], rawAttr:A)
+
+class FileBasedLogoBlock;
+class CompressedLogoBlock[A:ClassTag, B:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawEdge:Seq[B], crystals:Seq[(String,List[B])], rawAttr:A)
 
 
 //

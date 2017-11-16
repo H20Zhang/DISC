@@ -40,6 +40,10 @@ object Catalog {
 
 }
 
+
+/**
+  * a reference to the logoRDD containing its actual rdd and its schema
+  */
 case class LogoRDDReference(logoRDD:RDD[LogoBlockRef], schema: LogoSchema)
 
 

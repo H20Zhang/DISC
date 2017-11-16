@@ -31,7 +31,7 @@ class BlockMakerTest extends FunSuite with BeforeAndAfterAll{
 
   test("LogoRDDMaker"){
 
-    val data = List.range(0,10).map(f => (f,f)).map(f => (List(f._1,f._2),1))
+    val data = List.range(0,10).map(f => (f,f)).map(f => (Seq(f._1,f._2),1))
 
 
     val rawRDD = sc.parallelize(data)

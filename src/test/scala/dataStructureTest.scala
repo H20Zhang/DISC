@@ -111,14 +111,35 @@ class dataStructureTest extends FunSuite {
 
     val edges2 = List((0,1),(1,3),(3,0),(1,2),(2,4),(4,0),(2,0))
     val keySizeMap2 = Map((0,3),(1,3),(2,3),(3,3),(4,3))
+    val keyMapping2 = List(
+      List(0,1,3),
+      List(1,2,0),
+      List(2,4,0)
+    )
 
 //    threeTriangleSchema.keyMapping.foreach(println)
 
-    assert(TestUtil.listEqual(edges2.sorted,threeTriangleSchema.edges.sorted), "CompositeLogo's generated edges wrong")
-    assert(TestUtil.listEqual(keySizeMap2.toList.sorted,threeTriangleSchema.keySizeMap.toList.sorted), "CompositeLogo's generate KeySizeMap wrong")
+    assert(TestUtil.listEqual(edges2.sorted,threeTriangleSchema.edges.sorted), "CompositeLogoSchema's generated edges wrong")
+    assert(TestUtil.listEqual(keySizeMap2.toList.sorted,threeTriangleSchema.keySizeMap.toList.sorted), "CompositeLogoSchema's generate KeySizeMap wrong")
+    assert(TestUtil.listlistEqual(keyMapping2,threeTriangleSchema.keyMapping), "CompositeLogoSchema's generated keyMapping wrong")
+
+    //compositeKey conversion Test
+
+
+    val newKey = List(1,2,2,2,2)
+    val newIndex = threeTriangleSchema.keyToIndex(newKey)
+    val oldKeys = threeTriangleSchema.newKeyToOldKey(newKey)
+    val oldIndex = threeTriangleSchema.newIndexToOldIndex(newIndex)
+
+    val oldKeys1 = List(
+      List(1,2,2),
+      List(2,2,1),
+      List(2,2,1))
+    val oldIndex1 = List(25,25,25)
+
+    assert(TestUtil.listlistEqual(oldKeys1,oldKeys))
+    assert(TestUtil.listEqual(oldIndex1.sorted,oldIndex1.sorted))
 
   }
-
-
 
 }

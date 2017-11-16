@@ -13,7 +13,7 @@ import scala.reflect.ClassTag
 
 abstract class RowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: RDD[(A,B)]) extends Serializable{
 
-  var _edges:List[(Int,Int)] = _
+  var _edges:Seq[(Int,Int)] = _
   var _keySizeMap:Map[Int,Int] = _
 
 
@@ -22,7 +22,7 @@ abstract class RowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: RDD[(A,B)]) ext
   lazy val _nodeSize = _schema.nodeSize
   lazy val partitioner:CompositeParitioner = _schema.partitioner
 
-  def setEdges(edges:List[(Int,Int)]) = {
+  def setEdges(edges:Seq[(Int,Int)]) = {
     this._edges = edges
     this
   }
@@ -44,16 +44,16 @@ abstract class RowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: RDD[(A,B)]) ext
   * @tparam A Attribute Type
   * List[Int] Key Type
   */
-class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(List[Int],A)]) extends RowLogoRDDMaker(rdd){
+class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(Seq[Int],A)]) extends RowLogoRDDMaker(rdd){
 
   @transient val sc = rdd.sparkContext
   lazy val keyCol = partitioner.partitioners.map(_.slotNum)
 
   def generateSentry() = {
 
-    var sentryNode:List[List[Int]] = null
-    var sentry:List[(List[Int],A)] = null
-    var sentryRDD:RDD[(List[Int],A)] = null
+    var sentryNode:Seq[Seq[Int]] = null
+    var sentry:Seq[(Seq[Int],A)] = null
+    var sentryRDD:RDD[(Seq[Int],A)] = null
 
 
     val slotNums = partitioner.partitioners.map(_.slotNum)
@@ -66,7 +66,7 @@ class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(List[Int],A)]) extends RowLogoR
     sentryRDD
   }
 
-  def build(): RDD[RowLogoBlock[(List[Int],A)]] ={
+  def build(): RDD[RowLogoBlock[(Seq[Int],A)]] ={
 
     require(_edges != null, "edge must be designated before build")
     require(_keySizeMap != null, "keySizeMap must be designated before build")
@@ -78,7 +78,7 @@ class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(List[Int],A)]) extends RowLogoR
 
     val schema = _schema.clone().asInstanceOf[LogoSchema]
 
-    sentriedRDD.partitionBy(partitioner).mapPartitionsWithIndex[RowLogoBlock[(List[Int],A)]]({case (index,f) =>
+    sentriedRDD.partitionBy(partitioner).mapPartitionsWithIndex[RowLogoBlock[(Seq[Int],A)]]({case (index,f) =>
       val blockGenerator = new rowBlockGenerator(schema,index,f)
       val block = blockGenerator.generate()
       Iterator(block)
