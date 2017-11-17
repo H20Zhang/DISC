@@ -1,7 +1,7 @@
 import TestData.TestLogoRDDData
-import org.apache.spark.Logo.Physical.Builder.{Catalog, LogoRDDReference}
+import org.apache.spark.Logo.Physical.Builder.{Catalog, LogoBuildScriptOneStep, LogoRDDReference, SnapPoint}
 import org.apache.spark.Logo.Physical.dataStructure.{LogoBlockRef, RowLogoBlock}
-import org.apache.spark.Logo.Physical.utlis.TestUtil
+import org.apache.spark.Logo.Physical.utlis.{SparkSingle, TestUtil}
 import org.apache.spark.rdd.RDD
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
@@ -36,6 +36,40 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
     }
 
     assert(ref2 == null)
+  }
+
+  test("logoBuildScript"){
+    val sc = SparkSingle.getSparkContext()
+
+    val (edgeLogoRDD,schema) = TestLogoRDDData.edgeLogoRDD
+
+    val edgeRef0 = LogoRDDReference(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
+    val edgeRef1 = LogoRDDReference(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
+    val edgeRef2 = LogoRDDReference(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
+
+    val logoRDDRefs = List(edgeRef0,edgeRef1,edgeRef2)
+    val snapPoints = List(
+      SnapPoint(0,0,1,0),
+      SnapPoint(1,1,2,1)
+    )
+
+    val handler = (blocks:Seq[LogoBlockRef]) => {
+      blocks(0)
+    }
+
+
+    //logoScriptOneStep
+    //Compiling Test
+    val oneStep = LogoBuildScriptOneStep(logoRDDRefs,snapPoints,handler)
+
+    println("keymapping is:")
+    println(oneStep.compositeSchema.keyMapping)
+    val fetchJoinRDD = oneStep.performFetchJoin(sc)
+
+    //TODO This requires further testing
+    fetchJoinRDD.count()
+
+
   }
 
 

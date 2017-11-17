@@ -4,15 +4,19 @@ import scala.collection.mutable.ArrayBuffer
 
 class PointToNumConverter(val parts:Seq[Int]){
 
+  //points(4,5)
+  //parts(20,10)
+
+  //we assume here that List(0,1,2,3) represent number 3,2,1,0
   //convert a x variable based number to 10 based system
-  def convertToNum(point:Seq[Int]) = point.zipWithIndex.map{f =>
+  def convertToNum(point:Seq[Int]) = point.reverse.zipWithIndex.map{f =>
 
-    val mutipliers = parts.drop(f._2+1)
+    val multipliers = parts.dropRight(f._2+1)
 
-    if (mutipliers.isEmpty){
+    if (multipliers.isEmpty){
       f._1
     }else{
-      f._1*parts.drop(f._2+1).product
+      f._1*multipliers.product
     }
     }.sum
 
@@ -21,7 +25,7 @@ class PointToNumConverter(val parts:Seq[Int]){
     val buffer = new ArrayBuffer[Int]()
     var total = index
 
-    parts.dropRight(1).foldLeft(buffer){case(buffer, mod) =>
+    parts.drop(1).foldRight(buffer){case(mod, buffer) =>
       buffer += (total % mod)
       total = total/mod
       buffer

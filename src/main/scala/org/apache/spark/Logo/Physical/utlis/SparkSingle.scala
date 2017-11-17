@@ -15,6 +15,14 @@ object SparkSingle {
     (spark,sc)
   }
 
+  def getSparkContext() = {
+    getSpark()._2
+  }
+
+  def getSparkSession() = {
+    getSpark()._1
+  }
+
   def close(): Unit ={
     counter -= 1
     if(counter == 0){

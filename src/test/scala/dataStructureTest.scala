@@ -71,16 +71,16 @@ class dataStructureTest extends FunSuite {
 
 
     val key1 = List(24,35,27)
-    assert(compositeParitioner2D1.getPartition(key1) == 4*10+5)
-    assert(compositeParitioner2D2.getPartition(key1) == 5*25+2)
-    assert(compositeParitioner3D.getPartition(key1) == 4*10*25+5*25+2)
+    assert(compositeParitioner2D1.getPartition(key1) == 4+5*20)
+    assert(compositeParitioner2D2.getPartition(key1) == 5+2*10)
+    assert(compositeParitioner3D.getPartition(key1) == 4+5*20+2*20*10)
 //    assert(compositeParitioner2D2D.getPartition(key1) == 85*20*10+52)
 //    assert(limitsCompositePartitioner2D2D.getPartition(key1) == 5*20+12)
 
     val key2 = (24,35,27)
-    assert(compositeParitioner2D1.getPartition(key2) == 4*10+5)
-    assert(compositeParitioner2D2.getPartition(key2) == 5*25+2)
-    assert(compositeParitioner3D.getPartition(key2) == 4*10*25+5*25+2)
+    assert(compositeParitioner2D1.getPartition(key2) == 4+5*20)
+    assert(compositeParitioner2D2.getPartition(key2) == 5+2*10)
+    assert(compositeParitioner3D.getPartition(key2) == 4+5*20+2*20*10)
 //    assert(compositeParitioner2D2D.getPartition(key2) == 85*20*10+52)
 
   }
@@ -131,14 +131,23 @@ class dataStructureTest extends FunSuite {
     val oldKeys = threeTriangleSchema.newKeyToOldKey(newKey)
     val oldIndex = threeTriangleSchema.newIndexToOldIndex(newIndex)
 
+
     val oldKeys1 = List(
       List(1,2,2),
       List(2,2,1),
       List(2,2,1))
-    val oldIndex1 = List(25,25,25)
+    val oldIndex1 = List(25,17,17)
 
     assert(TestUtil.listlistEqual(oldKeys1,oldKeys))
     assert(TestUtil.listEqual(oldIndex1.sorted,oldIndex1.sorted))
+
+
+    val newIndex1 = threeTriangleSchema.oldIndexToNewIndex(oldIndex1)
+    assert(newIndex==newIndex1)
+
+    println(newIndex1)
+
+
 
   }
 

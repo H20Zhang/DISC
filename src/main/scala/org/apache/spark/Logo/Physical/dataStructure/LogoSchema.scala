@@ -36,9 +36,15 @@ class LogoSchema (val edges:Seq[(Int,Int)], val keySizeMap:Map[Int,Int]) extends
   @transient lazy val converter = new PointToNumConverter(baseList)
 
   //assume we sorted the keyCol and get their value as a list
+
+  //we assume here that List(0,1,2,3) represent number 3,2,1,0
   def keyToIndex(key:Seq[Int]) = converter.convertToNum(key)
 
   def IndexToKey(num:Int) = converter.NumToList(num)
+
+  def allPossiblePlan() = {
+    ListGenerator.cartersianSizeList(slotSize);
+  }
 
   override def clone(): AnyRef = {
     new LogoSchema(edges,keySizeMap)
@@ -65,6 +71,11 @@ class CompositeLogoSchema(schema:LogoSchema,
 
   def oldIndexToNewIndex(oldIndex:Seq[Int]) = {
     val keyList = oldIndex.zipWithIndex.map(_.swap).map(f => (f._1,oldSchemas(f._1).IndexToKey(f._2)))
+
+//    //TODO testing
+//    println("keyList")
+//    keyList.foreach(println)
+
     val newSpecificRow = keyList.
       foldRight(ListGenerator.fillList(0,schema.nodeSize))((updateList,targetList) => ListGenerator.fillListIntoTargetList(updateList._2,schema.nodeSize,keyMapping(updateList._1),targetList) )
     val index = schema.partitioner.getPartition(newSpecificRow)
@@ -76,11 +87,17 @@ class CompositeLogoSchema(schema:LogoSchema,
   }
 
   def newKeyToOldIndex(newKey:Seq[Int]):Seq[Int] = {
+
     newKeyToOldKey(newKey).zipWithIndex.map(f => oldSchemas(f._2).keyToIndex(f._1))
   }
 
   def newIndexToOldIndex(newIndex:Int):Seq[Int] = {
     newKeyToOldIndex(IndexToKey(newIndex))
+  }
+
+  def allPossibleCombinePlan() ={
+    val allPlan = allPossiblePlan()
+    allPlan.map(f => newKeyToOldIndex(f))
   }
 
 }
@@ -130,7 +147,7 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val 
       val index = f._2
       val keySize = f._1
       keySize.map(x => (keyMapping(index)(x._1),x._2))
-    }.flatMap(f => f.toList).distinct.toMap
+    }.flatMap(f => f.toList).distinct.sortBy(_._1).toMap
   }
 
   override def generate(): CompositeLogoSchema = {

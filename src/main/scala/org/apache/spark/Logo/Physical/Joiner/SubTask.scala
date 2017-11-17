@@ -4,8 +4,10 @@ import java.io.{IOException, ObjectOutputStream}
 
 import org.apache.spark.Logo.Physical.dataStructure.{CompositeLogoSchema, LogoBlockRef, LogoSchema}
 import org.apache.spark.Logo.Physical.utlis.ListGenerator
-import org.apache.spark.{Partition, TaskContext}
+import org.apache.spark.{Partition, SparkEnv, TaskContext}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.scheduler.TaskLocation
+import org.apache.spark.storage.{BlockId, RDDBlockId}
 import org.apache.spark.util.Utils
 
 
@@ -20,8 +22,12 @@ case class SubTask(rddPartitions:Seq[Int], rdds:Seq[RDD[_]], @transient compsite
 
   def calculateNewIdex = compsiteSchema.oldIndexToNewIndex(rddPartitions)
 
+
+  //TODO this method is useless
   def calculatePreferedLocation = {
     val prefs = rddPartitions.zipWithIndex.map(_.swap).map(f => rdds(f._1).preferredLocations(rdds(f._1).partitions(f._2)))
+
+
     val exactMatchLocations = prefs.reduce((x, y) => x.intersect(y))
     val locs = if (!exactMatchLocations.isEmpty) exactMatchLocations else prefs.flatten.distinct
     locs
@@ -30,7 +36,8 @@ case class SubTask(rddPartitions:Seq[Int], rdds:Seq[RDD[_]], @transient compsite
   def generateSubTaskPartition = {
     val idx = calculateNewIdex
     val preferredLocations = calculatePreferedLocation
-    val subtaskPartition = new SubTaskPartition(idx, rddPartitions, rdds, preferredLocations)
+
+    val subtaskPartition = new SubTaskPartition(idx, rddPartitions, rdds)
     subtaskPartition
   }
 
@@ -53,18 +60,41 @@ case class SubTask(rddPartitions:Seq[Int], rdds:Seq[RDD[_]], @transient compsite
   * @param idx index of this partition
   * @param subPartitions paritions id for retrieve
   * @param rdds rdds whose parititions will be used to construct this partition
-  * @param preferredLocations prefered locations for this partition
+
   */
 class SubTaskPartition(
                         idx: Int,
                         subPartitions: Seq[Int],
-                        @transient private val rdds: Seq[RDD[_]],
-                        @transient val preferredLocations: Seq[String])
+                        @transient private val rdds: Seq[RDD[_]]
+                        )
   extends Partition {
   override val index: Int = idx
 
   var partitionValues = subPartitions.zipWithIndex.map(_.swap).map(f => (f._1,rdds(f._1).partitions(f._2)))
   def partitions: Seq[(Int,Partition)] = partitionValues
+
+
+
+  def calculatePreferedLocation = {
+    var prefs = subPartitions.zipWithIndex.map(_.swap).map(f => rdds(f._1).preferredLocations(rdds(f._1).partitions(f._2)))
+
+    //TODO this part is very trick, be careful, might need to refactor
+    if (prefs.flatten.distinct.forall(f => f == "")){
+      val sparkEnv = SparkEnv.get
+      val blockManagerMaster = sparkEnv.blockManager.master
+      prefs = subPartitions.zipWithIndex.map(_.swap).map{f =>
+        val blockId = RDDBlockId(rdds(f._1).id,rdds(f._1).partitions(f._2).index)
+        blockManagerMaster.getLocations(blockId).map(f => TaskLocation(f.host,f.executorId).toString)
+      }
+    }
+
+    val exactMatchLocations = prefs.reduce((x, y) => x.intersect(y))
+    val locs = if (!exactMatchLocations.isEmpty) exactMatchLocations else prefs.flatten.distinct
+
+    locs
+  }
+
+
 
   @throws(classOf[IOException])
   private def writeObject(oos: ObjectOutputStream): Unit = Utils.tryOrIOException {

@@ -20,11 +20,13 @@ class FetchJoinRDD(sc:SparkContext,
 
   override def getPartitions: Array[Partition] = {
     val subTaskParitions = subTasks.map(f => f.generateSubTaskPartition).sortBy(_.index).toArray
+
     subTaskParitions.asInstanceOf[Array[Partition]]
   }
 
   override def getPreferredLocations(s: Partition): Seq[String] = {
-    s.asInstanceOf[SubTaskPartition].preferredLocations
+
+    s.asInstanceOf[SubTaskPartition].calculatePreferedLocation
   }
 
   override def clearDependencies() {

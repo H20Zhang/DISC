@@ -22,6 +22,8 @@ object TestLogoRDDData {
 
     val logoRDD = logoRDDMaker.build()
     val schema = logoRDDMaker.getSchema
+    logoRDD.cache()
+    logoRDD.count()
 
     (logoRDD,schema)
   }

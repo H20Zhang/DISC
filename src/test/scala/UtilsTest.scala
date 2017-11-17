@@ -62,7 +62,7 @@ class UtilsTest extends FunSuite{
     val converter = new PointToNumConverter(baseList)
     val index = converter.convertToNum(numList)
 
-    assert(index == 1*4*5*6+2*5*6+3*6+4)
+    assert(index == 1+2*3+3*3*4+4*3*4*5)
 
     val numList1 = converter.NumToList(index)
 
