@@ -54,6 +54,9 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
     )
 
     val handler = (blocks:Seq[LogoBlockRef]) => {
+      blocks.foreach { f =>
+        println(f.asInstanceOf[RowLogoBlock[(scala.Seq[Int], Int)]].metaData.numberOfParts)
+      }
       blocks(0)
     }
 

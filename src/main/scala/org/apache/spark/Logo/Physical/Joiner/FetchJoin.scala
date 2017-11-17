@@ -36,7 +36,16 @@ class FetchJoinRDD(sc:SparkContext,
 
   override def compute(split: Partition, context: TaskContext) = {
     val subTaskPartition = split.asInstanceOf[SubTaskPartition]
-    val blockList = subTaskPartition.partitionValues.map(f => rdds(f._1).iterator(f._2,context).next())
+    val blockList = subTaskPartition.partitionValues.map{
+      f =>
+        val iterator1 = rdds(f._1).iterator(f._2,context)
+        val block = iterator1.next()
+        iterator1.hasNext
+        block
+    }
+
+
+
     Iterator(f(blockList))
   }
 

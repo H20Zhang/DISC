@@ -12,7 +12,7 @@ object TestLogoRDDData {
   lazy val (_,sc) = SparkSingle.getSpark()
 
   def edgeLogoRDD = {
-    val data = List.range(0,10).map(f => (f,f)).map(f => (Seq(f._1,f._2),1))
+    val data = List.range(0,1000000).map(f => (f,f)).map(f => (Seq(f._1,f._2),1))
 
     val rawRDD = sc.parallelize(data)
     val edges = List((0,1))

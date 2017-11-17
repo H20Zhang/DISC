@@ -6,7 +6,7 @@ object SparkSingle {
   private lazy val spark = SparkSession.builder().master("local[1]").appName("spark sql example").config("spark.some.config.option", "some-value")
     .getOrCreate()
   private lazy val sc = spark.sparkContext
-  sc.setLogLevel("ERROR")
+//  sc.setLogLevel("ERROR")
 
   var counter = 0
 
