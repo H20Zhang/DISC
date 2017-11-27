@@ -2,11 +2,15 @@ package org.apache.spark.Logo.Physical.utlis
 
 import org.apache.spark.sql.SparkSession
 
+
+/**
+  * Simple Class which wrap around SparkContext, and SparkSession for easy testing
+  */
 object SparkSingle {
-  private lazy val spark = SparkSession.builder().master("local[1]").appName("spark sql example").config("spark.some.config.option", "some-value")
+  private lazy val spark = SparkSession.builder().master("local[*]").appName("spark sql example").config("spark.some.config.option", "some-value")
     .getOrCreate()
   private lazy val sc = spark.sparkContext
-//  sc.setLogLevel("ERROR")
+  sc.setLogLevel("ERROR")
 
   var counter = 0
 

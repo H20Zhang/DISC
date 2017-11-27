@@ -14,7 +14,7 @@ import scala.reflect.ClassTag
 class FetchJoinRDD(sc:SparkContext,
                    subTasks:Seq[SubTask],
                    schema:CompositeLogoSchema,
-                   var f: (Seq[LogoBlockRef]) => LogoBlockRef,
+                   var f: (Seq[LogoBlockRef], CompositeLogoSchema) => LogoBlockRef,
                    var rdds:Seq[RDD[LogoBlockRef]]) extends RDD[LogoBlockRef](sc,rdds.map(x => new OneToOneDependency(x))){
   override val partitioner = Some(schema.partitioner)
 
@@ -46,7 +46,7 @@ class FetchJoinRDD(sc:SparkContext,
 
 
 
-    Iterator(f(blockList))
+    Iterator(f(blockList, schema))
   }
 
 }

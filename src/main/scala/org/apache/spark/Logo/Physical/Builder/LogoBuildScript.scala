@@ -33,7 +33,7 @@ case class SnapPoint(lRDDID:Int, lRDDSlot:Int, rRDDID:Int, rRDDSlot:Int)
   * @param snapPoints how logo's are snapped to each other
   * @param handler how to handle the LogoBlock after the LogoBlocks are already snapped together by FetchJoin
   */
-case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints:List[SnapPoint], handler: (Seq[LogoBlockRef]) => LogoBlockRef) extends LogoBuildScriptStep{
+case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints:List[SnapPoint], handler: (Seq[LogoBlockRef],CompositeLogoSchema) => LogoBlockRef, name:String="") extends LogoBuildScriptStep{
 
   lazy val schemas = logoRDDRefs.map(_.schema)
   lazy val rdds = logoRDDRefs.map(_.logoRDD)
@@ -73,7 +73,7 @@ case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints
   }
 
   def generateCompositeSchema() = {
-      CompositeLogoSchema(schemas,intersectionMapping)
+      CompositeLogoSchema(schemas,intersectionMapping,name)
   }
 
   def generateSubTasks() = {

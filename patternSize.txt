@@ -1,0 +1,8 @@
+wikiV
+
+name    count   our_count
+triangle    608389  3650334.0/6 = 608389
+
+
+as-skitter
+name    count   out_count

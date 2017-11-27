@@ -109,7 +109,14 @@ class dataStructureTest extends FunSuite {
 
     val threeTriangleSchema = CompositeLogoSchema(oldSchemas,intersectionKeyMappings)
 
-    val edges2 = List((0,1),(1,3),(3,0),(1,2),(2,4),(4,0),(2,0))
+    val edges2 = List((0,1),(1,3),(3,0),(1,2),(2,4),(4,0),(2,0)).map{
+      f =>
+        if (f._2 < f._1){
+          f.swap
+        }else{
+          f
+        }
+    }
     val keySizeMap2 = Map((0,3),(1,3),(2,3),(3,3),(4,3))
     val keyMapping2 = List(
       List(0,1,3),

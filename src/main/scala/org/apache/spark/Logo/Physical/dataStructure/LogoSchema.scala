@@ -19,7 +19,7 @@ case object AttributeType extends LogoColType
   * @param edges edges of pattern
   * @param keySizeMap partition size for each key slot
   */
-class LogoSchema (val edges:Seq[(Int,Int)], val keySizeMap:Map[Int,Int]) extends Serializable{
+class LogoSchema (val edges:Seq[(Int,Int)], val keySizeMap:Map[Int,Int], val name:String = "") extends Serializable{
 
   assert(TestUtil.listEqual(edges.flatMap(f => Iterator(f._1,f._2)).toList.distinct.sorted,keySizeMap.keys.toList.sorted), "all nodes in edge are keys and must be specified an partition number")
 
@@ -48,6 +48,16 @@ class LogoSchema (val edges:Seq[(Int,Int)], val keySizeMap:Map[Int,Int]) extends
 
   override def clone(): AnyRef = {
     new LogoSchema(edges,keySizeMap)
+  }
+
+  override def toString: String = {
+    val stringBuilder = new StringBuilder
+    stringBuilder.append(s"\nname:${name}")
+    stringBuilder.append("\nedge connection: \n")
+    edges.foldLeft(stringBuilder)((stringBuilder,ele) => stringBuilder.append(ele+"\n"))
+    stringBuilder.append("keySizeMap: \n")
+    keySizeMap.foldLeft(stringBuilder)((stringBuilder,ele) => stringBuilder.append(ele+"\n"))
+    stringBuilder.toString()
   }
 }
 
@@ -111,12 +121,21 @@ trait schemaGenerator{
 
 /**
   *
-  * @param edges edges of pattern
+  * @param edges edges of pattern, the direction of the edges is not important, so it will all be represented as (small_id,large_id),it only represent a connection
   * @param keySizeMap partition size for each key slot
   */
-class PlainLogoSchemaGenerator(edges:Seq[(Int,Int)],keySizeMap:Map[Int,Int]) extends schemaGenerator{
+class PlainLogoSchemaGenerator(edges:Seq[(Int,Int)],keySizeMap:Map[Int,Int],name:String) extends schemaGenerator{
   override def generate() = {
-    new LogoSchema(edges,keySizeMap)
+    val sortedEdges = edges.map{
+      f =>
+        if (f._2 < f._1){
+          f.swap
+        }else{
+          f
+        }
+    }
+
+    new LogoSchema(sortedEdges,keySizeMap,name)
   }
 }
 
@@ -125,7 +144,7 @@ class PlainLogoSchemaGenerator(edges:Seq[(Int,Int)],keySizeMap:Map[Int,Int]) ext
   * @param oldSchemas old schema from which this new schema is dereived
   * @param partialKeyMappings key mapping from old schemas to new schemas
   */
-abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val partialKeyMappings:Seq[Map[Int,Int]]) extends schemaGenerator{
+abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val partialKeyMappings:Seq[Map[Int,Int]], val name:String="") extends schemaGenerator{
   def keyMapGenerate():Seq[Seq[Int]]
 
   def integrityCheck(): Unit ={
@@ -138,7 +157,14 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val 
       val index = f._2
       val oldEdge = f._1
       oldEdge.map(x => (keyMapping(index)(x._1),(keyMapping(index)(x._2))))
-    }.flatMap(f => f).distinct
+    }.flatMap(f => f).map{
+      f =>
+        if (f._2 < f._1){
+          f.swap
+        }else{
+          f
+        }
+    }.distinct
   }
 
   def keySizeMapGenerate(keyMapping: Seq[Seq[Int]]):Map[Int,Int] = {
@@ -156,7 +182,7 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val 
     val keyMapping  = keyMapGenerate()
     val edges = edgeGenerate(keyMapping)
     val keySizeMap = keySizeMapGenerate(keyMapping)
-    val schema = LogoSchema(edges,keySizeMap)
+    val schema = LogoSchema(edges,keySizeMap,name)
     val compositeSchema = new CompositeLogoSchema(schema,oldSchemas,keyMapping)
     compositeSchema
   }
@@ -170,7 +196,7 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val 
   * @param oldSchmeas old schema from which this new schema is dereived
   * @param intersectionKeyMappings key mapping from old schemas to new schemas
   */
-class SimpleCompositeLogoSchemaGenerator(oldSchmeas:Seq[LogoSchema], intersectionKeyMappings:Seq[Map[Int,Int]]) extends CompositeLogoSchemaGenerator(oldSchmeas, intersectionKeyMappings){
+class SimpleCompositeLogoSchemaGenerator(oldSchmeas:Seq[LogoSchema], intersectionKeyMappings:Seq[Map[Int,Int]],name:String="") extends CompositeLogoSchemaGenerator(oldSchmeas, intersectionKeyMappings){
   override def keyMapGenerate() = {
     val oldKeys = oldSchemas.map(_.keyCol)
     val keyMapBuffer = new Array[Array[Int]](oldSchemas.length).map(f => new Array[Int](0)).zipWithIndex.map { f =>
@@ -204,13 +230,13 @@ class SimpleCompositeLogoSchemaGenerator(oldSchmeas:Seq[LogoSchema], intersectio
 }
 
 object LogoSchema{
-  def apply(edges:Seq[(Int,Int)],keySizeMap:Map[Int,Int]): LogoSchema = {
-    new PlainLogoSchemaGenerator(edges,keySizeMap).generate()
+  def apply(edges:Seq[(Int,Int)],keySizeMap:Map[Int,Int],name:String=""): LogoSchema = {
+    new PlainLogoSchemaGenerator(edges,keySizeMap,name).generate()
   }
 }
 
 object CompositeLogoSchema{
-  def apply(oldSchmeas:Seq[LogoSchema], IntersectionKeyMappings:Seq[Map[Int,Int]]) = {
+  def apply(oldSchmeas:Seq[LogoSchema], IntersectionKeyMappings:Seq[Map[Int,Int]],name:String="") = {
     new SimpleCompositeLogoSchemaGenerator(oldSchmeas,IntersectionKeyMappings).generate()
   }
 }

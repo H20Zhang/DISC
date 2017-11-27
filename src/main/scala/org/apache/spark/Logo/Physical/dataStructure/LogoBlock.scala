@@ -7,6 +7,12 @@ import scala.reflect.ClassTag
 
 trait LogoBlockRef
 
+/**
+  * Convinent method for ouputting the count result, for testing
+  * @param count
+  */
+class CountLogo(val count:Long) extends LogoBlockRef{}
+
 abstract class LogoBlock[A:ClassTag](val schema: LogoSchema, val metaData: LogoMetaData, val rawData:A) extends LogoBlockRef with Serializable{}
 
 class RowLogoBlock[A:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawData:Seq[A]) extends LogoBlock(schema, metaData, rawData){}

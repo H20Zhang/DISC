@@ -15,10 +15,10 @@ abstract class RowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: RDD[(A,B)]) ext
 
   var _edges:Seq[(Int,Int)] = _
   var _keySizeMap:Map[Int,Int] = _
+  var _name:String = ""
 
 
-
-  lazy val _schema = LogoSchema(_edges,_keySizeMap)
+  lazy val _schema = LogoSchema(_edges,_keySizeMap,_name)
   lazy val _nodeSize = _schema.nodeSize
   lazy val partitioner:CompositeParitioner = _schema.partitioner
 
@@ -31,6 +31,12 @@ abstract class RowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: RDD[(A,B)]) ext
     _keySizeMap = keySizeMap
     this
   }
+
+  def setName(name:String) = {
+    _name = name
+    this
+  }
+
 
   def getSchema = _schema
 
