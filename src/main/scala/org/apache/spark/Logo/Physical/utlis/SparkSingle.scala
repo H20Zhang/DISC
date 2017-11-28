@@ -7,15 +7,20 @@ import org.apache.spark.sql.SparkSession
   * Simple Class which wrap around SparkContext, and SparkSession for easy testing
   */
 object SparkSingle {
-  private lazy val spark = SparkSession.builder().master("local[*]").appName("spark sql example").config("spark.some.config.option", "some-value")
+  private var spark = SparkSession.builder().master("local[*]").appName("spark sql example").config("spark.some.config.option", "some-value")
     .getOrCreate()
-  private lazy val sc = spark.sparkContext
+  private var sc = spark.sparkContext
   sc.setLogLevel("ERROR")
 
   var counter = 0
 
   def getSpark() = {
     counter += 1
+
+    if (sc.isStopped){
+      spark = SparkSession.builder().master("local[*]").appName("spark sql example").config("spark.some.config.option", "some-value")
+        .getOrCreate()
+    }
     (spark,sc)
   }
 

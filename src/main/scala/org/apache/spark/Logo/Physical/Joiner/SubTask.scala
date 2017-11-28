@@ -78,6 +78,10 @@ class SubTaskPartition(
   def calculatePreferedLocation = {
     var prefs = subPartitions.zipWithIndex.map(_.swap).map(f => rdds(f._1).preferredLocations(rdds(f._1).partitions(f._2)))
 
+
+    //The Prefed Location is very important for index reuse, however for some init input rdd's it may not have a prefered location,
+    //which can result error.
+
     //TODO this part is very trick, be careful, might need to refactor
     if (prefs.flatten.distinct.forall(f => f == "")){
       val sparkEnv = SparkEnv.get

@@ -9,8 +9,15 @@ import org.apache.spark.rdd.RDD
 import scala.reflect.ClassTag
 
 
-
-
+/**
+  * Fetch Join is an implementation of HyberCube Join, but difference in, even after the Join is perform the index is still
+  * usable which means it preserve the index information through carefully designed subTasks(whose id).
+  * @param sc SparkContext
+  * @param subTasks Generated Task from the LogoOneStepScript
+  * @param schema CompositeSchema for the generated Logo
+  * @param f function to make blocks into the schema designed new block
+  * @param rdds Logo used to construct new Logo
+  */
 class FetchJoinRDD(sc:SparkContext,
                    subTasks:Seq[SubTask],
                    schema:CompositeLogoSchema,

@@ -74,6 +74,44 @@ class CompositeLogoSchema(schema:LogoSchema,
 
   @transient lazy val reverseKeyMapping = keyMapping.map(f => f.zipWithIndex.toMap)
 
+
+  //TODO testing snapMapps,coreBlock,leafBlock,Joint
+
+  /**
+    * calculate each node in new pattern has how many old pattern join on it.
+    */
+  @transient lazy val snapMapps = keyMapping.flatten.groupBy(f => f).map(f => (f._1,f._2.size))
+
+
+  /**
+    * calculate the coreBlockId, core is the block which has the most joint.
+    */
+  @transient lazy val coreBlockId = {
+    val JointSet = Joint.toSet
+    val jointCountMap = keyMapping.map{
+      f =>
+        var counter = 0
+        f.foldLeft(counter)((counter,ele) => JointSet.contains(ele) match {
+          case true => counter+1
+          case false => counter
+        })
+    }
+
+    val coreBlockId = jointCountMap.zipWithIndex.maxBy(_._1)._2
+    coreBlockId
+  }
+
+  /**
+    * calculate the leafBlockIds, except from core, the other blocks are all leaf.
+    */
+  @transient lazy val leafBlockIds = Range(0,oldSchemas.size).filter(p => p != coreBlockId)
+
+  /**
+    * Joint are nodes in new pattern which have at two sub patterns join on it.
+    */
+  @transient lazy val Joint = snapMapps.filter(p => p._2 > 1).keys
+
+
   def oldKeysToNewKey(oldKey:Seq[Seq[Int]]) =
     IndexToKey(
     oldIndexToNewIndex(
