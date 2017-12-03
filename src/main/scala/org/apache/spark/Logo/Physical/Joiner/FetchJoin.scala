@@ -1,5 +1,6 @@
 package org.apache.spark.Logo.Physical.Joiner
 
+import org.apache.spark.Logo.Physical.Joiner.SubTask.SubTaskPartition
 import org.apache.spark.Logo.Physical.Joiner.multiJoin.subJoinPartition
 import org.apache.spark.Logo.Physical.dataStructure.{CompositeLogoSchema, LogoBlockRef, LogoSchema}
 import org.apache.spark.Logo.Physical.utlis.ListGenerator
@@ -25,6 +26,7 @@ class FetchJoinRDD(sc:SparkContext,
                    var rdds:Seq[RDD[LogoBlockRef]]) extends RDD[LogoBlockRef](sc,rdds.map(x => new OneToOneDependency(x))){
   override val partitioner = Some(schema.partitioner)
 
+  //reorder the subTaskPartitions according to their idx
   override def getPartitions: Array[Partition] = {
     val subTaskParitions = subTasks.map(f => f.generateSubTaskPartition).sortBy(_.index).toArray
 
@@ -50,8 +52,6 @@ class FetchJoinRDD(sc:SparkContext,
         iterator1.hasNext
         block
     }
-
-
 
     Iterator(f(blockList, schema))
   }

@@ -21,6 +21,7 @@ case object AttributeType extends LogoColType
   */
 class LogoSchema (val edges:Seq[(Int,Int)], val keySizeMap:Map[Int,Int], val name:String = "") extends Serializable{
 
+
   assert(TestUtil.listEqual(edges.flatMap(f => Iterator(f._1,f._2)).toList.distinct.sorted,keySizeMap.keys.toList.sorted), "all nodes in edge are keys and must be specified an partition number")
 
 
@@ -42,6 +43,7 @@ class LogoSchema (val edges:Seq[(Int,Int)], val keySizeMap:Map[Int,Int], val nam
 
   def IndexToKey(num:Int) = converter.NumToList(num)
 
+  //generate all possible logoblock keys
   def allPossiblePlan() = {
     ListGenerator.cartersianSizeList(slotSize);
   }
@@ -112,6 +114,7 @@ class CompositeLogoSchema(schema:LogoSchema,
   @transient lazy val Joint = snapMapps.filter(p => p._2 > 1).keys
 
 
+
   def oldKeysToNewKey(oldKey:Seq[Seq[Int]]) =
     IndexToKey(
     oldIndexToNewIndex(
@@ -119,10 +122,6 @@ class CompositeLogoSchema(schema:LogoSchema,
 
   def oldIndexToNewIndex(oldIndex:Seq[Int]) = {
     val keyList = oldIndex.zipWithIndex.map(_.swap).map(f => (f._1,oldSchemas(f._1).IndexToKey(f._2)))
-
-//    //TODO testing
-//    println("keyList")
-//    keyList.foreach(println)
 
     val newSpecificRow = keyList.
       foldRight(ListGenerator.fillList(0,schema.nodeSize))((updateList,targetList) => ListGenerator.fillListIntoTargetList(updateList._2,schema.nodeSize,keyMapping(updateList._1),targetList) )
@@ -135,7 +134,6 @@ class CompositeLogoSchema(schema:LogoSchema,
   }
 
   def newKeyToOldIndex(newKey:Seq[Int]):Seq[Int] = {
-
     newKeyToOldKey(newKey).zipWithIndex.map(f => oldSchemas(f._2).keyToIndex(f._1))
   }
 
@@ -183,12 +181,15 @@ class PlainLogoSchemaGenerator(edges:Seq[(Int,Int)],keySizeMap:Map[Int,Int],name
   * @param partialKeyMappings key mapping from old schemas to new schemas
   */
 abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val partialKeyMappings:Seq[Map[Int,Int]], val name:String="") extends schemaGenerator{
+
+  //generate the keyMapping
   def keyMapGenerate():Seq[Seq[Int]]
 
   def integrityCheck(): Unit ={
 
   }
 
+  //generate the new edges from the old edges and keyMapping
   def edgeGenerate(keyMapping: Seq[Seq[Int]]):Seq[(Int,Int)] = {
     val oldEdges = oldSchemas.map(_.edges)
     oldEdges.zipWithIndex.map{f =>
@@ -205,6 +206,7 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val 
     }.distinct
   }
 
+  //generate the new keySizeMap from old keySizeMap and keyMapping
   def keySizeMapGenerate(keyMapping: Seq[Seq[Int]]):Map[Int,Int] = {
     val oldKeySizes = oldSchemas.map(_.keySizeMap)
     oldKeySizes.zipWithIndex.map{ f=>
@@ -214,6 +216,7 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val 
     }.flatMap(f => f.toList).distinct.sortBy(_._1).toMap
   }
 
+  //generate the CompositeLogoSchema
   override def generate(): CompositeLogoSchema = {
     integrityCheck()
 
@@ -225,7 +228,6 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val 
     compositeSchema
   }
 }
-
 
 
 //must ensure that intersectionKey in IntersectionKeyMapping take low number new key first.

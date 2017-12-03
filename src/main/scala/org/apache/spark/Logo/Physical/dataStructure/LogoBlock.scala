@@ -32,7 +32,11 @@ class CompressedLogoBlock[A:ClassTag, B:ClassTag](schema: LogoSchema, metaData: 
   * @param rawData rawData for the block
   */
 class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMetaData, rawData:A) extends LogoBlock(schema, metaData, rawData){
-  def filter = ???
+  //TODO finish basic operation
+  def map() = ???
+  def filte() = ???
+  def foldLeft() = ???
+  def group() = ???
 }
 
 /**
@@ -87,14 +91,11 @@ class CompositePatternLogoBlock(schema:CompositeLogoSchema, metaData:LogoMetaDat
   }
 
 
-
   //TODO finish assemble in CompositePatternLogoBlock
   /**
     * generate a ConcretePatternLogoBlock
     */
   def assemble(): ConcretePatternLogoBlock = ???
-
-
 }
 
 

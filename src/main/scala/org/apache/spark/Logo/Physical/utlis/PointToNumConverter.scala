@@ -2,6 +2,10 @@ package org.apache.spark.Logo.Physical.utlis
 
 import scala.collection.mutable.ArrayBuffer
 
+
+
+//convert a point to a number
+// point(1,2,3,4) represent number 4,3,2,1
 class PointToNumConverter(val parts:Seq[Int]){
 
   //points(4,5)

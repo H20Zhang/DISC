@@ -41,6 +41,8 @@ case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints
   lazy val compositeSchema = generateCompositeSchema()
   lazy val subtasks = generateSubTasks()
 
+
+  //from the snapPoints generate the IntersectionMapping(define which two nodes mapping to the same new nodes)
   def generateIntersectionMapping():List[Map[Int,Int]] = {
 //    val totalRDDNum = snapPoints.flatMap(f => Iterator(f.lRDDID,f.rRDDID)).max
     val partialMappingTemp = new Array[Map[Int,Int]](logoRDDRefs.size).map(f => Map[Int,Int]())
@@ -72,15 +74,15 @@ case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints
     partialMappingTemp.toList
   }
 
+  //generate the composite schema
   def generateCompositeSchema() = {
       CompositeLogoSchema(schemas,intersectionMapping,name)
   }
 
+  //generate the subTasks
   def generateSubTasks() = {
     val newSchemaSlots = compositeSchema.slotSize
     val newSchemaSubTasks = ListGenerator.cartersianSizeList(newSchemaSlots)
-
-
 
     val oldIndexs = newSchemaSubTasks.map(f => compositeSchema.newKeyToOldIndex(f))
     val subtasks = oldIndexs.map(SubTask(_,rdds,compositeSchema))
@@ -88,6 +90,7 @@ case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints
     subtasks
   }
 
+  //generate the FetchJoinRDD
   def performFetchJoin(sc:SparkContext) = {
     new FetchJoinRDD(sc,subtasks,compositeSchema, handler,rdds)
   }

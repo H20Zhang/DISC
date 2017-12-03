@@ -2,6 +2,8 @@ package org.apache.spark.Logo.Physical.Maker
 
 import org.apache.spark.Logo.Physical.dataStructure.{CompositeParitioner, SlotPartitioner}
 
+
+//Generate the CompositePartitioner
 case class PartitionerMaker() {
 
   var _slotMapping:List[Int] = _

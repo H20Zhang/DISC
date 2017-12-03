@@ -6,6 +6,10 @@ import org.apache.spark.rdd.RDD
 import scala.collection.mutable
 import scala.reflect.ClassTag
 
+/**
+  * catlog used to associate a name with a RDD[LogoRDDReference],
+  * LogoRDDReference records the RDD[LogoBlock] and its according schema
+  */
 class Catalog {
   val rddMap:mutable.Map[String,LogoRDDReference] = mutable.Map()
 
