@@ -12,7 +12,11 @@ case object NonKeyType extends LogoColType
 case object AttributeType extends LogoColType
 
 
-
+/*
+LogoSchema
+CompositeLogoSchema
+KeyValueLogoSchema
+ */
 
 /**
   * @note notice key must start from zero. and key cols are consecutive
@@ -147,6 +151,30 @@ class CompositeLogoSchema(schema:LogoSchema,
   }
 
 }
+
+
+//TODO finish
+/**
+  * a schema wrapper around the LogoSchema to represent the underlying block can function as a key value map.
+  * @param schema original schema
+  * @param keys keys of the key value map
+  * @param values values needed for key value map (other keyCol will also be included but will store seperately from keyCol spcified in values)
+  */
+case class KeyValueLogoSchema(schema:LogoSchema, keys:Seq[Int], values:Seq[Int]) extends LogoSchema(schema.edges,schema.keySizeMap,"keyValueLogoSchema")
+
+
+case class PlannedCompositeLogoSchema(coreBlock:Int,
+                                      leafBlock:Seq[Int],
+                                       schema:LogoSchema,
+                                      oldSchemas:Seq[LogoSchema],
+                                      override val keyMapping:Seq[Seq[Int]])  extends CompositeLogoSchema(schema, oldSchemas, keyMapping){
+
+
+  def getCoreBlock(blocks:Seq[PatternLogoBlock[_]]):PatternLogoBlock[_] = ???
+  def getLeafBlock(blocks:Seq[PatternLogoBlock[_]]):Seq[KeyValuePatternLogoBlock] = ???
+
+}
+
 
 /**
   * generator for generate LogoSchema

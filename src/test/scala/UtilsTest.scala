@@ -1,4 +1,4 @@
-import org.apache.spark.Logo.Physical.utlis.{ListGenerator, PointToNumConverter}
+import org.apache.spark.Logo.Physical.utlis._
 import org.scalatest.FunSuite
 
 class UtilsTest extends FunSuite{
@@ -67,13 +67,49 @@ class UtilsTest extends FunSuite{
     val numList1 = converter.NumToList(index)
 
     assert(numList.diff(numList).length == 0)
-
-
-
-
-
-
-
   }
+
+  test("ListSelector"){
+    val list = List(1,2,3,4,5)
+    val keys = List(0,2,4)
+    val selectedList = ListSelector.selectElements(list,keys)
+    val selectedList1 = List(1,3,5)
+    assert(TestUtil.listEqual(selectedList1,selectedList))
+  }
+
+  test("mapBuilder"){
+    val list1 = List(1,2,3,4)
+    val list2 = List(2,3,4,5)
+    val list3 = List(3,4,5,6)
+    val list4 = List(4,5,6,7)
+    val list5 = List(5,6,7,8)
+
+    val keys = List(0,1)
+    val values= List(2)
+    val total = List(0,1,2,3)
+    val list = List(list1,list2,list3,list4,list5)
+
+    val theMap = MapBuilder.fromListToMap(list,keys)
+
+    assert(TestUtil.listlistEqual(List(List(3,4)),theMap.get(List(1,2)).get))
+  }
+
+  test("KeyValueMap"){
+    import org.apache.spark.Logo.Physical.TypeRef.Pattern
+    val list1 = List(1,2,3,4)
+    val list2 = List(2,3,4,5)
+    val list3 = List(3,4,5,6)
+    val list4 = List(4,5,6,7)
+    val list5 = List(5,6,7,8)
+
+    val keys = List(0,1)
+    val values= List(2)
+    val total = List(0,1,2,3)
+    val list = List(list1,list2,list3,list4,list5)
+
+    val theMap = MapBuilder.buildKeyValueMap(list,keys,values)
+    println(TestUtil.listlistEqual(List(List(4)),theMap.get(List(1,2)).get.get(List(3)).get))
+  }
+
 
 }

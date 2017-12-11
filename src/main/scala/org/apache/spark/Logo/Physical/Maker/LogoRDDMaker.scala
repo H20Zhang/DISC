@@ -96,6 +96,9 @@ class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(Seq[Int],A)]) extends RowLogoRD
 
 
 
+
+
+
 //class TwoTupleOneHoleListLogoBlockMaker(sc:SparkContext,  partitioner: Partitioner)
 //  extends LogoBlockMaker[VertexId,VertexId](sc, partitioner.numPartitions ,partitioner){
 //

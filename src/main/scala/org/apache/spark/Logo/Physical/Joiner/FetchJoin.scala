@@ -1,6 +1,6 @@
 package org.apache.spark.Logo.Physical.Joiner
 
-import org.apache.spark.Logo.Physical.Joiner.SubTask.SubTaskPartition
+import org.apache.spark.Logo.Physical.Joiner.SubTaskPartition
 import org.apache.spark.Logo.Physical.Joiner.multiJoin.subJoinPartition
 import org.apache.spark.Logo.Physical.dataStructure.{CompositeLogoSchema, LogoBlockRef, LogoSchema}
 import org.apache.spark.Logo.Physical.utlis.ListGenerator
