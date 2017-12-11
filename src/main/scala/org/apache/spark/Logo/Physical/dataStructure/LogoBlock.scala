@@ -95,6 +95,8 @@ class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData
 //    val values = schema.values
 //    MapBuilder.buildKeyValueMap(rawData,keys,values)
 //  }
+
+
 }
 
 /**
@@ -103,7 +105,7 @@ class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData
   * @param metaData metaData for the block
   * @param rawData rawData is other PatternLogoBlocks which assembled this block
   */
-class CompositePatternLogoBlock(schema:CompositeLogoSchema, metaData:LogoMetaData, rawData:Seq[PatternLogoBlock[_]]) extends PatternLogoBlock(schema, metaData, rawData){
+class CompositePatternLogoBlock(schema:PlannedCompositeLogoSchema, metaData:LogoMetaData, rawData:Seq[PatternLogoBlock[_]]) extends PatternLogoBlock(schema, metaData, rawData){
 
 
 //  /**
@@ -141,16 +143,55 @@ class CompositePatternLogoBlock(schema:CompositeLogoSchema, metaData:LogoMetaDat
 //  }
 
 
+  lazy val coreBlock = schema.getCoreBlock(rawData)
+  lazy val leafsBlocks = schema.getLeafBlock(rawData)
 
   //TODO finish assemble in CompositePatternLogoBlock
+
+  //generate the leaf instance grow from this core, actually the Iterator is just a wrapper the leafs are concrefied
+  def genereateLeafs(coreInstance:Seq[Int]):Iterator[Seq[Int]] = ???
+
+  //assmeble the core and leafs instance into a single instance
+  def assembleCoreAndLeafInstance(coreInstance:Seq[Int], leafInstance:Seq[Int]):Seq[Int] = ???
+
+
+  //the iterator to iterate through the pattern, core is iterated but leaf are concrefied but treat as a iterator for convinence.
+  class patternIterator extends Iterator[Seq[Int]]{
+
+    var leafsIterator:Iterator[Seq[Int]] = _
+    val coreIterator:Iterator[Seq[Int]] = coreBlock.iterator()
+    var currentCore:Seq[Int] = _
+
+    override def hasNext: Boolean = {
+
+      if (!leafsIterator.hasNext){
+        if (!coreIterator.hasNext){
+          return false
+        } else{
+          leafsIterator = genereateLeafs(coreIterator.next())
+          currentCore = coreIterator.next()
+        }
+      }
+
+      return true
+    }
+
+    override def next(): Seq[Int] = {
+      val leafs = leafsIterator.next()
+      val core = currentCore
+      assembleCoreAndLeafInstance(core,leafs)
+    }
+  }
+
   /**
     * generate a ConcretePatternLogoBlock
     */
-  override def assemble(): Seq[Seq[Int]] = ???
-  override def iterator() = ???
+  override def assemble(): Seq[Seq[Int]] = iterator().toSeq
+  override def iterator() = new patternIterator
 }
 
-
+//TODO finish the LogoBlock for block-centric iterative process
+class IterativeLogoBlock
 
 
 

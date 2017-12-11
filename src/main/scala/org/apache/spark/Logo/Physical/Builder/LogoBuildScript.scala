@@ -26,6 +26,16 @@ trait LogoBuildScriptStep
   */
 case class SnapPoint(lRDDID:Int, lRDDSlot:Int, rRDDID:Int, rRDDSlot:Int)
 
+
+/**
+  * define the joint between two blocks
+  * @param lBlockID
+  * @param rBlockID
+  * @param lJoints
+  * @param rJoints
+  */
+case class BlockBlockJoints(lBlockID:Int, rBlockID:Int, lJoints:Seq[Int], rJoints:Seq[Int])
+
 /**
   * Represent one step in building an "LOGO" by specifying how logoRDD are snapped into each other
   *

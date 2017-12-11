@@ -1,5 +1,6 @@
 package org.apache.spark.Logo.Physical.dataStructure
 
+import org.apache.spark.Logo.Physical.Builder.BlockBlockJoints
 import org.apache.spark.Logo.Physical.Maker.PartitionerMaker
 import org.apache.spark.Logo.Physical.utlis.{ListGenerator, PointToNumConverter, TestUtil}
 import org.apache.spark.Partitioner
@@ -172,6 +173,8 @@ case class PlannedCompositeLogoSchema(coreBlock:Int,
 
   def getCoreBlock(blocks:Seq[PatternLogoBlock[_]]):PatternLogoBlock[_] = ???
   def getLeafBlock(blocks:Seq[PatternLogoBlock[_]]):Seq[KeyValuePatternLogoBlock] = ???
+  def getLeafLeafJointsForest():Seq[BlockBlockJoints] = ???
+  def getCoreLeafJoins():Seq[BlockBlockJoints] = ???
 
 }
 
