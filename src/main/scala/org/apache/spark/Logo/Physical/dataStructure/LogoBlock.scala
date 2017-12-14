@@ -44,14 +44,18 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
 
 
   //TODO testing required for below
-  def buildIndex(schema:KeyValueLogoSchema):Map[Seq[Int], Seq[Seq[Int]]] = {
+  def buildIndex(schema:KeyValueLogoSchema):Map[KeyPatternInstance, Seq[ValuePatternInstance]] = {
     val rawData = assemble()
     val keys = schema.keys
-    MapBuilder.fromListToMap(rawData,keys)
+    MapBuilder
+      .fromListToMap(rawData.map(_.pattern),keys)
+      .map(f => (PatternInstance(f._1).toKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
   }
 
-  def iterator():Iterator[Seq[Int]]
-  def assemble():Seq[Seq[Int]]
+  //sub class needs to over-write this method
+  def iterator():Iterator[PatternInstance]
+
+  def assemble():Seq[PatternInstance] = iterator().toSeq
 
   def toKeyValueLogoBlock(key:Seq[Int]):KeyValuePatternLogoBlock = {
 
@@ -79,9 +83,9 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
   * @param metaData metaData for the block
   * @param rawData rawData for the block, here we assume the nodeIds are represented using Int.
   */
-class ConcretePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Seq[Seq[Int]]) extends PatternLogoBlock(schema,metaData,rawData){
-  override def assemble(): Seq[Seq[Int]] = rawData
-  override def iterator(): Iterator[Seq[Int]] = rawData.iterator
+class ConcretePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Seq[PatternInstance]) extends PatternLogoBlock(schema,metaData,rawData){
+  override def assemble(): Seq[PatternInstance] = rawData
+  override def iterator(): Iterator[PatternInstance] = rawData.iterator
 }
 
 /**
@@ -90,7 +94,7 @@ class ConcretePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawDat
   * @param metaData metaData for the block
   * @param rawData rawData for the block, here we assume the nodeIds are represented using Int.
   */
-class EdgePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Seq[Seq[Int]]) extends ConcretePatternLogoBlock(schema,metaData,rawData){
+class EdgePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Seq[PatternInstance]) extends ConcretePatternLogoBlock(schema,metaData,rawData){
 
 }
 
@@ -102,11 +106,11 @@ class EdgePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Se
   * @param metaData metaData for the block
   * @param rawData rawData for the block, here we assume the nodeIds are represented using Int.
   */
-class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:Map[Seq[Int], Seq[Seq[Int]]]) extends LogoBlock(schema,metaData,rawData){
+class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:Map[KeyPatternInstance, Seq[ValuePatternInstance]]) extends LogoBlock(schema,metaData,rawData){
   def valueMapping(keyMapping:Seq[Int])= schema.valueKeyMapping(keyMapping)
 
   //get the values from the key in KeyValuePatternLogoBlock
-  def getValue(key:Seq[Int]) = rawData(key)
+  def getValue(key:PatternInstance) = rawData(key.asInstanceOf[KeyPatternInstance])
 }
 
 /**
@@ -127,24 +131,25 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
 
   //generate the leaf instance grow from this core, actually the Iterator is just a wrapper the leafs are concrefied
   //the intersection node is not included in the returned iterator.
-  def genereateLeafsNode(coreInstance:Seq[Int]):Iterator[Seq[Int]] = leafsBlock.
-    getValue(ListSelector.selectElements(coreInstance,coreLeafJoints.leafJoints)).toIterator
+  def genereateLeafsNode(coreInstance:PatternInstance):Iterator[PatternInstance] = leafsBlock.
+    getValue(PatternInstance(ListSelector.selectElements(coreInstance.pattern,coreLeafJoints.leafJoints))).toIterator
 
   //assmeble the core and leafs instance into a single instance
-  def assembleCoreAndLeafInstance(coreInstance:Seq[Int], leafInstanceNode:Seq[Int]):Seq[Int] =
-    ListGenerator.fillListIntoTargetList(
-      leafInstanceNode,
+  //TODO this method has some bug
+  def assembleCoreAndLeafInstance(coreInstance:PatternInstance, leafInstanceNode:PatternInstance):PatternInstance =
+    PatternInstance(ListGenerator.fillListIntoTargetList(
+      leafInstanceNode.pattern,
       schema.nodeSize,
       leafValueMapping,
-      ListGenerator.fillListIntoSlots(coreInstance,schema.nodeSize,schema.coreKeyMapping)
-    )
+      ListGenerator.fillListIntoSlots(coreInstance.pattern,schema.nodeSize,schema.coreKeyMapping)
+    ))
 
   //the iterator to iterate through the pattern, core is iterated but leaf are concrefied but treat as a iterator for convinence.
-  class patternIterator extends Iterator[Seq[Int]]{
+  class patternIterator extends Iterator[PatternInstance]{
 
-    var leafsIterator:Iterator[Seq[Int]] = _
-    val coreIterator:Iterator[Seq[Int]] = coreBlock.iterator()
-    var currentCore:Seq[Int] = _
+    var leafsIterator:Iterator[PatternInstance] = _
+    val coreIterator:Iterator[PatternInstance] = coreBlock.iterator()
+    var currentCore:PatternInstance = _
 
     override def hasNext: Boolean = {
 
@@ -160,7 +165,7 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
       return true
     }
 
-    override def next(): Seq[Int] = {
+    override def next(): PatternInstance = {
       val leafs = leafsIterator.next()
       val core = currentCore
       assembleCoreAndLeafInstance(core,leafs)
@@ -170,7 +175,6 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
   /**
     * generate a ConcretePatternLogoBlock
     */
-  override def assemble(): Seq[Seq[Int]] = iterator().toSeq
   override def iterator() = new patternIterator
 }
 

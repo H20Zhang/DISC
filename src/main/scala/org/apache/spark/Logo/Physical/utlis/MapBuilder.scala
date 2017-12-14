@@ -12,7 +12,6 @@ object MapBuilder {
   def buildKeyValueMap[A](data:Seq[Seq[A]], keys:Seq[Int], values:Seq[Int]) ={
     require(keys.intersect(values).size == 0)
 
-
     //because after the key Map is build the values position will change, so we need to calculate the new value position.
     val maxCol = (keys ++ values).max
     val indexList = Range(0,maxCol+1)

@@ -11,7 +11,7 @@ abstract class LogoBlockGenerator[A:ClassTag, B:ClassTag](val schema: LogoSchema
   lazy val numParts = filteredData.length
   var filteredData:List[A] = _
 
-  lazy val metaData = LogoMetaData(numList,schema,numParts)
+  lazy val metaData = LogoMetaData(numList,numParts)
 
   def generate():B
 }

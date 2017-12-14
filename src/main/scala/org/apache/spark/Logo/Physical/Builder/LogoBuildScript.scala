@@ -106,3 +106,5 @@ case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints
   }
 }
 
+//TODO implement this class
+case class LogoTwoBlockBuildScript() extends LogoBuildScriptStep
