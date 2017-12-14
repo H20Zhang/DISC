@@ -1,5 +1,5 @@
 package org.apache.spark.Logo.Physical.dataStructure
-import org.apache.spark.Logo.Physical.utlis.{ListSelector, MapBuilder}
+import org.apache.spark.Logo.Physical.utlis.{ListGenerator, ListSelector, MapBuilder}
 import org.apache.spark.graphx.VertexId
 
 import scala.Predef
@@ -43,18 +43,34 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
 
 
 
-  def buildIndex(schema:KeyValueLogoSchema):Map[Seq[Int],Map[Seq[Int],Seq[Seq[Int]]]] = {
+  //TODO testing required for below
+  def buildIndex(schema:KeyValueLogoSchema):Map[Seq[Int], Seq[Seq[Int]]] = {
     val rawData = assemble()
     val keys = schema.keys
-    val values = schema.values
-    MapBuilder.buildKeyValueMap(rawData,keys,values)
+    MapBuilder.fromListToMap(rawData,keys)
   }
 
   def iterator():Iterator[Seq[Int]]
   def assemble():Seq[Seq[Int]]
 
-  def toKeyValueLogoBlock:KeyValueLogoSchema = ???
-  def toConcreteLogoBlock:ConcretePatternLogoBlock = ???
+  def toKeyValueLogoBlock(key:Seq[Int]):KeyValuePatternLogoBlock = {
+
+    val keyValueSchema = new KeyValueLogoSchema(schema,key)
+    val keyValueRawData = buildIndex(keyValueSchema)
+    new KeyValuePatternLogoBlock(
+      keyValueSchema,
+      metaData,
+      keyValueRawData
+    )
+  }
+
+  def toConcreteLogoBlock:ConcretePatternLogoBlock = {
+    new ConcretePatternLogoBlock(
+      schema,
+      metaData,
+      assemble()
+    )
+  }
 }
 
 /**
@@ -79,81 +95,49 @@ class EdgePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Se
 }
 
 
-//TODO test
+//TODO test required
 /**
   * LogoBlock which can be used as a key-value map.
   * @param schema schema for the block
   * @param metaData metaData for the block
   * @param rawData rawData for the block, here we assume the nodeIds are represented using Int.
   */
-class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:Seq[Seq[Int]]) extends ConcretePatternLogoBlock(schema,metaData,rawData){
+class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:Map[Seq[Int], Seq[Seq[Int]]]) extends LogoBlock(schema,metaData,rawData){
+  def valueMapping(keyMapping:Seq[Int])= schema.valueKeyMapping(keyMapping)
 
-//  val index = buildIndex()
-//
-//  def buildIndex():Map[Seq[Int],Map[Seq[Int],Seq[Seq[Int]]]] = {
-//    val keys = schema.keys
-//    val values = schema.values
-//    MapBuilder.buildKeyValueMap(rawData,keys,values)
-//  }
-
-
+  //get the values from the key in KeyValuePatternLogoBlock
+  def getValue(key:Seq[Int]) = rawData(key)
 }
 
 /**
   * Composite LogoBlock Class for UnlabeledPatternMatching, which is assembled using multiple basic PatternLogoBlock.
+  * In this specific class, there are only two blocks to build the new composite block.s
   * @param schema composite schema for the block
   * @param metaData metaData for the block
   * @param rawData rawData is other PatternLogoBlocks which assembled this block
   */
-class CompositePatternLogoBlock(schema:PlannedCompositeLogoSchema, metaData:LogoMetaData, rawData:Seq[PatternLogoBlock[_]]) extends PatternLogoBlock(schema, metaData, rawData){
-
-
-//  /**
-//    * generate the ConcreteLogoBlock from the rawData, if the original PatternLogoBlock is already a ConcretePatternLogoBlock,
-//    * The just pass it, if not, which means it is a CompositePatternLogoBlock, then it will be called assemble to make it a
-//    * ConcretePatternLogoBlock
-//    * @return Concreted PatternBlocks
-//    */
-//  def concretedRawData:Seq[ConcretePatternLogoBlock] = rawData.map{
-//    f => f match {
-//      case x:ConcretePatternLogoBlock => x
-//      case x:CompositePatternLogoBlock => x.assemble()
-//    }
-//  }
-
-//  /**
-//    * building the index for later star join, the index is maps, whose key is Joint in each subBlock, and the value is the remain nodes.
-//    * @return The index for later star join
-//    */
-//  def buildIndex() ={
-//    val Blocks = concretedRawData
-//    val keyMapping = schema.keyMapping
-//
-//    val jointSet = schema.Joint.toSet
-//    val JointKeyMap =  keyMapping.map(f => f.zipWithIndex.filter(k => jointSet.contains(k._1)).map(_._2))
-//
-//    val Indexs = Blocks.map(f =>
-//      f.rawData
-//        .zipWithIndex
-//        .groupBy(k => k._1.zipWithIndex.filter(p => JointKeyMap(k._2).contains(p._2)))
-//        .map(k => (k._1.map(_._1),k._2.map(_._1)))
-//        .map(k => (k._1,k._2.map(w => w.zipWithIndex.filter(p => !jointSet.contains(p._2)).map(_._1))))
-//    )
-//    Indexs
-//  }
-
+class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaData:LogoMetaData, rawData:Seq[PatternLogoBlock[_]]) extends PatternLogoBlock(schema, metaData, rawData){
 
   lazy val coreBlock = schema.getCoreBlock(rawData)
-  lazy val leafsBlocks = schema.getLeafBlock(rawData)
+  lazy val leafsBlock = schema.getLeafBlock(rawData)
+  lazy val coreLeafJoints = schema.getCoreLeafJoins()
+  lazy val leafValueMapping = schema.leafBlockSchema.valueKeyMapping(schema.leafKeyMapping)
 
-  //TODO finish assemble in CompositePatternLogoBlock
+  //TODO testing required
 
   //generate the leaf instance grow from this core, actually the Iterator is just a wrapper the leafs are concrefied
-  def genereateLeafs(coreInstance:Seq[Int]):Iterator[Seq[Int]] = ???
+  //the intersection node is not included in the returned iterator.
+  def genereateLeafsNode(coreInstance:Seq[Int]):Iterator[Seq[Int]] = leafsBlock.
+    getValue(ListSelector.selectElements(coreInstance,coreLeafJoints.leafJoints)).toIterator
 
   //assmeble the core and leafs instance into a single instance
-  def assembleCoreAndLeafInstance(coreInstance:Seq[Int], leafInstance:Seq[Int]):Seq[Int] = ???
-
+  def assembleCoreAndLeafInstance(coreInstance:Seq[Int], leafInstanceNode:Seq[Int]):Seq[Int] =
+    ListGenerator.fillListIntoTargetList(
+      leafInstanceNode,
+      schema.nodeSize,
+      leafValueMapping,
+      ListGenerator.fillListIntoSlots(coreInstance,schema.nodeSize,schema.coreKeyMapping)
+    )
 
   //the iterator to iterate through the pattern, core is iterated but leaf are concrefied but treat as a iterator for convinence.
   class patternIterator extends Iterator[Seq[Int]]{
@@ -168,7 +152,7 @@ class CompositePatternLogoBlock(schema:PlannedCompositeLogoSchema, metaData:Logo
         if (!coreIterator.hasNext){
           return false
         } else{
-          leafsIterator = genereateLeafs(coreIterator.next())
+          leafsIterator = genereateLeafsNode(coreIterator.next())
           currentCore = coreIterator.next()
         }
       }

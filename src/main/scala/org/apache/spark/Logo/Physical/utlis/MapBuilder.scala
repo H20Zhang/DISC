@@ -8,7 +8,7 @@ object MapBuilder {
             .map(f => (f._1,f._2.map(t => ListSelector.notSelectElements(t,keys))))
   }
 
-  //TODO test
+  //In case of two building, this function is not needed, because there is only one leaf.
   def buildKeyValueMap[A](data:Seq[Seq[A]], keys:Seq[Int], values:Seq[Int]) ={
     require(keys.intersect(values).size == 0)
 

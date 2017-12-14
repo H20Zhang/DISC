@@ -2,7 +2,7 @@ package org.apache.spark.Logo.Physical.dataStructure
 
 import org.apache.spark.Logo.Physical.Builder.BlockBlockJoints
 import org.apache.spark.Logo.Physical.Maker.PartitionerMaker
-import org.apache.spark.Logo.Physical.utlis.{ListGenerator, PointToNumConverter, TestUtil}
+import org.apache.spark.Logo.Physical.utlis._
 import org.apache.spark.Partitioner
 
 import scala.collection.mutable.ArrayBuffer
@@ -90,33 +90,33 @@ class CompositeLogoSchema(schema:LogoSchema,
   @transient lazy val snapMapps = keyMapping.flatten.groupBy(f => f).map(f => (f._1,f._2.size))
 
 
-  /**
-    * calculate the coreBlockId, core is the block which has the most joint.
-    */
-  @transient lazy val coreBlockId = {
-    val JointSet = Joint.toSet
-    val jointCountMap = keyMapping.map{
-      f =>
-        var counter = 0
-        f.foldLeft(counter)((counter,ele) => JointSet.contains(ele) match {
-          case true => counter+1
-          case false => counter
-        })
-    }
-
-    val coreBlockId = jointCountMap.zipWithIndex.maxBy(_._1)._2
-    coreBlockId
-  }
-
-  /**
-    * calculate the leafBlockIds, except from core, the other blocks are all leaf.
-    */
-  @transient lazy val leafBlockIds = Range(0,oldSchemas.size).filter(p => p != coreBlockId)
-
-  /**
-    * Joint are nodes in new pattern which have at two sub patterns join on it.
-    */
-  @transient lazy val Joint = snapMapps.filter(p => p._2 > 1).keys
+//  /**
+//    * calculate the coreBlockId, core is the block which has the most joint.
+//    */
+//  @transient lazy val coreBlockId = {
+//    val JointSet = Joint.toSet
+//    val jointCountMap = keyMapping.map{
+//      f =>
+//        var counter = 0
+//        f.foldLeft(counter)((counter,ele) => JointSet.contains(ele) match {
+//          case true => counter+1
+//          case false => counter
+//        })
+//    }
+//
+//    val coreBlockId = jointCountMap.zipWithIndex.maxBy(_._1)._2
+//    coreBlockId
+//  }
+//
+//  /**
+//    * calculate the leafBlockIds, except from core, the other blocks are all leaf.
+//    */
+//  @transient lazy val leafBlockIds = Range(0,oldSchemas.size).filter(p => p != coreBlockId)
+//
+//  /**
+//    * Joint are nodes in new pattern which have at two sub patterns join on it.
+//    */
+//  @transient lazy val Joint = snapMapps.filter(p => p._2 > 1).keys
 
 
 
@@ -154,27 +154,77 @@ class CompositeLogoSchema(schema:LogoSchema,
 }
 
 
-//TODO finish
 /**
   * a schema wrapper around the LogoSchema to represent the underlying block can function as a key value map.
   * @param schema original schema
   * @param keys keys of the key value map
-  * @param values values needed for key value map (other keyCol will also be included but will store seperately from keyCol spcified in values)
   */
-case class KeyValueLogoSchema(schema:LogoSchema, keys:Seq[Int], values:Seq[Int]) extends LogoSchema(schema.edges,schema.keySizeMap,"keyValueLogoSchema")
+case class KeyValueLogoSchema(schema:LogoSchema, keys:Seq[Int]) extends LogoSchema(schema.edges,schema.keySizeMap,"keyValueLogoSchema"){
+
+  //TODO testing required
+  lazy val value:Seq[Int] = Range(0,schema.nodeSize-1).diff(keys)
+
+  //get the keyMapping when building the composite block only for the value nodes.
+  def valueKeyMapping(keyMapping:Seq[Int]) = ListSelector.selectElements(keyMapping,value)
+
+}
 
 
-case class PlannedCompositeLogoSchema(coreBlock:Int,
-                                      leafBlock:Seq[Int],
-                                       schema:LogoSchema,
-                                      oldSchemas:Seq[LogoSchema],
-                                      override val keyMapping:Seq[Seq[Int]])  extends CompositeLogoSchema(schema, oldSchemas, keyMapping){
+//TODO testing required
+/**
+  * The composite LogoSchema after the optimizer plan the building process and determine the core and leafs.
+  * In this version, we assume that there is only one core and one leaf in building process. So there is no need for calculating LeafLeafJointsForest.
+  * @param coreId the id of the coreBlock
+  * @param schema new schema of this composite schema
+  * @param oldSchemas old schema from which this new schema is dereived
+  * @param keyMappings key mapping from old schemas to new schemas
+  */
+case class PlannedTwoCompositeLogoSchema(coreId:Int,
+                                         schema:LogoSchema,
+                                         oldSchemas:Seq[LogoSchema],
+                                         keyMappings:Seq[Seq[Int]])  extends CompositeLogoSchema(schema, oldSchemas, keyMappings){
 
 
-  def getCoreBlock(blocks:Seq[PatternLogoBlock[_]]):PatternLogoBlock[_] = ???
-  def getLeafBlock(blocks:Seq[PatternLogoBlock[_]]):Seq[KeyValuePatternLogoBlock] = ???
-  def getLeafLeafJointsForest():Seq[BlockBlockJoints] = ???
-  def getCoreLeafJoins():Seq[BlockBlockJoints] = ???
+
+  require(oldSchemas.size == 2, s"In this version, we only allow two logo are snapped together in a build process, but here we have oldSchemas.size=${oldSchemas.size}")
+
+  val coreBlockId = coreId
+  val leafBlockId = coreBlockId match {
+    case 0 => 1
+    case 1 => 0
+  }
+
+  lazy val leafBlockSchema = oldSchemas(leafBlockId).asInstanceOf[KeyValueLogoSchema]
+  lazy val coreBlockSchema = oldSchemas(coreBlockId)
+
+  lazy val coreKeyMapping = keyMapping(coreBlockId)
+  lazy val leafKeyMapping = keyMapping(leafBlockId)
+
+  //get the core block using the given coreBlockId in blocks
+  def getCoreBlock(blocks:Seq[PatternLogoBlock[_]]):PatternLogoBlock[_] = blocks(coreBlockId)
+
+  //get the leaf blocks by drop the coreBlock using the coreBlockId
+  def getLeafBlock(blocks:Seq[PatternLogoBlock[_]]):KeyValuePatternLogoBlock = blocks(leafBlockId).asInstanceOf[KeyValuePatternLogoBlock]
+
+  //this version we assume that compositeLogo only has one core and one leaf, so there is no need for calculating LeafLeafJointsForest
+//  def getLeafLeafJointsForest():Seq[BlockBlockJoints] = ???
+
+
+  def getCoreLeafJoins():BlockBlockJoints = {
+    val coreKeyMapping = keyMapping(coreBlockId)
+    val leafKeyMapping = keyMapping(leafBlockId)
+
+    val reverseCoreKeyMapping = KeyMappingHelper.getReverseKeyMapping(coreKeyMapping)
+    val reverseLeafKeyMapping = KeyMappingHelper.getReverseKeyMapping(leafKeyMapping)
+
+    val joints = reverseCoreKeyMapping.keySet.intersect(reverseLeafKeyMapping.keySet)
+    val coreLeafJoints = joints.map(f => (reverseCoreKeyMapping(f), reverseLeafKeyMapping(f))).toSeq
+
+    val coreJoints = coreLeafJoints.map(_._1)
+    val leafJoints = coreLeafJoints.map(_._2)
+
+    BlockBlockJoints(coreBlockId,leafBlockId,coreJoints,leafJoints)
+  }
 
 }
 

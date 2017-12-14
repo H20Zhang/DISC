@@ -29,12 +29,12 @@ case class SnapPoint(lRDDID:Int, lRDDSlot:Int, rRDDID:Int, rRDDSlot:Int)
 
 /**
   * define the joint between two blocks
-  * @param lBlockID
-  * @param rBlockID
-  * @param lJoints
-  * @param rJoints
+  * @param coreBlockID the Id of core
+  * @param leafBlockID the Id of leaf
+  * @param coreJoints the joints of the coreBlock
+  * @param leafJoints the joints of the leafBlock
   */
-case class BlockBlockJoints(lBlockID:Int, rBlockID:Int, lJoints:Seq[Int], rJoints:Seq[Int])
+case class BlockBlockJoints(coreBlockID:Int, leafBlockID:Int, coreJoints:Seq[Int], leafJoints:Seq[Int])
 
 /**
   * Represent one step in building an "LOGO" by specifying how logoRDD are snapped into each other
