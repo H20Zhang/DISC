@@ -10,4 +10,10 @@ object TestPatternBlockData {
 
     new EdgePatternLogoBlock(schema,metaData,rawData)
   }
+
+
+  //we assume col0 to be the key.
+  lazy val keyValueEdgeBlock = {
+    edgeBlock.toKeyValueLogoBlock(Seq(0))
+  }
 }

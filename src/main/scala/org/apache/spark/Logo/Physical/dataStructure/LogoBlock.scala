@@ -110,13 +110,14 @@ class EdgePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Se
   * @param metaData metaData for the block
   * @param rawData rawData for the block, here we assume the nodeIds are represented using Int.
   */
-class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:Map[KeyPatternInstance, Seq[ValuePatternInstance]]) extends LogoBlock(schema,metaData,rawData){
+class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:Map[KeyPatternInstance, Seq[ValuePatternInstance]]) extends PatternLogoBlock(schema,metaData,rawData){
   def valueMapping(keyMapping:KeyMapping)= KeyMapping(schema.valueKeyMapping(keyMapping))
 
   //get the values from the key in KeyValuePatternLogoBlock
   def getValue(key:KeyPatternInstance) = rawData(key.asInstanceOf[KeyPatternInstance])
 
-
+  //TODO this part is wrong, it is only just a temporary fix
+  override def iterator() = rawData.toSeq.flatMap(f => f._2).iterator
 }
 
 /**
@@ -159,7 +160,7 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
 
     override def hasNext: Boolean = {
 
-      if (!leafsIterator.hasNext){
+      if (leafsIterator == null || !leafsIterator.hasNext){
         if (!coreIterator.hasNext){
           return false
         } else{
@@ -167,7 +168,7 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
           currentCore = coreIterator.next()
         }
       }
-
+List
       return true
     }
 
@@ -187,7 +188,8 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
 //TODO finish the LogoBlock for block-centric iterative process
 class IterativeLogoBlock
 
-
+class IterativeNodeLogoBlock extends IterativeLogoBlock
+class IterativeEdgeLogoBlock extends IterativeLogoBlock
 
 
 

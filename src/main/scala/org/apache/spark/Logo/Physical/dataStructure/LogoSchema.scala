@@ -156,10 +156,15 @@ class CompositeLogoSchema(schema:LogoSchema,
 case class KeyValueLogoSchema(schema:LogoSchema, keys:Seq[Int]) extends LogoSchema(schema.keySizeMap,"keyValueLogoSchema"){
 
   //TODO testing required
-  lazy val value:Seq[Int] = Range(0,schema.nodeSize-1).diff(keys)
+  lazy val value:Seq[Int] = Range(0,schema.nodeSize).diff(keys)
 
   //get the keyMapping when building the composite block only for the value nodes.
-  def valueKeyMapping(keyMapping:KeyMapping) = ListSelector.selectElements(keyMapping.toListMapping(),value)
+  def valueKeyMapping(keyMapping:KeyMapping) = {
+
+
+
+    ListSelector.selectElements(keyMapping.toListMapping(),value)
+  }
 
 }
 
