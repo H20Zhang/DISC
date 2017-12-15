@@ -1,7 +1,7 @@
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.HashPartitioner
 import org.apache.spark.Logo.Physical.Maker.{PartitionerMaker, SimpleRowLogoRDDMaker, rowBlockGenerator}
-import org.apache.spark.Logo.Physical.dataStructure.LogoSchema
+import org.apache.spark.Logo.Physical.dataStructure.{KeyMapping, LogoSchema}
 import org.apache.spark.Logo.Physical.utlis.{SparkSingle, TestUtil}
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
@@ -14,7 +14,7 @@ class BlockMakerTest extends FunSuite with BeforeAndAfterAll{
 
     val edges = List((0,1),(0,2),(1,2))
     val keySizeMap = Map((0,3),(1,3),(2,3))
-    val schema = LogoSchema(edges, keySizeMap)
+    val schema = LogoSchema(keySizeMap)
 
     val index = schema.partitioner.getPartition(List(0,1,2))
 
@@ -57,7 +57,7 @@ class BlockMakerTest extends FunSuite with BeforeAndAfterAll{
   }
 
   test("PartitionerMaker"){
-    val compositeParitioner = PartitionerMaker().setSlotMapping(List(0,1)).setSlotSize(List(3,3)).build()
+    val compositeParitioner = PartitionerMaker().setSlotSizeMapping(KeyMapping(List(3,3))).build()
     assert(compositeParitioner.numPartitions == 9)
   }
 

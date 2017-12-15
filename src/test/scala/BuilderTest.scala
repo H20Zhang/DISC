@@ -104,7 +104,7 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
     val oneStep = LogoBuildScriptOneStep(logoRDDRefs,snapPoints,handler,"Triangle")
 
     println("keymapping is:")
-    println(oneStep.compositeSchema.keyMapping)
+    println(oneStep.compositeSchema.keyMappings)
     val fetchJoinRDD = oneStep.performFetchJoin(sc)
 
     //TODO This requires further testing

@@ -59,9 +59,6 @@ object TestLogoRDDData {
     (logoRDD,schema)
   }
 
-  def triangleLogoRDD = {
-
-  }
 
 
 

@@ -90,7 +90,7 @@ class dataStructureTest extends FunSuite {
     //logoSchema
     val edges = List((0,1),(1,2),(2,0))
     val keySizeMap = Map((0,3),(1,3),(2,3))
-    val triangleSchema = LogoSchema(edges,keySizeMap)
+    val triangleSchema = LogoSchema(keySizeMap)
 
     //compositeLogoSchema
     val intersectionKeyMappings = List(
@@ -101,13 +101,13 @@ class dataStructureTest extends FunSuite {
 
     val edges1 = List((0,1),(1,2),(0,2))
     val keySizeMap1 = Map((0,3),(1,3),(2,3))
-    val triangleSchema1 = LogoSchema(edges1,keySizeMap1)
+    val triangleSchema1 = LogoSchema(keySizeMap1)
 
     //for three triangle pattern, as the edges are directed, the last triangle is actually different from the other two
     //in the sense of the edge direction.
     val oldSchemas = List(triangleSchema,triangleSchema,triangleSchema1)
 
-    val threeTriangleSchema = CompositeLogoSchema(oldSchemas,intersectionKeyMappings)
+    val threeTriangleSchema = CompositeLogoSchema(oldSchemas,intersectionKeyMappings.map(f => KeyMapping(f)))
 
     val edges2 = List((0,1),(1,3),(3,0),(1,2),(2,4),(4,0),(2,0)).map{
       f =>
@@ -126,9 +126,9 @@ class dataStructureTest extends FunSuite {
 
 //    threeTriangleSchema.keyMapping.foreach(println)
 
-    assert(TestUtil.listEqual(edges2.sorted,threeTriangleSchema.edges.sorted), "CompositeLogoSchema's generated edges wrong")
+
     assert(TestUtil.listEqual(keySizeMap2.toList.sorted,threeTriangleSchema.keySizeMap.toList.sorted), "CompositeLogoSchema's generate KeySizeMap wrong")
-    assert(TestUtil.listlistEqual(keyMapping2,threeTriangleSchema.keyMapping), "CompositeLogoSchema's generated keyMapping wrong")
+    assert(TestUtil.listlistEqual(keyMapping2,threeTriangleSchema.keyMappings.map(_.toListMapping())), "CompositeLogoSchema's generated keyMapping wrong")
 
     //compositeKey conversion Test
 

@@ -36,10 +36,10 @@ class CompressedLogoBlock[A:ClassTag, B:ClassTag](schema: LogoSchema, metaData: 
   */
 abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMetaData, rawData:A) extends LogoBlock(schema, metaData, rawData){
   //TODO finish basic operation
-  def map() = ???
-  def filter() = ???
-  def foldLeft() = ???
-  def group() = ???
+//  def map() = ???
+//  def filter() = ???
+//  def foldLeft() = ???
+//  def group() = ???
 
 
 
@@ -75,6 +75,10 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
       assemble()
     )
   }
+
+  override def toString: String = {
+    s"schema:\n${schema.toString}\nmetaData:${metaData.toString}\nrawData:${rawData.toString()}"
+  }
 }
 
 /**
@@ -107,10 +111,12 @@ class EdgePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Se
   * @param rawData rawData for the block, here we assume the nodeIds are represented using Int.
   */
 class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:Map[KeyPatternInstance, Seq[ValuePatternInstance]]) extends LogoBlock(schema,metaData,rawData){
-  def valueMapping(keyMapping:Seq[Int])= schema.valueKeyMapping(keyMapping)
+  def valueMapping(keyMapping:KeyMapping)= KeyMapping(schema.valueKeyMapping(keyMapping))
 
   //get the values from the key in KeyValuePatternLogoBlock
-  def getValue(key:PatternInstance) = rawData(key.asInstanceOf[KeyPatternInstance])
+  def getValue(key:KeyPatternInstance) = rawData(key.asInstanceOf[KeyPatternInstance])
+
+
 }
 
 /**
@@ -132,17 +138,17 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
   //generate the leaf instance grow from this core, actually the Iterator is just a wrapper the leafs are concrefied
   //the intersection node is not included in the returned iterator.
   def genereateLeafsNode(coreInstance:PatternInstance):Iterator[PatternInstance] = leafsBlock.
-    getValue(PatternInstance(ListSelector.selectElements(coreInstance.pattern,coreLeafJoints.leafJoints))).toIterator
+    getValue(coreInstance.subPatterns(coreLeafJoints.leafJoints).toKeyPatternInstance()).toIterator
 
   //assmeble the core and leafs instance into a single instance
   //TODO this method has some bug
   def assembleCoreAndLeafInstance(coreInstance:PatternInstance, leafInstanceNode:PatternInstance):PatternInstance =
-    PatternInstance(ListGenerator.fillListIntoTargetList(
-      leafInstanceNode.pattern,
-      schema.nodeSize,
-      leafValueMapping,
-      ListGenerator.fillListIntoSlots(coreInstance.pattern,schema.nodeSize,schema.coreKeyMapping)
-    ))
+    PatternInstance.build(
+      coreInstance,
+      schema.coreKeyMapping,
+      leafInstanceNode,
+      leafsBlock.valueMapping(schema.leafKeyMapping)
+    )
 
   //the iterator to iterate through the pattern, core is iterated but leaf are concrefied but treat as a iterator for convinence.
   class patternIterator extends Iterator[PatternInstance]{

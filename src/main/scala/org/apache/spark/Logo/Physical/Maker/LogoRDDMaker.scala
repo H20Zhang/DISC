@@ -14,11 +14,11 @@ import scala.reflect.ClassTag
 abstract class RowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: RDD[(A,B)]) extends Serializable{
 
   var _edges:Seq[(Int,Int)] = _
-  var _keySizeMap:Map[Int,Int] = _
+  var _keySizeMap:KeyMapping = _
   var _name:String = ""
 
 
-  lazy val _schema = LogoSchema(_edges,_keySizeMap,_name)
+  lazy val _schema = LogoSchema(_keySizeMap,_name)
   lazy val _nodeSize = _schema.nodeSize
   lazy val partitioner:CompositeParitioner = _schema.partitioner
 
@@ -28,7 +28,7 @@ abstract class RowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: RDD[(A,B)]) ext
   }
 
   def setKeySizeMap(keySizeMap:Map[Int,Int]) = {
-    _keySizeMap = keySizeMap
+    _keySizeMap = KeyMapping(keySizeMap)
     this
   }
 

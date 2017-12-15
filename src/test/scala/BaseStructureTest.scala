@@ -28,8 +28,8 @@ class BaseStructureTest extends FunSuite{
 
     val list1 = List(1,2,3)
     val list2 = List(4)
-    val lKeyMapping = KeyMapping(0,1,2)
-    val rKeyMapping = KeyMapping(3)
+    val lKeyMapping = KeyMapping(Seq(0,1,2))
+    val rKeyMapping = KeyMapping(Seq(3))
 
     val pattern1 = PatternInstance(list1)
     val pattern2 = PatternInstance(list2)

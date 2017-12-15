@@ -1,7 +1,7 @@
 package org.apache.spark.Logo.Physical.Builder
 
 import org.apache.spark.Logo.Physical.Joiner.{FetchJoinRDD, SubTask}
-import org.apache.spark.Logo.Physical.dataStructure.{CompositeLogoSchema, LogoBlock, LogoBlockRef, RowLogoBlock}
+import org.apache.spark.Logo.Physical.dataStructure._
 import org.apache.spark.Logo.Physical.utlis.ListGenerator
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
@@ -86,7 +86,7 @@ case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints
 
   //generate the composite schema
   def generateCompositeSchema() = {
-      CompositeLogoSchema(schemas,intersectionMapping,name)
+      CompositeLogoSchema(schemas,intersectionMapping.map(f => KeyMapping(f)),name)
   }
 
   //generate the subTasks
