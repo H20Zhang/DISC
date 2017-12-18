@@ -1,6 +1,6 @@
 package org.apache.spark.Logo.Physical.Builder
 
-import org.apache.spark.Logo.Physical.dataStructure.{LogoBlock, LogoBlockRef, LogoSchema, RowLogoBlock}
+import org.apache.spark.Logo.Physical.dataStructure._
 import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable
@@ -45,10 +45,29 @@ object Catalog {
 }
 
 
+
+//TODO actually logoRDD field should be removed it is generated through generate, before generate the logoRDD doesn't exist, LogoRDDReference is a placeholder.
 /**
   * a reference to the logoRDD containing its actual rdd and its schema
   */
-case class LogoRDDReference(logoRDD:RDD[LogoBlockRef], schema: LogoSchema)
+case class LogoRDDReference(logoRDD:RDD[LogoBlockRef], schema: LogoSchema, buildScriptStep: LogoBuildScriptStep){
+  def generate() = ???
+}
 
 
+//TODO finish this, the same case as LogoRDDReference
+case class PatternLogoRDDReference(patternRDD:RDD[LogoBlockRef], patternSchema: LogoSchema, buildScript:LogoPatternBuildScriptOneStep) extends LogoRDDReference(patternRDD,patternSchema,buildScript){
+
+  //prepare the Pattern Logo RDD for build operation.
+  def toSubPattern(keyMapping: KeyMapping):SubPatternLogoRDDReference = ???
+
+  //actually generate the patternRDD
+  def generate() = ???
+
+}
+
+
+case class SubPatternLogoRDDReference(patternLogoRDDReference:PatternLogoRDDReference, keyMapping:KeyMapping){
+
+}
 

@@ -300,6 +300,8 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val 
 }
 
 
+
+//TODO need to retest, what will happen if the we specify all keys rather than just intersectionKey.
 //must ensure that intersectionKey in IntersectionKeyMapping take low number new key first.
 /**
   *

@@ -17,8 +17,13 @@ class CountLogo(val count:Long) extends LogoBlockRef{}
 
 abstract class LogoBlock[A:ClassTag](val schema: LogoSchema, val metaData: LogoMetaData, val rawData:A) extends LogoBlockRef with Serializable{}
 
+
 class RowLogoBlock[A:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawData:Seq[A]) extends LogoBlock(schema, metaData, rawData){}
 
+//TODO finish this
+class CompositeLogoBlock(schema: LogoSchema, metaData: LogoMetaData, rawData:Seq[LogoBlockRef], handler:(Seq[LogoBlockRef],CompositeLogoSchema) => LogoBlockRef) extends LogoBlock(schema,metaData,rawData){
+  def executeHandler() = ???
+}
 
 class FileBasedLogoBlock;
 class CompressedLogoBlock[A:ClassTag, B:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawEdge:Seq[B], crystals:Seq[(String,List[B])], rawAttr:A)

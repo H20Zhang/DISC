@@ -104,7 +104,40 @@ case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints
   def performFetchJoin(sc:SparkContext) = {
     new FetchJoinRDD(sc,subtasks,compositeSchema, handler,rdds)
   }
+
+  //TODO finish this
+  //generate the logoBlockRef and add it to catalog
+  def generateLogoRef(sc:SparkContext) = ???
 }
 
 //TODO implement this class
-case class LogoTwoBlockBuildScript() extends LogoBuildScriptStep
+case class LogoPatternBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints:List[SnapPoint]) extends LogoBuildScriptStep{
+
+
+  //method used by planner to set which LogoRDDReference is the core.
+  def setCoreID() = ???
+
+  //preprocessing the leaf RDD, if the leaf is not in J-state, then it will be in J-state
+  def leafProcess() = ???
+
+  //preprocessing the core RDD
+  def coreProcess() = ???
+
+  //generate the handler for underlying LogoBuildScriptOneStep
+  def handlerGenerate() = ???
+
+  //generate the new Pattern and add it to catalog, after generate the pattern is in F state
+  def generateNewPattern() = ???
+
+  // the generator for generating the handler for converting blocks into a planned2CompositeBlock.
+  class Planned2HandlerGenerator(){
+    def generate() = ???
+  }
+
+
+}
+
+
+
+
+
