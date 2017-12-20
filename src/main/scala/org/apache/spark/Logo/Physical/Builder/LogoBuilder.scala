@@ -1,5 +1,8 @@
 package org.apache.spark.Logo.Physical.Builder
 
+import org.apache.spark.Logo.Logical.SubPatternLogoRDDReference
+import org.apache.spark.Logo.Physical.dataStructure.PatternLogoRDD
+
 class LogoBuilder {
 
 }

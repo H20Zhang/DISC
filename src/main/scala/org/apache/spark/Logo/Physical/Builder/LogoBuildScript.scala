@@ -107,9 +107,6 @@ case class LogoBuildPhyiscalStep(logoRDDRefs:List[LogoRDD], snapPoints:List[Snap
     new FetchJoinRDD(sc,subtasks,compositeSchema, handler,rdds)
   }
 
-  //TODO finish this
-  //generate the logoBlockRef and add it to catalog
-  def generateLogoRef(sc:SparkContext) = ???
 }
 
 

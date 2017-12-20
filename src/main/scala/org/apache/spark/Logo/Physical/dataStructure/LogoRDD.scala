@@ -1,27 +1,23 @@
 package org.apache.spark.Logo.Physical.dataStructure
 
-import org.apache.spark.Logo.Physical.Builder.{LogoBuildScriptStep, SubPatternLogoRDDReference}
+import org.apache.spark.Logo.Physical.Builder.{LogoBuildScriptStep}
 import org.apache.spark.rdd.RDD
 
 /**
   * a reference to the logoRDD containing its actual rdd and its schema
   */
-case class LogoRDD(logoRDD:RDD[LogoBlockRef], schema: LogoSchema, buildScriptStep: LogoBuildScriptStep){
-  def generate() = ???
-}
-
+class LogoRDD(val logoRDD:RDD[LogoBlockRef], val schema: LogoSchema){}
 
 //TODO finish this, the same case as LogoRDDReference
-case class PatternLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema: LogoSchema, buildScript:LogoPatternBuildLogicalStep) extends LogoRDD(patternRDD,patternSchema,buildScript){
+class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSchema) extends LogoRDD(patternRDD,patternSchema){
 
-  //prepare the Pattern Logo RDD for build operation.
-  def toSubPattern(keyMapping: KeyMapping):SubPatternLogoRDDReference = ???
-
-  //actually generate the patternRDD
-  def generate() = ???
+  //TODO this logical should be in logoRDDReference
+//  //prepare the Pattern Logo RDD for build operation.
+//  def toSubPattern(keyMapping: KeyMapping):SubPatternLogoRDDReference = ???
+//
 }
 
-case class SubPatternLogoRDDReference(patternLogoRDDReference:PatternLogoRDD, keyMapping:KeyMapping){
+class SubPatternLogoRDDReference(patternLogoRDDReference:PatternLogoRDD, keyMapping:KeyMapping){
 
-  def generate() = ???
+//  def generate() = ???
 }

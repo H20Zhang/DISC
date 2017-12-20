@@ -1,6 +1,6 @@
 import TestData.TestLogoRDDData
-import org.apache.spark.Logo.Physical.Builder.{Catalog, LogoBuildPhyiscalStep, LogoRDD, SnapPoint}
-import org.apache.spark.Logo.Physical.dataStructure.{CompositeLogoSchema, CountLogo, LogoBlockRef, RowLogoBlock}
+import org.apache.spark.Logo.Physical.Builder.{Catalog, LogoBuildPhyiscalStep, SnapPoint}
+import org.apache.spark.Logo.Physical.dataStructure._
 import org.apache.spark.Logo.Physical.utlis.{SparkSingle, TestUtil}
 import org.apache.spark.rdd.RDD
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
@@ -11,7 +11,7 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
 
     val (edgeLogoRDD,schema) = TestLogoRDDData.debugEdgeLogoRDD
 
-    val ref = LogoRDDReference(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
+    val ref = new LogoRDD(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
 
     //put test
     Catalog.putLogo("edge",ref)
@@ -43,9 +43,9 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
 
     val (edgeLogoRDD,schema) = TestLogoRDDData.debugEdgeLogoRDD
 
-    val edgeRef0 = LogoRDDReference(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
-    val edgeRef1 = LogoRDDReference(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
-    val edgeRef2 = LogoRDDReference(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
+    val edgeRef0 = new LogoRDD(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
+    val edgeRef1 = new LogoRDD(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
+    val edgeRef2 = new LogoRDD(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
 
     val logoRDDRefs = List(edgeRef0,edgeRef1,edgeRef2)
     val snapPoints = List(

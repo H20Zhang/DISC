@@ -123,21 +123,29 @@ class LogoComposite2PatternBuildLogicalStep(logoRDDRefs:List[LogoPatternBuildLog
     coreLogoRef.generateNewPattern()
   }
 
-  override def generateNewPattern(): RDD[LogoBlockRef] = {
-    logoStep.performFetchJoin(sc)
+  override def generateNewPattern(): PatternLogoRDD = {
+    new PatternLogoRDD(logoStep.performFetchJoin(sc), getSchema())
   }
 
   override def getSchema(): LogoSchema = logoStep.generateCompositeSchema().toPlan2CompositeSchema(coreId)
 }
 
 
-class LogoEdgePatternBuildLogicalStep(edgeLogoRDD:PatternLogoRDD) extends LogoPatternBuildLogicalStep(List(edgeLogoRDD),List()){
+class LogoEdgePatternBuildLogicalStep(edgeLogoRDD:PatternLogoRDD) extends LogoPatternBuildLogicalStep(List(),List()){
 
   override def generateNewPattern(): PatternLogoRDD = {
     edgeLogoRDD
   }
 
   override def getSchema(): LogoSchema = edgeLogoRDD.patternSchema
+
+  override def generateLeafPhyiscal():PatternLogoRDD = {
+    edgeLogoRDD
+  }
+
+  override def generateCorePhyiscal():PatternLogoRDD = {
+    edgeLogoRDD
+  }
 }
 
 
