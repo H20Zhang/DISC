@@ -26,11 +26,11 @@ object TestLogoRDDData {
       f =>
         var res:(Int,Int) = null
         if (!f.startsWith("#")){
-          val splittedString = f.split("\\t")
+          val splittedString = f.split("\\s")
           res = (splittedString(0).toInt,splittedString(1).toInt)
         }
         res
-    }.filter(f => f != null).flatMap(f => Iterable(f,f)).distinct().map(f => (Seq(f._1,f._2),1))
+    }.filter(f => f != null).flatMap(f => Iterable(f,f.swap)).distinct().map(f => (Seq(f._1,f._2),1))
 
 
 

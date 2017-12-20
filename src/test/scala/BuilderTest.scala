@@ -54,6 +54,7 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
       SnapPoint(0,1,2,0)
     )
 
+
     val handler = (blocks:Seq[LogoBlockRef], schema:CompositeLogoSchema) => {
 
       val edgeBlock0 = blocks(0).asInstanceOf[RowLogoBlock[(Seq[Int],Int)]]
@@ -95,13 +96,16 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
         res
       }
 
+      println(triangleSize.sum)
       new CountLogo(triangleSize.sum)
     }
 
 
+    val compositeSchema = new IntersectionCompositeLogoSchemaGenerator(logoRDDRefs.map(_.schema), snapPoints) generate()
+
     //logoScriptOneStep
     //Compiling Test
-    val oneStep = LogoBuildPhyiscalStep(logoRDDRefs,snapPoints,handler,"Triangle")
+    val oneStep = LogoBuildPhyiscalStep(logoRDDRefs,compositeSchema,snapPoints,handler,"Triangle")
 
     println("keymapping is:")
     println(oneStep.compositeSchema.keyMappings)

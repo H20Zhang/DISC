@@ -14,6 +14,7 @@ trait LogoBlockRef
   * @param count
   */
 class CountLogo(val count:Long) extends LogoBlockRef{}
+class DebugLogo(val message:String, val value:Long = 0L) extends LogoBlockRef{}
 
 abstract class LogoBlock[A:ClassTag](val schema: LogoSchema, val metaData: LogoMetaData, val rawData:A) extends LogoBlockRef with Serializable{}
 

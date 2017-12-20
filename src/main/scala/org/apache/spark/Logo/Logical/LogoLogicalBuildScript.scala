@@ -12,47 +12,7 @@ class LogoLogicalBuildScript {
 //TODO implement this class
 abstract class LogoPatternBuildLogicalStep(logoRDDRefs:List[LogoPatternBuildLogicalStep], snapPoints:List[SnapPoint], name:String="") extends LogoBuildScriptStep{
 
-  lazy val schemas = logoRDDRefs.map(_.getSchema())
-  lazy val intersectionMapping = generateIntersectionMapping()
-  lazy val compositeSchema = generateCompositeSchema()
-
-  //from the snapPoints generate the IntersectionMapping(define which two nodes mapping to the same new nodes)
-  def generateIntersectionMapping():List[Map[Int,Int]] = {
-    //    val totalRDDNum = snapPoints.flatMap(f => Iterator(f.lRDDID,f.rRDDID)).max
-    val partialMappingTemp = new Array[Map[Int,Int]](logoRDDRefs.size).map(f => Map[Int,Int]())
-    snapPoints.foldLeft(0){(curIndex,point) =>
-      var curIndexTemp = curIndex
-      val lRDDMap = partialMappingTemp(point.lRDDID)
-      val rRDDMap = partialMappingTemp(point.rRDDID)
-      val lPrevMapping = lRDDMap.getOrElse(point.lRDDSlot,-1)
-      val rPrevMapping = rRDDMap.getOrElse(point.rRDDSlot,-1)
-
-      if (lPrevMapping != -1 || rPrevMapping != -1){
-        if (lPrevMapping != -1){
-          val index = lPrevMapping
-          partialMappingTemp.update(point.rRDDID, rRDDMap + ((point.rRDDSlot,index)))
-        }
-
-        if (rPrevMapping != -1){
-          val index = rPrevMapping
-          partialMappingTemp.update(point.lRDDID, lRDDMap + ((point.lRDDSlot,index)))
-        }
-      } else {
-        partialMappingTemp.update(point.lRDDID, lRDDMap + ((point.lRDDSlot,curIndexTemp)))
-        partialMappingTemp.update(point.rRDDID, rRDDMap + ((point.rRDDSlot,curIndexTemp)))
-        curIndexTemp += 1
-      }
-
-      curIndexTemp}
-
-    partialMappingTemp.toList
-  }
-
-  //generate the composite schema
-  def generateCompositeSchema() = {
-    CompositeLogoSchema(schemas,intersectionMapping.map(f => KeyMapping(f)),name)
-  }
-
+  lazy val compositeSchema = new IntersectionCompositeLogoSchemaGenerator(logoRDDRefs.map(_.getSchema()), snapPoints) generate()
 
   @transient lazy val sc = SparkContext.getOrCreate()
   var coreId = 0
@@ -74,7 +34,6 @@ abstract class LogoPatternBuildLogicalStep(logoRDDRefs:List[LogoPatternBuildLogi
   //generate the new Pattern and add it to catalog, after generate the pattern is in F state
   def generateNewPattern():PatternLogoRDD
   def getSchema():LogoSchema
-
 
 }
 
@@ -113,7 +72,7 @@ class LogoComposite2PatternBuildLogicalStep(logoRDDRefs:List[LogoPatternBuildLog
     new Planned2HandlerGenerator(coreId) generate()
   }
 
-  lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs,snapPoints,handler)
+  lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs, compositeSchema, snapPoints,handler)
 
   override def generateLeafPhyiscal(): PatternLogoRDD = {
     leafLogoRef.generateNewPattern()
@@ -127,7 +86,7 @@ class LogoComposite2PatternBuildLogicalStep(logoRDDRefs:List[LogoPatternBuildLog
     new PatternLogoRDD(logoStep.performFetchJoin(sc), getSchema())
   }
 
-  override def getSchema(): LogoSchema = logoStep.generateCompositeSchema().toPlan2CompositeSchema(coreId)
+  override def getSchema(): LogoSchema = compositeSchema.toPlan2CompositeSchema(coreId)
 }
 
 

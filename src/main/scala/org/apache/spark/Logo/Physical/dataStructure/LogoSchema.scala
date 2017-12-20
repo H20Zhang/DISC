@@ -1,6 +1,6 @@
 package org.apache.spark.Logo.Physical.dataStructure
 
-import org.apache.spark.Logo.Physical.Builder.BlockBlockJoints
+import org.apache.spark.Logo.Physical.Builder.{BlockBlockJoints, SnapPoint}
 import org.apache.spark.Logo.Physical.Maker.PartitionerMaker
 import org.apache.spark.Logo.Physical.utlis._
 import org.apache.spark.Partitioner
@@ -342,6 +342,49 @@ class SimpleCompositeLogoSchemaGenerator(oldSchmeas:Seq[LogoSchema], intersectio
     keyMapBuffer.toList.map(_.toList).map(f => KeyMapping(f))
   }
 }
+
+class IntersectionCompositeLogoSchemaGenerator(oldSchmeas:Seq[LogoSchema], snapPoints:Seq[SnapPoint]) extends schemaGenerator {
+  lazy val schemas = oldSchmeas
+  lazy val intersectionMapping = generateIntersectionMapping()
+
+  //from the snapPoints generate the IntersectionMapping(define which two nodes mapping to the same new nodes)
+  def generateIntersectionMapping():List[Map[Int,Int]] = {
+    //    val totalRDDNum = snapPoints.flatMap(f => Iterator(f.lRDDID,f.rRDDID)).max
+    val partialMappingTemp = new Array[Map[Int,Int]](schemas.size).map(f => Map[Int,Int]())
+    snapPoints.foldLeft(0){(curIndex,point) =>
+      var curIndexTemp = curIndex
+      val lRDDMap = partialMappingTemp(point.lRDDID)
+      val rRDDMap = partialMappingTemp(point.rRDDID)
+      val lPrevMapping = lRDDMap.getOrElse(point.lRDDSlot,-1)
+      val rPrevMapping = rRDDMap.getOrElse(point.rRDDSlot,-1)
+
+      if (lPrevMapping != -1 || rPrevMapping != -1){
+        if (lPrevMapping != -1){
+          val index = lPrevMapping
+          partialMappingTemp.update(point.rRDDID, rRDDMap + ((point.rRDDSlot,index)))
+        }
+
+        if (rPrevMapping != -1){
+          val index = rPrevMapping
+          partialMappingTemp.update(point.lRDDID, lRDDMap + ((point.lRDDSlot,index)))
+        }
+      } else {
+        partialMappingTemp.update(point.lRDDID, lRDDMap + ((point.lRDDSlot,curIndexTemp)))
+        partialMappingTemp.update(point.rRDDID, rRDDMap + ((point.rRDDSlot,curIndexTemp)))
+        curIndexTemp += 1
+      }
+
+      curIndexTemp}
+
+    partialMappingTemp.toList
+  }
+
+  //generate the composite schema
+  def generate() = {
+    CompositeLogoSchema(schemas,intersectionMapping.map(f => KeyMapping(f)))
+  }
+}
+
 
 object LogoSchema{
   def apply(keySizeMap:KeyMapping,name:String=""): LogoSchema = {
