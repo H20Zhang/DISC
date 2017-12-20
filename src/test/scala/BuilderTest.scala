@@ -1,5 +1,5 @@
 import TestData.TestLogoRDDData
-import org.apache.spark.Logo.Physical.Builder.{Catalog, LogoBuildScriptOneStep, LogoRDDReference, SnapPoint}
+import org.apache.spark.Logo.Physical.Builder.{Catalog, LogoBuildPhyiscalStep, LogoRDD, SnapPoint}
 import org.apache.spark.Logo.Physical.dataStructure.{CompositeLogoSchema, CountLogo, LogoBlockRef, RowLogoBlock}
 import org.apache.spark.Logo.Physical.utlis.{SparkSingle, TestUtil}
 import org.apache.spark.rdd.RDD
@@ -25,7 +25,7 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
     //delete test
     Catalog.removeLogo("edge")
 
-    var ref2:LogoRDDReference = null
+    var ref2:LogoRDD = null
 
     try{
       ref2 = Catalog.getLogo("edge")
@@ -101,7 +101,7 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
 
     //logoScriptOneStep
     //Compiling Test
-    val oneStep = LogoBuildScriptOneStep(logoRDDRefs,snapPoints,handler,"Triangle")
+    val oneStep = LogoBuildPhyiscalStep(logoRDDRefs,snapPoints,handler,"Triangle")
 
     println("keymapping is:")
     println(oneStep.compositeSchema.keyMappings)

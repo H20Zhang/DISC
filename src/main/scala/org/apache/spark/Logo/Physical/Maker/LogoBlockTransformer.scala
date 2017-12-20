@@ -4,6 +4,8 @@ class LogoBlockTransformer {
 
 }
 
+
+//TODO
 /**
   * transform the ConcreteLogoBlock into KeyValueLogoBlock defined by KeyValueLogoSchema
   */

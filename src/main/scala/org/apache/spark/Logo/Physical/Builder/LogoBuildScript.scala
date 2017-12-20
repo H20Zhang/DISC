@@ -1,7 +1,7 @@
 package org.apache.spark.Logo.Physical.Builder
 
 import org.apache.spark.Logo.Physical.Joiner.{FetchJoinRDD, SubTask}
-import org.apache.spark.Logo.Physical.dataStructure._
+import org.apache.spark.Logo.Physical.dataStructure.{LogoBlockRef, _}
 import org.apache.spark.Logo.Physical.utlis.ListGenerator
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
@@ -36,6 +36,8 @@ case class SnapPoint(lRDDID:Int, lRDDSlot:Int, rRDDID:Int, rRDDSlot:Int)
   */
 case class BlockBlockJoints(coreBlockID:Int, leafBlockID:Int, coreJoints:Seq[Int], leafJoints:Seq[Int])
 
+
+//TODO should relocate composite schema generate part to logical part.
 /**
   * Represent one step in building an "LOGO" by specifying how logoRDD are snapped into each other
   *
@@ -43,7 +45,7 @@ case class BlockBlockJoints(coreBlockID:Int, leafBlockID:Int, coreJoints:Seq[Int
   * @param snapPoints how logo's are snapped to each other
   * @param handler how to handle the LogoBlock after the LogoBlocks are already snapped together by FetchJoin
   */
-case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints:List[SnapPoint], handler: (Seq[LogoBlockRef],CompositeLogoSchema) => LogoBlockRef, name:String="") extends LogoBuildScriptStep{
+case class LogoBuildPhyiscalStep(logoRDDRefs:List[LogoRDD], snapPoints:List[SnapPoint], handler: (Seq[LogoBlockRef],CompositeLogoSchema) => LogoBlockRef, name:String="") extends LogoBuildScriptStep{
 
   lazy val schemas = logoRDDRefs.map(_.schema)
   lazy val rdds = logoRDDRefs.map(_.logoRDD)
@@ -109,35 +111,5 @@ case class LogoBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints
   //generate the logoBlockRef and add it to catalog
   def generateLogoRef(sc:SparkContext) = ???
 }
-
-//TODO implement this class
-case class LogoPatternBuildScriptOneStep(logoRDDRefs:List[LogoRDDReference], snapPoints:List[SnapPoint]) extends LogoBuildScriptStep{
-
-
-  //method used by planner to set which LogoRDDReference is the core.
-  def setCoreID() = ???
-
-  //preprocessing the leaf RDD, if the leaf is not in J-state, then it will be in J-state
-  def leafProcess() = ???
-
-  //preprocessing the core RDD
-  def coreProcess() = ???
-
-  //generate the handler for underlying LogoBuildScriptOneStep
-  def handlerGenerate() = ???
-
-  //generate the new Pattern and add it to catalog, after generate the pattern is in F state
-  def generateNewPattern() = ???
-
-  // the generator for generating the handler for converting blocks into a planned2CompositeBlock.
-  class Planned2HandlerGenerator(){
-    def generate() = ???
-  }
-
-
-}
-
-
-
 
 

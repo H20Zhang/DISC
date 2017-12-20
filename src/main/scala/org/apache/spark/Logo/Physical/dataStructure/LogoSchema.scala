@@ -145,6 +145,10 @@ class CompositeLogoSchema(schema:LogoSchema,
     allPlan.map(f => newKeyToOldIndex(f))
   }
 
+  //TODO testing required
+  def toPlan2CompositeSchema(coreId:Int) = {
+    PlannedTwoCompositeLogoSchema(coreId,schema,oldSchemas,keyMappings)
+  }
 }
 
 
@@ -160,8 +164,6 @@ case class KeyValueLogoSchema(schema:LogoSchema, keys:Seq[Int]) extends LogoSche
 
   //get the keyMapping when building the composite block only for the value nodes.
   def valueKeyMapping(keyMapping:KeyMapping) = {
-
-
 
     ListSelector.selectElements(keyMapping.toListMapping(),value)
   }

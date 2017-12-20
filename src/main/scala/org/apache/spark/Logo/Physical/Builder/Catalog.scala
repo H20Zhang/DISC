@@ -11,9 +11,9 @@ import scala.reflect.ClassTag
   * LogoRDDReference records the RDD[LogoBlock] and its according schema
   */
 class Catalog {
-  val rddMap:mutable.Map[String,LogoRDDReference] = mutable.Map()
+  val rddMap:mutable.Map[String,LogoRDD] = mutable.Map()
 
-  def putLogo(name:String , rdd:LogoRDDReference): Unit ={
+  def putLogo(name:String , rdd:LogoRDD): Unit ={
     rddMap += ((name,rdd))
   }
 
@@ -30,7 +30,7 @@ class Catalog {
 object Catalog {
   lazy val _catalog = new Catalog
 
-  def putLogo(name:String , rdd:LogoRDDReference): Unit ={
+  def putLogo(name:String , rdd:LogoRDD): Unit ={
     _catalog.rddMap += ((name,rdd))
   }
 
@@ -46,28 +46,6 @@ object Catalog {
 
 
 
-//TODO actually logoRDD field should be removed it is generated through generate, before generate the logoRDD doesn't exist, LogoRDDReference is a placeholder.
-/**
-  * a reference to the logoRDD containing its actual rdd and its schema
-  */
-case class LogoRDDReference(logoRDD:RDD[LogoBlockRef], schema: LogoSchema, buildScriptStep: LogoBuildScriptStep){
-  def generate() = ???
-}
 
 
-//TODO finish this, the same case as LogoRDDReference
-case class PatternLogoRDDReference(patternRDD:RDD[LogoBlockRef], patternSchema: LogoSchema, buildScript:LogoPatternBuildScriptOneStep) extends LogoRDDReference(patternRDD,patternSchema,buildScript){
-
-  //prepare the Pattern Logo RDD for build operation.
-  def toSubPattern(keyMapping: KeyMapping):SubPatternLogoRDDReference = ???
-
-  //actually generate the patternRDD
-  def generate() = ???
-
-}
-
-
-case class SubPatternLogoRDDReference(patternLogoRDDReference:PatternLogoRDDReference, keyMapping:KeyMapping){
-
-}
 
