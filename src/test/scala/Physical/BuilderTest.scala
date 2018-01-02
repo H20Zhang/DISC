@@ -1,3 +1,5 @@
+package Physical
+
 import TestData.TestLogoRDDData
 import org.apache.spark.Logo.Physical.Builder.{Catalog, LogoBuildPhyiscalStep, SnapPoint}
 import org.apache.spark.Logo.Physical.dataStructure._
@@ -101,11 +103,11 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
     }
 
 
-    val compositeSchema = new IntersectionCompositeLogoSchemaGenerator(logoRDDRefs.map(_.schema), snapPoints) generate()
+    val compositeSchema = new IntersectionCompositeLogoSchemaBuilder(logoRDDRefs.map(_.schema), snapPoints) generate()
 
     //logoScriptOneStep
     //Compiling Test
-    val oneStep = LogoBuildPhyiscalStep(logoRDDRefs,compositeSchema,snapPoints,handler,"Triangle")
+    val oneStep = LogoBuildPhyiscalStep(logoRDDRefs,compositeSchema,handler,"Triangle")
 
     println("keymapping is:")
     println(oneStep.compositeSchema.keyMappings)

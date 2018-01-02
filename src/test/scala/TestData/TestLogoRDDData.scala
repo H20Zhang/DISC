@@ -1,6 +1,7 @@
 package TestData
 
 import org.apache.spark.Logo.Physical.Maker.SimpleRowLogoRDDMaker
+import org.apache.spark.Logo.Physical.dataStructure.{ConcreteLogoRDD, LogoBlockRef}
 import org.apache.spark.Logo.Physical.utlis.SparkSingle
 import org.apache.spark.rdd.RDD
 
@@ -17,6 +18,11 @@ object TestLogoRDDData {
 //  val dataSource = "/Users/zhanghao/Downloads/as-skitter.txt"
 
 
+
+  def debugConcreteEdgeLogoRDD = {
+    val (edgeRDD,schema) = debugEdgeLogoRDD
+    new ConcreteLogoRDD(edgeRDD.asInstanceOf[RDD[LogoBlockRef]], schema)
+  }
 
   def debugEdgeLogoRDD = {
 

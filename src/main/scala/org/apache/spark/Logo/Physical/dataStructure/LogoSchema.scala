@@ -69,7 +69,7 @@ class LogoSchema (val keySizeMap:KeyMapping, val name:String = "") extends Seria
   * @param oldSchemas old schema from which this new schema is dereived
   * @param keyMappings key mapping from old schemas to new schemas
   */
-class CompositeLogoSchema(schema:LogoSchema,
+class CompositeLogoSchema(val schema:LogoSchema,
                           oldSchemas:Seq[LogoSchema],
                           val keyMappings:Seq[KeyMapping]) extends LogoSchema(schema.keySizeMap){
 
@@ -149,6 +149,8 @@ class CompositeLogoSchema(schema:LogoSchema,
   def toPlan2CompositeSchema(coreId:Int) = {
     PlannedTwoCompositeLogoSchema(coreId,schema,oldSchemas,keyMappings)
   }
+
+
 }
 
 
@@ -176,14 +178,14 @@ case class KeyValueLogoSchema(schema:LogoSchema, keys:Seq[Int]) extends LogoSche
   * The composite LogoSchema after the optimizer plan the building process and determine the core and leafs.
   * In this version, we assume that there is only one core and one leaf in building process. So there is no need for calculating LeafLeafJointsForest.
   * @param coreId the id of the coreBlock
-  * @param schema new schema of this composite schema
+  * @param _schema new schema of this composite schema
   * @param oldSchemas old schema from which this new schema is dereived
   * @param _keyMappings key mapping from old schemas to new schemas
   */
 case class PlannedTwoCompositeLogoSchema(coreId:Int,
-                                         schema:LogoSchema,
+                                         _schema:LogoSchema,
                                          oldSchemas:Seq[LogoSchema],
-                                         _keyMappings:Seq[KeyMapping])  extends CompositeLogoSchema(schema, oldSchemas, _keyMappings){
+                                         _keyMappings:Seq[KeyMapping])  extends CompositeLogoSchema(_schema, oldSchemas, _keyMappings){
 
 
 
@@ -303,14 +305,18 @@ abstract class CompositeLogoSchemaGenerator(val oldSchemas:Seq[LogoSchema], val 
 
 
 
-//TODO need to retest, what will happen if the we specify all keys rather than just intersectionKey.
+
+class IdentityCompositeLogoSchemaGenerator(oldSchemas:Seq[LogoSchema], keyMapping:Seq[KeyMapping]) extends CompositeLogoSchemaGenerator(oldSchemas, keyMapping){
+  override def keyMapGenerate() = keyMapping
+}
+
 //must ensure that intersectionKey in IntersectionKeyMapping take low number new key first.
 /**
   *
-  * @param oldSchmeas old schema from which this new schema is dereived
+  * @param oldSchemas old schema from which this new schema is dereived
   * @param intersectionKeyMappings key mapping from old schemas to new schemas
   */
-class SimpleCompositeLogoSchemaGenerator(oldSchmeas:Seq[LogoSchema], intersectionKeyMappings:Seq[KeyMapping],name:String="") extends CompositeLogoSchemaGenerator(oldSchmeas, intersectionKeyMappings){
+class IntersectCompositeLogoSchemaGenerator(oldSchemas:Seq[LogoSchema], intersectionKeyMappings:Seq[KeyMapping], name:String="") extends CompositeLogoSchemaGenerator(oldSchemas, intersectionKeyMappings){
   override def keyMapGenerate() = {
     val oldKeys = oldSchemas.map(_.keyCol)
     val keyMapBuffer = new Array[Array[Int]](oldSchemas.length).map(f => new Array[Int](0)).zipWithIndex.map { f =>
@@ -343,7 +349,7 @@ class SimpleCompositeLogoSchemaGenerator(oldSchmeas:Seq[LogoSchema], intersectio
   }
 }
 
-class IntersectionCompositeLogoSchemaGenerator(oldSchmeas:Seq[LogoSchema], snapPoints:Seq[SnapPoint]) extends schemaGenerator {
+class IntersectionCompositeLogoSchemaBuilder(oldSchmeas:Seq[LogoSchema], snapPoints:Seq[SnapPoint]) extends schemaGenerator {
   lazy val schemas = oldSchmeas
   lazy val intersectionMapping = generateIntersectionMapping()
 
@@ -385,6 +391,15 @@ class IntersectionCompositeLogoSchemaGenerator(oldSchmeas:Seq[LogoSchema], snapP
   }
 }
 
+class subKeyMappingCompositeLogoSchemaBuilder(oldSchmeas:Seq[LogoSchema], keyMapping:Seq[KeyMapping]) extends schemaGenerator {
+  lazy val schemas = oldSchmeas
+
+  //generate the composite schema
+  def generate() = {
+    CompositeLogoSchema.identityCompositeSchema(schemas,keyMapping)
+  }
+}
+
 
 object LogoSchema{
   def apply(keySizeMap:KeyMapping,name:String=""): LogoSchema = {
@@ -394,7 +409,11 @@ object LogoSchema{
 
 object CompositeLogoSchema{
   def apply(oldSchmeas:Seq[LogoSchema], IntersectionKeyMappings:Seq[KeyMapping],name:String="") = {
-    new SimpleCompositeLogoSchemaGenerator(oldSchmeas,IntersectionKeyMappings).generate()
+    new IntersectCompositeLogoSchemaGenerator(oldSchmeas,IntersectionKeyMappings).generate()
+  }
+
+  def identityCompositeSchema(oldSchmeas:Seq[LogoSchema], keyMappings:Seq[KeyMapping],name:String="") = {
+    new IdentityCompositeLogoSchemaGenerator(oldSchmeas,keyMappings).generate()
   }
 }
 

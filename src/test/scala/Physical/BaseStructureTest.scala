@@ -1,3 +1,5 @@
+package Physical
+
 import org.apache.spark.Logo.Physical.dataStructure.{KeyMapping, PatternInstance}
 import org.apache.spark.Logo.Physical.utlis.TestUtil
 import org.scalatest.FunSuite

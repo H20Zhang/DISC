@@ -1,8 +1,7 @@
-package org.apache.spark.Logo.Physical.dataStructure
+package Physical
 
-import org.apache.spark.Logo.Physical.Joiner.multiJoin.StarJoin
+import org.apache.spark.Logo.Physical.dataStructure._
 import org.apache.spark.Logo.Physical.utlis.TestUtil
-import org.apache.spark.sql.SparkSession
 import org.scalatest.FunSuite
 
 class dataStructureTest extends FunSuite {

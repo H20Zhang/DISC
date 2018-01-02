@@ -1,9 +1,8 @@
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark.HashPartitioner
+package Physical
+
 import org.apache.spark.Logo.Physical.Maker.{PartitionerMaker, SimpleRowLogoRDDMaker, rowBlockGenerator}
 import org.apache.spark.Logo.Physical.dataStructure.{KeyMapping, LogoSchema}
 import org.apache.spark.Logo.Physical.utlis.{SparkSingle, TestUtil}
-import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class BlockMakerTest extends FunSuite with BeforeAndAfterAll{

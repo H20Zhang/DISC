@@ -1,3 +1,5 @@
+package Physical
+
 import org.apache.spark.Logo.Physical.utlis._
 import org.scalatest.FunSuite
 
@@ -95,7 +97,6 @@ class UtilsTest extends FunSuite{
   }
 
   test("KeyValueMap"){
-    import org.apache.spark.Logo.Physical.TypeRef.Pattern
     val list1 = List(1,2,3,4)
     val list2 = List(2,3,4,5)
     val list3 = List(3,4,5,6)

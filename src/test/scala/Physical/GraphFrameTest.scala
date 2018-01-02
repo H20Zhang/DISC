@@ -1,9 +1,6 @@
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.{Column, DataFrame, SparkSession}
-import org.graphframes.GraphFrame
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FunSuite}
-import org.graphframes.examples
-import org.apache.spark.sql.functions.{col, lit, when}
+package Physical
+
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class GraphFrameTest extends FunSuite with BeforeAndAfterAll{
 

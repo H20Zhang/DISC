@@ -1,4 +1,6 @@
 package org.apache.spark.Logo.Physical.dataStructure
+import java.io.{Externalizable, ObjectInput, ObjectOutput}
+
 import org.apache.spark.Logo.Physical.utlis.{ListGenerator, ListSelector, MapBuilder}
 import org.apache.spark.graphx.VertexId
 
@@ -7,7 +9,7 @@ import scala.reflect.ClassTag
 
 
 
-trait LogoBlockRef
+trait LogoBlockRef extends Serializable
 
 /**
   * Convinent method for ouputting the count result, for testing
@@ -16,7 +18,9 @@ trait LogoBlockRef
 class CountLogo(val count:Long) extends LogoBlockRef{}
 class DebugLogo(val message:String, val value:Long = 0L) extends LogoBlockRef{}
 
-abstract class LogoBlock[A:ClassTag](val schema: LogoSchema, val metaData: LogoMetaData, val rawData:A) extends LogoBlockRef with Serializable{}
+class LogoBlock[A:ClassTag](val schema: LogoSchema, val metaData: LogoMetaData, val rawData:A) extends LogoBlockRef{
+
+}
 
 
 class RowLogoBlock[A:ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawData:Seq[A]) extends LogoBlock(schema, metaData, rawData){}

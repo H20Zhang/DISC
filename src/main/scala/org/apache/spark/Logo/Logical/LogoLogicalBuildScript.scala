@@ -9,10 +9,18 @@ class LogoLogicalBuildScript {
 
 }
 
-//TODO implement this class
-abstract class LogoPatternBuildLogicalStep(logoRDDRefs:List[LogoPatternBuildLogicalStep], snapPoints:List[SnapPoint], name:String="") extends LogoBuildScriptStep{
+//TODO test this on 1/3
 
-  lazy val compositeSchema = new IntersectionCompositeLogoSchemaGenerator(logoRDDRefs.map(_.getSchema()), snapPoints) generate()
+//TODO implement this class, this class use as the start point of the whole framework
+/**
+  * Represent a logical step in building a bigger LogoRDD
+  * @param logoRDDRefs logical logoRDD used to build this LogoRDD
+  * @param keyMapping the keyMapping between the old Logo and new Logo
+  * @param name
+  */
+abstract class LogoPatternBuildLogicalStep(logoRDDRefs:Seq[LogoPatternBuildLogicalStep], keyMapping:Seq[KeyMapping], name:String="") extends LogoBuildScriptStep{
+
+  lazy val compositeSchema = new subKeyMappingCompositeLogoSchemaBuilder(logoRDDRefs.map(_.getSchema()), keyMapping) generate()
 
   @transient lazy val sc = SparkContext.getOrCreate()
   var coreId = 0
@@ -32,8 +40,13 @@ abstract class LogoPatternBuildLogicalStep(logoRDDRefs:List[LogoPatternBuildLogi
   def generateCorePhyiscal():PatternLogoRDD
 
   //generate the new Pattern and add it to catalog, after generate the pattern is in F state
-  def generateNewPattern():PatternLogoRDD
+  def generateNewPatternFState():PatternLogoRDD
+  def generateNewPatternJState():ConcreteLogoRDD
   def getSchema():LogoSchema
+
+  def toLogoRDDReference() = {
+    new PatternLogoRDDReference(getSchema(),this)
+  }
 
 }
 
@@ -54,8 +67,9 @@ class Planned2HandlerGenerator(coreId:Int){
   }
 }
 
-class LogoComposite2PatternBuildLogicalStep(logoRDDRefs:List[LogoPatternBuildLogicalStep], snapPoints:List[SnapPoint]) extends LogoPatternBuildLogicalStep(logoRDDRefs,snapPoints) {
+class LogoComposite2PatternBuildLogicalStep(logoRDDRefs:Seq[LogoPatternBuildLogicalStep], keyMapping:Seq[KeyMapping]) extends LogoPatternBuildLogicalStep(logoRDDRefs,keyMapping) {
 
+  lazy val schema = getSchema()
   lazy val coreLogoRef = logoRDDRefs(coreId)
   lazy val leafLogoRef = coreId match {
     case 0 => logoRDDRefs(1)
@@ -72,27 +86,31 @@ class LogoComposite2PatternBuildLogicalStep(logoRDDRefs:List[LogoPatternBuildLog
     new Planned2HandlerGenerator(coreId) generate()
   }
 
-  lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs, compositeSchema, snapPoints,handler)
+  lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs, compositeSchema,handler)
 
   override def generateLeafPhyiscal(): PatternLogoRDD = {
-    leafLogoRef.generateNewPattern()
+    leafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreLeafJoins().leafJoints)
   }
 
   override def generateCorePhyiscal(): PatternLogoRDD = {
-    coreLogoRef.generateNewPattern()
+    coreLogoRef.generateNewPatternFState()
   }
 
-  override def generateNewPattern(): PatternLogoRDD = {
+  override def generateNewPatternFState(): PatternLogoRDD = {
     new PatternLogoRDD(logoStep.performFetchJoin(sc), getSchema())
   }
 
-  override def getSchema(): LogoSchema = compositeSchema.toPlan2CompositeSchema(coreId)
+  override def getSchema(): PlannedTwoCompositeLogoSchema = compositeSchema.toPlan2CompositeSchema(coreId)
+
+  override def generateNewPatternJState():ConcreteLogoRDD = {
+    generateNewPatternFState().toConcretePatternLogoRDD
+  }
 }
 
 
-class LogoEdgePatternBuildLogicalStep(edgeLogoRDD:PatternLogoRDD) extends LogoPatternBuildLogicalStep(List(),List()){
+class LogoEdgePatternBuildLogicalStep(edgeLogoRDD:ConcreteLogoRDD) extends LogoPatternBuildLogicalStep(List(),List()){
 
-  override def generateNewPattern(): PatternLogoRDD = {
+  override def generateNewPatternFState(): PatternLogoRDD = {
     edgeLogoRDD
   }
 
@@ -103,6 +121,10 @@ class LogoEdgePatternBuildLogicalStep(edgeLogoRDD:PatternLogoRDD) extends LogoPa
   }
 
   override def generateCorePhyiscal():PatternLogoRDD = {
+    edgeLogoRDD
+  }
+
+  override def generateNewPatternJState() = {
     edgeLogoRDD
   }
 }

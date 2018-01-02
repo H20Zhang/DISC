@@ -8,3 +8,6 @@ package org.apache.spark.Logo.Physical.dataStructure
   */
 case class LogoMetaData (color:Seq[Int], numberOfParts:Long) extends Serializable
 
+
+//TODO this part although currently is not used, it will be used later.
+class CompositeMetaData(color:Seq[Int], subColors:Seq[Seq[Int]], subNumberOfParts:Seq[Long]) extends LogoMetaData(color,subNumberOfParts(0))

@@ -51,6 +51,10 @@ class KeyMapping(val keyMapping:Map[Int,Int]) extends Serializable {
       t.keyMapping.toSeq.sortBy(_._1).zip(keyMapping.toSeq.sortBy(_._1)).forall(p => p._1 == p._2)
     case _ => false
   }
+
+  override def toString: String = {
+    toList().toString()
+  }
 }
 
 class PatternInstance(val pattern:Seq[Int]) extends Serializable {
