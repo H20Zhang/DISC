@@ -45,13 +45,6 @@ class CompressedLogoBlock[A:ClassTag, B:ClassTag](schema: LogoSchema, metaData: 
   * @param rawData rawData for the block
   */
 abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMetaData, rawData:A) extends LogoBlock(schema, metaData, rawData){
-  //TODO finish basic operation
-//  def map() = ???
-//  def filter() = ???
-//  def foldLeft() = ???
-//  def group() = ???
-
-
 
   //TODO testing required for below
   def buildIndex(schema:KeyValueLogoSchema):Map[KeyPatternInstance, Seq[ValuePatternInstance]] = {

@@ -17,7 +17,7 @@ class SlotPartitioner(val p1: Int, val slotNum:Int, var partitioner: Partitioner
   override def numPartitions = p1
 
   override def getPartition(key: Any) = key match {
-    case listKey:List[Any] => {
+    case listKey:Seq[Any] => {
       if (listKey.length < slotNum+1){
         throw new Exception("slotNum must be smaller or equal to the total slots of the key")
       }
@@ -102,7 +102,7 @@ class CompositeParitioner(val partitioners:Seq[SlotPartitioner], val sizeLimits:
 
 
   override def getPartition(key: Any) = key match {
-    case listKey:List[Any] => {
+    case listKey:Seq[Any] => {
 //      println(partitioners.map(f => f.getPartition(key)))
 //      println(converter.parts)
       sizeLimitsMap match {

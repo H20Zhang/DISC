@@ -16,6 +16,7 @@ class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSc
   def toKeyValuePatternLogoRDD(key:Seq[Int]):KeyValueLogoRDD = {
 
     val toKeyValueTransformer = new ToKeyValueTransformer
+    toKeyValueTransformer.setKey(key)
     val keyValueRDDData = toKeyValueTransformer.transform(patternRDD)
     val keyValueSchema = KeyValueLogoSchema(patternSchema,key)
     new KeyValueLogoRDD(keyValueRDDData,keyValueSchema)
@@ -34,7 +35,7 @@ class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSc
   }
 }
 
-class KeyValueLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema: KeyValueLogoSchema) extends PatternLogoRDD(patternRDD,patternSchema){
+class KeyValueLogoRDD(patternRDD:RDD[LogoBlockRef], override val patternSchema: KeyValueLogoSchema) extends PatternLogoRDD(patternRDD,patternSchema){
 
 }
 

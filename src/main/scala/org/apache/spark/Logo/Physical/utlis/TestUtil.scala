@@ -9,8 +9,8 @@ object TestUtil {
 
     if (res == false){
 
-      println(s"List String Equal Fail: ${msg}")
-      listToVerify.foreach(println)
+//      println(s"List String Equal Fail: ${msg}")
+//      listToVerify.foreach(println)
     }
 
     res

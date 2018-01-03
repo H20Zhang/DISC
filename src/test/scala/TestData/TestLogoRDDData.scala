@@ -1,7 +1,7 @@
 package TestData
 
 import org.apache.spark.Logo.Physical.Maker.SimpleRowLogoRDDMaker
-import org.apache.spark.Logo.Physical.dataStructure.{ConcreteLogoRDD, LogoBlockRef}
+import org.apache.spark.Logo.Physical.dataStructure.{ConcreteLogoRDD, EdgePatternLogoBlock, LogoBlockRef, PatternInstance}
 import org.apache.spark.Logo.Physical.utlis.SparkSingle
 import org.apache.spark.rdd.RDD
 
@@ -19,12 +19,15 @@ object TestLogoRDDData {
 
 
 
-  def debugConcreteEdgeLogoRDD = {
-    val (edgeRDD,schema) = debugEdgeLogoRDD
-    new ConcreteLogoRDD(edgeRDD.asInstanceOf[RDD[LogoBlockRef]], schema)
+  def debugEdgePatternLogoRDD = {
+    val (edgeRDD,schema) = debugEdgeRowLogoRDD
+
+
+    val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema,f.metaData,f.rawData.map(t => PatternInstance(t._1))))
+    new ConcreteLogoRDD(edgePatternLogoRDD.asInstanceOf[RDD[LogoBlockRef]], schema)
   }
 
-  def debugEdgeLogoRDD = {
+  def debugEdgeRowLogoRDD = {
 
     val data = sc.textFile(dataSource)
 
@@ -36,13 +39,13 @@ object TestLogoRDDData {
           res = (splittedString(0).toInt,splittedString(1).toInt)
         }
         res
-    }.filter(f => f != null).flatMap(f => Iterable(f,f.swap)).distinct().map(f => (Seq(f._1,f._2),1))
+    }.filter(f => f != null).flatMap(f => Iterable(f,f.swap)).distinct().map(f => (Array(f._1,f._2),1)).map(f => (f._1.toSeq, f._2))
 
 
 
 
 //    val rawRDD = sc.parallelize(List.range(0,100)).map(f => (Seq(f,f),1))
-    edgeLogoRDD(rawRDD)
+    edgeRowLogoRDD(rawRDD)
   }
 
 
@@ -50,7 +53,7 @@ object TestLogoRDDData {
     *
     * @return a edgeLogoRDD, whose content is specified by dataSource in TestLogoRDDData
     */
-  def edgeLogoRDD(rawRDD: RDD[(Seq[Int], Int)]) = {
+  def edgeRowLogoRDD(rawRDD: RDD[(Seq[Int], Int)]) = {
 
     val edges = List((0,1))
     val keySizeMap = Map((0,3),(1,3))
