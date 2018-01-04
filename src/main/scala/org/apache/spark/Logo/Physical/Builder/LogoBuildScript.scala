@@ -44,7 +44,7 @@ case class BlockBlockJoints(coreBlockID:Int, leafBlockID:Int, coreJoints:Seq[Int
   * @param logoRDDRefs logoRDDs used to build the new logo
   * @param handler how to handle the LogoBlock after the LogoBlocks are already snapped together by FetchJoin
   */
-case class LogoBuildPhyiscalStep(logoRDDRefs:Seq[LogoRDD], schema:CompositeLogoSchema, handler: (Seq[LogoBlockRef],CompositeLogoSchema) => LogoBlockRef, name:String="") extends LogoBuildScriptStep{
+case class LogoBuildPhyiscalStep(logoRDDRefs:Seq[LogoRDD], schema:CompositeLogoSchema, handler: (Seq[LogoBlockRef],CompositeLogoSchema,Int) => LogoBlockRef, name:String="") extends LogoBuildScriptStep{
 
   lazy val schemas = logoRDDRefs.map(_.schema)
   lazy val rdds = logoRDDRefs.map(_.logoRDD)

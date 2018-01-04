@@ -28,32 +28,37 @@ class ToKeyValueTransformer extends LogoBlockTransformer{
   override def transform(rdd: RDD[LogoBlockRef]):RDD[LogoBlockRef] = {
 
     require(key != null, "should set key before calling transform")
-    rdd.mapPartitions({
+    val resRDD = rdd.mapPartitions({
       it =>
 
         val block = it.next()
         it.hasNext
 
         val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
-        Iterator(patternBlock.toKeyValueLogoBlock(key))
+        Iterator(patternBlock.toKeyValueLogoBlock(key).asInstanceOf[LogoBlockRef])
     },true)
+
+    resRDD.cache()
+    resRDD.count()
+    resRDD
   }
 }
 
 class ToConcreteTransformer extends LogoBlockTransformer{
   override def transform(rdd: RDD[LogoBlockRef]):RDD[LogoBlockRef] = {
 
-    rdd.mapPartitions({
+    val resRDD = rdd.mapPartitions({
       it =>
         val block = it.next()
         it.hasNext
 
         val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
-        Iterator(patternBlock.toConcreteLogoBlock)
-
-
-
+        Iterator(patternBlock.toConcreteLogoBlock.asInstanceOf[LogoBlockRef])
     },true)
+
+    resRDD.cache()
+    resRDD.count()
+    resRDD
   }
 }
 

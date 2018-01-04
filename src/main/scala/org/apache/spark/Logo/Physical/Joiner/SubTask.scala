@@ -4,11 +4,13 @@ import java.io.{IOException, ObjectOutputStream}
 
 import org.apache.spark.Logo.Physical.dataStructure.{CompositeLogoSchema, LogoBlockRef, LogoSchema}
 import org.apache.spark.Logo.Physical.utlis.ListGenerator
-import org.apache.spark.{Partition, SparkEnv, TaskContext}
+import org.apache.spark.{NarrowDependency, Partition, SparkEnv, TaskContext}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.scheduler.TaskLocation
-import org.apache.spark.storage.{BlockId, RDDBlockId}
+import org.apache.spark.storage.{BlockId, RDDBlockId, StorageLevel}
 import org.apache.spark.util.Utils
+
+import scala.collection.mutable.HashSet
 
 
 /**
@@ -61,6 +63,8 @@ class SubTaskPartition(
     //which can result error.
 
     //TODO this part is very trick, be careful, might need to refactor
+
+
     //find all blocks location using blockManager.master
     if (prefs.flatten.distinct.forall(f => f == "")){
       val sparkEnv = SparkEnv.get
@@ -68,7 +72,12 @@ class SubTaskPartition(
       prefs = subPartitions.zipWithIndex.map(_.swap).map{f =>
         val blockId = RDDBlockId(rdds(f._1).id,rdds(f._1).partitions(f._2).index)
         blockManagerMaster.getLocations(blockId).map(f => TaskLocation(f.host,f.executorId).toString)
+
       }
+    }
+
+    if(prefs.flatten.distinct.size == 0){
+
     }
 
     val exactMatchLocations = prefs.reduce((x, y) => x.intersect(y))
@@ -77,6 +86,60 @@ class SubTaskPartition(
     locs
   }
 
+  def findCachedLocation(): Unit ={
+
+  }
+
+
+//  def getCacheLocs(rdd: RDD[_]): IndexedSeq[Seq[TaskLocation]] = {
+//    val sparkEnv = SparkEnv.get
+//    val blockManagerMaster = sparkEnv.blockManager.master
+//    val prefs = subPartitions.zipWithIndex.map(_.swap).map{f =>
+//      val blockId = RDDBlockId(rdds(f._1).id,rdds(f._1).partitions(f._2).index)
+//      blockManagerMaster.getLocations(blockId).map(f => TaskLocation(f.host,f.executorId))
+//
+//    }
+//    prefs.toIndexedSeq
+//  }
+//
+//  private def getPreferredLocsInternal(
+//                                        rdd: RDD[_],
+//                                        partition: Int,
+//                                        visited: HashSet[(RDD[_], Int)]): Seq[TaskLocation] = {
+//    // If the partition has already been visited, no need to re-visit.
+//    // This avoids exponential path exploration.  SPARK-695
+//    if (!visited.add((rdd, partition))) {
+//      // Nil has already been returned for previously visited partitions.
+//      return Nil
+//    }
+//    // If the partition is cached, return the cache locations
+//    val cached = getCacheLocs(rdd)(partition)
+//    if (cached.nonEmpty) {
+//      return cached
+//    }
+//    // If the RDD has some placement preferences (as is the case for input RDDs), get those
+//    val rddPrefs = rdd.preferredLocations(rdd.partitions(partition)).toList
+//    if (rddPrefs.nonEmpty) {
+//      return rddPrefs.map(TaskLocation(_))
+//    }
+//
+//    // If the RDD has narrow dependencies, pick the first partition of the first narrow dependency
+//    // that has any placement preferences. Ideally we would choose based on transfer sizes,
+//    // but this will do for now.
+//    rdd.dependencies.foreach {
+//      case n: NarrowDependency[_] =>
+//        for (inPart <- n.getParents(partition)) {
+//          val locs = getPreferredLocsInternal(n.rdd, inPart, visited)
+//          if (locs != Nil) {
+//            return locs
+//          }
+//        }
+//
+//      case _ =>
+//    }
+//
+//    Nil
+//  }
 
   @throws(classOf[IOException])
   private def writeObject(oos: ObjectOutputStream): Unit = Utils.tryOrIOException {

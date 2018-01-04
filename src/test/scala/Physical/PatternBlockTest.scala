@@ -16,7 +16,7 @@ class PatternBlockTest extends FunSuite{
     val edgeBlock = TestPatternBlockData.edgeBlock.toKeyValueLogoBlock(Seq(0))
     val value = edgeBlock.getValue(KeyPatternInstance(Seq(1)))
     assert(
-      TestUtil.listEqual(value,
+      TestUtil.listEqual(value.get,
         Seq.fill(10)(ValuePatternInstance(Seq(2)))))
   }
 

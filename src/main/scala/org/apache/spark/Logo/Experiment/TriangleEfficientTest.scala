@@ -135,7 +135,7 @@ object TriangleEfficientTest{
     )
 
 
-    val handler = (blocks:Seq[LogoBlockRef], schema:CompositeLogoSchema) => {
+    val handler = (blocks:Seq[LogoBlockRef], schema:CompositeLogoSchema, index:Int) => {
 
 
       val logger = Logger.getRootLogger

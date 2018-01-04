@@ -117,7 +117,28 @@ class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData
   def valueMapping(keyMapping:KeyMapping)= KeyMapping(schema.valueKeyMapping(keyMapping))
 
   //get the values from the key in KeyValuePatternLogoBlock
-  def getValue(key:KeyPatternInstance) = rawData(key.asInstanceOf[KeyPatternInstance])
+  def getValue(key:KeyPatternInstance) ={
+    val res = rawData.contains(key.asInstanceOf[KeyPatternInstance]) match {
+      case true => Some(rawData(key.asInstanceOf[KeyPatternInstance]))
+      case false => None
+    }
+
+
+    if (res.isDefined){
+
+      val x = 1
+      val y = 2
+
+    }else{
+      val x = 1
+      val y = 2
+    }
+
+    res
+  }
+
+
+
 
   //TODO this part is wrong, it is only just a temporary fix
   override def iterator() = rawData.toSeq.flatMap(f => f._2).iterator
@@ -141,8 +162,16 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
 
   //generate the leaf instance grow from this core, actually the Iterator is just a wrapper the leafs are concrefied
   //the intersection node is not included in the returned iterator.
-  def genereateLeafsNode(coreInstance:PatternInstance):Iterator[PatternInstance] = leafsBlock.
-    getValue(coreInstance.subPatterns(coreLeafJoints.leafJoints).toKeyPatternInstance()).toIterator
+  def genereateLeafsNode(coreInstance:PatternInstance):Iterator[PatternInstance] = {
+
+    val optValues = leafsBlock.
+      getValue(coreInstance.subPatterns(coreLeafJoints.coreJoints).toKeyPatternInstance())
+
+      optValues match {
+        case Some(values) => values.toIterator
+        case _ => null
+      }
+  }
 
   //assmeble the core and leafs instance into a single instance
   //TODO this method has some bug
@@ -164,14 +193,16 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
     override def hasNext: Boolean = {
 
       if (leafsIterator == null || !leafsIterator.hasNext){
-        if (!coreIterator.hasNext){
-          return false
-        } else{
-          leafsIterator = genereateLeafsNode(coreIterator.next())
-          currentCore = coreIterator.next()
+          do {
+            if (coreIterator.hasNext){
+              currentCore = coreIterator.next()
+            }else{
+              return false
+            }
+            leafsIterator = genereateLeafsNode(currentCore)
+          } while (leafsIterator == null)
         }
-      }
-List
+
       return true
     }
 

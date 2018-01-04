@@ -11,7 +11,7 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
 
   test("catalog"){
 
-    val (edgeLogoRDD,schema) = TestLogoRDDData.debugEdgeRowLogoRDD
+    val (edgeLogoRDD,schema) = TestLogoRDDData.EdgeRowLogoRDD
 
     val ref = new LogoRDD(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
 
@@ -43,7 +43,7 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
   test("triangleCounting"){
     val sc = SparkSingle.getSparkContext()
 
-    val (edgeLogoRDD,schema) = TestLogoRDDData.debugEdgeRowLogoRDD
+    val (edgeLogoRDD,schema) = TestLogoRDDData.EdgeRowLogoRDD
 
     val edgeRef0 = new LogoRDD(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
     val edgeRef1 = new LogoRDD(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
@@ -57,7 +57,7 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
     )
 
 
-    val handler = (blocks:Seq[LogoBlockRef], schema:CompositeLogoSchema) => {
+    val handler = (blocks:Seq[LogoBlockRef], schema:CompositeLogoSchema, index:Int) => {
 
       val edgeBlock0 = blocks(0).asInstanceOf[RowLogoBlock[(Seq[Int],Int)]]
       val edgeBlock1 = blocks(1).asInstanceOf[RowLogoBlock[(Seq[Int],Int)]]

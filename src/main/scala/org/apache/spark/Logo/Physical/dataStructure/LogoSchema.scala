@@ -23,7 +23,7 @@ KeyValueLogoSchema
   * @note notice key must start from zero. and key cols are consecutive
   * @param keySizeMap partition size for each key slot
   */
-class LogoSchema (val keySizeMap:KeyMapping, val name:String = "") extends Serializable{
+class LogoSchema (val keySizeMap:KeyMapping, val name:String = "Schema") extends Serializable{
 
   assert(keySizeMap.isFullRank(), "keySizeMaping must be full rank")
 
@@ -71,7 +71,7 @@ class LogoSchema (val keySizeMap:KeyMapping, val name:String = "") extends Seria
   */
 class CompositeLogoSchema(val schema:LogoSchema,
                           oldSchemas:Seq[LogoSchema],
-                          val keyMappings:Seq[KeyMapping]) extends LogoSchema(schema.keySizeMap){
+                          val keyMappings:Seq[KeyMapping]) extends LogoSchema(schema.keySizeMap, "CompositeSchema"){
 
   @transient lazy val reverseKeyMapping = keyMappings.map(f => f.toReverseMapping())
 

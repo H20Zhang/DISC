@@ -51,15 +51,15 @@ abstract class LogoPatternBuildLogicalStep(logoRDDRefs:Seq[LogoPatternBuildLogic
 }
 
 // the generator for generating the handler for converting blocks into a planned2CompositeBlock.
-class Planned2HandlerGenerator(coreId:Int){
-  def generate():(Seq[LogoBlockRef],CompositeLogoSchema) => LogoBlockRef = {
-    (blocks,schema) =>
+class Planned2HandlerGenerator(coreId:Int) extends Serializable {
+  def generate():(Seq[LogoBlockRef],CompositeLogoSchema,Int) => LogoBlockRef = {
+    (blocks,schema,index) =>
 
       val planned2CompositeSchema = schema.toPlan2CompositeSchema(coreId)
       val subBlocks = blocks.asInstanceOf[Seq[PatternLogoBlock[_]]]
 
-      //this place needs to implement later, although currently it has no use.
-      val metaData = LogoMetaData(Seq(2,1,2),10)
+      //TODO this place needs to implement later, although currently it has no use.
+      val metaData = LogoMetaData(schema.IndexToKey(index),10)
 
       val planned2CompositeLogoBlock = new CompositeTwoPatternLogoBlock(planned2CompositeSchema,metaData, subBlocks)
 
