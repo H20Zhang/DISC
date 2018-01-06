@@ -34,7 +34,7 @@ case class SnapPoint(lRDDID:Int, lRDDSlot:Int, rRDDID:Int, rRDDSlot:Int)
   * @param coreJoints the joints of the coreBlock
   * @param leafJoints the joints of the leafBlock
   */
-case class BlockBlockJoints(coreBlockID:Int, leafBlockID:Int, coreJoints:Seq[Int], leafJoints:Seq[Int])
+case class BlockBlockJoints(coreBlockID:Int, leafBlockID:Int, coreJoints:Set[Int], leafJoints:Set[Int])
 
 
 //TODO should relocate composite schema generate part to logical part.

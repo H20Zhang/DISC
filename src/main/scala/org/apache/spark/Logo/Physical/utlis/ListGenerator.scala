@@ -1,6 +1,6 @@
 package org.apache.spark.Logo.Physical.utlis
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.reflect.ClassTag
 
 object ListGenerator {
@@ -14,8 +14,8 @@ object ListGenerator {
     * @return a list of length "size" filled with element "ele"
     */
   def fillList[T:ClassTag](ele:T, size:Int) = {
-    val list = new Array[T](size).toList
-    list.map(f => ele)
+    val list = new Array[T](size)
+    list.map(f => ele).toSeq
   }
 
 
@@ -72,8 +72,14 @@ object ListGenerator {
 
   def fillListIntoTargetList(list:Seq[Int], totalSlot:Int, slotMapping:Seq[Int], targetList:Seq[Int]) = {
     val resultList = targetList.toArray
-    slotMapping.zipWithIndex.foreach{case (z,index) => resultList(z) = list(index)}
-    resultList.toList
+
+    for (i<- 0 until slotMapping.size){
+      resultList(slotMapping(i)) = list(i)
+    }
+
+    //TODO need test to verify correctness
+//    slotMapping.zipWithIndex.foreach{case (z,index) => resultList(z) = list(index)}
+    resultList.toSeq
   }
 
   def fillCartersianListIntoTargetList(catersianList:Seq[Seq[Int]], totalSlot:Int, slotMapping:Seq[Int], targetList:Seq[Int]) ={
@@ -95,7 +101,7 @@ object ListGenerator {
     fillListIntoTargetList(list,totalSlot,slotMapping,fillList(0,totalSlot))
   }
 
-  def fillListListIntoSlots(catersianList:Seq[Seq[Int]], totalSlot:Int, slotMapping:Seq[Int]): Seq[Seq[Int]] ={
+  def fillListListIntoSlots(catersianList:Seq[Seq[Int]], totalSlot:Int, slotMapping:Seq[Int]) ={
     fillCartersianListIntoTargetList(catersianList,totalSlot,slotMapping,fillList(0,totalSlot))
   }
 

@@ -38,7 +38,7 @@ class BlockMakerTest extends FunSuite with BeforeAndAfterAll{
     val edges = List((0,1))
     val keySizeMap = Map((0,3),(1,3))
 
-    val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD).setEdges(edges).setKeySizeMap(keySizeMap)
+    val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD,1).setEdges(edges).setKeySizeMap(keySizeMap)
 
     val logoRDD = logoRDDMaker.build()
 

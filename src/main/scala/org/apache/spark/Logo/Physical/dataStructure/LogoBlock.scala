@@ -46,13 +46,21 @@ class CompressedLogoBlock[A:ClassTag, B:ClassTag](schema: LogoSchema, metaData: 
   */
 abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMetaData, rawData:A) extends LogoBlock(schema, metaData, rawData){
 
-  //TODO testing required for below
+  //TODO testing required for below, this place needs further optimization
   def buildIndex(schema:KeyValueLogoSchema):Map[KeyPatternInstance, Seq[ValuePatternInstance]] = {
     val rawData = assemble()
-    val keys = schema.keys
-    MapBuilder
-      .fromListToMap(rawData.map(_.pattern),keys)
-      .map(f => (PatternInstance(f._1).toKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
+    val keys = schema.keys.toSet
+
+    if (keys.size == 1){
+      MapBuilder
+        .fromListToMap(rawData.map(_.pattern),keys)
+        .map(f => (PatternInstance(f._1).toOneKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
+    }else{
+      MapBuilder
+        .fromListToMap(rawData.map(_.pattern),keys)
+        .map(f => (PatternInstance(f._1).toKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
+    }
+
   }
 
   //sub class needs to over-write this method
@@ -60,7 +68,7 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
 
   def assemble():Seq[PatternInstance] = iterator().toSeq
 
-  def toKeyValueLogoBlock(key:Seq[Int]):KeyValuePatternLogoBlock = {
+  def toKeyValueLogoBlock(key:Set[Int]):KeyValuePatternLogoBlock = {
 
     val keyValueSchema = new KeyValueLogoSchema(schema,key)
     val keyValueRawData = buildIndex(keyValueSchema)
@@ -118,21 +126,20 @@ class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData
 
   //get the values from the key in KeyValuePatternLogoBlock
   def getValue(key:KeyPatternInstance) ={
-    val res = rawData.contains(key.asInstanceOf[KeyPatternInstance]) match {
-      case true => Some(rawData(key.asInstanceOf[KeyPatternInstance]))
-      case false => None
+    val resRaw = rawData.getOrElse(key,null)
+    val res = resRaw match {
+      case null => None
+      case _ => Some(resRaw)
     }
 
 
-    if (res.isDefined){
 
-      val x = 1
-      val y = 2
-
-    }else{
-      val x = 1
-      val y = 2
-    }
+//
+//    if (rawData.contains(key)){
+//      print(s"contain key $key")
+//      val result = rawData(key)
+//      print(result)
+//    }
 
     res
   }
@@ -156,7 +163,9 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
   lazy val coreBlock = schema.getCoreBlock(rawData)
   lazy val leafsBlock = schema.getLeafBlock(rawData)
   lazy val coreLeafJoints = schema.getCoreLeafJoins()
+  lazy val coreKeyMapping = schema.coreKeyMapping
   lazy val leafValueMapping = schema.leafBlockSchema.valueKeyMapping(schema.leafKeyMapping)
+  lazy val valueMapping = leafsBlock.valueMapping(schema.leafKeyMapping)
 
   //TODO testing required
 
@@ -164,8 +173,12 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
   //the intersection node is not included in the returned iterator.
   def genereateLeafsNode(coreInstance:PatternInstance):Iterator[PatternInstance] = {
 
+//    val optValues = leafsBlock.
+//      getValue(coreInstance.subPatterns(coreLeafJoints.coreJoints).toKeyPatternInstance())
+
     val optValues = leafsBlock.
-      getValue(coreInstance.subPatterns(coreLeafJoints.coreJoints).toKeyPatternInstance())
+            getValue(coreInstance.toSubKeyPattern(coreLeafJoints.coreJoints))
+
 
       optValues match {
         case Some(values) => values.toIterator
@@ -173,15 +186,22 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
       }
   }
 
+
+  @transient lazy val totalNodes = (coreKeyMapping.values ++ valueMapping.values).toSeq.max + 1
+
   //assmeble the core and leafs instance into a single instance
   //TODO this method has some bug
-  def assembleCoreAndLeafInstance(coreInstance:PatternInstance, leafInstanceNode:PatternInstance):PatternInstance =
+  def assembleCoreAndLeafInstance(coreInstance:PatternInstance, leafInstanceNode:PatternInstance):PatternInstance = {
+
     PatternInstance.build(
       coreInstance,
-      schema.coreKeyMapping,
+      coreKeyMapping,
       leafInstanceNode,
-      leafsBlock.valueMapping(schema.leafKeyMapping)
+      valueMapping,
+      totalNodes
     )
+  }
+
 
   //the iterator to iterate through the pattern, core is iterated but leaf are concrefied but treat as a iterator for convinence.
   class patternIterator extends Iterator[PatternInstance]{

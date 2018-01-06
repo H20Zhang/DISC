@@ -74,7 +74,7 @@ class UtilsTest extends FunSuite{
   test("ListSelector"){
     val list = List(1,2,3,4,5)
     val keys = List(0,2,4)
-    val selectedList = ListSelector.selectElements(list,keys)
+    val selectedList = ListSelector.selectElements(list,keys.toSet)
     val selectedList1 = List(1,3,5)
     assert(TestUtil.listEqual(selectedList1,selectedList))
   }
@@ -91,7 +91,7 @@ class UtilsTest extends FunSuite{
     val total = List(0,1,2,3)
     val list = List(list1,list2,list3,list4,list5)
 
-    val theMap = MapBuilder.fromListToMap(list,keys)
+    val theMap = MapBuilder.fromListToMap(list,keys.toSet)
 
     assert(TestUtil.listlistEqual(List(List(3,4)),theMap.get(List(1,2)).get))
   }
@@ -108,8 +108,8 @@ class UtilsTest extends FunSuite{
     val total = List(0,1,2,3)
     val list = List(list1,list2,list3,list4,list5)
 
-    val theMap = MapBuilder.buildKeyValueMap(list,keys,values)
-    println(TestUtil.listlistEqual(List(List(4)),theMap.get(List(1,2)).get.get(List(3)).get))
+//    val theMap = MapBuilder.buildKeyValueMap(list,keys,values)
+//    println(TestUtil.listlistEqual(List(List(4)),theMap.get(List(1,2)).get.get(List(3)).get))
   }
 
 

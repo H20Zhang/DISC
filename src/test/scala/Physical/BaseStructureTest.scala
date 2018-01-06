@@ -36,7 +36,9 @@ class BaseStructureTest extends FunSuite{
     val pattern1 = PatternInstance(list1)
     val pattern2 = PatternInstance(list2)
 
-    val pattern3 = PatternInstance.build(pattern1,lKeyMapping,pattern2,rKeyMapping)
+
+    val totalNodes = (lKeyMapping.values ++ rKeyMapping.values).toSeq.max + 1
+    val pattern3 = PatternInstance.build(pattern1,lKeyMapping,pattern2,rKeyMapping,totalNodes)
 
     assert(TestUtil.listEqual(PatternInstance(Seq(1,2,3,4)).pattern,pattern3.pattern),"build failed")
 

@@ -18,9 +18,9 @@ abstract class LogoBlockTransformer extends Serializable {
   */
 class ToKeyValueTransformer extends LogoBlockTransformer{
 
-  var key:Seq[Int] = _
+  var key:Set[Int] = _
 
-  def setKey(key:Seq[Int]):ToKeyValueTransformer = {
+  def setKey(key:Set[Int]):ToKeyValueTransformer = {
     this.key = key
     this
   }

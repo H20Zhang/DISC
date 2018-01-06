@@ -159,10 +159,10 @@ class CompositeLogoSchema(val schema:LogoSchema,
   * @param schema original schema
   * @param keys keys of the key value map
   */
-case class KeyValueLogoSchema(schema:LogoSchema, keys:Seq[Int]) extends LogoSchema(schema.keySizeMap,"keyValueLogoSchema"){
+case class KeyValueLogoSchema(schema:LogoSchema, keys:Set[Int]) extends LogoSchema(schema.keySizeMap,"keyValueLogoSchema"){
 
   //TODO testing required
-  lazy val value:Seq[Int] = Range(0,schema.nodeSize).diff(keys)
+  lazy val value = Range(0,schema.nodeSize).toSet.diff(keys)
 
   //get the keyMapping when building the composite block only for the value nodes.
   def valueKeyMapping(keyMapping:KeyMapping) = {
@@ -223,8 +223,8 @@ case class PlannedTwoCompositeLogoSchema(coreId:Int,
     val joints = reverseCoreKeyMapping.keySet.intersect(reverseLeafKeyMapping.keySet)
     val coreLeafJoints = joints.map(f => (reverseCoreKeyMapping(f), reverseLeafKeyMapping(f))).toSeq
 
-    val coreJoints = coreLeafJoints.map(_._1)
-    val leafJoints = coreLeafJoints.map(_._2)
+    val coreJoints = coreLeafJoints.map(_._1).toSet
+    val leafJoints = coreLeafJoints.map(_._2).toSet
 
     BlockBlockJoints(coreBlockId,leafBlockId,coreJoints,leafJoints)
   }

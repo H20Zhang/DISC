@@ -13,7 +13,7 @@ class LogoRDD(val logoRDD:RDD[LogoBlockRef], val schema: LogoSchema){}
 class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSchema) extends LogoRDD(patternRDD,patternSchema){
 
   //
-  def toKeyValuePatternLogoRDD(key:Seq[Int]):KeyValueLogoRDD = {
+  def toKeyValuePatternLogoRDD(key:Set[Int]):KeyValueLogoRDD = {
 
     val toKeyValueTransformer = new ToKeyValueTransformer
     toKeyValueTransformer.setKey(key)

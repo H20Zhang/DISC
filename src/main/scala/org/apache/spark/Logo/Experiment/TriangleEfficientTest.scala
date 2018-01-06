@@ -44,7 +44,7 @@ object TriangleEfficientTest{
     val edges = List((0,1))
     val keySizeMap = Map((0,7),(1,7))
 
-    val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD).setEdges(edges).setKeySizeMap(keySizeMap)
+    val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD,1).setEdges(edges).setKeySizeMap(keySizeMap)
 
     val logoRDD = logoRDDMaker.build()
     val schema = logoRDDMaker.getSchema
@@ -86,7 +86,7 @@ object TriangleEfficientTest{
 
   def main(args: Array[String]): Unit = {
 
-    val spark = SparkSession.builder().master("yarn").appName("LogoTriangleTest").config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+    val spark = SparkSession.builder().master("local[*]").appName("LogoTriangleTest").config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .getOrCreate()
     val sc = spark.sparkContext
 

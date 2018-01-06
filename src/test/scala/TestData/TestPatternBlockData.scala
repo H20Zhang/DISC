@@ -14,6 +14,6 @@ object TestPatternBlockData {
 
   //we assume col0 to be the key.
   lazy val keyValueEdgeBlock = {
-    edgeBlock.toKeyValueLogoBlock(Seq(0))
+    edgeBlock.toKeyValueLogoBlock(Set(0))
   }
 }

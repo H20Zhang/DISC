@@ -8,6 +8,8 @@ class BaseStructure
 class KeyMapping(val keyMapping:Map[Int,Int]) extends Serializable {
 
 
+  @transient lazy val listMapping = toListMapping()
+
   def contains(key:Int) = {
     keyMapping.contains(key)
   }
@@ -15,7 +17,9 @@ class KeyMapping(val keyMapping:Map[Int,Int]) extends Serializable {
 
   def getNumOfKey() = keyMapping.size
   def getKeys() = keyMapping.keys.toSeq
-  def getValues() = keyMapping.values.toSeq
+  def getValues() = values
+  @transient lazy val values = keyMapping.values.toSeq
+
 
   def keySet() = keyMapping.keySet
 
@@ -52,19 +56,21 @@ class KeyMapping(val keyMapping:Map[Int,Int]) extends Serializable {
     case _ => false
   }
 
+
+
   override def toString: String = {
     toList().toString()
   }
 }
 
+
+//TODO optimize hash for node and edge PatternInstance
 class PatternInstance(val pattern:Seq[Int]) extends Serializable {
   lazy val patternSize = pattern.size
 
-  override def equals(obj: scala.Any): Boolean = obj match {
-    case t:PatternInstance => TestUtil.listEqual(t.pattern,pattern)
-    case _ => false
-  }
 
+
+  def toOneKeyPatternInstance():KeyPatternInstance = new OneKeyPatternInstance(pattern(0))
   def toKeyPatternInstance():KeyPatternInstance = new KeyPatternInstance(pattern)
   def toValuePatternInstance():ValuePatternInstance = new ValuePatternInstance(pattern)
 
@@ -72,15 +78,70 @@ class PatternInstance(val pattern:Seq[Int]) extends Serializable {
     pattern.toString()
   }
 
-  def subPatterns(colToPreserve:Seq[Int]) = {
+  def subPatterns(colToPreserve:Set[Int]) = {
     PatternInstance(ListSelector.selectElements(pattern,colToPreserve))
+  }
+
+  def toSubKeyPattern(colToPreserve:Set[Int]) = {
+    val colSizes = colToPreserve.size
+    val res = colSizes match {
+      case 1 => new OneKeyPatternInstance(pattern(colToPreserve.toSeq(0)))
+      case _ => subPatterns(colToPreserve).toKeyPatternInstance()
+    }
+
+    res
+  }
+
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[PatternInstance]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: PatternInstance =>
+      (that canEqual this) &&
+        patternSize == that.patternSize &&
+        pattern == that.pattern
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(pattern)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 }
 
-class KeyPatternInstance(pattern:Seq[Int]) extends PatternInstance(pattern)
-class ValuePatternInstance(pattern:Seq[Int]) extends  PatternInstance(pattern)
+class KeyPatternInstance(pattern:Seq[Int]) extends PatternInstance(pattern){
 
-object KeyMapping {
+}
+
+
+class OneKeyPatternInstance(pattern:Int) extends KeyPatternInstance(Seq(pattern)){
+  val node = pattern
+
+  override def canEqual(other: Any): Boolean = other.isInstanceOf[OneKeyPatternInstance]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: OneKeyPatternInstance =>
+      super.equals(that) &&
+        (that canEqual this) &&
+        node == that.node
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    31*node
+  }
+}
+
+//TODO finish this class
+class TwoKeyPatternInstance(pattern:Seq[Int]) extends KeyPatternInstance(pattern){
+
+}
+
+class ValuePatternInstance(pattern:Seq[Int]) extends  PatternInstance(pattern){
+
+}
+
+object KeyMapping extends Serializable {
   def apply(keyMapping: Seq[Int]): KeyMapping = new KeyMapping(keyMapping.zipWithIndex.map(_.swap).toMap)
   def apply(keyMapping: Map[Int, Int]): KeyMapping = new KeyMapping(keyMapping)
 
@@ -90,27 +151,34 @@ object KeyMapping {
   }
 }
 
-object PatternInstance{
+object PatternInstance extends Serializable {
 
   def apply(pattern: Seq[Int]): PatternInstance = new PatternInstance(pattern)
-  def build(lInstance:PatternInstance, lKeyMapping:KeyMapping, rInstance:PatternInstance, rKeyMapping:KeyMapping):PatternInstance = {
+  def build(lInstance:PatternInstance, lKeyMapping:KeyMapping, rInstance:PatternInstance, rKeyMapping:KeyMapping,totalNodes:Int):PatternInstance = {
 
-    val totalNodes = (lKeyMapping.getValues() ++ rKeyMapping.getValues()).toSeq.max + 1
 
-    apply(ListGenerator.fillListIntoTargetList(
-      rInstance.pattern,
-      totalNodes,
-      rKeyMapping.toListMapping(),
-      ListGenerator.fillListIntoSlots(lInstance.pattern,totalNodes,lKeyMapping.toListMapping())))
+    if (rKeyMapping.keyMapping.size == 0){
+      lInstance
+    } else {
+      apply(ListGenerator.fillListIntoTargetList(
+        rInstance.pattern,
+        totalNodes,
+        rKeyMapping.listMapping,
+        ListGenerator.fillListIntoSlots(lInstance.pattern,totalNodes,lKeyMapping.listMapping)))
+    }
+
   }
   
 }
 
-object KeyPatternInstance{
+object KeyPatternInstance extends Serializable {
   def apply(pattern: Seq[Int]): KeyPatternInstance = new KeyPatternInstance(pattern)
 }
 
-object ValuePatternInstance{
+
+
+
+object ValuePatternInstance extends Serializable {
   def apply(pattern: Seq[Int]): ValuePatternInstance = new ValuePatternInstance(pattern)
 }
 

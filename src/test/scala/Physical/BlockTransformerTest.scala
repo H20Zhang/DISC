@@ -10,7 +10,7 @@ class BlockTransformerTest extends FunSuite{
     val edgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference
     val edgeRDD = edgeRDDReference.generateF()
 
-    val keyValueRDD = edgeRDD.toKeyValuePatternLogoRDD(Seq(0))
+    val keyValueRDD = edgeRDD.toKeyValuePatternLogoRDD(Set(0))
 
     keyValueRDD.patternRDD.foreach { f =>
 

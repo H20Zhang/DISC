@@ -14,8 +14,8 @@ object TestLogoRDDData {
   lazy val (_,sc) = SparkSingle.getSpark()
 
 
-//  val dataSource="./wikiV.txt"
-  val dataSource="./debugData.txt"
+  val dataSource="./wikiV.txt"
+//  val dataSource="./debugData.txt"
 //  val dataSource = "/Users/zhanghao/Downloads/as-skitter.txt"
 
 
@@ -63,9 +63,9 @@ object TestLogoRDDData {
   def RowLogoRDDMaker(rawRDD: RDD[(Seq[Int], Int)]) = {
 
     val edges = List((0,1))
-    val keySizeMap = Map((0,2),(1,2))
+    val keySizeMap = Map((0,4),(1,4))
 
-    val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD).setEdges(edges).setKeySizeMap(keySizeMap)
+    val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD,1).setEdges(edges).setKeySizeMap(keySizeMap)
 
     val logoRDD = logoRDDMaker.build()
     val schema = logoRDDMaker.getSchema

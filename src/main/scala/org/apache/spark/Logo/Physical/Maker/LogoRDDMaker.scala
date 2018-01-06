@@ -50,10 +50,15 @@ abstract class RowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: RDD[(A,B)]) ext
   * @tparam A Attribute Type
   * List[Int] Key Type
   */
-class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(Seq[Int],A)]) extends RowLogoRDDMaker(rdd){
+class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(Seq[Int],A)], default:A) extends RowLogoRDDMaker(rdd){
 
   @transient val sc = rdd.sparkContext
   lazy val keyCol = partitioner.partitioners.map(_.slotNum)
+
+
+  class X[A] {
+    var value: A = _
+  }
 
   def generateSentry() = {
 
@@ -67,7 +72,6 @@ class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(Seq[Int],A)]) extends RowLogoRD
     sentryNode = ListGenerator.fillListListIntoSlots(ListGenerator.cartersianSizeList(baseList),_nodeSize,slotNums)
     sentry = sentryNode.map((_,null.asInstanceOf[A]))
     sentryRDD = sc.parallelize(sentry)
-
 
     sentryRDD
   }
