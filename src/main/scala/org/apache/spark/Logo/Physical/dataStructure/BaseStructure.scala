@@ -2,6 +2,8 @@ package org.apache.spark.Logo.Physical.dataStructure
 
 import org.apache.spark.Logo.Physical.utlis.{ListGenerator, ListSelector, TestUtil}
 
+import scala.collection.mutable.ArrayBuffer
+
 class BaseStructure
 
 //TODO finish this to optimize the code
@@ -65,12 +67,11 @@ class KeyMapping(val keyMapping:Map[Int,Int]) extends Serializable {
 
 
 //TODO optimize hash for node and edge PatternInstance
-class PatternInstance(val pattern:Seq[Int]) extends Serializable {
+class PatternInstance(var pattern:Seq[Int]) extends Serializable {
   lazy val patternSize = pattern.size
 
-
-
   def toOneKeyPatternInstance():KeyPatternInstance = new OneKeyPatternInstance(pattern(0))
+  def toTwoKeyPatternInstance():KeyPatternInstance = new TwoKeyPatternInstance(pattern(0),pattern(1))
   def toKeyPatternInstance():KeyPatternInstance = new KeyPatternInstance(pattern)
   def toValuePatternInstance():ValuePatternInstance = new ValuePatternInstance(pattern)
 
@@ -82,11 +83,12 @@ class PatternInstance(val pattern:Seq[Int]) extends Serializable {
     PatternInstance(ListSelector.selectElements(pattern,colToPreserve))
   }
 
-  def toSubKeyPattern(colToPreserve:Set[Int]) = {
-    val colSizes = colToPreserve.size
+  def toSubKeyPattern(colToPreserveSet:Set[Int], colToPreserve:Seq[Int]) = {
+    val colSizes = colToPreserveSet.size
     val res = colSizes match {
-      case 1 => new OneKeyPatternInstance(pattern(colToPreserve.toSeq(0)))
-      case _ => subPatterns(colToPreserve).toKeyPatternInstance()
+      case 1 => new OneKeyPatternInstance(pattern(colToPreserve(0)))
+      case 2 => new TwoKeyPatternInstance(pattern(colToPreserve(0)),pattern(colToPreserve(1)))
+      case _ => subPatterns(colToPreserveSet).toKeyPatternInstance()
     }
 
     res
@@ -109,20 +111,21 @@ class PatternInstance(val pattern:Seq[Int]) extends Serializable {
   }
 }
 
+class EnumeratePatternInstance(pattern:ArrayBuffer[Int]) extends PatternInstance(pattern){
+}
+
 class KeyPatternInstance(pattern:Seq[Int]) extends PatternInstance(pattern){
 
 }
 
 
-class OneKeyPatternInstance(pattern:Int) extends KeyPatternInstance(Seq(pattern)){
-  val node = pattern
+class OneKeyPatternInstance(pattern0:Int) extends KeyPatternInstance(null){
+  val node = pattern0
 
   override def canEqual(other: Any): Boolean = other.isInstanceOf[OneKeyPatternInstance]
 
   override def equals(other: Any): Boolean = other match {
     case that: OneKeyPatternInstance =>
-      super.equals(that) &&
-        (that canEqual this) &&
         node == that.node
     case _ => false
   }
@@ -132,9 +135,25 @@ class OneKeyPatternInstance(pattern:Int) extends KeyPatternInstance(Seq(pattern)
   }
 }
 
-//TODO finish this class
-class TwoKeyPatternInstance(pattern:Seq[Int]) extends KeyPatternInstance(pattern){
 
+class TwoKeyPatternInstance(pattern0:Int, pattern1:Int) extends KeyPatternInstance(null){
+
+  val node0 = pattern0
+  val node1 = pattern1
+
+  override def canEqual(other: Any): Boolean = other.isInstanceOf[OneKeyPatternInstance]
+
+
+  override def equals(other: Any): Boolean = other match {
+    case that: TwoKeyPatternInstance =>
+        node0 == that.node0 &&
+        node1 == that.node1
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    31*node0+node1
+  }
 }
 
 class ValuePatternInstance(pattern:Seq[Int]) extends  PatternInstance(pattern){
@@ -154,8 +173,7 @@ object KeyMapping extends Serializable {
 object PatternInstance extends Serializable {
 
   def apply(pattern: Seq[Int]): PatternInstance = new PatternInstance(pattern)
-  def build(lInstance:PatternInstance, lKeyMapping:KeyMapping, rInstance:PatternInstance, rKeyMapping:KeyMapping,totalNodes:Int):PatternInstance = {
-
+  def slowBuild(lInstance:PatternInstance, lKeyMapping:KeyMapping, rInstance:PatternInstance, rKeyMapping:KeyMapping, totalNodes:Int):PatternInstance = {
 
     if (rKeyMapping.keyMapping.size == 0){
       lInstance
@@ -166,9 +184,23 @@ object PatternInstance extends Serializable {
         rKeyMapping.listMapping,
         ListGenerator.fillListIntoSlots(lInstance.pattern,totalNodes,lKeyMapping.listMapping)))
     }
-
   }
-  
+
+  def quickBuild(lInstance:PatternInstance, lKeyMapping:KeyMapping, rInstance:PatternInstance, rKeyMapping:KeyMapping,totalNodes:Int) = {
+
+    if (rKeyMapping.keyMapping.size == 0){
+      lInstance
+    }else {
+      val arrayBuffer = new Array[Int](totalNodes)
+      lKeyMapping.keyMapping.foreach{f =>
+        arrayBuffer(f._2) = lInstance.pattern(f._1)}
+
+      rKeyMapping.keyMapping.foreach{f =>
+        arrayBuffer(f._2) = rInstance.pattern(f._1)}
+
+      apply(arrayBuffer)
+    }
+  }
 }
 
 object KeyPatternInstance extends Serializable {

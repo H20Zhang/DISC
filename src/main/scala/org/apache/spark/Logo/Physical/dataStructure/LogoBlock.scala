@@ -5,6 +5,7 @@ import org.apache.spark.Logo.Physical.utlis.{ListGenerator, ListSelector, MapBui
 import org.apache.spark.graphx.VertexId
 
 import scala.Predef
+import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag
 
 
@@ -55,7 +56,12 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
       MapBuilder
         .fromListToMap(rawData.map(_.pattern),keys)
         .map(f => (PatternInstance(f._1).toOneKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
-    }else{
+    } else if (keys.size == 2){
+      MapBuilder
+        .fromListToMap(rawData.map(_.pattern),keys)
+        .map(f => (PatternInstance(f._1).toTwoKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
+    }
+    else{
       MapBuilder
         .fromListToMap(rawData.map(_.pattern),keys)
         .map(f => (PatternInstance(f._1).toKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
@@ -65,6 +71,7 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
 
   //sub class needs to over-write this method
   def iterator():Iterator[PatternInstance]
+  def enumerateIterator():Iterator[PatternInstance]
 
   def assemble():Seq[PatternInstance] = iterator().toSeq
 
@@ -101,6 +108,7 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
 class ConcretePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Seq[PatternInstance]) extends PatternLogoBlock(schema,metaData,rawData){
   override def assemble(): Seq[PatternInstance] = rawData
   override def iterator(): Iterator[PatternInstance] = rawData.iterator
+  override def enumerateIterator(): Iterator[PatternInstance] = iterator()
 }
 
 /**
@@ -149,6 +157,8 @@ class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData
 
   //TODO this part is wrong, it is only just a temporary fix
   override def iterator() = rawData.toSeq.flatMap(f => f._2).iterator
+
+  override def enumerateIterator(): Iterator[PatternInstance] = iterator()
 }
 
 /**
@@ -169,6 +179,9 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
 
   //TODO testing required
 
+
+  val coreJointsSeq = coreLeafJoints.coreJoints.toSeq.sorted
+
   //generate the leaf instance grow from this core, actually the Iterator is just a wrapper the leafs are concrefied
   //the intersection node is not included in the returned iterator.
   def genereateLeafsNode(coreInstance:PatternInstance):Iterator[PatternInstance] = {
@@ -177,7 +190,7 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
 //      getValue(coreInstance.subPatterns(coreLeafJoints.coreJoints).toKeyPatternInstance())
 
     val optValues = leafsBlock.
-            getValue(coreInstance.toSubKeyPattern(coreLeafJoints.coreJoints))
+            getValue(coreInstance.toSubKeyPattern(coreLeafJoints.coreJoints,coreJointsSeq))
 
 
       optValues match {
@@ -190,10 +203,17 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
   @transient lazy val totalNodes = (coreKeyMapping.values ++ valueMapping.values).toSeq.max + 1
 
   //assmeble the core and leafs instance into a single instance
-  //TODO this method has some bug
   def assembleCoreAndLeafInstance(coreInstance:PatternInstance, leafInstanceNode:PatternInstance):PatternInstance = {
 
-    PatternInstance.build(
+//    PatternInstance.slowBuild(
+//      coreInstance,
+//      coreKeyMapping,
+//      leafInstanceNode,
+//      valueMapping,
+//      totalNodes
+//    )
+
+    PatternInstance.quickBuild(
       coreInstance,
       coreKeyMapping,
       leafInstanceNode,
@@ -233,10 +253,53 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
     }
   }
 
+  class EnumerateIterator extends Iterator[PatternInstance]{
+
+    var leafsIterator:Iterator[PatternInstance] = _
+    val coreIterator:Iterator[PatternInstance] = coreBlock.iterator()
+    var currentCore:PatternInstance = _
+    val currentPattern:EnumeratePatternInstance = new EnumeratePatternInstance(arrayBuffer)
+    val arrayBuffer = ArrayBuffer.fill(totalNodes)(0)
+
+    override def hasNext: Boolean = {
+
+      if (leafsIterator == null || !leafsIterator.hasNext){
+        do {
+          if (coreIterator.hasNext){
+            currentCore = coreIterator.next()
+          }else{
+            return false
+          }
+          leafsIterator = genereateLeafsNode(currentCore)
+        } while (leafsIterator == null)
+      }
+
+      return true
+    }
+
+    override def next(): PatternInstance = {
+      val leafs = leafsIterator.next()
+      val core = currentCore
+
+      if (valueMapping.keyMapping.size == 0){
+        core
+      }else {
+        coreKeyMapping.keyMapping.foreach{f =>
+          arrayBuffer(f._2) = core.pattern(f._1)}
+
+        valueMapping.keyMapping.foreach{f =>
+          arrayBuffer(f._2) = leafs.pattern(f._1)}
+        currentPattern
+    }
+  }
+  }
+
   /**
     * generate a ConcretePatternLogoBlock
     */
   override def iterator() = new patternIterator
+  override def enumerateIterator() = new EnumerateIterator
+
 }
 
 //TODO finish the LogoBlock for block-centric iterative process

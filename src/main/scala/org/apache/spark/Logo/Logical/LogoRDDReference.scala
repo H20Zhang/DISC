@@ -24,6 +24,8 @@ abstract class LogoRDDReference(schema: LogoSchema, buildScriptStep: LogoBuildSc
   */
 class PatternLogoRDDReference(val patternSchema: LogoSchema, val buildScript:LogoPatternBuildLogicalStep) extends LogoRDDReference(patternSchema,buildScript){
 
+  def toIdentitySubPattern():SubPatternLogoRDDReference = new SubPatternLogoRDDReference(this,KeyMapping(List.range(0,patternSchema.nodeSize)))
+
   //prepare for build operation.
   def toSubPattern(keyMapping: KeyMapping):SubPatternLogoRDDReference = new SubPatternLogoRDDReference(this,keyMapping)
 

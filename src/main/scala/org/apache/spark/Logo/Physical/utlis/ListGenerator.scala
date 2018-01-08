@@ -14,8 +14,11 @@ object ListGenerator {
     * @return a list of length "size" filled with element "ele"
     */
   def fillList[T:ClassTag](ele:T, size:Int) = {
-    val list = new Array[T](size)
-    list.map(f => ele).toSeq
+    Seq.fill(size)(ele)
+//    val list = new Array[T](size)
+//
+//
+//    list.map(f => ele).toSeq
   }
 
 

@@ -20,7 +20,15 @@ object ListSelector {
   }
 
   def notSelectElements[A](elems:Seq[A], keys:Set[Int]):Seq[A] = {
+
     val keySet = keys
-    elems.zipWithIndex.filter(p => !keySet.contains(p._2)).map(_._1)
+
+    val arraybuffer = new ArrayBuffer[A]()
+    for (i <- 0 until elems.size){
+      if (!keySet.contains(i))
+        arraybuffer.append(elems(i))
+    }
+
+    arraybuffer
   }
 }
