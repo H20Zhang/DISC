@@ -24,6 +24,7 @@ abstract class LogoPatternBuildLogicalStep(logoRDDRefs:Seq[LogoPatternBuildLogic
 
   @transient lazy val sc = SparkContext.getOrCreate()
   var coreId = 0
+  var filteringCondition:FilteringCondition = null
 
   lazy val corePhysical = generateCorePhyiscal()
   lazy val leafPhysical = generateLeafPhyiscal()
@@ -31,6 +32,10 @@ abstract class LogoPatternBuildLogicalStep(logoRDDRefs:Seq[LogoPatternBuildLogic
   //method used by planner to set which LogoRDDReference is the core.
   def setCoreID(coreId:Int): Unit ={
     this.coreId = coreId
+  }
+
+  def setFilteringCondition(f:FilteringCondition): Unit ={
+    this.filteringCondition = filteringCondition
   }
 
   //preprocessing the leaf RDD, if the leaf is not in J-state, then it will be in J-state
@@ -97,7 +102,13 @@ class LogoComposite2PatternBuildLogicalStep(logoRDDRefs:Seq[LogoPatternBuildLogi
   }
 
   override def generateNewPatternFState(): PatternLogoRDD = {
-    new PatternLogoRDD(logoStep.performFetchJoin(sc), getSchema())
+    val fStatePatternLogoRDD = new PatternLogoRDD(logoStep.performFetchJoin(sc), getSchema())
+
+    if (filteringCondition != null){
+      fStatePatternLogoRDD.toFilteringPatternLogoRDD(filteringCondition)
+    } else{
+      fStatePatternLogoRDD
+    }
   }
 
   override def getSchema(): PlannedTwoCompositeLogoSchema = compositeSchema.toPlan2CompositeSchema(coreId)

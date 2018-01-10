@@ -32,7 +32,6 @@ class BlockTransformerTest extends FunSuite{
     keyValueRDD.patternRDD.foreach{
       f =>
         val block = f.asInstanceOf[ConcretePatternLogoBlock]
-        println(block.rawData)
     }
 
     println(keyValueRDD.patternSchema)

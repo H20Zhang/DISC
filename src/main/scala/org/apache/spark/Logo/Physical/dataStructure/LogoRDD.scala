@@ -1,7 +1,8 @@
 package org.apache.spark.Logo.Physical.dataStructure
 
+import org.apache.spark.Logo.Logical.FilteringCondition
 import org.apache.spark.Logo.Physical.Builder.LogoBuildScriptStep
-import org.apache.spark.Logo.Physical.Maker.{ToConcreteTransformer, ToKeyValueTransformer}
+import org.apache.spark.Logo.Physical.Maker.{ToConcreteTransformer, ToFilteringTransformer, ToKeyValueTransformer}
 import org.apache.spark.rdd.RDD
 
 /**
@@ -9,8 +10,11 @@ import org.apache.spark.rdd.RDD
   */
 class LogoRDD(val logoRDD:RDD[LogoBlockRef], val schema: LogoSchema){}
 
-//TODO finish this, the same case as LogoRDDReference
+
 class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSchema) extends LogoRDD(patternRDD,patternSchema){
+
+
+
 
   //
   def toKeyValuePatternLogoRDD(key:Set[Int]):KeyValueLogoRDD = {
@@ -33,6 +37,29 @@ class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSc
 
     new ConcreteLogoRDD(concreteRDDData,concreteSchema)
   }
+
+  def toFilteringPatternLogoRDD(f:FilteringCondition):FilteringLogoRDD = {
+
+    val toFilteringTransformer = new ToFilteringTransformer
+    toFilteringTransformer.setFilteringCondition(f)
+    val filteringData = toFilteringTransformer.transform(patternRDD)
+    val filteringSchema = patternSchema match {
+      case c:CompositeLogoSchema => c.schema
+      case _ => patternSchema
+    }
+
+    //TODO, this place actually filter is not always executed.
+    new FilteringLogoRDD(filteringData, filteringSchema, true)
+  }
+
+
+
+
+}
+
+
+class FilteringLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema: LogoSchema, isFilterExecuted:Boolean) extends PatternLogoRDD(patternRDD,patternSchema){
+
 }
 
 class KeyValueLogoRDD(patternRDD:RDD[LogoBlockRef], override val patternSchema: KeyValueLogoSchema) extends PatternLogoRDD(patternRDD,patternSchema){

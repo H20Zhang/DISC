@@ -33,10 +33,10 @@ object SparkSingle {
   }
 
   def close(): Unit ={
-    counter -= 1
-    if(counter == 0){
-      spark.close()
-    }
+//    counter -= 1
+//    if(counter == 0){
+//      spark.close()
+//    }
   }
 
 }

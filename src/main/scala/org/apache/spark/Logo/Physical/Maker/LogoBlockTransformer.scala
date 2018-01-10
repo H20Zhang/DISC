@@ -1,5 +1,6 @@
 package org.apache.spark.Logo.Physical.Maker
 
+import org.apache.spark.Logo.Logical.FilteringCondition
 import org.apache.spark.Logo.Physical.dataStructure.{LogoBlockRef, PatternLogoBlock}
 import org.apache.spark.rdd.RDD
 
@@ -62,3 +63,47 @@ class ToConcreteTransformer extends LogoBlockTransformer{
   }
 }
 
+//TODO: test needed
+
+class ToFilteringTransformer extends LogoBlockTransformer{
+
+  var filteringCondition:FilteringCondition = null
+
+  def setFilteringCondition(f:FilteringCondition): Unit ={
+    filteringCondition = f
+  }
+
+  override def transform(rdd: RDD[LogoBlockRef]): RDD[LogoBlockRef] = {
+    require(filteringCondition != null, "should set filteringCondition before calling transform")
+
+    var resRDD:RDD[LogoBlockRef] = null
+
+    if (filteringCondition.isStrictCondition){
+      resRDD = rdd.mapPartitions({
+        it =>
+          val block = it.next()
+          it.hasNext
+
+          val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
+          Iterator(patternBlock.toFilteringLogoBlock(filteringCondition.f).toConcreteLogoBlock.asInstanceOf[LogoBlockRef])
+      },true)
+
+
+    }
+    else{
+      resRDD = rdd.mapPartitions({
+        it =>
+          val block = it.next()
+          it.hasNext
+
+          val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
+          Iterator(patternBlock.toFilteringLogoBlock(filteringCondition.f).asInstanceOf[LogoBlockRef])
+      },true)
+
+    }
+
+    resRDD.cache()
+    resRDD.count()
+    resRDD
+  }
+}

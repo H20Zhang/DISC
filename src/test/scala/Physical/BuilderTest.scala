@@ -123,7 +123,6 @@ class BuilderTest extends FunSuite with BeforeAndAfterAll{
     println(triangleCount)
 
 
-    sc.stop()
 
   }
 

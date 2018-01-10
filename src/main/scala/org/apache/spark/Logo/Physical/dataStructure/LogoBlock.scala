@@ -94,6 +94,10 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
     )
   }
 
+  def toFilteringLogoBlock(f:PatternInstance => Boolean):FilteringPatternLogoBlock[A] = {
+    new FilteringPatternLogoBlock(this,f)
+  }
+
   override def toString: String = {
     s"schema:\n${schema.toString}\nmetaData:${metaData.toString}\nrawData:${rawData.toString()}"
   }
@@ -159,6 +163,13 @@ class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData
   override def iterator() = rawData.toSeq.flatMap(f => f._2).iterator
 
   override def enumerateIterator(): Iterator[PatternInstance] = iterator()
+}
+
+
+//TODO: test filtering
+class FilteringPatternLogoBlock[A:ClassTag](logoBlock: PatternLogoBlock[A], f:PatternInstance=>Boolean) extends PatternLogoBlock(logoBlock.schema,logoBlock.metaData,logoBlock.rawData){
+  override def iterator(): Iterator[PatternInstance] = logoBlock.iterator().filter(f)
+  override def enumerateIterator(): Iterator[PatternInstance] = logoBlock.enumerateIterator().filter(f)
 }
 
 /**
