@@ -1,7 +1,7 @@
 package graphFrameTest
 
 import graphFrameApplication.{GraphFrameLoader, mainEntry}
-import org.apache.spark.Logo.Physical.utlis.SparkSingle
+import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 import org.graphframes.{GraphFrame, examples}
 import org.scalatest.FunSuite
 

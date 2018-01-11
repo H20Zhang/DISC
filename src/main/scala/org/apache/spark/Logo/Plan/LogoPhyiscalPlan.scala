@@ -1,0 +1,168 @@
+package org.apache.spark.Logo.Plan
+
+
+import org.apache.spark.Logo.UnderLying.Joiner.{LogoBuildPhyiscalStep, LogoBuildScriptStep}
+import org.apache.spark.Logo.UnderLying.dataStructure._
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
+import org.apache.spark.storage.StorageLevel
+
+class LogoLogicalBuildScript {
+
+}
+
+
+/**
+  * Represent a logical step in building a bigger LogoRDD
+  * @param logoRDDRefs logical logoRDD used to build this LogoRDD
+  * @param keyMapping the keyMapping between the old Logo and new Logo
+  * @param name
+  */
+abstract class LogoPatternPhysicalPlan(val logoRDDRefs:Seq[LogoPatternPhysicalPlan], val keyMapping:Seq[KeyMapping], val name:String="") extends LogoBuildScriptStep{
+
+  lazy val compositeSchema = new subKeyMappingCompositeLogoSchemaBuilder(logoRDDRefs.map(_.getSchema()), keyMapping) generate()
+
+  @transient lazy val sc = SparkContext.getOrCreate()
+  var coreId = 0
+//  var filteringCondition:FilteringCondition = null
+
+  lazy val corePhysical = generateCorePhyiscal()
+  lazy val leafPhysical = generateLeafPhyiscal()
+
+  //method used by planner to set which LogoRDDReference is the core.
+  def setCoreID(coreId:Int): Unit ={
+    this.coreId = coreId
+  }
+
+//  def setFilteringCondition(f:FilteringCondition): Unit ={
+//    this.filteringCondition = f
+//
+//    val x = 1
+//  }
+
+  //preprocessing the leaf RDD, if the leaf is not in J-state, then it will be in J-state
+  def generateLeafPhyiscal():PatternLogoRDD
+
+  //preprocessing the core RDD
+  def generateCorePhyiscal():PatternLogoRDD
+
+  //generate the new Pattern and add it to catalog, after generate the pattern is in F state
+  def generateNewPatternFState():PatternLogoRDD
+  def generateNewPatternJState():ConcreteLogoRDD
+  def getSchema():LogoSchema
+
+  def toLogoRDDReference() = {
+    new PatternLogoRDDReference(getSchema(),this)
+  }
+
+}
+
+// the generator for generating the handler for converting blocks into a planned2CompositeBlock.
+class Planned2HandlerGenerator(coreId:Int) extends Serializable {
+  def generate():(Seq[LogoBlockRef],CompositeLogoSchema,Int) => LogoBlockRef = {
+    (blocks,schema,index) =>
+
+      val planned2CompositeSchema = schema.toPlan2CompositeSchema(coreId)
+      val subBlocks = blocks.asInstanceOf[Seq[PatternLogoBlock[_]]]
+
+      //TODO this place needs to implement later, although currently it has no use.
+      val metaData = LogoMetaData(schema.IndexToKey(index),10)
+
+      val planned2CompositeLogoBlock = new CompositeTwoPatternLogoBlock(planned2CompositeSchema,metaData, subBlocks)
+
+      planned2CompositeLogoBlock
+  }
+}
+
+
+class LogoFilterPatternPhysicalPlan(f:FilteringCondition, buildLogicalStep: LogoPatternPhysicalPlan) extends LogoPatternPhysicalPlan(buildLogicalStep.logoRDDRefs, buildLogicalStep.keyMapping){
+  override def generateLeafPhyiscal(): PatternLogoRDD = buildLogicalStep.generateLeafPhyiscal()
+
+  override def generateCorePhyiscal(): PatternLogoRDD = buildLogicalStep.generateCorePhyiscal()
+
+  override def generateNewPatternFState(): PatternLogoRDD = {
+    buildLogicalStep.generateNewPatternFState().toFilteringPatternLogoRDD(f)
+  }
+
+  override def generateNewPatternJState(): ConcreteLogoRDD = {
+    buildLogicalStep.generateNewPatternJState().toFilteringPatternLogoRDD(f).toConcretePatternLogoRDD
+  }
+
+  override def getSchema(): LogoSchema = buildLogicalStep.getSchema()
+}
+
+/**
+  * The class that represent composing a new Pattern using two existing pattern
+  * @param logoRDDRefs logical logoRDD used to build this LogoRDD
+  * @param keyMapping the keyMapping between the old Logo and new Logo
+  */
+class LogoComposite2PatternPhysicalPlan(logoRDDRefs:Seq[LogoPatternPhysicalPlan], keyMapping:Seq[KeyMapping]) extends LogoPatternPhysicalPlan(logoRDDRefs,keyMapping) {
+
+  lazy val schema = getSchema()
+  lazy val coreLogoRef = logoRDDRefs(coreId)
+  lazy val leafLogoRef = coreId match {
+    case 0 => logoRDDRefs(1)
+    case 1 => logoRDDRefs(0)
+  }
+
+  lazy val logoRDDs = coreId match {
+    case 0 => List(corePhysical,leafPhysical)
+    case 1 => List(leafPhysical, corePhysical)
+  }
+
+
+  lazy val handler = {
+    new Planned2HandlerGenerator(coreId) generate()
+  }
+
+  lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs, compositeSchema,handler)
+
+  override def generateLeafPhyiscal(): PatternLogoRDD = {
+    leafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreLeafJoins().leafJoints)
+  }
+
+  override def generateCorePhyiscal(): PatternLogoRDD = {
+    val corePatternLogoRDD = coreLogoRef.generateNewPatternFState()
+    corePatternLogoRDD.patternRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    corePatternLogoRDD.patternRDD.count()
+    corePatternLogoRDD
+  }
+
+  override def generateNewPatternFState(): PatternLogoRDD = {
+    val fStatePatternLogoRDD = new PatternLogoRDD(logoStep.performFetchJoin(sc), getSchema())
+      fStatePatternLogoRDD
+  }
+
+  override def getSchema(): PlannedTwoCompositeLogoSchema = compositeSchema.toPlan2CompositeSchema(coreId)
+
+  override def generateNewPatternJState():ConcreteLogoRDD = {
+    generateNewPatternFState().toConcretePatternLogoRDD
+  }
+}
+
+/**
+  * The class represent the edge pattern for starting the building
+  * @param edgeLogoRDD the actually data of the edge
+  */
+class LogoEdgePatternPhysicalPlan(edgeLogoRDD:ConcreteLogoRDD) extends LogoPatternPhysicalPlan(List(),List()){
+
+  override def generateNewPatternFState(): PatternLogoRDD = {
+    edgeLogoRDD
+  }
+
+  override def getSchema(): LogoSchema = edgeLogoRDD.patternSchema
+
+  override def generateLeafPhyiscal():PatternLogoRDD = {
+    generateNewPatternFState()
+  }
+
+  override def generateCorePhyiscal():PatternLogoRDD = {
+    generateNewPatternJState()
+  }
+
+  override def generateNewPatternJState() = {
+    edgeLogoRDD
+  }
+}
+
+
