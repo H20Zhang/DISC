@@ -13,14 +13,20 @@ class LogoRDD(val logoRDD:RDD[LogoBlockRef], val schema: LogoSchema){}
 
 class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSchema) extends LogoRDD(patternRDD,patternSchema){
 
+  var keyValueLogoRDD:KeyValueLogoRDD = null
+  var filteringLogoRDD:FilteringLogoRDD = null
+
   //
   def toKeyValuePatternLogoRDD(key:Set[Int]):KeyValueLogoRDD = {
 
-    val toKeyValueTransformer = new ToKeyValueTransformer
-    toKeyValueTransformer.setKey(key)
-    val keyValueRDDData = toKeyValueTransformer.transform(patternRDD)
-    val keyValueSchema = KeyValueLogoSchema(patternSchema,key)
-    new KeyValueLogoRDD(keyValueRDDData,keyValueSchema)
+//    if (keyValueLogoRDD == null){
+      val toKeyValueTransformer = new ToKeyValueTransformer
+      toKeyValueTransformer.setKey(key)
+      val keyValueRDDData = toKeyValueTransformer.transform(patternRDD)
+      val keyValueSchema = KeyValueLogoSchema(patternSchema,key)
+      keyValueLogoRDD = new KeyValueLogoRDD(keyValueRDDData,keyValueSchema)
+//    }
+    keyValueLogoRDD
   }
 
   def toConcretePatternLogoRDD:ConcreteLogoRDD = {
@@ -37,16 +43,24 @@ class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSc
 
   def toFilteringPatternLogoRDD(f:FilteringCondition):FilteringLogoRDD = {
 
-    val toFilteringTransformer = new ToFilteringTransformer
-    toFilteringTransformer.setFilteringCondition(f)
-    val filteringData = toFilteringTransformer.transform(patternRDD)
-    val filteringSchema = patternSchema match {
-      case c:CompositeLogoSchema => c.schema
-      case _ => patternSchema
-    }
+    if (filteringLogoRDD == null){
+      val toFilteringTransformer = new ToFilteringTransformer
+      toFilteringTransformer.setFilteringCondition(f)
+      val filteringData = toFilteringTransformer.transform(patternRDD)
+      val filteringSchema = patternSchema match {
+        case c:CompositeLogoSchema => c.schema
+        case _ => patternSchema
+      }
 
-    //TODO, this place actually filter is not always executed.
-    new FilteringLogoRDD(filteringData, filteringSchema, true)
+      //TODO, this place actually filter is not always executed.
+      if (f.isStrictCondition){
+        filteringLogoRDD = new FilteringLogoRDD(filteringData, filteringSchema, true)
+      } else{
+        filteringLogoRDD = new FilteringLogoRDD(filteringData, filteringSchema, false)
+      }
+    }
+    filteringLogoRDD
+
   }
 }
 
@@ -82,6 +96,9 @@ class ConcreteLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema: LogoSchema) e
 //
 //    new FilteringLogoRDD(filteringData, filteringSchema,true)
 //  }
+
+
+
 }
 
 class SubPatternLogoRDDReference(patternLogoRDDReference:PatternLogoRDD, keyMapping:KeyMapping){

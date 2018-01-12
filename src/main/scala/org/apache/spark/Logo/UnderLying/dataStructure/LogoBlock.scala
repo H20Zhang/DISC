@@ -1,6 +1,11 @@
 package org.apache.spark.Logo.UnderLying.dataStructure
 import java.io.{Externalizable, ObjectInput, ObjectOutput}
 
+import com.esotericsoftware.kryo.io.{Input, Output}
+import com.esotericsoftware.kryo.{Kryo, KryoSerializable}
+
+import scala.collection.mutable
+//import com.koloboke.collect.map.hash.HashObjObjMap
 import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, ListSelector, MapBuilder}
 import org.apache.spark.graphx.VertexId
 
@@ -45,25 +50,30 @@ class CompressedLogoBlock[A:ClassTag, B:ClassTag](schema: LogoSchema, metaData: 
   * @param metaData metaData for the block
   * @param rawData rawData for the block
   */
-abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMetaData, rawData:A) extends LogoBlock(schema, metaData, rawData){
+abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMetaData, rawData:A) extends LogoBlock(schema, metaData, rawData) {
 
   //TODO testing required for below, this place needs further optimization
-  def buildIndex(schema:KeyValueLogoSchema):Map[KeyPatternInstance, Seq[ValuePatternInstance]] = {
+  def buildIndex(schema:KeyValueLogoSchema):mutable.Map[KeyPatternInstance, Seq[ValuePatternInstance]] = {
     val rawData = assemble()
     val keys = schema.keys.toSet
 
     if (keys.size == 1){
+
+//      MapBuilder.oneKeyfromListToMapFast(rawData.map(_.pattern),keys)
+
       MapBuilder
-        .fromListToMap(rawData.map(_.pattern),keys)
+        .fromListToMapFast(rawData.map(_.pattern),keys)
         .map(f => (PatternInstance(f._1).toOneKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
     } else if (keys.size == 2){
+//      MapBuilder.twoKeyfromListToMapFast(rawData.map(_.pattern),keys)
       MapBuilder
-        .fromListToMap(rawData.map(_.pattern),keys)
+        .fromListToMapFast(rawData.map(_.pattern),keys)
         .map(f => (PatternInstance(f._1).toTwoKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
     }
     else{
+//      MapBuilder.keyfromListToMapFast(rawData.map(_.pattern),keys)
       MapBuilder
-        .fromListToMap(rawData.map(_.pattern),keys)
+        .fromListToMapFast(rawData.map(_.pattern),keys)
         .map(f => (PatternInstance(f._1).toKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
     }
 
@@ -73,7 +83,7 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
   def iterator():Iterator[PatternInstance]
   def enumerateIterator():Iterator[PatternInstance]
 
-  def assemble():Seq[PatternInstance] = iterator().toSeq
+  def assemble():Seq[PatternInstance] = iterator().toList
 
   def toKeyValueLogoBlock(key:Set[Int]):KeyValuePatternLogoBlock = {
 
@@ -109,10 +119,11 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
   * @param metaData metaData for the block
   * @param rawData rawData for the block, here we assume the nodeIds are represented using Int.
   */
-class ConcretePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Seq[PatternInstance]) extends PatternLogoBlock(schema,metaData,rawData) {
+class ConcretePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Seq[PatternInstance]) extends PatternLogoBlock(schema,metaData,rawData){
   override def assemble(): Seq[PatternInstance] = rawData
   override def iterator(): Iterator[PatternInstance] = rawData.iterator
   override def enumerateIterator(): Iterator[PatternInstance] = iterator()
+
 }
 
 /**
@@ -133,11 +144,12 @@ class EdgePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Se
   * @param metaData metaData for the block
   * @param rawData rawData for the block, here we assume the nodeIds are represented using Int.
   */
-class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:Map[KeyPatternInstance, Seq[ValuePatternInstance]]) extends PatternLogoBlock(schema,metaData,rawData){
+class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:mutable.Map[KeyPatternInstance, Seq[ValuePatternInstance]]) extends PatternLogoBlock(schema,metaData,rawData){
   def valueMapping(keyMapping:KeyMapping)= KeyMapping(schema.valueKeyMapping(keyMapping))
 
   //get the values from the key in KeyValuePatternLogoBlock
   def getValue(key:KeyPatternInstance) ={
+
     val resRaw = rawData.getOrElse(key,null)
     val res = resRaw match {
       case null => None
@@ -157,19 +169,29 @@ class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData
   }
 
 
-
-
   //TODO this part is wrong, it is only just a temporary fix
-  override def iterator() = rawData.toSeq.flatMap(f => f._2).iterator
+  override def iterator() = null
+//    rawData.toSeq.flatMap(f => f._2).iterator
 
-  override def enumerateIterator(): Iterator[PatternInstance] = iterator()
+  override def enumerateIterator(): Iterator[PatternInstance] = null
+//    iterator()
 }
 
 
 //TODO: test filtering
-class FilteringPatternLogoBlock[A:ClassTag](logoBlock: PatternLogoBlock[A], f:PatternInstance=>Boolean) extends PatternLogoBlock(logoBlock.schema,logoBlock.metaData,logoBlock.rawData){
+class FilteringPatternLogoBlock[A:ClassTag](var logoBlock: PatternLogoBlock[A], var f:PatternInstance=>Boolean) extends PatternLogoBlock(logoBlock.schema,logoBlock.metaData,logoBlock.rawData) {
   override def iterator(): Iterator[PatternInstance] = logoBlock.iterator().filter(f)
   override def enumerateIterator(): Iterator[PatternInstance] = logoBlock.enumerateIterator().filter(f)
+
+//  override def write(kryo: Kryo, output: Output): Unit = {
+//    kryo.writeObject(output,logoBlock)
+//    kryo.writeObject(output,f)
+//  }
+//
+//  override def read(kryo: Kryo, input: Input): Unit = {
+//    logoBlock = kryo.readObject(input,classOf[PatternLogoBlock[A]])
+//    f = kryo.readObject(input,classOf[PatternInstance=>Boolean])
+//  }
 }
 
 /**

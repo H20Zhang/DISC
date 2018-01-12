@@ -5,7 +5,12 @@ import org.apache.spark.Logo.UnderLying.Joiner.LogoBuildScriptStep
 import org.apache.spark.Logo.UnderLying.dataStructure.{PatternInstance, _}
 
 
-case class FilteringCondition(f:PatternInstance => Boolean, isStrictCondition:Boolean)
+case class FilteringCondition(f:PatternInstance => Boolean, isStrictCondition:Boolean) {
+
+  override def clone(): AnyRef = {
+    FilteringCondition(f,isStrictCondition)
+  }
+}
 
 /**
   * Represent a logical reference to Logo, an wrapper around LogoBuildScriptStep
@@ -23,7 +28,7 @@ abstract class LogoRDDReference(schema: LogoSchema, buildScriptStep: LogoBuildSc
   * @param patternSchema the schema of the patternLogo
   * @param buildScript the buildScript used to build the new Logo
   */
-class PatternLogoRDDReference(val patternSchema: LogoSchema, val buildScript:LogoPatternPhysicalPlan) extends LogoRDDReference(patternSchema,buildScript){
+class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript:LogoPatternPhysicalPlan) extends LogoRDDReference(patternSchema,buildScript){
 
 
   var filteringCondition:FilteringCondition = null
@@ -39,8 +44,24 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, val buildScript:Log
 //    this
 //  }
 //
+
+
+  def executeFiltering(f:FilteringCondition):PatternLogoRDDReference = {
+    val filteredBuildScript = new LogoFilterPatternPhysicalPlan(f,buildScript)
+    val newData = filteredBuildScript.generateNewPatternJState()
+    val newBuildScript = new LogoEdgePatternPhysicalPlan(newData)
+    new PatternLogoRDDReference(patternSchema,newBuildScript)
+  }
+
   def filter(f:FilteringCondition):PatternLogoRDDReference = {
-    new PatternLogoRDDReference(patternSchema,new LogoFilterPatternPhysicalPlan(f,buildScript))
+    val filteredBuildScript = new LogoFilterPatternPhysicalPlan(f,buildScript)
+    if (f.isStrictCondition){
+
+      val newBuildScript = new LogoEdgePatternPhysicalPlan(filteredBuildScript.generateNewPatternJState())
+      new PatternLogoRDDReference(patternSchema,newBuildScript)
+    }else{
+      new PatternLogoRDDReference(patternSchema,filteredBuildScript)
+    }
   }
 
   def toIdentitySubPattern():SubPatternLogoRDDReference = new SubPatternLogoRDDReference(this,KeyMapping(List.range(0,patternSchema.nodeSize)))
@@ -69,9 +90,9 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, val buildScript:Log
   * The class that represent the logical plan of composing a new pattern using the two old pattern
   * @param children the old pattern used to construct the new pattern
   * @param patternSchema the schema of the patternLogo
-  * @param buildScript the buildScript used to build the new Logo
+  * @param composebuildScript the buildScript used to build the new Logo
   */
-class ComposingPatternLogoRDDReference(val children:Seq[PatternLogoRDDReference], override val patternSchema: LogoSchema, override val buildScript:LogoPatternPhysicalPlan) extends PatternLogoRDDReference(patternSchema,buildScript){
+class ComposingPatternLogoRDDReference(val children:Seq[PatternLogoRDDReference], override val patternSchema: LogoSchema, var composebuildScript:LogoPatternPhysicalPlan) extends PatternLogoRDDReference(patternSchema,composebuildScript){
 
 }
 

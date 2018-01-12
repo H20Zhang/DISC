@@ -1,8 +1,8 @@
 package graphFrameTest
 
-import graphFrameApplication.{GraphFrameLoader, mainEntry}
-import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
-import org.graphframes.{GraphFrame, examples}
+//import graphFrameApplication.{GraphFrameLoader, mainEntry}
+//import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
+//import org.graphframes.{GraphFrame, examples}
 import org.scalatest.FunSuite
 
 class mainTest extends FunSuite{

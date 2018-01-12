@@ -26,11 +26,9 @@ object TestLogoRDDData {
 
     val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema,f.metaData,f.rawData.map(t => PatternInstance(t._1))))
 
-    edgePatternLogoRDD.persist(StorageLevel.MEMORY_AND_DISK_SER).count()
+    edgePatternLogoRDD.cache().count()
     new ConcreteLogoRDD(edgePatternLogoRDD.asInstanceOf[RDD[LogoBlockRef]], schema)
   }
-
-
 
 
 
@@ -47,8 +45,6 @@ object TestLogoRDDData {
         }
         res
     }.filter(f => f != null).flatMap(f => Iterable(f,f.swap)).distinct().map(f => (Array(f._1,f._2),1)).map(f => (f._1.toSeq, f._2))
-
-
 
 
 //    val rawRDD = sc.parallelize(List.range(0,100)).map(f => (Seq(f,f),1))

@@ -92,7 +92,7 @@ class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(Seq[Int],A)], default:A) extend
       val blockGenerator = new rowBlockGenerator(schema,index,f)
       val block = blockGenerator.generate()
       Iterator(block)
-    },true)
+    },true).cache()
   }
 }
 

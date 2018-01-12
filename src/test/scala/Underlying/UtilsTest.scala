@@ -112,5 +112,23 @@ class UtilsTest extends FunSuite{
 //    println(TestUtil.listlistEqual(List(List(4)),theMap.get(List(1,2)).get.get(List(3)).get))
   }
 
+//  test("testNewHashMap"){
+//    val list1 = List(1,2,3,4)
+//    val list2 = List(2,3,4,5)
+//    val list3 = List(3,4,5,6)
+//    val list4 = List(4,5,6,7)
+//    val list5 = List(5,6,7,8)
+//
+//    val keys = List(0,1)
+//    val values= List(2)
+//    val total = List(0,1,2,3)
+//    val list = List(list1,list2,list3,list4,list5)
+//
+//    val theMap = MapBuilder.fromListToMapFast(list,keys.toSet)
+//
+//
+//    assert(TestUtil.listlistEqual(List(List(3,4)),theMap.get(List(1,2))))
+//  }
+
 
 }

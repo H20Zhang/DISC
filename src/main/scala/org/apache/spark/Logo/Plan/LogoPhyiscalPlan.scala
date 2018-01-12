@@ -2,6 +2,7 @@ package org.apache.spark.Logo.Plan
 
 
 import org.apache.spark.Logo.UnderLying.Joiner.{LogoBuildPhyiscalStep, LogoBuildScriptStep}
+import org.apache.spark.Logo.UnderLying.Maker.ToFilteringTransformer
 import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
@@ -18,7 +19,7 @@ class LogoLogicalBuildScript {
   * @param keyMapping the keyMapping between the old Logo and new Logo
   * @param name
   */
-abstract class LogoPatternPhysicalPlan(val logoRDDRefs:Seq[LogoPatternPhysicalPlan], val keyMapping:Seq[KeyMapping], val name:String="") extends LogoBuildScriptStep{
+abstract class LogoPatternPhysicalPlan(@transient val logoRDDRefs:Seq[LogoPatternPhysicalPlan], @transient val keyMapping:Seq[KeyMapping], val name:String="") extends LogoBuildScriptStep{
 
   lazy val compositeSchema = new subKeyMappingCompositeLogoSchemaBuilder(logoRDDRefs.map(_.getSchema()), keyMapping) generate()
 
@@ -75,17 +76,44 @@ class Planned2HandlerGenerator(coreId:Int) extends Serializable {
 }
 
 
-class LogoFilterPatternPhysicalPlan(f:FilteringCondition, buildLogicalStep: LogoPatternPhysicalPlan) extends LogoPatternPhysicalPlan(buildLogicalStep.logoRDDRefs, buildLogicalStep.keyMapping){
-  override def generateLeafPhyiscal(): PatternLogoRDD = buildLogicalStep.generateLeafPhyiscal()
+class LogoFilterPatternPhysicalPlan(@transient f:FilteringCondition, @transient buildLogicalStep: LogoPatternPhysicalPlan) extends LogoPatternPhysicalPlan(buildLogicalStep.logoRDDRefs, buildLogicalStep.keyMapping){
 
-  override def generateCorePhyiscal(): PatternLogoRDD = buildLogicalStep.generateCorePhyiscal()
+
+
+  @transient var cachedFState:PatternLogoRDD = null
+  @transient var cachedJState:ConcreteLogoRDD = null
+
+  override def generateLeafPhyiscal(): PatternLogoRDD = generateNewPatternFState()
+
+  override def generateCorePhyiscal(): PatternLogoRDD = generateNewPatternJState()
+
+
+
 
   override def generateNewPatternFState(): PatternLogoRDD = {
-    buildLogicalStep.generateNewPatternFState().toFilteringPatternLogoRDD(f)
+    if (cachedFState == null){
+      if (f.isStrictCondition == true){
+        val filteringCondition = FilteringCondition(f.f,f.isStrictCondition)
+        cachedFState = buildLogicalStep.generateNewPatternFState()
+          .toFilteringPatternLogoRDD(filteringCondition.clone().asInstanceOf[FilteringCondition]).toConcretePatternLogoRDD
+      }else{
+        val filteringCondition = FilteringCondition(f.f,f.isStrictCondition)
+        cachedFState = buildLogicalStep.generateNewPatternFState()
+          .toFilteringPatternLogoRDD(filteringCondition.clone().asInstanceOf[FilteringCondition])
+      }
+
+    }
+  cachedFState
   }
 
   override def generateNewPatternJState(): ConcreteLogoRDD = {
-    buildLogicalStep.generateNewPatternJState().toFilteringPatternLogoRDD(f).toConcretePatternLogoRDD
+    if (cachedJState == null){
+      val filteringCondition = FilteringCondition(f.f,f.isStrictCondition)
+      cachedJState = buildLogicalStep.generateNewPatternJState()
+        .toFilteringPatternLogoRDD(filteringCondition.clone().asInstanceOf[FilteringCondition])
+        .toConcretePatternLogoRDD
+    }
+    cachedJState
   }
 
   override def getSchema(): LogoSchema = buildLogicalStep.getSchema()
@@ -96,7 +124,7 @@ class LogoFilterPatternPhysicalPlan(f:FilteringCondition, buildLogicalStep: Logo
   * @param logoRDDRefs logical logoRDD used to build this LogoRDD
   * @param keyMapping the keyMapping between the old Logo and new Logo
   */
-class LogoComposite2PatternPhysicalPlan(logoRDDRefs:Seq[LogoPatternPhysicalPlan], keyMapping:Seq[KeyMapping]) extends LogoPatternPhysicalPlan(logoRDDRefs,keyMapping) {
+class LogoComposite2PatternPhysicalPlan(@transient logoRDDRefs:Seq[LogoPatternPhysicalPlan], @transient keyMapping:Seq[KeyMapping]) extends LogoPatternPhysicalPlan(logoRDDRefs,keyMapping) {
 
   lazy val schema = getSchema()
   lazy val coreLogoRef = logoRDDRefs(coreId)
@@ -123,8 +151,13 @@ class LogoComposite2PatternPhysicalPlan(logoRDDRefs:Seq[LogoPatternPhysicalPlan]
 
   override def generateCorePhyiscal(): PatternLogoRDD = {
     val corePatternLogoRDD = coreLogoRef.generateNewPatternFState()
-    corePatternLogoRDD.patternRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
-    corePatternLogoRDD.patternRDD.count()
+////    corePatternLogoRDD.patternRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+
+    if (!(corePatternLogoRDD.patternRDD.getStorageLevel == StorageLevel.MEMORY_ONLY)){
+      corePatternLogoRDD.patternRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+      corePatternLogoRDD.patternRDD.count()
+    }
+
     corePatternLogoRDD
   }
 
@@ -144,7 +177,7 @@ class LogoComposite2PatternPhysicalPlan(logoRDDRefs:Seq[LogoPatternPhysicalPlan]
   * The class represent the edge pattern for starting the building
   * @param edgeLogoRDD the actually data of the edge
   */
-class LogoEdgePatternPhysicalPlan(edgeLogoRDD:ConcreteLogoRDD) extends LogoPatternPhysicalPlan(List(),List()){
+class LogoEdgePatternPhysicalPlan(@transient edgeLogoRDD:ConcreteLogoRDD) extends LogoPatternPhysicalPlan(List(),List()){
 
   override def generateNewPatternFState(): PatternLogoRDD = {
     edgeLogoRDD

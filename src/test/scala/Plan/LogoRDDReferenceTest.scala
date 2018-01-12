@@ -1,8 +1,9 @@
 package Plan
 
-import org.apache.spark.Logo.Plan.FilteringCondition
+import org.apache.spark.Logo.Plan.{FilteringCondition, LogoEdgePatternPhysicalPlan, LogoFilterPatternPhysicalPlan, PatternLogoRDDReference}
 import org.apache.spark.Logo.UnderLying.TestData.TestLogoRDDReferenceData
 import org.apache.spark.Logo.UnderLying.dataStructure._
+import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 import org.scalatest.FunSuite
 
 class LogoRDDReferenceTest extends FunSuite{
@@ -60,102 +61,169 @@ class LogoRDDReferenceTest extends FunSuite{
 //  }
 
 
-//  test("filterCondition-Triangle"){
+//  test("filtering"){
 //
 //    val filterCondition = FilteringCondition({
-//      pattern =>
-//        pattern.pattern(0) < pattern.pattern(1)
-//    },false)
+//            pattern =>
+//              pattern.pattern(0) < pattern.pattern(1)
+//          },true)
 //
-//        val edgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference.filter(filterCondition)
-//        val leftEdge = edgeRDDReference.toIdentitySubPattern()
-//        val rightEdge = edgeRDDReference.toSubPattern(KeyMapping(Map((0,1),(1,2))))
+//    val filteredEdgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference
+//      .filter(filterCondition)
 //
-//        val wedge = leftEdge.build(rightEdge).toIdentitySubPattern()
+//    filteredEdgeRDDReference.generateF().toKeyValuePatternLogoRDD(Set(0))
+//    filteredEdgeRDDReference.generateJ()
 //
-//        val middleEdge = edgeRDDReference.toSubPattern(KeyMapping(Map((0,0),(1,2))))
-//
-//        val triangle = wedge.build(middleEdge)
-//
-//        val triangleCount = triangle.generateF().logoRDD.map{
-//          f =>
-//
-//            val compositeBlock = f.asInstanceOf[CompositeTwoPatternLogoBlock]
-//            val size = compositeBlock.enumerateIterator().size
-//            println(compositeBlock.leafsBlock.schema)
-//            println(compositeBlock.coreBlock.schema)
-//            println(size)
-//            size
-//        }.sum()
 //  }
 
-  test("filterCondition-notStrict"){
-    val edgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference
+
+  test("filterCondition-Triangle"){
 
     val filterCondition = FilteringCondition({
       pattern =>
-        pattern == PatternInstance(Seq(7115,201524))
-    },false)
-
-
-    //for
-    val filteredEdgeCount = edgeRDDReference.filter(filterCondition).generateF().logoRDD.map{
-      f =>
-        val filteringBlock = f.asInstanceOf[FilteringPatternLogoBlock[_]]
-        val concreteBlock = filteringBlock.rawData.asInstanceOf[Seq[PatternInstance]]
-
-          println("")
-          println(filteringBlock.metaData)
-          println(filteringBlock.schema)
-          println(filteringBlock.iterator().size)
-          println(concreteBlock.toList.size)
-         concreteBlock.toList.size
-    }.sum()
-
-    assert(filteredEdgeCount == 201526.0)
-  }
-
-  test("filterCondition-set-unset"){
-    val edgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference
-
-    val filterCondition = FilteringCondition({
-      pattern =>
-        pattern == PatternInstance(Seq(7115,201524))
+        pattern.pattern(0) < pattern.pattern(1)
     },true)
 
 
+    val edgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference
 
-    val filteredEdgeCount = edgeRDDReference.filter(filterCondition).generateJ().logoRDD.map{
-      f =>
-      val concreteBlock = f.asInstanceOf[ConcretePatternLogoBlock]
-              if (concreteBlock.rawData.toList.size > 0){
-                println("")
-                println(concreteBlock.metaData)
-                println(concreteBlock.schema)
-                println(concreteBlock.rawData.toList.size)
-                1
-              }else{
-                0
-              }
-    }.sum()
-
-    assert(filteredEdgeCount == 1)
-
-
-    val edgeCount = edgeRDDReference.generateJ().logoRDD.map{
+    edgeRDDReference.generateJ().patternRDD.map{
       f =>
         val concreteBlock = f.asInstanceOf[ConcretePatternLogoBlock]
-
+        //                    if (concreteBlock.rawData.toList.size > 0){
         println("")
         println(concreteBlock.metaData)
         println(concreteBlock.schema)
         println(concreteBlock.rawData.toList.size)
-        concreteBlock.rawData.toList.size
+        1
+      //                    }else{
+      //                      0
+      //                    }
+    }.count()
+        val filteredEdgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference
+          .filter(filterCondition)
 
-    }.sum()
 
-    assert(edgeCount == 201526.0)
+//        val filteredBuildScript = new LogoFilterPatternPhysicalPlan(filterCondition,edgeRDDReference.buildScript)
+//         val newBuildScript = new LogoEdgePatternPhysicalPlan(filteredBuildScript.generateNewPatternJState())
+//         val filteredEdgeRDDReference =  new PatternLogoRDDReference(edgeRDDReference.patternSchema,newBuildScript)
+//
+//
+//
+//    filteredEdgeRDDReference.generateJ().patternRDD.map{
+//      f =>
+//        val concreteBlock = f.asInstanceOf[ConcretePatternLogoBlock]
+////                    if (concreteBlock.rawData.toList.size > 0){
+//                      println("")
+//                      println(concreteBlock.metaData)
+//                      println(concreteBlock.schema)
+//                      println(concreteBlock.rawData.toList.size)
+//                      1
+////                    }else{
+////                      0
+////                    }
+//    }.count()
+//
+        val leftEdge = filteredEdgeRDDReference.toIdentitySubPattern()
+        val rightEdge = filteredEdgeRDDReference.toSubPattern(KeyMapping(Map((0,1),(1,2))))
+
+//        val wedge = leftEdge.build(rightEdge).generateF().logoRDD.map{
+//          f=>
+//          val compositeBlock = f.asInstanceOf[CompositeTwoPatternLogoBlock]
+//                      val size = compositeBlock.enumerateIterator().size
+//                      println(compositeBlock.leafsBlock.schema)
+//                      println(compositeBlock.coreBlock.schema)
+//                      println(size)
+//                      size
+//        }
+
+        val wedge = leftEdge.build(rightEdge).toIdentitySubPattern()
+
+        val middleEdge = filteredEdgeRDDReference.toSubPattern(KeyMapping(Map((0,0),(1,2))))
+
+        val triangle = wedge.build(middleEdge)
+
+        val triangleCount = triangle.generateF().logoRDD.map{
+          f =>
+
+            val compositeBlock = f.asInstanceOf[CompositeTwoPatternLogoBlock]
+            val size = compositeBlock.enumerateIterator().size
+            println(compositeBlock.leafsBlock.schema)
+            println(compositeBlock.coreBlock.schema)
+            println(size)
+            size
+        }.sum()
+
+        assert(triangleCount == 608389.0)
   }
+
+//  test("filterCondition-notStrict"){
+//    val edgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference
+//
+//    val filterCondition = FilteringCondition({
+//      pattern =>
+//        pattern == PatternInstance(Seq(7115,201524))
+//    },false)
+//
+//
+//    //for
+//    val filteredEdgeCount = edgeRDDReference.filter(filterCondition).generateF().logoRDD.map{
+//      f =>
+//        val filteringBlock = f.asInstanceOf[FilteringPatternLogoBlock[_]]
+//        val concreteBlock = filteringBlock.rawData.asInstanceOf[Seq[PatternInstance]]
+//
+//          println("")
+//          println(filteringBlock.metaData)
+//          println(filteringBlock.schema)
+//          println(filteringBlock.iterator().size)
+//          println(concreteBlock.toList.size)
+//         concreteBlock.toList.size
+//    }.sum()
+//
+//    assert(filteredEdgeCount == 201526.0)
+//  }
+//
+//  test("filterCondition-set-unset"){
+//    val edgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference
+//
+//    val filterCondition = FilteringCondition({
+//      pattern =>
+//        pattern == PatternInstance(Seq(7115,201524))
+//    },true)
+//
+//
+//
+//    val filteredEdgeCount = edgeRDDReference.filter(filterCondition).generateJ().logoRDD.map{
+//      f =>
+//      val concreteBlock = f.asInstanceOf[ConcretePatternLogoBlock]
+//              if (concreteBlock.rawData.toList.size > 0){
+//                println("")
+//                println(concreteBlock.metaData)
+//                println(concreteBlock.schema)
+//                println(concreteBlock.rawData.toList.size)
+//                1
+//              }else{
+//                0
+//              }
+//    }.sum()
+//
+//    assert(filteredEdgeCount == 1)
+//
+//
+//    val edgeCount = edgeRDDReference.generateJ().logoRDD.map{
+//      f =>
+//        val concreteBlock = f.asInstanceOf[ConcretePatternLogoBlock]
+//
+//        println("")
+//        println(concreteBlock.metaData)
+//        println(concreteBlock.schema)
+//        println(concreteBlock.rawData.toList.size)
+//        concreteBlock.rawData.toList.size
+//
+//    }.sum()
+//
+//    assert(edgeCount == 201526.0)
+//  }
 
 
 //  test("triangleTest"){
@@ -178,19 +246,19 @@ class LogoRDDReferenceTest extends FunSuite{
 //        println(size)
 //        size
 //    }.sum()
-
-//   triangle.generateJ().logoRDD.map{
-//      f =>
-//        val concreteBlock = f.asInstanceOf[ConcretePatternLogoBlock]
-//        if (concreteBlock.rawData.toList.size > 0){
-//          println("")
-//          println(concreteBlock.metaData)
-//          println(concreteBlock.schema)
-//          println(concreteBlock.rawData.toList.size)
-//        }
-//        concreteBlock.rawData.toList.size
 //
-//    }.sum()
+////   triangle.generateJ().logoRDD.map{
+////      f =>
+////        val concreteBlock = f.asInstanceOf[ConcretePatternLogoBlock]
+////        if (concreteBlock.rawData.toList.size > 0){
+////          println("")
+////          println(concreteBlock.metaData)
+////          println(concreteBlock.schema)
+////          println(concreteBlock.rawData.toList.size)
+////        }
+////        concreteBlock.rawData.toList.size
+////
+////    }.sum()
 //
 //    println(s"triangle number is $triangleCount")
 //  }

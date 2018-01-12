@@ -40,7 +40,9 @@ class ToKeyValueTransformer extends LogoBlockTransformer{
         Iterator(patternBlock.toKeyValueLogoBlock(key).asInstanceOf[LogoBlockRef])
     },true)
 
+
     resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+//    resRDD.cache()
     resRDD.count()
     resRDD
   }
@@ -59,6 +61,7 @@ class ToConcreteTransformer extends LogoBlockTransformer{
     },true)
 
     resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+//    resRDD.cache()
     resRDD.count()
     resRDD
   }
@@ -78,6 +81,7 @@ class ToFilteringTransformer extends LogoBlockTransformer{
     require(filteringCondition != null, "should set filteringCondition before calling transform")
 
     var resRDD:RDD[LogoBlockRef] = null
+    val fCondition = filteringCondition
 
     if (filteringCondition.isStrictCondition){
       resRDD = rdd.mapPartitions({
@@ -86,7 +90,7 @@ class ToFilteringTransformer extends LogoBlockTransformer{
           it.hasNext
 
           val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
-          Iterator(patternBlock.toFilteringLogoBlock(filteringCondition.f).toConcreteLogoBlock.asInstanceOf[LogoBlockRef])
+          Iterator(patternBlock.toFilteringLogoBlock(fCondition.f).toConcreteLogoBlock.asInstanceOf[LogoBlockRef])
       },true)
 
 
@@ -98,12 +102,13 @@ class ToFilteringTransformer extends LogoBlockTransformer{
           it.hasNext
 
           val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
-          Iterator(patternBlock.toFilteringLogoBlock(filteringCondition.f).asInstanceOf[LogoBlockRef])
+          Iterator(patternBlock.toFilteringLogoBlock(fCondition.f).asInstanceOf[LogoBlockRef])
       },true)
 
     }
 
-    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+//    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    resRDD.cache()
     resRDD.count()
     resRDD
   }

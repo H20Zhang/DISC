@@ -8,6 +8,11 @@ class dataStructureTest extends FunSuite {
 
 
 
+//  test("theMap"){
+//    val tickers = TheMap.withExpectedSize[String,String](10)
+//    tickers.put("AAPL", "Apple, Inc.")
+//  }
+
 //  implicit class Crossable[X](xs: Traversable[X]) {
 //    def cross[Y](ys: Traversable[Y]) = for { x <- xs; y <- ys } yield (x, y)
 //  }

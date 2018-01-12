@@ -3,6 +3,8 @@ package org.apache.spark.Logo.UnderLying.utlis
 import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
+import com.esotericsoftware.minlog.Log;
+import com.esotericsoftware.minlog.Log.LEVEL_TRACE
 
 
 /**
@@ -18,6 +20,10 @@ object SparkSingle {
   private def getConf(): Unit ={
 
 
+
+    // ...
+//    Log.set(LEVEL_TRACE)
+
     new SparkConf()
       .registerKryoClasses(Array(
         classOf[LogoSchema]
@@ -26,6 +32,7 @@ object SparkSingle {
         ,classOf[ConcretePatternLogoBlock]
         ,classOf[KeyValuePatternLogoBlock]
         ,classOf[CompositeTwoPatternLogoBlock]
+        ,classOf[FilteringPatternLogoBlock[_]]
         ,classOf[PatternInstance]
         ,classOf[OneKeyPatternInstance]
         ,classOf[TwoKeyPatternInstance]
