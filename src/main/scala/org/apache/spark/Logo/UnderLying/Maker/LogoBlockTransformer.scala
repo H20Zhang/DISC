@@ -69,12 +69,21 @@ class ToConcreteTransformer extends LogoBlockTransformer{
 
 //TODO: test needed
 
+
+
+
 class ToFilteringTransformer extends LogoBlockTransformer{
+
+  var isCached:Boolean = false
 
   var filteringCondition:FilteringCondition = null
 
   def setFilteringCondition(f:FilteringCondition): Unit ={
     filteringCondition = f
+  }
+
+  def setIsCached(isCached:Boolean): Unit ={
+    this.isCached = isCached
   }
 
   override def transform(rdd: RDD[LogoBlockRef]): RDD[LogoBlockRef] = {
@@ -108,8 +117,11 @@ class ToFilteringTransformer extends LogoBlockTransformer{
     }
 
 //    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
-    resRDD.cache()
-    resRDD.count()
+
+    if (isCached){
+      resRDD.cache()
+      resRDD.count()
+    }
     resRDD
   }
 }

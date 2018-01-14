@@ -17,7 +17,7 @@ object MapBuilder {
     res
   }
 
-  def fromListToMapFast[A](data:Seq[Seq[A]], keys:Set[Int]) ={
+  def fromListToMapFast[A](data:Seq[Array[A]], keys:Set[Int]) ={
 
     val hashmap = new mutable.HashMap[Seq[A],ArrayBuffer[Seq[A]]]()
 

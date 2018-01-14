@@ -3,6 +3,7 @@ import java.io.{Externalizable, ObjectInput, ObjectOutput}
 
 import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.{Kryo, KryoSerializable}
+import gnu.trove.list.array.TIntArrayList
 
 import scala.collection.mutable
 //import com.koloboke.collect.map.hash.HashObjObjMap
@@ -289,10 +290,12 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
   class EnumerateIterator extends Iterator[PatternInstance]{
 
     var leafsIterator:Iterator[PatternInstance] = _
-    val coreIterator:Iterator[PatternInstance] = coreBlock.iterator()
+    val coreIterator:Iterator[PatternInstance] = coreBlock.enumerateIterator()
     var currentCore:PatternInstance = _
-    val currentPattern:EnumeratePatternInstance = new EnumeratePatternInstance(arrayBuffer)
-    val arrayBuffer = ArrayBuffer.fill(totalNodes)(0)
+//    val TintBuffer = new TIntArrayList(totalNodes)
+    val array = Array.fill(totalNodes)(0)
+    val currentPattern:EnumeratePatternInstance = new EnumeratePatternInstance(array)
+
 
     override def hasNext: Boolean = {
 
@@ -300,6 +303,9 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
         do {
           if (coreIterator.hasNext){
             currentCore = coreIterator.next()
+            coreMapping.foreach{
+              f => array.update(f._2,currentCore.pattern(f._1))
+            }
           }else{
             return false
           }
@@ -310,6 +316,11 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
       return true
     }
 
+
+    val coreMapping = coreKeyMapping.keyMapping.toArray
+    val valueKeyMapping = valueMapping.keyMapping.toArray
+    val updateArray = coreMapping ++ valueKeyMapping
+
     override def next(): PatternInstance = {
       val leafs = leafsIterator.next()
       val core = currentCore
@@ -317,14 +328,17 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
       if (valueMapping.keyMapping.size == 0){
         core
       }else {
-        coreKeyMapping.keyMapping.foreach{f =>
-          arrayBuffer(f._2) = core.pattern(f._1)}
 
-        valueMapping.keyMapping.foreach{f =>
-          arrayBuffer(f._2) = leafs.pattern(f._1)}
+
+        valueKeyMapping.foreach{
+          f => array.update(f._2,leafs.pattern(f._1))
+        }
+
+
         currentPattern
     }
   }
+
   }
 
   /**

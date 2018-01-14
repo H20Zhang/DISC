@@ -44,7 +44,7 @@ object SparkSingle {
 
   private var spark = SparkSession
     .builder()
-    .master("local[*]")
+    .master("local[1]")
     .appName("spark sql example")
     .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     .config("spark.some.config.option", "some-value")

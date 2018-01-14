@@ -88,8 +88,6 @@ class LogoFilterPatternPhysicalPlan(@transient f:FilteringCondition, @transient 
   override def generateCorePhyiscal(): PatternLogoRDD = generateNewPatternJState()
 
 
-
-
   override def generateNewPatternFState(): PatternLogoRDD = {
     if (cachedFState == null){
       if (f.isStrictCondition == true){
@@ -117,6 +115,9 @@ class LogoFilterPatternPhysicalPlan(@transient f:FilteringCondition, @transient 
   }
 
   override def getSchema(): LogoSchema = buildLogicalStep.getSchema()
+
+
+
 }
 
 /**
@@ -163,6 +164,7 @@ class LogoComposite2PatternPhysicalPlan(@transient logoRDDRefs:Seq[LogoPatternPh
 
   override def generateNewPatternFState(): PatternLogoRDD = {
     val fStatePatternLogoRDD = new PatternLogoRDD(logoStep.performFetchJoin(sc), getSchema())
+//    fStatePatternLogoRDD.patternRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
       fStatePatternLogoRDD
   }
 

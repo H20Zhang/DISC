@@ -65,6 +65,30 @@ class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSc
 }
 
 
+class ComposingLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema:LogoSchema) extends PatternLogoRDD(patternRDD,patternSchema){
+
+  override def toFilteringPatternLogoRDD(f: FilteringCondition): FilteringLogoRDD = {
+    if (filteringLogoRDD == null){
+      val toFilteringTransformer = new ToFilteringTransformer
+      toFilteringTransformer.setFilteringCondition(f)
+      toFilteringTransformer.setIsCached(false)
+      val filteringData = toFilteringTransformer.transform(patternRDD)
+      val filteringSchema = patternSchema match {
+        case c:CompositeLogoSchema => c.schema
+        case _ => patternSchema
+      }
+
+      //TODO, this place actually filter is not always executed.
+      if (f.isStrictCondition){
+        filteringLogoRDD = new FilteringLogoRDD(filteringData, filteringSchema, true)
+      } else{
+        filteringLogoRDD = new FilteringLogoRDD(filteringData, filteringSchema, false)
+      }
+    }
+    filteringLogoRDD
+  }
+}
+
 class FilteringLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema: LogoSchema, isFilterExecuted:Boolean) extends PatternLogoRDD(patternRDD,patternSchema){
 
   override def toConcretePatternLogoRDD: ConcreteLogoRDD = {

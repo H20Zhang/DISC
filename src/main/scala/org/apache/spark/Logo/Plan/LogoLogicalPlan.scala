@@ -21,6 +21,8 @@ abstract class LogoRDDReference(schema: LogoSchema, buildScriptStep: LogoBuildSc
   def generateF():PatternLogoRDD
   def generateJ():ConcreteLogoRDD
   def optimize():Unit
+  def size():Long
+  def blockCount():Long
 }
 
 /**
@@ -64,10 +66,19 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript:Log
     }
   }
 
+  def toConcrete() = {
+      val newBuildScript = new LogoEdgePatternPhysicalPlan(buildScript.generateNewPatternJState())
+      new PatternLogoRDDReference(patternSchema,newBuildScript)
+  }
+
   def toIdentitySubPattern():SubPatternLogoRDDReference = new SubPatternLogoRDDReference(this,KeyMapping(List.range(0,patternSchema.nodeSize)))
 
   //prepare for build operation.
   def toSubPattern(keyMapping: KeyMapping):SubPatternLogoRDDReference = new SubPatternLogoRDDReference(this,keyMapping)
+
+  def toSubPattern(keyMapping: (Int,Int)*):SubPatternLogoRDDReference = {
+    new SubPatternLogoRDDReference(this,KeyMapping(keyMapping.toMap))
+  }
 
   //generate the F-state Logo
   override def generateF() = {
@@ -83,6 +94,38 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript:Log
 
   override def optimize(): Unit = {
 //    buildScript.setFilteringCondition(filteringCondition)
+  }
+
+  override def size(): Long = {
+    generateF().logoRDD.map{
+      f =>
+        var size = 0L
+        val block = f.asInstanceOf[PatternLogoBlock[_]]
+        val iterator = block.enumerateIterator()
+
+        while (iterator.hasNext){
+          iterator.next()
+          size = size + 1
+        }
+        size
+
+    }.sum().toLong
+  }
+
+  override def blockCount(): Long = {
+    generateF().logoRDD.map{
+      f =>
+        var size = 0L
+        val block = f.asInstanceOf[PatternLogoBlock[_]]
+        val iterator = block.enumerateIterator()
+
+        while (iterator.hasNext){
+          iterator.next()
+          size = size + 1
+        }
+        size
+
+    }.count()
   }
 }
 

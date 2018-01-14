@@ -2,11 +2,15 @@ package org.apache.spark.Logo.UnderLying.dataStructure
 
 import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.{Kryo, KryoSerializable}
+import gnu.trove.list.array.TIntArrayList
 import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, ListSelector, TestUtil}
-
+import scala.util.hashing.MurmurHash3
 import scala.collection.mutable.ArrayBuffer
 
 class BaseStructure
+
+
+
 
 //TODO finish this to optimize the code
 
@@ -75,7 +79,7 @@ class KeyMapping(val keyMapping:Map[Int,Int]) extends Serializable {
   * The class that represent a pattern instance, which can later be converted to keyPatternInstance and valuePatternInstance
   * @param pattern Seq[Int] used to represent pattern
   */
-class PatternInstance(var pattern:Seq[Int]) extends Serializable with KryoSerializable{
+class PatternInstance(var pattern:Array[Int]) extends Serializable with KryoSerializable{
   lazy val patternSize = pattern.size
 
   def toOneKeyPatternInstance():KeyPatternInstance = new OneKeyPatternInstance(pattern(0))
@@ -93,11 +97,12 @@ class PatternInstance(var pattern:Seq[Int]) extends Serializable with KryoSerial
 
   //for keyPattern with just one node or two node, we make specific optimization here.
   def toSubKeyPattern(colToPreserveSet:Set[Int], colToPreserve:Seq[Int]) = {
+
     val colSizes = colToPreserveSet.size
     val res = colSizes match {
       case 1 => new OneKeyPatternInstance(pattern(colToPreserve(0)))
       case 2 => new TwoKeyPatternInstance(pattern(colToPreserve(0)),pattern(colToPreserve(1)))
-      case _ => subPatterns(colToPreserveSet).toKeyPatternInstance()
+      case _ => throw new Exception("keys must be 2 or 1, more need to be implemented")
     }
 
     res
@@ -130,10 +135,10 @@ class PatternInstance(var pattern:Seq[Int]) extends Serializable with KryoSerial
   }
 }
 
-class EnumeratePatternInstance(pattern:ArrayBuffer[Int]) extends PatternInstance(pattern){
+class EnumeratePatternInstance(pattern:Array[Int]) extends PatternInstance(pattern){
 }
 
-class KeyPatternInstance(pattern:Seq[Int]) extends PatternInstance(pattern){
+class KeyPatternInstance(pattern:Seq[Int]) extends PatternInstance(null){
 
 }
 
@@ -144,6 +149,8 @@ class KeyPatternInstance(pattern:Seq[Int]) extends PatternInstance(pattern){
 class OneKeyPatternInstance(pattern0:Int) extends KeyPatternInstance(null){
   var node = pattern0
 
+
+
   override def canEqual(other: Any): Boolean = other.isInstanceOf[OneKeyPatternInstance]
 
   override def equals(other: Any): Boolean = other match {
@@ -153,7 +160,8 @@ class OneKeyPatternInstance(pattern0:Int) extends KeyPatternInstance(null){
   }
 
   override def hashCode(): Int = {
-    31*node
+    node*31
+//    MurmurHash3.finalizeHash(MurmurHash3.mix(0x3c074a61,node),1)
   }
 
   override def read(kryo: Kryo, input: Input): Unit = {
@@ -186,7 +194,9 @@ class TwoKeyPatternInstance(pattern0:Int, pattern1:Int) extends KeyPatternInstan
   }
 
   override def hashCode(): Int = {
-    31*node0+node1
+//    Hash.fmix32(node0)
+    node0*31+node1
+//    MurmurHash3.finalizeHash(MurmurHash3.mix(MurmurHash3.mix(0x3c074a61,node0),node1),2)
   }
 
   override def read(kryo: Kryo, input: Input): Unit = {
@@ -200,7 +210,25 @@ class TwoKeyPatternInstance(pattern0:Int, pattern1:Int) extends KeyPatternInstan
   }
 }
 
-class ValuePatternInstance(pattern:Seq[Int]) extends  PatternInstance(pattern){
+
+class rawPatternInstance(tIntArrayList: TIntArrayList) extends PatternInstance(null){
+  override def toSubKeyPattern(colToPreserveSet: Set[Int], colToPreserve: Seq[Int]): KeyPatternInstance = {
+
+
+      val colSizes = colToPreserveSet.size
+      val res = colSizes match {
+        case 1 => new OneKeyPatternInstance(tIntArrayList.getQuick((colToPreserve(0))))
+        case 2 => new TwoKeyPatternInstance(tIntArrayList.getQuick(colToPreserve(0)),tIntArrayList.getQuick(colToPreserve(1)))
+      }
+
+      res
+
+
+  }
+}
+
+
+class ValuePatternInstance(pattern:Array[Int]) extends  PatternInstance(pattern){
 
 }
 
@@ -216,7 +244,7 @@ object KeyMapping extends Serializable {
 
 object PatternInstance extends Serializable{
 
-  def apply(pattern: Seq[Int]): PatternInstance = new PatternInstance(pattern)
+  def apply(pattern: Seq[Int]): PatternInstance = new PatternInstance(pattern.toArray)
   def slowBuild(lInstance:PatternInstance, lKeyMapping:KeyMapping, rInstance:PatternInstance, rKeyMapping:KeyMapping, totalNodes:Int):PatternInstance = {
 
     if (rKeyMapping.keyMapping.size == 0){
@@ -235,14 +263,15 @@ object PatternInstance extends Serializable{
     if (rKeyMapping.keyMapping.size == 0){
       lInstance
     }else {
-      val arrayBuffer = new Array[Int](totalNodes)
+
+      val array = new Array[Int](totalNodes)
       lKeyMapping.keyMapping.foreach{f =>
-        arrayBuffer(f._2) = lInstance.pattern(f._1)}
+        array(f._2) = lInstance.pattern(f._1)}
 
       rKeyMapping.keyMapping.foreach{f =>
-        arrayBuffer(f._2) = rInstance.pattern(f._1)}
+        array(f._2) = rInstance.pattern(f._1)}
 
-      apply(arrayBuffer)
+      apply(array)
     }
   }
 
@@ -255,7 +284,7 @@ object KeyPatternInstance extends Serializable {
 
 
 object ValuePatternInstance extends Serializable {
-  def apply(pattern: Seq[Int]): ValuePatternInstance = new ValuePatternInstance(pattern)
+  def apply(pattern: Seq[Int]): ValuePatternInstance = new ValuePatternInstance(pattern.toArray)
 }
 
 
