@@ -38,6 +38,45 @@ object MapBuilder {
           hashmap
   }
 
+
+  def fromListToMapLongFast(data:Seq[Array[Int]], keySet:Set[Int], keys:Seq[Int]) ={
+
+//    val hashmap = new mutable.HashMap[Seq[Long],ArrayBuffer[Seq[Long]]]()
+
+    val hashmap = new mutable.LongMap[ArrayBuffer[ValuePatternInstance]]()
+
+    if (keys.size == 1){
+      data.foreach{
+        f =>
+          val key = f(keys(0)).toLong
+//            ListSelector.selectElements(f,keys)
+          val value = ListSelector.notSelectElements(f,keySet)
+          if (hashmap.contains(key)){
+            hashmap.get(key).get.append(ValuePatternInstance(value))
+          }else{
+            hashmap.put(key,new ArrayBuffer[ValuePatternInstance]())
+            hashmap.get(key).get.append(ValuePatternInstance(value))
+          }
+      }
+    } else if(keys.size == 2){
+      data.foreach{
+        f =>
+          val key1 = f(keys(0))
+          val key2 = f(keys(1))
+          val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
+          //            ListSelector.selectElements(f,keys)
+          val value = ListSelector.notSelectElements(f,keySet)
+          if (hashmap.contains(key)){
+            hashmap.get(key).get.append(ValuePatternInstance(value))
+          }else{
+            hashmap.put(key,new ArrayBuffer[ValuePatternInstance]())
+            hashmap.get(key).get.append(ValuePatternInstance(value))
+          }
+      }
+    }
+
+    hashmap
+  }
 //  def fromListToMapFast[A](data:Seq[Seq[A]],keys:Set[Int]) = {
 //    val hashmap = HashObjObjMaps.newMutableMap[Seq[A],ArrayBuffer[Seq[A]]](data.size)
 //

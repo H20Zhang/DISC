@@ -54,28 +54,33 @@ class CompressedLogoBlock[A:ClassTag, B:ClassTag](schema: LogoSchema, metaData: 
 abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMetaData, rawData:A) extends LogoBlock(schema, metaData, rawData) {
 
   //TODO testing required for below, this place needs further optimization
-  def buildIndex(schema:KeyValueLogoSchema):mutable.Map[KeyPatternInstance, Seq[ValuePatternInstance]] = {
+  def buildIndex(schema:KeyValueLogoSchema) = {
     val rawData = assemble()
     val keys = schema.keys.toSet
 
     if (keys.size == 1){
 
-//      MapBuilder.oneKeyfromListToMapFast(rawData.map(_.pattern),keys)
+//      println(MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq).getClass)
+      MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq)
 
-      MapBuilder
-        .fromListToMapFast(rawData.map(_.pattern),keys)
-        .map(f => (PatternInstance(f._1).toOneKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
+//      MapBuilder
+//        .fromListToMapFast(rawData.map(_.pattern),keys)
+//        .map(f => (PatternInstance(f._1).toOneKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
     } else if (keys.size == 2){
-//      MapBuilder.twoKeyfromListToMapFast(rawData.map(_.pattern),keys)
-      MapBuilder
-        .fromListToMapFast(rawData.map(_.pattern),keys)
-        .map(f => (PatternInstance(f._1).toTwoKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
+
+      MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq)
+//      MapBuilder
+//        .fromListToMapFast(rawData.map(_.pattern),keys)
+//        .map(f => (PatternInstance(f._1).toTwoKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
     }
     else{
-//      MapBuilder.keyfromListToMapFast(rawData.map(_.pattern),keys)
-      MapBuilder
-        .fromListToMapFast(rawData.map(_.pattern),keys)
-        .map(f => (PatternInstance(f._1).toKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
+
+      null.asInstanceOf[mutable.LongMap[ArrayBuffer[ValuePatternInstance]]]
+
+//
+//      MapBuilder
+//        .fromListToMapFast(rawData.map(_.pattern),keys)
+//        .map(f => (PatternInstance(f._1).toKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
     }
 
   }
@@ -145,13 +150,13 @@ class EdgePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Se
   * @param metaData metaData for the block
   * @param rawData rawData for the block, here we assume the nodeIds are represented using Int.
   */
-class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:mutable.Map[KeyPatternInstance, Seq[ValuePatternInstance]]) extends PatternLogoBlock(schema,metaData,rawData){
+class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:mutable.LongMap[ArrayBuffer[ValuePatternInstance]]) extends PatternLogoBlock(schema,metaData,rawData){
   def valueMapping(keyMapping:KeyMapping)= KeyMapping(schema.valueKeyMapping(keyMapping))
 
   //get the values from the key in KeyValuePatternLogoBlock
   def getValue(key:KeyPatternInstance) ={
 
-    val resRaw = rawData.getOrElse(key,null)
+    val resRaw = rawData.getOrElse(key.node,null)
     val res = resRaw match {
       case null => None
       case _ => Some(resRaw)

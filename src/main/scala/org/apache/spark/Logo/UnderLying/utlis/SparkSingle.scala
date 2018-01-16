@@ -3,8 +3,10 @@ package org.apache.spark.Logo.UnderLying.utlis
 import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import com.esotericsoftware.minlog.Log;
+import com.esotericsoftware.minlog.Log
 import com.esotericsoftware.minlog.Log.LEVEL_TRACE
+
+import scala.collection.mutable
 
 
 /**
@@ -17,7 +19,8 @@ object SparkSingle {
   private val conf = getConf()
 
 
-  private def getConf(): Unit ={
+  private def getConf() ={
+
 
 
 
@@ -38,19 +41,44 @@ object SparkSingle {
         ,classOf[TwoKeyPatternInstance]
         ,classOf[ValuePatternInstance]
         ,classOf[KeyMapping]
+        ,classOf[mutable.LongMap[ValuePatternInstance]]
       )
-      )
+      ).set("spark.kryo.registrator","org.apache.spark.Logo.UnderLying.dataStructure.KryoRegistor")
+
   }
 
-  private var spark = SparkSession
-    .builder()
-    .master("local[1]")
-    .appName("spark sql example")
-    .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-    .config("spark.some.config.option", "some-value")
-    .getOrCreate()
+
+  var isCluster = false
+
+
+
+  private def getSparkInternal() = {
+    isCluster match {
+      case true =>  SparkSession
+        .builder()
+        .master("yarn")
+        .appName("Lego")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config(getConf())
+        .config("spark.yarn.executor.memoryOverhead","600")
+        .config("spark.externalBlockStore.blockManager", "org.apache.spark.storage.GigaSpacesBlockManager")
+        .getOrCreate()
+      case false =>  SparkSession
+        .builder()
+        .master("local[1]")
+        .appName("Lego")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config(getConf())
+        .config("spark.yarn.executor.memoryOverhead","600")
+        .config("spark.externalBlockStore.blockManager", "org.apache.spark.storage.GigaSpacesBlockManager")
+        .getOrCreate()
+    }
+  }
+
+  private var spark = getSparkInternal()
+
   private var sc = spark.sparkContext
-  sc.setLogLevel("ERROR")
+//  sc.setLogLevel("ERROR")
 
   var counter = 0
 
@@ -58,8 +86,7 @@ object SparkSingle {
     counter += 1
 
     if (sc.isStopped){
-      spark = SparkSession.builder().master("local[*]").appName("spark sql example").config("spark.some.config.option", "some-value")
-        .getOrCreate()
+      spark = getSparkInternal()
     }
     (spark,sc)
   }

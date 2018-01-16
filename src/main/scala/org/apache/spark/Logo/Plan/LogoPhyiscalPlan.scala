@@ -154,10 +154,16 @@ class LogoComposite2PatternPhysicalPlan(@transient logoRDDRefs:Seq[LogoPatternPh
     val corePatternLogoRDD = coreLogoRef.generateNewPatternFState()
 ////    corePatternLogoRDD.patternRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
 
-    if (!(corePatternLogoRDD.patternRDD.getStorageLevel == StorageLevel.MEMORY_ONLY)){
-      corePatternLogoRDD.patternRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    if (corePatternLogoRDD.patternRDD.getStorageLevel == null){
+//      corePatternLogoRDD.patternRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+      corePatternLogoRDD.patternRDD.persist(StorageLevel.OFF_HEAP)
       corePatternLogoRDD.patternRDD.count()
     }
+
+//    if (!(corePatternLogoRDD.patternRDD.getStorageLevel == StorageLevel.MEMORY_ONLY)){
+//      corePatternLogoRDD.patternRDD.persist(StorageLevel.OFF_HEAP)
+//      corePatternLogoRDD.patternRDD.count()
+//    }
 
     corePatternLogoRDD
   }

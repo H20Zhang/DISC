@@ -112,6 +112,25 @@ class UtilsTest extends FunSuite{
 //    println(TestUtil.listlistEqual(List(List(4)),theMap.get(List(1,2)).get.get(List(3)).get))
   }
 
+    test("converter"){
+      val converter = new PointToNumConverter(Seq(3,3,1))
+
+
+
+      var num = 1
+
+      for(i <- 0 until 9) {
+        num = i
+        val list = converter.NumToList(num)
+        println(converter.NumToList(num))
+
+        println(converter.convertToNum(list))
+
+        assert(converter.convertToNum(list) == i)
+      }
+
+    }
+
 //  test("testNewHashMap"){
 //    val list1 = List(1,2,3,4)
 //    val list2 = List(2,3,4,5)

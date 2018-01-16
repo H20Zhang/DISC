@@ -1,21 +1,27 @@
 package Plan
 
-import org.apache.spark.Logo.UnderLying.utlis.ExamplePattern
+import org.apache.spark.Logo.UnderLying.utlis.{ExamplePattern, PointToNumConverter}
 import org.scalatest.FunSuite
 
 class ExamplePatternTest extends FunSuite{
-  test("Triangle"){
-    val triangle = ExamplePattern.triangle
-    assert(triangle.size() == 608389)
-  }
 
-//  test("Pattern"){
-//    val chordalSquare = ExamplePattern.chordalSquare
-//    assert(chordalSquare.size() == 40544543)
+  val data = "./wikiV.txt"
+
+//  test("Triangle"){
+//    val triangle = new ExamplePattern(data).triangle
+//    assert(triangle.size() == 608389)
 //  }
 
-//  test("Pattern"){
-//        val square = ExamplePattern.square
+
+
+
+  test("ChordalSquare"){
+    val chordalSquare = new ExamplePattern(data).chordalSquareFast
+    assert(chordalSquare.size() == 40544543)
+  }
+
+//  test("square"){
+//        val square = new ExamplePattern(data).square
 //        assert(square.size() == 57654491)
 //      }
 

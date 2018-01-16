@@ -98,7 +98,7 @@ class PatternInstance(var pattern:Array[Int]) extends Serializable with KryoSeri
   //for keyPattern with just one node or two node, we make specific optimization here.
   def toSubKeyPattern(colToPreserveSet:Set[Int], colToPreserve:Seq[Int]) = {
 
-    val colSizes = colToPreserveSet.size
+    val colSizes = colToPreserve.size
     val res = colSizes match {
       case 1 => new OneKeyPatternInstance(pattern(colToPreserve(0)))
       case 2 => new TwoKeyPatternInstance(pattern(colToPreserve(0)),pattern(colToPreserve(1)))
@@ -139,7 +139,7 @@ class EnumeratePatternInstance(pattern:Array[Int]) extends PatternInstance(patte
 }
 
 class KeyPatternInstance(pattern:Seq[Int]) extends PatternInstance(null){
-
+  var node = 0L
 }
 
 /**
@@ -147,9 +147,7 @@ class KeyPatternInstance(pattern:Seq[Int]) extends PatternInstance(null){
   * @param pattern0
   */
 class OneKeyPatternInstance(pattern0:Int) extends KeyPatternInstance(null){
-  var node = pattern0
-
-
+  node = pattern0.toLong
 
   override def canEqual(other: Any): Boolean = other.isInstanceOf[OneKeyPatternInstance]
 
@@ -160,16 +158,16 @@ class OneKeyPatternInstance(pattern0:Int) extends KeyPatternInstance(null){
   }
 
   override def hashCode(): Int = {
-    node*31
+    (node*31).hashCode()
 //    MurmurHash3.finalizeHash(MurmurHash3.mix(0x3c074a61,node),1)
   }
 
   override def read(kryo: Kryo, input: Input): Unit = {
-    node = input.readInt(true)
+    node = input.readLong(true)
   }
 
   override def write(kryo: Kryo, output: Output): Unit = {
-    output.writeInt(node,true)
+    output.writeLong(node,true)
   }
 }
 
@@ -180,33 +178,37 @@ class OneKeyPatternInstance(pattern0:Int) extends KeyPatternInstance(null){
   */
 class TwoKeyPatternInstance(pattern0:Int, pattern1:Int) extends KeyPatternInstance(null){
 
-  var node0 = pattern0
-  var node1 = pattern1
+//  var node0 = pattern0
+//  var node1 = pattern1
+//
+//
+  node = (pattern0.toLong << 32) | (pattern1 & 0xffffffffL)
+//
+//  val x: Int = (l >> 32).toInt
+//  val y: Int = l.toInt
+//
 
   override def canEqual(other: Any): Boolean = other.isInstanceOf[OneKeyPatternInstance]
 
 
   override def equals(other: Any): Boolean = other match {
     case that: TwoKeyPatternInstance =>
-        node0 == that.node0 &&
-        node1 == that.node1
+        node == that.node
     case _ => false
   }
 
   override def hashCode(): Int = {
 //    Hash.fmix32(node0)
-    node0*31+node1
+    (node*31).hashCode()
 //    MurmurHash3.finalizeHash(MurmurHash3.mix(MurmurHash3.mix(0x3c074a61,node0),node1),2)
   }
 
   override def read(kryo: Kryo, input: Input): Unit = {
-    node0 = input.readInt(true)
-    node1 = input.readInt(true)
+    node = input.readLong(true)
   }
 
   override def write(kryo: Kryo, output: Output): Unit = {
-    output.writeInt(node0,true)
-    output.writeInt(node1,true)
+    output.writeLong(node,true)
   }
 }
 

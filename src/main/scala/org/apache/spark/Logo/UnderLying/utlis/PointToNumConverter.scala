@@ -13,9 +13,9 @@ class PointToNumConverter(val parts:Seq[Int]){
 
   //we assume here that List(0,1,2,3) represent number 3,2,1,0
   //convert a x variable based number to 10 based system
-  def convertToNum(point:Seq[Int]) = point.reverse.zipWithIndex.map{f =>
+  def convertToNum(point:Seq[Int]) = point.zipWithIndex.map{f =>
 
-    val multipliers = parts.dropRight(f._2+1)
+    val multipliers = parts.dropRight(parts.size - (f._2))
 
     if (multipliers.isEmpty){
       f._1
@@ -29,13 +29,38 @@ class PointToNumConverter(val parts:Seq[Int]){
     val buffer = new ArrayBuffer[Int]()
     var total = index
 
-    parts.drop(1).foldRight(buffer){case(mod, buffer) =>
-      buffer += (total % mod)
-      total = total/mod
-      buffer
+    var count = 1
+    while (count < parts.size){
+      val product = parts.dropRight(count).product
+      if (total / product > 0){
+        val cur = total / product
+        buffer += cur
+        total = total - cur * product
+      }else{
+        buffer += 0
+      }
+
+      count += 1
     }
 
     buffer += total
-    buffer.toList
+
+
+
+
+
+
+//    parts.drop(1).foldRight(buffer){case(mod, buffer) =>
+//      if (total/mod > 0){
+//        buffer += (total % mod)
+//        total = total/mod
+//      } else{
+//        buffer += 0
+//      }
+//      buffer
+//    }
+//
+//    buffer += total
+    buffer.toList.reverse
   }
 }

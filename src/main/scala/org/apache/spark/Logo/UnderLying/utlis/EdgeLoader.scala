@@ -1,23 +1,22 @@
-package org.apache.spark.Logo.UnderLying.TestData
+package org.apache.spark.Logo.UnderLying.utlis
 
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.spark.Logo.Plan.LogoEdgePatternPhysicalPlan
 import org.apache.spark.Logo.UnderLying.Maker.SimpleRowLogoRDDMaker
 import org.apache.spark.Logo.UnderLying.dataStructure.{ConcreteLogoRDD, EdgePatternLogoBlock, LogoBlockRef, PatternInstance}
-import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 import org.apache.spark.rdd.RDD
-import org.apache.spark.storage.StorageLevel
 
+class EdgeLoader(data:String,sizes:Seq[Int]) {
 
-/**
-  * convinent object for generating test data
-  */
-object TestLogoRDDData {
-
+  lazy val edgeLogoRDDReference = new LogoEdgePatternPhysicalPlan(debugEdgePatternLogoRDD) toLogoRDDReference()
   lazy val (_,sc) = SparkSingle.getSpark()
 
 
-  val dataSource="./wikiV.txt"
-//  val dataSource="./debugData.txt"
-//  val dataSource = "/Users/zhanghao/Downloads/as-skitter.txt"
+  val dataSource=data
+//    "./wikiV.txt"
+  //  val dataSource="./debugData.txt"
+  //  val dataSource = "/Users/zhanghao/Downloads/as-skitter.txt"
 
 
 
@@ -34,7 +33,13 @@ object TestLogoRDDData {
 
   def EdgeRowLogoRDD = {
 
-    val data = sc.textFile(dataSource)
+//    sc.textFile(dataSource).repartition(64).cache().saveAsTextFile(dataSource+"temp")
+
+    val data = sc.textFile(dataSource).repartition(sizes(0)*sizes(1)).cache()
+//    val data = sc.textFile(dataSource)
+//    data.count()
+
+//    FileSystem.get(new Configuration()).delete(new Path(dataSource+"temp"))
 
     val rawRDD = data.map{
       f =>
@@ -47,7 +52,8 @@ object TestLogoRDDData {
     }.filter(f => f != null).flatMap(f => Iterable(f,f.swap)).distinct().map(f => (Array(f._1,f._2),1)).map(f => (f._1.toSeq, f._2))
 
 
-//    val rawRDD = sc.parallelize(List.range(0,100)).map(f => (Seq(f,f),1))
+    rawRDD.cache()
+    //    val rawRDD = sc.parallelize(List.range(0,100)).map(f => (Seq(f,f),1))
     RowLogoRDDMaker(rawRDD)
   }
 
@@ -59,7 +65,7 @@ object TestLogoRDDData {
   def RowLogoRDDMaker(rawRDD: RDD[(Seq[Int], Int)]) = {
 
     val edges = List((0,1))
-    val keySizeMap = Map((0,3),(1,3))
+    val keySizeMap = Map((0,sizes(0)),(1,sizes(1)))
 
     val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD,1).setEdges(edges).setKeySizeMap(keySizeMap)
 
@@ -70,5 +76,4 @@ object TestLogoRDDData {
 
     (logoRDD,schema)
   }
-
 }

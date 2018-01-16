@@ -4,11 +4,15 @@ import org.apache.spark.Logo.Plan.FilteringCondition
 import org.apache.spark.Logo.UnderLying.TestData.TestLogoRDDReferenceData
 import org.apache.spark.Logo.UnderLying.dataStructure.{ConcretePatternLogoBlock, KeyMapping}
 
-object ExamplePattern {
-
+class ExamplePattern(data:String) {
 
   lazy val edge = {
-    TestLogoRDDReferenceData.edgeLogoRDDReference
+
+    //    "./wikiV.txt"
+    //  val dataSource="./debugData.txt"
+    //  val dataSource = "/Users/zhanghao/Downloads/as-skitter.txt"
+
+    new EdgeLoader(data,Seq(8,8)) edgeLogoRDDReference
   }
 
   //simple pattern
@@ -77,34 +81,66 @@ object ExamplePattern {
           square
   }
 
-  lazy val chordalSquare = {
-        val edgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference
-        val leftEdge = edgeRDDReference.toSubPattern((0,0),(1,1))
-        val rightEdge = edgeRDDReference.toSubPattern((0,1),(1,2))
-
-
-        val wedge = leftEdge.build(rightEdge).toSubPattern((0,0),(1,1),(2,2))
+  lazy val chordalSquareFast = {
 
     val filterCondition1 = FilteringCondition({
       pattern =>
         pattern.pattern(0) < pattern.pattern(1)
     },true)
 
-        val middleEdge = edgeRDDReference.filter(filterCondition1).toSubPattern((0,0),(1,2))
+        val edge3_1 =  new EdgeLoader(data,Seq(8,1)) edgeLogoRDDReference
+        val edge3_3 =  new EdgeLoader(data,Seq(8,8)) edgeLogoRDDReference
+        val leftEdge = edge3_3.filter(filterCondition1).toIdentitySubPattern()
+        val rightEdge = edge3_1.toSubPattern((0,1),(1,2))
 
-        val triangle = wedge.build(middleEdge)
+        val wedge = leftEdge.build(rightEdge).toIdentitySubPattern()
+
+
+        val middleEdge = edge3_1.toSubPattern((0,0),(1,2))
+
+        val triangle = wedge.build(middleEdge).toConcrete()
 
         val leftTriangle = triangle.toIdentitySubPattern()
-        val rightTriangle = triangle.toSubPattern((0,0),(2,2),(1,3))
+        val rightTriangle = triangle.toSubPattern((0,0),(1,1),(2,3))
+
+    val filterCondition2 = FilteringCondition({
+      pattern =>
+        pattern.pattern(2) < pattern.pattern(3)
+    },false)
+
+        val chordalSquare = leftTriangle.build(rightTriangle).filter(filterCondition2)
+
+        chordalSquare
+  }
+
+  lazy val chordalSquare = {
+    val edge = this.edge
+    val leftEdge = edge.toSubPattern((0,0),(1,1))
+    val rightEdge = edge.toSubPattern((0,1),(1,2))
+
+
+    val wedge = leftEdge.build(rightEdge).toSubPattern((0,0),(1,1),(2,2))
+
+    val filterCondition1 = FilteringCondition({
+      pattern =>
+        pattern.pattern(0) < pattern.pattern(1)
+    },true)
+
+    val middleEdge = edge.filter(filterCondition1).toSubPattern((0,0),(1,2))
+
+    val triangle = wedge.build(middleEdge).toConcrete()
+
+    val leftTriangle = triangle.toIdentitySubPattern()
+    val rightTriangle = triangle.toSubPattern((0,0),(2,2),(1,3))
 
     val filterCondition2 = FilteringCondition({
       pattern =>
         pattern.pattern(1) < pattern.pattern(3)
     },false)
 
-        val chordalSquare = leftTriangle.build(rightTriangle).filter(filterCondition2)
+    val chordalSquare = leftTriangle.build(rightTriangle).filter(filterCondition2)
 
-        chordalSquare
+    chordalSquare
   }
 
 
@@ -138,12 +174,12 @@ object ExamplePattern {
   }
 
   lazy val threeTriangle = {
-        val edgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference
-        val leftEdge = edgeRDDReference.toIdentitySubPattern()
-        val rightEdge = edgeRDDReference.toSubPattern((0,0),(1,2))
+        val edge = this.edge
+        val leftEdge = edge.toIdentitySubPattern()
+        val rightEdge = edge.toSubPattern((0,0),(1,2))
 
         val wedge = leftEdge.build(rightEdge).toIdentitySubPattern()
-        val middleEdge = edgeRDDReference.toSubPattern((0,1),(1,2))
+        val middleEdge = edge.toSubPattern((0,1),(1,2))
 
 
         val triangle = wedge.build(middleEdge).toConcrete()

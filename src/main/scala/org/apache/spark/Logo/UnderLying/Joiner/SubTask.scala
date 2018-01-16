@@ -59,6 +59,8 @@ class SubTaskPartition(
     var prefs = subPartitions.zipWithIndex.map(_.swap).map(f => rdds(f._1).preferredLocations(rdds(f._1).partitions(f._2)))
 
 
+//    rdds(0).dependencies.map(f => f.rdd.preferredLocations())
+
     //The Prefed Location is very important for index reuse, however for some init input rdd's it may not have a prefered location,
     //which can result error.
 
@@ -82,6 +84,7 @@ class SubTaskPartition(
 
     val exactMatchLocations = prefs.reduce((x, y) => x.intersect(y))
     val locs = if (!exactMatchLocations.isEmpty) exactMatchLocations else prefs.flatten.distinct
+
 
     locs
   }
