@@ -73,7 +73,6 @@ class KeyMapping(val keyMapping:Map[Int,Int]) extends Serializable {
   }
 }
 
-
 //TODO optimize hash for node and edge PatternInstance
 /**
   * The class that represent a pattern instance, which can later be converted to keyPatternInstance and valuePatternInstance

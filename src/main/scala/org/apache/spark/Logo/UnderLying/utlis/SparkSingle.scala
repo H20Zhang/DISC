@@ -47,10 +47,7 @@ object SparkSingle {
 
   }
 
-
   var isCluster = false
-
-
 
   private def getSparkInternal() = {
     isCluster match {

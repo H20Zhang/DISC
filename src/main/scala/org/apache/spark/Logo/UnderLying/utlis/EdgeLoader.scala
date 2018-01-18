@@ -23,7 +23,17 @@ class EdgeLoader(data:String,sizes:Seq[Int]) {
   def debugEdgePatternLogoRDD = {
     val (edgeRDD,schema) = EdgeRowLogoRDD
 
-    val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema,f.metaData,f.rawData.map(t => PatternInstance(t._1))))
+    val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema,f.metaData,f.rawData.sortWith{
+      (l,r) =>
+        if (l._1(0) < r._1(0)){
+         true
+        }
+        else if (l._1(0) == r._1(0) && l._1(1) < r._1(1)){
+          true
+        } else {
+          false
+        }
+    }.map(t => PatternInstance(t._1) )))
 
     edgePatternLogoRDD.cache().count()
     new ConcreteLogoRDD(edgePatternLogoRDD.asInstanceOf[RDD[LogoBlockRef]], schema)

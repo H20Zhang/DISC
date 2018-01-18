@@ -233,7 +233,7 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
 
 
       optValues match {
-        case Some(values) => values.toIterator
+        case Some(values) => values.iterator
         case _ => null
       }
   }
@@ -259,6 +259,51 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
       valueMapping,
       totalNodes
     )
+  }
+
+//TODO:finish this place
+  class FastEnumerateIterator extends Iterator[PatternInstance]{
+
+    require(coreBlock.isInstanceOf[CompositeTwoPatternLogoBlock])
+    val _coreBlock = coreBlock.asInstanceOf[CompositeTwoPatternLogoBlock]
+    val oldCoreBlock = _coreBlock.coreBlock
+    val oldLeafBlock = _coreBlock.leafsBlock
+    val curLeafBlock = leafsBlock
+
+
+  def isFeasible() ={
+
+  }
+
+    val oldCoreIterator:Iterator[PatternInstance] = oldCoreBlock.enumerateIterator()
+    val oldLeafIterator:Iterator[PatternInstance] = null
+    var leafsIterator:Iterator[PatternInstance] = null
+
+
+    var currentCore:PatternInstance = null
+    val array = Array.fill(totalNodes)(0)
+    val currentPattern:EnumeratePatternInstance = new EnumeratePatternInstance(array)
+
+
+    def genereateLeafsNodeWithBlock(coreInstance:PatternInstance, block:KeyValuePatternLogoBlock):Iterator[PatternInstance] = {
+
+      //    val optValues = leafsBlock.
+      //      getValue(coreInstance.subPatterns(coreLeafJoints.coreJoints).toKeyPatternInstance())
+
+      val optValues = block.
+        getValue(coreInstance.toSubKeyPattern(coreLeafJoints.coreJoints,coreJointsSeq))
+
+
+      optValues match {
+        case Some(values) => values.iterator
+        case _ => null
+      }
+    }
+
+
+    override def hasNext: Boolean = ???
+
+    override def next(): PatternInstance = ???
   }
 
 
@@ -300,7 +345,11 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
 //    val TintBuffer = new TIntArrayList(totalNodes)
     val array = Array.fill(totalNodes)(0)
     val currentPattern:EnumeratePatternInstance = new EnumeratePatternInstance(array)
-
+    val coreMapping = coreKeyMapping.keyMapping.toArray
+    val valueKeyMapping = valueMapping.keyMapping.toArray
+    val updateArray = coreMapping ++ valueKeyMapping
+    val coreLen = coreMapping.length
+    val valueLen = valueKeyMapping.length
 
     override def hasNext: Boolean = {
 
@@ -308,9 +357,18 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
         do {
           if (coreIterator.hasNext){
             currentCore = coreIterator.next()
-            coreMapping.foreach{
-              f => array.update(f._2,currentCore.pattern(f._1))
+
+
+            var i = 0
+
+            while (i < coreLen) {
+              val temp = coreMapping(i)
+              array.update(temp._2,currentCore.pattern(temp._1))
+              i += 1
             }
+//            coreMapping.foreach{
+//              f => array.update(f._2,currentCore.pattern(f._1))
+//            }
           }else{
             return false
           }
@@ -322,9 +380,7 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
     }
 
 
-    val coreMapping = coreKeyMapping.keyMapping.toArray
-    val valueKeyMapping = valueMapping.keyMapping.toArray
-    val updateArray = coreMapping ++ valueKeyMapping
+
 
     override def next(): PatternInstance = {
       val leafs = leafsIterator.next()
@@ -333,12 +389,17 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
       if (valueMapping.keyMapping.size == 0){
         core
       }else {
+        var i = 0
 
-
-        valueKeyMapping.foreach{
-          f => array.update(f._2,leafs.pattern(f._1))
+        while (i < valueLen) {
+          val temp = valueKeyMapping(i)
+          array.update(temp._2,leafs.pattern(temp._1))
+          i += 1
         }
 
+//        valueKeyMapping.foreach{
+//          f => array.update(f._2,leafs.pattern(f._1))
+//        }
 
         currentPattern
     }

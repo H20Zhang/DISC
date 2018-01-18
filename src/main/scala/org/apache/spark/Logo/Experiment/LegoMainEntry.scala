@@ -7,12 +7,15 @@ object LegoMainEntry {
 
   def main(args: Array[String]): Unit = {
     val data = args(0)
-//    val triangle = new ExamplePattern(data).triangle
-//    println(triangle.size())
+    val triangle = new ExamplePattern(data).triangle
+    println(triangle.size())
 
-    SparkSingle.isCluster = true
-    val chordalSquare = new ExamplePattern(data).chordalSquareFast
-    println(chordalSquare.size())
+//    SparkSingle.isCluster = true
+//    val house = new ExamplePattern(data).houseFast
+//    println(house.size())
+//
+//    val square = new ExamplePattern(data).squareFast
+//    println(square.size())
 
 //    val threeTriangle = new ExamplePattern(data).threeTriangle
 //    println(threeTriangle.size())

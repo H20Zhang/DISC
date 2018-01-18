@@ -44,6 +44,7 @@ object MapBuilder {
 //    val hashmap = new mutable.HashMap[Seq[Long],ArrayBuffer[Seq[Long]]]()
 
     val hashmap = new mutable.LongMap[ArrayBuffer[ValuePatternInstance]]()
+    val valueSize = data(0).length - keys.size
 
     if (keys.size == 1){
       data.foreach{
@@ -75,7 +76,14 @@ object MapBuilder {
       }
     }
 
-    hashmap
+
+    if (valueSize == 1){
+    hashmap.mapValuesNow(f => f.sortBy(t => t.pattern(0)))
+    }
+    else{
+       hashmap
+    }
+//    hashmap
   }
 //  def fromListToMapFast[A](data:Seq[Seq[A]],keys:Set[Int]) = {
 //    val hashmap = HashObjObjMaps.newMutableMap[Seq[A],ArrayBuffer[Seq[A]]](data.size)

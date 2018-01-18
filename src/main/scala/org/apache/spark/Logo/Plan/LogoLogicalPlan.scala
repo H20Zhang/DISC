@@ -103,11 +103,18 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript:Log
         val block = f.asInstanceOf[PatternLogoBlock[_]]
         val iterator = block.enumerateIterator()
 
+
+
+//        var result = 0L
+//        for (x <- iterator) result += 1
+//        result
+//
         while (iterator.hasNext){
           iterator.next()
           size = size + 1
         }
         size
+
 
     }.sum().toLong
   }

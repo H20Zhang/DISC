@@ -162,7 +162,7 @@ class LogoComposite2PatternPhysicalPlan(@transient logoRDDRefs:Seq[LogoPatternPh
 
 //    if (!(corePatternLogoRDD.patternRDD.getStorageLevel == StorageLevel.MEMORY_ONLY)){
 //      corePatternLogoRDD.patternRDD.persist(StorageLevel.OFF_HEAP)
-//      corePatternLogoRDD.patternRDD.count()
+////      corePatternLogoRDD.patternRDD.count()
 //    }
 
     corePatternLogoRDD
