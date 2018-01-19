@@ -75,6 +75,23 @@ class Planned2HandlerGenerator(coreId:Int) extends Serializable {
   }
 }
 
+// the generator for generating the handler for converting blocks into a planned2CompositeBlock.
+class Planned3HandlerGenerator(coreId:Int) extends Serializable {
+  def generate():(Seq[LogoBlockRef],CompositeLogoSchema,Int) => LogoBlockRef = {
+    (blocks,schema,index) =>
+
+      val planned3CompositeSchema = schema.toPlan3CompositeSchema(coreId)
+      val subBlocks = blocks.asInstanceOf[Seq[PatternLogoBlock[_]]]
+
+      //TODO this place needs to implement later, although currently it has no use.
+      val metaData = LogoMetaData(schema.IndexToKey(index),10)
+
+      val planne3CompositeLogoBlock = new CompositeThreePatternLogoBlock(planned3CompositeSchema,metaData, subBlocks)
+
+      planne3CompositeLogoBlock
+  }
+}
+
 
 class LogoFilterPatternPhysicalPlan(@transient f:FilteringCondition, @transient buildLogicalStep: LogoPatternPhysicalPlan) extends LogoPatternPhysicalPlan(buildLogicalStep.logoRDDRefs, buildLogicalStep.keyMapping){
 
@@ -116,9 +133,74 @@ class LogoFilterPatternPhysicalPlan(@transient f:FilteringCondition, @transient 
 
   override def getSchema(): LogoSchema = buildLogicalStep.getSchema()
 
-
-
 }
+
+
+
+//TODO this class is an experiment, much more optimization is needed, now we limit to the case that leaf and leaf must have an intersection
+/**
+  * The class that represent composing a new Pattern using two existing pattern
+  * @param logoRDDRefs logical logoRDD used to build this LogoRDD
+  * @param keyMapping the keyMapping between the old Logo and new Logo
+  */
+class LogoComposite3IntersectionPatternPhysicalPlan(@transient logoRDDRefs:Seq[LogoPatternPhysicalPlan], @transient keyMapping:Seq[KeyMapping]) extends LogoPatternPhysicalPlan(logoRDDRefs,keyMapping) {
+
+  lazy val schema = getSchema()
+  lazy val coreLogoRef = logoRDDRefs(coreId)
+
+  lazy val leftLeafLogoRef = logoRDDRefs(1)
+
+  lazy val rightLeafLogoRef = logoRDDRefs(2)
+
+  lazy val leftLogo = generateLeftLeafPhyiscal()
+  lazy val rightLogo = generateRightLeafPhysical()
+
+
+  lazy val logoRDDs = Seq(corePhysical,leftLogo,rightLogo)
+
+
+  lazy val handler = {
+    new Planned3HandlerGenerator(coreId) generate()
+  }
+
+  lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs, compositeSchema,handler)
+
+  def generateLeftLeafPhyiscal(): PatternLogoRDD = {
+    leftLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreLeftLeafJoins().leafJoints)
+  }
+
+  def generateRightLeafPhysical(): PatternLogoRDD = {
+    rightLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreRightLeafJoins().leafJoints)
+  }
+
+  override def generateCorePhyiscal(): PatternLogoRDD = {
+    val corePatternLogoRDD = coreLogoRef.generateNewPatternFState()
+
+    if (corePatternLogoRDD.patternRDD.getStorageLevel == null){
+
+      corePatternLogoRDD.patternRDD.persist(StorageLevel.OFF_HEAP)
+      corePatternLogoRDD.patternRDD.count()
+    }
+
+    corePatternLogoRDD
+  }
+
+  override def generateNewPatternFState(): PatternLogoRDD = {
+    val fStatePatternLogoRDD = new PatternLogoRDD(logoStep.performFetchJoin(sc), getSchema())
+    //    fStatePatternLogoRDD.patternRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    fStatePatternLogoRDD
+  }
+
+  override def getSchema(): PlannedThreeCompositeLogoSchema = compositeSchema.toPlan3CompositeSchema(coreId)
+
+  override def generateNewPatternJState():ConcreteLogoRDD = {
+    generateNewPatternFState().toConcretePatternLogoRDD
+  }
+
+  //TODO this method is not used
+  override def generateLeafPhyiscal(): PatternLogoRDD = null
+}
+
 
 /**
   * The class that represent composing a new Pattern using two existing pattern

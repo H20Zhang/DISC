@@ -233,6 +233,7 @@ class ValuePatternInstance(pattern:Array[Int]) extends  PatternInstance(pattern)
 
 }
 
+
 object KeyMapping extends Serializable {
   def apply(keyMapping: Seq[Int]): KeyMapping = new KeyMapping(keyMapping.zipWithIndex.map(_.swap).toMap)
   def apply(keyMapping: Map[Int, Int]): KeyMapping = new KeyMapping(keyMapping)
@@ -271,6 +272,26 @@ object PatternInstance extends Serializable{
 
       rKeyMapping.keyMapping.foreach{f =>
         array(f._2) = rInstance.pattern(f._1)}
+
+      apply(array)
+    }
+  }
+
+  def quickBuild(lInstance:PatternInstance, lKeyMapping:KeyMapping, rInstance:PatternInstance, rKeyMapping:KeyMapping, rrInstance:PatternInstance, rrKeyMapping:KeyMapping,totalNodes:Int) = {
+
+    if (rKeyMapping.keyMapping.size == 0 && rrKeyMapping.keyMapping.size == 0){
+      lInstance
+    }else {
+
+      val array = new Array[Int](totalNodes)
+      lKeyMapping.keyMapping.foreach{f =>
+        array(f._2) = lInstance.pattern(f._1)}
+
+      rKeyMapping.keyMapping.foreach{f =>
+        array(f._2) = rInstance.pattern(f._1)}
+
+      rrKeyMapping.keyMapping.foreach{f =>
+        array(f._2) = rrInstance.pattern(f._1)}
 
       apply(array)
     }

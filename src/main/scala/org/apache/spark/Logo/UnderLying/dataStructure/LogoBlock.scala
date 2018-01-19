@@ -5,7 +5,7 @@ import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.{Kryo, KryoSerializable}
 import gnu.trove.list.array.TIntArrayList
 
-import scala.collection.mutable
+import scala.collection.{AbstractIterator, mutable}
 //import com.koloboke.collect.map.hash.HashObjObjMap
 import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, ListSelector, MapBuilder}
 import org.apache.spark.graphx.VertexId
@@ -404,6 +404,305 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
         currentPattern
     }
   }
+
+  }
+
+  /**
+    * generate a ConcretePatternLogoBlock
+    */
+  override def iterator() = new patternIterator
+  override def enumerateIterator() = new EnumerateIterator
+
+}
+
+
+
+//TODO now we limit the implementation to that leaf and leaf must have intesection
+/**
+  * Composite LogoBlock Class for UnlabeledPatternMatching, which is assembled using multiple basic PatternLogoBlock.
+  * In this specific class, there are only two blocks to build the new composite block.s
+  * @param schema composite schema for the block
+  * @param metaData metaData for the block
+  * @param rawData rawData is other PatternLogoBlocks which assembled this block
+  */
+class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, metaData:LogoMetaData, rawData:Seq[PatternLogoBlock[_]]) extends PatternLogoBlock(schema, metaData, rawData){
+
+  lazy val coreBlock = schema.getCoreBlock(rawData)
+  lazy val leftLeafsBlock = schema.getLeftLeafBlock(rawData)
+  lazy val rightLeafsBlock = schema.getRightLeafBlock(rawData)
+  lazy val leftCoreLeafJoints = schema.getCoreLeftLeafJoins()
+  lazy val rightCoreLeafJoints = schema.getCoreRightLeafJoins()
+  lazy val leafLeafJoints = schema.getLeafLeafJoints()
+
+
+  lazy val coreKeyMapping = schema.coreKeyMapping
+  lazy val leftLeafValueMapping = schema.leftLeafBlockSchema.valueKeyMapping(schema.leftLeafKeyMapping)
+  lazy val rightLeafValueMapping = schema.rightLeafBlockSchema.valueKeyMapping(schema.rightLeafKeyMapping)
+  lazy val leftvalueMapping = leftLeafsBlock.valueMapping(schema.leftLeafKeyMapping)
+  lazy val rightvalueMapping = leftLeafsBlock.valueMapping(schema.leftLeafKeyMapping)
+
+  //TODO testing required
+
+  val leftCoreJointsSeq  = leftCoreLeafJoints.coreJoints.toSeq.sorted
+  val rightCoreJointsSeq  = rightCoreLeafJoints.coreJoints.toSeq.sorted
+
+  //generate the leaf instance grow from this core, actually the Iterator is just a wrapper the leafs are concrefied
+  //the intersection node is not included in the returned iterator.
+  def genereateLeftLeafsNode(coreInstance:PatternInstance):ArrayBuffer[ValuePatternInstance] = {
+
+    val optValues = leftLeafsBlock.
+      getValue(coreInstance.toSubKeyPattern(leftCoreLeafJoints.coreJoints,leftCoreJointsSeq))
+
+    optValues match {
+      case Some(values) => values
+      case _ => null
+    }
+  }
+
+  //generate the leaf instance grow from this core, actually the Iterator is just a wrapper the leafs are concrefied
+  //the intersection node is not included in the returned iterator.
+  def genereateRightLeafsNode(coreInstance:PatternInstance):ArrayBuffer[ValuePatternInstance] = {
+
+    val optValues = rightLeafsBlock.
+      getValue(coreInstance.toSubKeyPattern(rightCoreLeafJoints.coreJoints,rightCoreJointsSeq))
+
+    optValues match {
+      case Some(values) => values
+      case _ => null
+    }
+  }
+
+
+  @transient lazy val totalNodes = (coreKeyMapping.values ++ leftvalueMapping.values ++ rightvalueMapping.values).toSeq.max + 1
+
+  //assmeble the core and leafs instance into a single instance
+  def assembleCoreAndLeafInstance(coreInstance:PatternInstance, leftLeafInstanceNode:PatternInstance):PatternInstance = {
+
+    //    PatternInstance.slowBuild(
+    //      coreInstance,
+    //      coreKeyMapping,
+    //      leafInstanceNode,
+    //      valueMapping,
+    //      totalNodes
+    //    )
+
+    PatternInstance.quickBuild(
+      coreInstance,
+      coreKeyMapping,
+      leftLeafInstanceNode,
+      leftvalueMapping,
+      totalNodes
+    )
+  }
+
+
+
+
+  //TODO this method currently only work for one node cases
+  def generateIntersectionIterator(leftIterator:ArrayBuffer[ValuePatternInstance], rightIterator:ArrayBuffer[ValuePatternInstance]):Iterator[PatternInstance] ={
+
+    if (leftIterator == null || !(leftIterator.size != 0)){
+      return new AbstractIterator[PatternInstance] {override def hasNext: Boolean =
+      {
+        false
+      }
+        override def next(): PatternInstance = {
+          null
+        }
+      }
+    }
+
+    if (rightIterator == null || !(rightIterator.size != 0)){
+      return new AbstractIterator[PatternInstance] {override def hasNext: Boolean =
+      {
+        false
+      }
+        override def next(): PatternInstance = {
+          null
+        }
+      }
+    }
+
+    new AbstractIterator[PatternInstance] {
+
+      var nextEle:PatternInstance = _
+      var leftArray = leftIterator
+      var rightArray = rightIterator
+      var uCur = 0
+      var vCur = 0
+      val uD = leftArray.size
+      val vD = rightArray.size
+
+      override def hasNext: Boolean = {
+
+        val x = 1
+        val y = 2
+
+
+        while ( {
+          (uCur < uD) && (vCur < vD)
+        }) {
+          if (leftArray(uCur).pattern(0) < rightArray(vCur).pattern(0)) uCur += 1
+          else if (leftArray(uCur).pattern(0) > rightArray(vCur).pattern(0)) vCur += 1
+          else {
+            nextEle = leftArray(uCur)
+            uCur += 1
+            vCur += 1
+            return true
+          }
+        }
+
+        return false
+      }
+
+
+      override def next(): PatternInstance = {
+        nextEle
+      }
+    }
+
+  }
+
+
+
+
+
+
+
+
+//  {
+//    @throws[InterruptedException]
+//    private def intersect(uN: IndexedSeq[Int], vN: IndexedSeq[Int], node:Int): Long = {
+//      if ((uN == null) || (vN == null)) return 0L
+//      var count = 0L
+//      var uCur = 0
+//      var vCur = 0
+//      val uD = uN.size
+//      val vD = vN.size
+//      while ( {
+//        (uCur < uD) && (vCur < vD)
+//      }) if (uN(uCur) < vN(vCur)) uCur += 1
+//      else if (vN(vCur) < uN(uCur)) vCur += 1
+//      else {
+//        if (uN(uCur) > node) count += 1L
+//        uCur += 1
+//        vCur += 1
+//      }
+//      count
+//    }
+//  }
+
+  //the iterator to iterate through the pattern, core is iterated but leaf are concrefied but treat as a iterator for convinence.
+  class patternIterator extends Iterator[PatternInstance]{
+
+    var leftLeafsIterator:ArrayBuffer[ValuePatternInstance] = _
+    var rightLeafsIterator:ArrayBuffer[ValuePatternInstance] = _
+    var intersectIterator:Iterator[PatternInstance] = _
+    val coreIterator:Iterator[PatternInstance] = coreBlock.iterator()
+    var currentCore:PatternInstance = _
+
+    override def hasNext: Boolean = {
+
+      if (intersectIterator == null || !intersectIterator.hasNext ){
+        do {
+          if (coreIterator.hasNext){
+            currentCore = coreIterator.next()
+          }else{
+            return false
+          }
+          leftLeafsIterator = genereateLeftLeafsNode(currentCore)
+          rightLeafsIterator = genereateRightLeafsNode(currentCore)
+          intersectIterator = generateIntersectionIterator(leftLeafsIterator,rightLeafsIterator)
+
+        } while (!intersectIterator.hasNext)
+      }
+
+      return true
+    }
+
+    override def next(): PatternInstance = {
+      val leafs = intersectIterator.next()
+      val core = currentCore
+      assembleCoreAndLeafInstance(core,leafs)
+    }
+  }
+
+  class EnumerateIterator extends Iterator[PatternInstance]{
+
+    var leftLeafsIterator:ArrayBuffer[ValuePatternInstance] = _
+    var rightLeafsIterator:ArrayBuffer[ValuePatternInstance] = _
+    var intersectIterator:Iterator[PatternInstance] = _
+    val coreIterator:Iterator[PatternInstance] = coreBlock.enumerateIterator()
+    var currentCore:PatternInstance = _
+    //    val TintBuffer = new TIntArrayList(totalNodes)
+    val array = Array.fill(totalNodes)(0)
+    val currentPattern:EnumeratePatternInstance = new EnumeratePatternInstance(array)
+    val coreMapping = coreKeyMapping.keyMapping.toArray
+    val valueKeyMapping = leftvalueMapping.keyMapping.toArray
+    val updateArray = coreMapping ++ valueKeyMapping
+    val coreLen = coreMapping.length
+    val valueLen = valueKeyMapping.length
+
+    override def hasNext: Boolean = {
+
+//      if (intersectIterator.hasNext){
+//        return true
+//      }
+
+      var hasNext1 = false
+      if (intersectIterator == null || !intersectIterator.hasNext){
+        do {
+          if (coreIterator.hasNext){
+            currentCore = coreIterator.next()
+            var i = 0
+
+            while (i < coreLen) {
+              val temp = coreMapping(i)
+              array.update(temp._2,currentCore.pattern(temp._1))
+              i += 1
+            }
+          }else{
+            return false
+          }
+          leftLeafsIterator = genereateLeftLeafsNode(currentCore)
+          rightLeafsIterator = genereateRightLeafsNode(currentCore)
+          intersectIterator = generateIntersectionIterator(leftLeafsIterator,rightLeafsIterator)
+
+
+//          hasNext1 =
+
+//          val x = 1
+        } while (!intersectIterator.hasNext)
+      }
+
+      return true
+    }
+
+
+
+
+    override def next(): PatternInstance = {
+      val leafs = intersectIterator.next()
+      val core = currentCore
+
+      if (leftvalueMapping.keyMapping.size == 0){
+        core
+      }else {
+        var i = 0
+
+        while (i < valueLen) {
+          val temp = valueKeyMapping(i)
+          array.update(temp._2,leafs.pattern(temp._1))
+          i += 1
+        }
+
+        //        valueKeyMapping.foreach{
+        //          f => array.update(f._2,leafs.pattern(f._1))
+        //        }
+
+        currentPattern
+      }
+    }
 
   }
 

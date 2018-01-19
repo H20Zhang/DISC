@@ -43,6 +43,26 @@ class ExamplePattern(data:String) {
     triangle
   }
 
+
+
+//TODO test
+  lazy val triangleIntersectionVersion = {
+    val filterCondition = FilteringCondition({
+      pattern =>
+        pattern.pattern(0) < pattern.pattern(1)
+    },true)
+
+    val filteredEdge = edge
+      .filter(filterCondition)
+
+    val leftEdge = filteredEdge.toIdentitySubPattern()
+    val rightEdge = filteredEdge.toSubPattern((0,1),(1,2))
+    val middleEdge = filteredEdge.toSubPattern((0,0),(1,2))
+
+    val triangle = leftEdge.build(rightEdge,middleEdge)
+    triangle
+  }
+
   //TODO finish this
   lazy val twinTriangle = {
 
@@ -201,6 +221,36 @@ class ExamplePattern(data:String) {
     },false)
     val threeLineTemp = wedge.build(edge4_1.toSubPattern((0,1),(1,3))).filter(filterCondition2).toIdentitySubPattern()
     val square = threeLineTemp.build(edge4_1.toSubPattern((0,2),(1,3)))
+    square
+  }
+
+  lazy val squareIntersectionVerificationFast = {
+
+
+    val edge4_1 =  getEdge(h1,1)
+    val edge4_4 =  getEdge(h1,h2)
+    val filterCondition = FilteringCondition({
+      pattern =>
+        pattern.pattern(0) < pattern.pattern(1)
+    },true)
+
+    val leftEdge = edge4_4
+      .filter(filterCondition).toIdentitySubPattern()
+
+    val filterCondition1 = FilteringCondition({
+      pattern =>
+        pattern.pattern(1) < pattern.pattern(2)
+    },false)
+
+    val wedge = leftEdge.build(edge4_4.filter(filterCondition).toSubPattern((0,0),(1,2))).filter(filterCondition1).toIdentitySubPattern()
+
+
+    val filterCondition2 = FilteringCondition({
+      pattern =>
+        pattern.pattern(0) < pattern.pattern(3)
+    },false)
+    val square = wedge.build(edge4_1.toSubPattern((0,1),(1,3)),edge4_1.toSubPattern((0,2),(1,3))).filter(filterCondition2)
+//    val square = threeLineTemp.build(edge4_1.toSubPattern((0,2),(1,3)))
     square
   }
 

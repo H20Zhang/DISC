@@ -162,6 +162,17 @@ class SubPatternLogoRDDReference(val patternLogoRDDReference:PatternLogoRDDRefer
 
     new ComposingPatternLogoRDDReference(Seq(patternLogoRDDReference,subPattern.patternLogoRDDReference),logoRDDReference.patternSchema,logoRDDReference.buildScript)
   }
+
+
+  //TODO this only intended for pattern like square, more cases need to be further implemented
+  def build(subPattern1:SubPatternLogoRDDReference, subPattern2:SubPatternLogoRDDReference):ComposingPatternLogoRDDReference = {
+    val logoBuildScriptSteps = Seq(patternLogoRDDReference.buildScript, subPattern1.patternLogoRDDReference.buildScript, subPattern2.patternLogoRDDReference.buildScript)
+    val keyMappings = Seq(keyMapping, subPattern1.keyMapping, subPattern2.keyMapping)
+    val newLogoBuildScriptStep = new LogoComposite3IntersectionPatternPhysicalPlan(logoBuildScriptSteps,keyMappings)
+    val logoRDDReference = newLogoBuildScriptStep.toLogoRDDReference()
+
+    new ComposingPatternLogoRDDReference(Seq(patternLogoRDDReference,subPattern1.patternLogoRDDReference, subPattern2.patternLogoRDDReference),logoRDDReference.patternSchema,logoRDDReference.buildScript)
+  }
 }
 
 

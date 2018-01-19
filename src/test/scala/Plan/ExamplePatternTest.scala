@@ -53,15 +53,25 @@ class ExamplePatternTest extends FunSuite{
 //    println("triangleWithOneEdge:" + triangleWithOneEdge.size())
 //  }
 
-  test("square"){
-        val square = new ExamplePattern(data).square
-        assert(square.size() == 57654491)
-      }
+//  test("square"){
+//        val square = new ExamplePattern(data).square
+//        assert(square.size() == 57654491)
+//      }
+
+//  test("triangleIntersectionVersion"){
+//    val triangle = new ExamplePattern(data).triangleIntersectionVersion
+//    assert(triangle.size() == 608389)
+//  }
 
 //  test("squareFast"){
 //    val square = new ExamplePattern(data).squareFast
 //    assert(square.size() == 57654491)
 //  }
+
+    test("squareVerificationFast"){
+      val square = new ExamplePattern(data).squareIntersectionVerificationFast
+      assert(square.size() == 57654491)
+    }
 
 
 

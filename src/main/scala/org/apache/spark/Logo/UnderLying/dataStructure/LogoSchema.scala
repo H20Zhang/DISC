@@ -151,6 +151,11 @@ class CompositeLogoSchema(val schema:LogoSchema,
     PlannedTwoCompositeLogoSchema(coreId,schema,oldSchemas,keyMappings)
   }
 
+  //TODO testing required
+  def toPlan3CompositeSchema(coreId:Int) = {
+    PlannedThreeCompositeLogoSchema(coreId,schema,oldSchemas,keyMappings)
+  }
+
 
 }
 
@@ -232,6 +237,98 @@ case class PlannedTwoCompositeLogoSchema(coreId:Int,
 
 }
 
+
+/**
+  * The composite LogoSchema after the optimizer plan the building process and determine the core and leafs.
+  * In this version, we assume that there is only one core and one leaf in building process. So there is no need for calculating LeafLeafJointsForest.
+  * @param coreId the id of the coreBlock
+  * @param _schema new schema of this composite schema
+  * @param oldSchemas old schema from which this new schema is dereived
+  * @param _keyMappings key mapping from old schemas to new schemas
+  */
+case class PlannedThreeCompositeLogoSchema(coreId:Int,
+                                         _schema:LogoSchema,
+                                         oldSchemas:Seq[LogoSchema],
+                                         _keyMappings:Seq[KeyMapping])  extends CompositeLogoSchema(_schema, oldSchemas, _keyMappings){
+
+
+  //TODO this class should be further fine tuned but at now we assume coreBlockId = 0
+
+  require(oldSchemas.size == 3, s"In this version, we only allow three logo are snapped together in a build process, but here we have oldSchemas.size=${oldSchemas.size}")
+
+  val coreBlockId = coreId
+  val leftLeafBlockId = 1
+  val rightLeafBlockId = 2
+
+  lazy val leftLeafBlockSchema = oldSchemas(leftLeafBlockId).asInstanceOf[KeyValueLogoSchema]
+  lazy val rightLeafBlockSchema = oldSchemas(rightLeafBlockId).asInstanceOf[KeyValueLogoSchema]
+  lazy val coreBlockSchema = oldSchemas(coreBlockId)
+
+  lazy val coreKeyMapping = keyMappings(coreBlockId)
+  lazy val leftLeafKeyMapping = keyMappings(leftLeafBlockId)
+  lazy val rightLeafKeyMapping = keyMappings(rightLeafBlockId)
+
+  //get the core block using the given coreBlockId in blocks
+  def getCoreBlock(blocks:Seq[PatternLogoBlock[_]]):PatternLogoBlock[_] = blocks(coreBlockId)
+
+  //get the leaf blocks by drop the coreBlock using the coreBlockId
+  def getLeftLeafBlock(blocks:Seq[PatternLogoBlock[_]]):KeyValuePatternLogoBlock = blocks(leftLeafBlockId).asInstanceOf[KeyValuePatternLogoBlock]
+
+  def getRightLeafBlock(blocks:Seq[PatternLogoBlock[_]]):KeyValuePatternLogoBlock = blocks(rightLeafBlockId).asInstanceOf[KeyValuePatternLogoBlock]
+
+  //this version we assume that compositeLogo only has one core and one leaf, so there is no need for calculating LeafLeafJointsForest
+  //  def getLeafLeafJointsForest():Seq[BlockBlockJoints] = ???
+
+
+  def getCoreLeftLeafJoins():BlockBlockJoints = {
+    val coreKeyMapping = keyMappings(coreBlockId)
+    val leafKeyMapping = keyMappings(leftLeafBlockId)
+
+    val reverseCoreKeyMapping = coreKeyMapping.toReverseMapping()
+    val reverseLeafKeyMapping = leafKeyMapping.toReverseMapping()
+
+    val joints = reverseCoreKeyMapping.keySet.intersect(reverseLeafKeyMapping.keySet)
+    val coreLeafJoints = joints.map(f => (reverseCoreKeyMapping(f), reverseLeafKeyMapping(f))).toSeq
+
+    val coreJoints = coreLeafJoints.map(_._1).toSet
+    val leafJoints = coreLeafJoints.map(_._2).toSet
+
+    BlockBlockJoints(coreBlockId,leftLeafBlockId,coreJoints,leafJoints)
+  }
+
+  def getCoreRightLeafJoins():BlockBlockJoints = {
+    val coreKeyMapping = keyMappings(coreBlockId)
+    val leafKeyMapping = keyMappings(rightLeafBlockId)
+
+    val reverseCoreKeyMapping = coreKeyMapping.toReverseMapping()
+    val reverseLeafKeyMapping = leafKeyMapping.toReverseMapping()
+
+    val joints = reverseCoreKeyMapping.keySet.intersect(reverseLeafKeyMapping.keySet)
+    val coreLeafJoints = joints.map(f => (reverseCoreKeyMapping(f), reverseLeafKeyMapping(f))).toSeq
+
+    val coreJoints = coreLeafJoints.map(_._1).toSet
+    val leafJoints = coreLeafJoints.map(_._2).toSet
+
+    BlockBlockJoints(coreBlockId,rightLeafBlockId,coreJoints,leafJoints)
+  }
+
+  def getLeafLeafJoints():BlockBlockJoints = {
+    val leftLeafKeyMapping = keyMappings(leftLeafBlockId)
+    val rightLeafKeyMapping = keyMappings(rightLeafBlockId)
+
+    val reverseLeftLeafKeyMapping = leftLeafKeyMapping.toReverseMapping()
+    val reverseRightLeafKeyMapping = rightLeafKeyMapping.toReverseMapping()
+
+    val joints = reverseLeftLeafKeyMapping.keySet.intersect(reverseRightLeafKeyMapping.keySet)
+    val leafLeafJoints = joints.map(f => (reverseLeftLeafKeyMapping(f), reverseRightLeafKeyMapping(f))).toSeq
+
+    val leftLeafJoints = leafLeafJoints.map(_._1).toSet
+    val rightLeafJoints = leafLeafJoints.map(_._2).toSet
+
+    BlockBlockJoints(leftLeafBlockId,rightLeafBlockId,leftLeafJoints,rightLeafJoints)
+  }
+
+}
 
 /**
   * generator for generate LogoSchema
