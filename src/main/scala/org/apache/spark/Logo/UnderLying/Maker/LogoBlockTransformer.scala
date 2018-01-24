@@ -2,7 +2,7 @@ package org.apache.spark.Logo.UnderLying.Maker
 
 import org.apache.spark.Logo.Plan.FilteringCondition
 import org.apache.spark.Logo.UnderLying.dataStructure.{LogoBlockRef, PatternLogoBlock}
-import org.apache.spark.rdd.RDD
+import org.apache.spark.rdd.{RDD, UnionRDD}
 import org.apache.spark.storage.StorageLevel
 
 
@@ -42,12 +42,22 @@ class ToKeyValueTransformer extends LogoBlockTransformer{
 
 
 
-    resRDD.persist(StorageLevel.OFF_HEAP)
+
+    resRDD.persist(StorageLevel.DISK_ONLY)
+//    resRDD.persist(StorageLevel.OFF_HEAP)
 //    resRDD.persist(StorageLevel.MEMORY_ONLY)
 //    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
 //    resRDD.cache()
+//    resRDD.count()
+//    resRDD.count()
     resRDD.count()
+//    new UnionRDD(resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))
+//val res = new UnionRDD[LogoBlockRef](resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))
+
+
+//    resRDD.countAsync()
     resRDD
+//    res
   }
 }
 
@@ -65,9 +75,19 @@ class ToConcreteTransformer extends LogoBlockTransformer{
 
 //    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
 //    resRDD.cache()
-    resRDD.persist(StorageLevel.OFF_HEAP)
+
+
+
+
+    resRDD.persist(StorageLevel.DISK_ONLY)
+//    resRDD.persist(StorageLevel.OFF_HEAP)
+//    resRDD.countAsync()
     resRDD.count()
+//    resRDD.union(resRDD.sparkContext.emptyRDD)
+//    val res = new UnionRDD[LogoBlockRef](resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))
+
     resRDD
+//    res
   }
 }
 

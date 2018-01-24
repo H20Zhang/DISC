@@ -16,6 +16,9 @@ class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSc
   var keyValueLogoRDD:KeyValueLogoRDD = null
   var filteringLogoRDD:FilteringLogoRDD = null
 
+
+
+
   //
   def toKeyValuePatternLogoRDD(key:Set[Int]):KeyValueLogoRDD = {
 

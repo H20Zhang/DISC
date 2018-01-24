@@ -11,7 +11,7 @@ class ExamplePatternTest extends FunSuite{
 //    val triangle = new ExamplePattern(data).triangle
 //    assert(triangle.size() == 608389)
 //  }
-
+//
 //  test("ChordalSquare"){
 //    val chordalSquare = new ExamplePattern(data).chordalSquareFast
 //    assert(chordalSquare.size() == 40544543)
@@ -41,6 +41,11 @@ class ExamplePatternTest extends FunSuite{
 //    val house = new ExamplePattern(data).houseFast
 //    assert(house.size() == 9488779111L)
 //  }
+
+    test("houseIntersectionFast"){
+      val house = new ExamplePattern(data).houseIntersectionFast
+      assert(house.size() == 9488779111L)
+    }
 
 
 //  test("threeTriangleFast"){

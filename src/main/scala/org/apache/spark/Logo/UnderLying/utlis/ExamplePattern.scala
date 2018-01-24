@@ -6,8 +6,8 @@ import org.apache.spark.Logo.UnderLying.dataStructure.{ConcretePatternLogoBlock,
 
 class ExamplePattern(data:String) {
 
-  var h1 = 4
-  var h2 = 4
+  var h1 = 6
+  var h2 = 6
 
   lazy val edge = {
 
@@ -15,7 +15,7 @@ class ExamplePattern(data:String) {
     //  val dataSource="./debugData.txt"
     //  val dataSource = "/Users/zhanghao/Downloads/as-skitter.txt"
 
-    new EdgeLoader(data,Seq(4,4)) edgeLogoRDDReference
+    new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
   }
 
   def getEdge(hNumber:(Int,Int)) = {
@@ -105,9 +105,9 @@ class ExamplePattern(data:String) {
         pattern.pattern(0) < pattern.pattern(1)
     },true)
 
-    val lastEdge =  new EdgeLoader(data,Seq(4,4)) edgeLogoRDDReference
+    val lastEdge =  new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
 
-    val edge = new EdgeLoader(data,Seq(4,4)) edgeLogoRDDReference
+    val edge = new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
     val leftEdge = edge.filter(filterCondition1).toIdentitySubPattern()
     val rightEdge = edge.toSubPattern((0,1),(1,2))
 
@@ -135,9 +135,9 @@ class ExamplePattern(data:String) {
         pattern.pattern(0) < pattern.pattern(1)
     },true)
 
-    val lastEdge =  new EdgeLoader(data,Seq(4,4)) edgeLogoRDDReference
+    val lastEdge =  new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
 
-    val edge = new EdgeLoader(data,Seq(4,4)) edgeLogoRDDReference
+    val edge = new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
     val leftEdge = edge.filter(filterCondition1).toIdentitySubPattern()
     val rightEdge = edge.toSubPattern((0,1),(1,2))
 
@@ -206,20 +206,27 @@ class ExamplePattern(data:String) {
     },true)
 
     val leftEdge = edge4_4
-      .filter(filterCondition).toIdentitySubPattern()
+      .filter(filterCondition)
+      .toIdentitySubPattern()
 
     val filterCondition1 = FilteringCondition({
       pattern =>
         pattern.pattern(1) < pattern.pattern(2)
     },false)
 
-    val wedge = leftEdge.build(edge4_4.filter(filterCondition).toSubPattern((0,0),(1,2))).filter(filterCondition1).toIdentitySubPattern()
+    val wedge = leftEdge.build(edge4_4
+      .filter(filterCondition)
+      .toSubPattern((0,0),(1,2)))
+      .filter(filterCondition1)
+      .toIdentitySubPattern()
 
     val filterCondition2 = FilteringCondition({
       pattern =>
         pattern.pattern(0) < pattern.pattern(3)
     },false)
-    val threeLineTemp = wedge.build(edge4_1.toSubPattern((0,1),(1,3))).filter(filterCondition2).toIdentitySubPattern()
+    val threeLineTemp = wedge.build(edge4_1.toSubPattern((0,1),(1,3)))
+      .filter(filterCondition2)
+      .toIdentitySubPattern()
     val square = threeLineTemp.build(edge4_1.toSubPattern((0,2),(1,3)))
     square
   }
@@ -235,21 +242,27 @@ class ExamplePattern(data:String) {
     },true)
 
     val leftEdge = edge4_4
-      .filter(filterCondition).toIdentitySubPattern()
+      .filter(filterCondition)
+      .toIdentitySubPattern()
 
     val filterCondition1 = FilteringCondition({
       pattern =>
         pattern.pattern(1) < pattern.pattern(2)
     },false)
 
-    val wedge = leftEdge.build(edge4_4.filter(filterCondition).toSubPattern((0,0),(1,2))).filter(filterCondition1).toIdentitySubPattern()
+    val wedge = leftEdge.build(edge4_4
+      .filter(filterCondition)
+      .toSubPattern((0,0),(1,2)))
+      .filter(filterCondition1)
+      .toIdentitySubPattern()
 
 
     val filterCondition2 = FilteringCondition({
       pattern =>
         pattern.pattern(0) < pattern.pattern(3)
     },false)
-    val square = wedge.build(edge4_1.toSubPattern((0,1),(1,3)),edge4_1.toSubPattern((0,2),(1,3))).filter(filterCondition2)
+    val square = wedge.build(edge4_1.toSubPattern((0,1),(1,3)),edge4_1.toSubPattern((0,2),(1,3)))
+      .filter(filterCondition2)
 //    val square = threeLineTemp.build(edge4_1.toSubPattern((0,2),(1,3)))
     square
   }
@@ -299,8 +312,8 @@ class ExamplePattern(data:String) {
         pattern.pattern(0) < pattern.pattern(1)
     },true)
 
-        val edge3_1 =  new EdgeLoader(data,Seq(8,1)) edgeLogoRDDReference
-        val edge3_3 =  new EdgeLoader(data,Seq(8,8)) edgeLogoRDDReference
+        val edge3_1 =  new EdgeLoader(data,Seq(h1,1)) edgeLogoRDDReference
+        val edge3_3 =  new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
         val leftEdge = edge3_3.filter(filterCondition1).toIdentitySubPattern()
         val rightEdge = edge3_1.toSubPattern((0,1),(1,2))
 
@@ -385,6 +398,47 @@ class ExamplePattern(data:String) {
   }
 
 
+  lazy val houseIntersectionFast = {
+    val edge4_1 =  new EdgeLoader(data,Seq(h1,1)) edgeLogoRDDReference
+    val edge4_4 =  new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
+
+    val filterCondition = FilteringCondition({
+      pattern =>
+        pattern.pattern(0) < pattern.pattern(1)
+    },true)
+
+    val leftEdge = edge4_4.filter(filterCondition).toIdentitySubPattern()
+    val wedge = leftEdge.build(edge4_4.toSubPattern((0,1),(1,2))).toIdentitySubPattern()
+//    val threeLine = wedge.build(edge4_1.toSubPattern((0,2),(1,3))).toIdentitySubPattern()
+//    val squareTemp = threeLine.build(edge4_1.toSubPattern((0,0),(1,3))).toIdentitySubPattern()
+val filterCondition1 = FilteringCondition({
+  pattern =>
+    val p = pattern.pattern
+    p(0) != p(2) && p(1) != p(3)
+},false)
+
+    val squareTemp = wedge.build(edge4_1.toSubPattern((0,2),(1,3)),edge4_1.toSubPattern((0,0),(1,3))).filter(filterCondition1).toIdentitySubPattern()
+
+
+
+
+    val filterCondition2 = FilteringCondition({
+      pattern =>
+        val p = pattern.pattern
+        p(3) != p(4) && p(2) != p(4)
+    },false)
+
+
+    val triangleLeftEdge = leftEdge
+    val triangleWedge = leftEdge.build(edge4_1.toSubPattern((0,1),(1,2))).toIdentitySubPattern()
+    val indexTriangle = triangleWedge.build(edge4_1.toSubPattern((0,0),(1,2)))
+
+    val house = squareTemp.build(indexTriangle.toSubPattern((0,0),(1,1),(2,4)))
+      .filter(filterCondition2)
+
+    house
+  }
+
   //TODO:testing this
   lazy val house = {
 
@@ -417,8 +471,8 @@ class ExamplePattern(data:String) {
   }
 
   lazy val threeTriangleFast = {
-    val edge4_1 =  new EdgeLoader(data,Seq(4,1)) edgeLogoRDDReference
-    val edge4_4 =  new EdgeLoader(data,Seq(4,4)) edgeLogoRDDReference
+    val edge4_1 =  new EdgeLoader(data,Seq(h1,1)) edgeLogoRDDReference
+    val edge4_4 =  new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
 
     val leftEdge = edge4_4.toIdentitySubPattern()
     val rightEdge = edge4_4.toSubPattern((0,0),(1,2))
@@ -431,7 +485,7 @@ class ExamplePattern(data:String) {
         pattern.pattern(1) < pattern.pattern(2)
     },false)
 
-    val triangle = wedge.build(middleEdge).filter(filterCondition).toConcrete()
+    val triangle = wedge.build(middleEdge).filter(filterCondition)
 
     val leftEdge1 = edge4_4.toIdentitySubPattern()
     val rightEdge1 = edge4_1.toSubPattern((0,0),(1,2))
@@ -449,7 +503,8 @@ class ExamplePattern(data:String) {
         p(3) != p(2) && p(4) != p(1) && p(3) != p(4)
     },false)
 
-    val threeTriangle = chordalSquareTemp.toIdentitySubPattern().build(indexTriangle.toSubPattern((0,0),(1,2),(2,4))).filter(filterCondition1)
+    val threeTriangle = chordalSquareTemp.toIdentitySubPattern().build(indexTriangle.toSubPattern((0,0),(1,2),(2,4)))
+      .filter(filterCondition1)
 
     threeTriangle
   }

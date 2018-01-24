@@ -86,6 +86,9 @@ class PatternInstance(var pattern:Array[Int]) extends Serializable with KryoSeri
   def toKeyPatternInstance():KeyPatternInstance = new KeyPatternInstance(pattern)
   def toValuePatternInstance():ValuePatternInstance = new ValuePatternInstance(pattern)
 
+
+
+
   override def toString: String = {
     pattern.toString()
   }
@@ -229,10 +232,47 @@ class rawPatternInstance(tIntArrayList: TIntArrayList) extends PatternInstance(n
 }
 
 
-class ValuePatternInstance(pattern:Array[Int]) extends  PatternInstance(pattern){
+class ValuePatternInstance(pattern1:Array[Int]) extends  PatternInstance(pattern1){
 
+  def getValue(idx:Int): Int ={
+    pattern(idx)
+  }
 }
 
+
+case class OneValuePatternInstance(var node1:Int) extends ValuePatternInstance(null){
+  override def getValue(idx: Int): Int = {
+    node1
+  }
+
+  override def write(kryo: Kryo, output: Output): Unit = {
+    output.writeInt(node1,true)
+  }
+
+  override def read(kryo: Kryo, input: Input): Unit = {
+    node1 = input.readInt(true)
+  }
+}
+
+case class TwoValuePatternInstance(var node1:Int, var node2:Int) extends ValuePatternInstance(null){
+  override def getValue(idx: Int): Int = {
+    if (idx == 1){
+      node1
+    } else {
+      node2
+    }
+  }
+
+  override def write(kryo: Kryo, output: Output): Unit = {
+    output.writeInt(node1,true)
+    output.writeInt(node2,true)
+  }
+
+  override def read(kryo: Kryo, input: Input): Unit = {
+    node1 = input.readInt(true)
+    node2 = input.readInt(true)
+  }
+}
 
 object KeyMapping extends Serializable {
   def apply(keyMapping: Seq[Int]): KeyMapping = new KeyMapping(keyMapping.zipWithIndex.map(_.swap).toMap)
@@ -260,7 +300,7 @@ object PatternInstance extends Serializable{
     }
   }
 
-  def quickBuild(lInstance:PatternInstance, lKeyMapping:KeyMapping, rInstance:PatternInstance, rKeyMapping:KeyMapping,totalNodes:Int) = {
+  def quickBuild(lInstance:PatternInstance, lKeyMapping:KeyMapping, rInstance:ValuePatternInstance, rKeyMapping:KeyMapping,totalNodes:Int) = {
 
     if (rKeyMapping.keyMapping.size == 0){
       lInstance
@@ -271,7 +311,7 @@ object PatternInstance extends Serializable{
         array(f._2) = lInstance.pattern(f._1)}
 
       rKeyMapping.keyMapping.foreach{f =>
-        array(f._2) = rInstance.pattern(f._1)}
+        array(f._2) = rInstance.getValue(f._1)}
 
       apply(array)
     }
@@ -306,7 +346,17 @@ object KeyPatternInstance extends Serializable {
 
 
 object ValuePatternInstance extends Serializable {
-  def apply(pattern: Seq[Int]): ValuePatternInstance = new ValuePatternInstance(pattern.toArray)
+  def apply(pattern: Seq[Int]): ValuePatternInstance = {
+    if (pattern.size == 1){
+      apply(pattern(0))
+    } else if (pattern.size == 2){
+      apply(pattern(0),pattern(1))
+    } else{
+      new ValuePatternInstance(pattern.toArray)
+    }
+  }
+  def apply(node1:Int): ValuePatternInstance = new OneValuePatternInstance(node1)
+  def apply(node1:Int, node2:Int): ValuePatternInstance = new TwoValuePatternInstance(node1, node2)
 }
 
 

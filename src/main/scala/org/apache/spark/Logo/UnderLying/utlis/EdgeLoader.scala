@@ -23,19 +23,23 @@ class EdgeLoader(data:String,sizes:Seq[Int]) {
   def debugEdgePatternLogoRDD = {
     val (edgeRDD,schema) = EdgeRowLogoRDD
 
-    val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema,f.metaData,f.rawData.sortWith{
-      (l,r) =>
-        if (l._1(0) < r._1(0)){
-         true
-        }
-        else if (l._1(0) == r._1(0) && l._1(1) < r._1(1)){
-          true
-        } else {
-          false
-        }
-    }.map(t => PatternInstance(t._1) )))
 
-    edgePatternLogoRDD.cache().count()
+//      .sortWith{
+//        (l,r) =>
+//          if (l._1(0) < r._1(0)){
+//            true
+//          }
+//          else if (l._1(0) == r._1(0) && l._1(1) < r._1(1)){
+//            true
+//          } else {
+//            false
+//          }
+//      }
+
+    val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema,f.metaData,f.rawData.map(t => PatternInstance(t._1) )))
+
+    edgePatternLogoRDD.cache()
+//    edgePatternLogoRDD.count()
     new ConcreteLogoRDD(edgePatternLogoRDD.asInstanceOf[RDD[LogoBlockRef]], schema)
   }
 
@@ -45,7 +49,7 @@ class EdgeLoader(data:String,sizes:Seq[Int]) {
 
 //    sc.textFile(dataSource).repartition(64).cache().saveAsTextFile(dataSource+"temp")
 
-    val data = sc.textFile(dataSource).repartition(sizes(0)*sizes(1)).cache()
+    val data = sc.textFile(dataSource).repartition(sizes(0)*sizes(1))
 //    val data = sc.textFile(dataSource)
 //    data.count()
 
@@ -63,6 +67,7 @@ class EdgeLoader(data:String,sizes:Seq[Int]) {
 
 
     rawRDD.cache()
+//    rawRDD.count()
     //    val rawRDD = sc.parallelize(List.range(0,100)).map(f => (Seq(f,f),1))
     RowLogoRDDMaker(rawRDD)
   }
@@ -82,7 +87,7 @@ class EdgeLoader(data:String,sizes:Seq[Int]) {
     val logoRDD = logoRDDMaker.build()
     val schema = logoRDDMaker.getSchema
     logoRDD.cache()
-    logoRDD.count()
+//    logoRDD.count()
 
     (logoRDD,schema)
   }

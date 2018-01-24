@@ -288,4 +288,16 @@ class LogoEdgePatternPhysicalPlan(@transient edgeLogoRDD:ConcreteLogoRDD) extend
   }
 }
 
+//class LogoKeyValuePatternPhysicalPlan(@transient keyValueLogoRDD: KeyValueLogoRDD) extends LogoPatternPhysicalPlan(List(),List()){
+//  override def generateLeafPhyiscal(): PatternLogoRDD = ???
+//
+//  override def generateCorePhyiscal(): PatternLogoRDD = ???
+//
+//  override def generateNewPatternFState(): PatternLogoRDD = ???
+//
+//  override def generateNewPatternJState(): ConcreteLogoRDD = ???
+//
+//  override def getSchema(): LogoSchema = ???
+//}
+
 

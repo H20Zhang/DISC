@@ -75,12 +75,18 @@ class SubTaskPartition(
         val blockId = RDDBlockId(rdds(f._1).id,rdds(f._1).partitions(f._2).index)
         blockManagerMaster.getLocations(blockId).map(f => TaskLocation(f.host,f.executorId).toString)
 
+
+
       }
     }
 
-    if(prefs.flatten.distinct.size == 0){
-
+    if (prefs.flatten.distinct.forall(f => f == "")){
+      val sparkEnv = SparkEnv.get
+      val blockManagerMaster = sparkEnv.blockManager.master
+      prefs =
+        Seq(sparkEnv.blockManager.master.getMemoryStatus.keys.toSeq.map(f => TaskLocation(f.host,f.executorId).toString))
     }
+
 
     val exactMatchLocations = prefs.reduce((x, y) => x.intersect(y))
     val locs = if (!exactMatchLocations.isEmpty) exactMatchLocations else prefs.flatten.distinct

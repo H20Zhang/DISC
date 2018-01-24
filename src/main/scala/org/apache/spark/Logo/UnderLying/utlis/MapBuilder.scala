@@ -7,6 +7,7 @@ import org.apache.spark.Logo.UnderLying.dataStructure.{KeyPatternInstance, OneKe
 import scala.collection.mutable
 import scala.collection.mutable.AnyRefMap.AnyRefMapBuilder
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Sorting
 
 object MapBuilder {
 
@@ -52,11 +53,28 @@ object MapBuilder {
           val key = f(keys(0)).toLong
 //            ListSelector.selectElements(f,keys)
           val value = ListSelector.notSelectElements(f,keySet)
-          if (hashmap.contains(key)){
-            hashmap.get(key).get.append(ValuePatternInstance(value))
-          }else{
-            hashmap.put(key,new ArrayBuffer[ValuePatternInstance]())
-            hashmap.get(key).get.append(ValuePatternInstance(value))
+
+          if (valueSize == 1){
+            if (hashmap.contains(key)){
+              hashmap.get(key).get.append(ValuePatternInstance(value(0)))
+            }else{
+              hashmap.put(key,new ArrayBuffer[ValuePatternInstance]())
+              hashmap.get(key).get.append(ValuePatternInstance(value(0)))
+            }
+          } else if (valueSize == 2){
+            if (hashmap.contains(key)){
+              hashmap.get(key).get.append(ValuePatternInstance(value(0), value(1)))
+            }else{
+              hashmap.put(key,new ArrayBuffer[ValuePatternInstance]())
+              hashmap.get(key).get.append(ValuePatternInstance(value(0), value(1)))
+            }
+          } else{
+            if (hashmap.contains(key)){
+              hashmap.get(key).get.append(ValuePatternInstance(value))
+            }else{
+              hashmap.put(key,new ArrayBuffer[ValuePatternInstance]())
+              hashmap.get(key).get.append(ValuePatternInstance(value))
+            }
           }
       }
     } else if(keys.size == 2){
@@ -65,23 +83,47 @@ object MapBuilder {
           val key1 = f(keys(0))
           val key2 = f(keys(1))
           val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
-          //            ListSelector.selectElements(f,keys)
           val value = ListSelector.notSelectElements(f,keySet)
-          if (hashmap.contains(key)){
-            hashmap.get(key).get.append(ValuePatternInstance(value))
-          }else{
-            hashmap.put(key,new ArrayBuffer[ValuePatternInstance]())
-            hashmap.get(key).get.append(ValuePatternInstance(value))
+
+          if (valueSize == 1){
+            if (hashmap.contains(key)){
+              hashmap.get(key).get.append(ValuePatternInstance(value(0)))
+            }else{
+              hashmap.put(key,new ArrayBuffer[ValuePatternInstance]())
+              hashmap.get(key).get.append(ValuePatternInstance(value(0)))
+            }
+          } else if (valueSize == 2){
+            if (hashmap.contains(key)){
+              hashmap.get(key).get.append(ValuePatternInstance(value(0), value(1)))
+            }else{
+              hashmap.put(key,new ArrayBuffer[ValuePatternInstance]())
+              hashmap.get(key).get.append(ValuePatternInstance(value(0), value(1)))
+            }
+          } else{
+            if (hashmap.contains(key)){
+              hashmap.get(key).get.append(ValuePatternInstance(value))
+            }else{
+              hashmap.put(key,new ArrayBuffer[ValuePatternInstance]())
+              hashmap.get(key).get.append(ValuePatternInstance(value))
+            }
+
           }
       }
     }
 
 
+
+    val x = 0
     if (valueSize == 1){
-    hashmap.mapValuesNow(f => f.sortBy(t => t.pattern(0)))
+    hashmap.mapValuesNow{f =>
+      val array = f.map(_.getValue(0)).toArray
+      Sorting.quickSort(array)
+      array.map(f => ValuePatternInstance(Seq(f)))
+//      f.toArray
+    }
     }
     else{
-       hashmap
+       hashmap.mapValuesNow(f => f.toArray)
     }
 //    hashmap
   }

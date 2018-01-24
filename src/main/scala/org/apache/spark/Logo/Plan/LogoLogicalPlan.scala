@@ -5,11 +5,19 @@ import org.apache.spark.Logo.UnderLying.Joiner.LogoBuildScriptStep
 import org.apache.spark.Logo.UnderLying.dataStructure.{PatternInstance, _}
 
 
-case class FilteringCondition(f:PatternInstance => Boolean, isStrictCondition:Boolean) {
+class FilteringCondition(val f:PatternInstance => Boolean, val isStrictCondition:Boolean) {
+
+
+
 
   override def clone(): AnyRef = {
-    FilteringCondition(f,isStrictCondition)
+    new FilteringCondition(f,isStrictCondition)
   }
+}
+
+object FilteringCondition{
+  def apply(f: PatternInstance => Boolean, isStrictCondition: Boolean
+  ): FilteringCondition = new FilteringCondition(f, isStrictCondition)
 }
 
 /**
@@ -59,6 +67,7 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript:Log
     val filteredBuildScript = new LogoFilterPatternPhysicalPlan(f,buildScript)
     if (f.isStrictCondition){
 
+
       val newBuildScript = new LogoEdgePatternPhysicalPlan(filteredBuildScript.generateNewPatternJState())
       new PatternLogoRDDReference(patternSchema,newBuildScript)
     }else{
@@ -103,19 +112,17 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript:Log
         val block = f.asInstanceOf[PatternLogoBlock[_]]
         val iterator = block.enumerateIterator()
 
-
-
 //        var result = 0L
 //        for (x <- iterator) result += 1
 //        result
 //
         while (iterator.hasNext){
           iterator.next()
-          size = size + 1
+          size += 1
+
         }
+
         size
-
-
     }.sum().toLong
   }
 

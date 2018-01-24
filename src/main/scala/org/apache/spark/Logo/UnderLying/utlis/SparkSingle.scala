@@ -47,6 +47,10 @@ object SparkSingle {
 
   }
 
+
+  //        .config("spark.memory.offHeap.enabled","true")
+  //        .config("spark.memory.offHeap.size","500M")
+
   var isCluster = false
 
   private def getSparkInternal() = {
@@ -59,6 +63,12 @@ object SparkSingle {
         .config(getConf())
         .config("spark.yarn.executor.memoryOverhead","600")
         .config("spark.externalBlockStore.blockManager", "org.apache.spark.storage.GigaSpacesBlockManager")
+        .config("spark.memory.offHeap.enabled","true")
+        .config("spark.memory.offHeap.size","800M")
+          .config("spark.kryo.unsafe","true")
+          .config("spark.shuffle.file.buffer","1M")
+        .config("conf spark.network.timeout","10000000")
+//          .config("spark.kryo.registrationRequired","true")
         .getOrCreate()
       case false =>  SparkSession
         .builder()
@@ -68,6 +78,12 @@ object SparkSingle {
         .config(getConf())
         .config("spark.yarn.executor.memoryOverhead","600")
         .config("spark.externalBlockStore.blockManager", "org.apache.spark.storage.GigaSpacesBlockManager")
+          .config("spark.memory.offHeap.enabled","true")
+          .config("spark.memory.offHeap.size","800M")
+        .config("spark.shuffle.file.buffer","1M")
+        .config("spark.kryo.unsafe","true")
+          .config("conf spark.network.timeout","10000000")
+//        .config("spark.kryo.registrationRequired","true")
         .getOrCreate()
     }
   }

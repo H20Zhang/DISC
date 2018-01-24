@@ -7,17 +7,24 @@ object LegoMainEntry {
 
   def main(args: Array[String]): Unit = {
     val data = args(0)
-    val triangle = new ExamplePattern(data).triangle
-    println(triangle.size())
+    val algorithm = args(1)
 
-//    SparkSingle.isCluster = true
-//    val house = new ExamplePattern(data).houseFast
-//    println(house.size())
-//
-//    val square = new ExamplePattern(data).squareFast
-//    println(square.size())
 
-//    val threeTriangle = new ExamplePattern(data).threeTriangle
-//    println(threeTriangle.size())
+    SparkSingle.isCluster = true
+    algorithm match {
+      case "triangle" => val triangle = new ExamplePattern(data).triangle; println(triangle.size())
+      case "house" => val house = new ExamplePattern(data).houseIntersectionFast; println(s"house:" + house.size())
+      case "square" => val square = new ExamplePattern(data).squareIntersectionVerificationFast; println(square.size())
+      case "threeTriangle" => val threeTriangle = new ExamplePattern(data).threeTriangleFast; println(threeTriangle.size())
+      case "trianglePlusOneEdge" => val trianglePlusOneEdge = new ExamplePattern(data).trianglePlusOneEdge; println(trianglePlusOneEdge.size())
+      case "trianglePlusTwoEdge" => val trianglePlusTwoEdge = new ExamplePattern(data).trianglePlusTwoEdge; println(trianglePlusTwoEdge.size())
+      case "trianglePlusWedge" => val trianglePlusWedge = new ExamplePattern(data).trianglePlusWedge; println(trianglePlusWedge.size())
+    }
+
+
+//    val chordalSquare = new ExamplePattern(data).chordalSquareFast
+//    println(chordalSquare.size())
+
+
   }
 }
