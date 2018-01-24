@@ -5,20 +5,18 @@ import org.apache.spark.Logo.UnderLying.Joiner.LogoBuildScriptStep
 import org.apache.spark.Logo.UnderLying.dataStructure.{PatternInstance, _}
 
 
-class FilteringCondition(val f:PatternInstance => Boolean, val isStrictCondition:Boolean) {
-
-
-
-
+case class FilteringCondition(var f:PatternInstance => Boolean, var isStrictCondition:Boolean) {
   override def clone(): AnyRef = {
     new FilteringCondition(f,isStrictCondition)
   }
 }
 
-object FilteringCondition{
-  def apply(f: PatternInstance => Boolean, isStrictCondition: Boolean
-  ): FilteringCondition = new FilteringCondition(f, isStrictCondition)
-}
+
+
+//object FilteringCondition{
+//  def apply(f: PatternInstance => Boolean, isStrictCondition: Boolean
+//  ): FilteringCondition = new FilteringCondition(f, isStrictCondition)
+//}
 
 /**
   * Represent a logical reference to Logo, an wrapper around LogoBuildScriptStep

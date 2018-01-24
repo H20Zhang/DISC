@@ -726,13 +726,20 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
         do {
           if (coreIterator.hasNext){
             currentCore = coreIterator.next()
-            var i = 0
+//            var i = 0
 
 //            while (i < coreLen) {
 //              val temp = coreMapping(i)
 //              array.update(temp._2,currentCore.pattern(temp._1))
 //              i += 1
 //            }
+
+            var i = 0
+            while (i < coreLen) {
+              //                            val temp = coreMapping(i)
+              array.update(coreMapping2(i),currentCore.pattern(coreMapping1(i)))
+              i += 1
+            }
           }else{
             return false
           }
@@ -741,14 +748,14 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
           intersectIterator = generateIntersectionIterator(leftLeafsIterator,rightLeafsIterator)
 
 
-          if (intersectIterator.hasNext){
-           var i = 0
-            while (i < coreLen) {
-//                            val temp = coreMapping(i)
-                            array.update(coreMapping2(i),currentCore.pattern(coreMapping1(i)))
-                            i += 1
-                          }
-          }
+//          if (intersectIterator.hasNext){
+//           var i = 0
+//            while (i < coreLen) {
+////                            val temp = coreMapping(i)
+//                            array.update(coreMapping2(i),currentCore.pattern(coreMapping1(i)))
+//                            i += 1
+//                          }
+//          }
 
 //          hasNext1 =
 

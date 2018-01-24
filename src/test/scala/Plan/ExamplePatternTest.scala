@@ -73,11 +73,11 @@ class ExamplePatternTest extends FunSuite{
 //    assert(square.size() == 57654491)
 //  }
 
-    test("squareVerificationFast"){
-      val square = new ExamplePattern(data).squareIntersectionVerificationFast
-      assert(square.size() == 57654491)
-    }
-
+//    test("squareVerificationFast"){
+//      val square = new ExamplePattern(data).squareIntersectionVerificationFast
+//      assert(square.size() == 57654491)
+//    }
+//
 
 
 
