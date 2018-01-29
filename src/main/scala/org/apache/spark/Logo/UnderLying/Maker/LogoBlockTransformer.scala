@@ -44,13 +44,13 @@ class ToKeyValueTransformer extends LogoBlockTransformer{
 
 
 //    resRDD.persist(StorageLevel.DISK_ONLY)
-    resRDD.persist(StorageLevel.OFF_HEAP)
+//    resRDD.persist(StorageLevel.OFF_HEAP)
 //    resRDD.persist(StorageLevel.MEMORY_ONLY)
 //    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
-//    resRDD.cache()
-//    resRDD.count()
-//    resRDD.count()
+    resRDD.cache()
     resRDD.count()
+//    resRDD.count()
+//    resRDD.count()
 //    new UnionRDD(resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))
 //val res = new UnionRDD[LogoBlockRef](resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))
 
@@ -80,8 +80,9 @@ class ToConcreteTransformer extends LogoBlockTransformer{
 
 
 //    resRDD.persist(StorageLevel.DISK_ONLY)
-    resRDD.persist(StorageLevel.OFF_HEAP)
+//    resRDD.persist(StorageLevel.OFF_HEAP)
 //    resRDD.countAsync()
+    resRDD.cache()
     resRDD.count()
 //    resRDD.union(resRDD.sparkContext.emptyRDD)
 //    val res = new UnionRDD[LogoBlockRef](resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))

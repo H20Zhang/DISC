@@ -129,10 +129,9 @@ class ConcretePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawDat
 }
 
 class CompactConcretePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:CompactPatternList) extends PatternLogoBlock(schema,metaData,rawData){
-  override def assemble(): Seq[PatternInstance] = ???
-  override def iterator(): Iterator[PatternInstance] = ???
-  override def enumerateIterator(): Iterator[PatternInstance] = ???
-
+  override def assemble(): Seq[PatternInstance] = rawData.iterator.toList
+  override def iterator(): Iterator[PatternInstance] = rawData.iterator
+  override def enumerateIterator(): Iterator[PatternInstance] = iterator()
 }
 
 /**

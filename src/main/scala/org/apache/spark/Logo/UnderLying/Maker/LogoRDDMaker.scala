@@ -129,7 +129,7 @@ abstract class CompactRowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: Dataset[
   def getSchema = _schema
 
 
-  def build():RDD[RowLogoBlock[(A,B)]]
+  def build():RDD[CompactConcretePatternLogoBlock]
 }
 
 /**
@@ -168,7 +168,9 @@ class SimpleCompactRowLogoRDDMaker(rdd:Dataset[((Int,Int),Int)]) extends Compact
     val sentryRDD = generateSentry
     val baseList = partitioner.partitioners.map(_.p1)
 
-    val sentriedRDD = rdd.union(sentryRDD)
+//    val sentriedRDD = rdd.union(sentryRDD)
+    val sentriedRDD = rdd
+
 
     val schema = _schema.clone().asInstanceOf[LogoSchema]
 

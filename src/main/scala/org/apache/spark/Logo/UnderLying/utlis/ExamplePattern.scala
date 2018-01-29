@@ -10,14 +10,17 @@ class ExamplePattern(data:String) {
   var h2 = 6
 
   lazy val rawEdge = {
+//    new CompactEdgeLoader(data) rawEdgeRDD
     new EdgeLoader(data) rawEdgeRDD
   }
 
   lazy val edge = {
+//    new CompactEdgePatternLoader(rawEdge,Seq(h1,h2)) edgeLogoRDDReference
     new EdgePatternLoader(rawEdge,Seq(h1,h2)) edgeLogoRDDReference
   }
 
   def getEdge(hNumber:(Int,Int)) = {
+//    new CompactEdgePatternLoader(rawEdge,Seq(h1,h2)) edgeLogoRDDReference
     new EdgePatternLoader(rawEdge,Seq(hNumber._1,hNumber._2)) edgeLogoRDDReference
   }
 
