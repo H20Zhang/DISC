@@ -398,7 +398,7 @@ class ExamplePattern(data:String) {
 
 
   lazy val houseIntersectionFast = {
-    val edge4_1 =  getEdge(h1,2)
+    val edge4_1 =  getEdge(h1,1)
     val edge4_4 =  getEdge(h1,h2)
 
     val filterCondition = FilteringCondition({

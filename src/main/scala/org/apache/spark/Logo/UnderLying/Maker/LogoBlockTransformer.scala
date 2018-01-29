@@ -43,8 +43,8 @@ class ToKeyValueTransformer extends LogoBlockTransformer{
 
 
 
-    resRDD.persist(StorageLevel.DISK_ONLY)
-//    resRDD.persist(StorageLevel.OFF_HEAP)
+//    resRDD.persist(StorageLevel.DISK_ONLY)
+    resRDD.persist(StorageLevel.OFF_HEAP)
 //    resRDD.persist(StorageLevel.MEMORY_ONLY)
 //    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
 //    resRDD.cache()
@@ -79,8 +79,8 @@ class ToConcreteTransformer extends LogoBlockTransformer{
 
 
 
-    resRDD.persist(StorageLevel.DISK_ONLY)
-//    resRDD.persist(StorageLevel.OFF_HEAP)
+//    resRDD.persist(StorageLevel.DISK_ONLY)
+    resRDD.persist(StorageLevel.OFF_HEAP)
 //    resRDD.countAsync()
     resRDD.count()
 //    resRDD.union(resRDD.sparkContext.emptyRDD)

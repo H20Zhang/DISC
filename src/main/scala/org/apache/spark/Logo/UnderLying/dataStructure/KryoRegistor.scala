@@ -10,6 +10,7 @@ import scala.collection.mutable
 class KryoRegistor extends KryoRegistrator {
   override def registerClasses(kryo: Kryo) {
     kryo.register(classOf[mutable.LongMap[Array[ValuePatternInstance]]], new LongMapSerializer())
+    kryo.register(classOf[mutable.LongMap[CompactPatternList]], new LongMapCompactSerializer())
     kryo.register(classOf[LogoSchema])
     kryo.register(classOf[CompositeLogoSchema])
     kryo.register(classOf[LogoMetaData])
@@ -24,11 +25,12 @@ class KryoRegistor extends KryoRegistrator {
     kryo.register(classOf[OneValuePatternInstance])
     kryo.register(classOf[TwoValuePatternInstance])
     kryo.register(classOf[KeyMapping])
+    kryo.register(classOf[CompactPatternList])
+    kryo.register(classOf[CompactOnePatternList])
+    kryo.register(classOf[CompactTwoPatternList])
+    kryo.register(classOf[CompactArrayPatternList])
     kryo.register(classOf[scala.collection.mutable.WrappedArray.ofRef[_]])
     kryo.register(classOf[scala.collection.mutable.WrappedArray.ofInt])
-
-
-
   }
 }
 
@@ -51,6 +53,27 @@ class LongMapSerializer extends Serializer[mutable.LongMap[Array[ValuePatternIns
 
   }
 }
+
+class LongMapCompactSerializer extends Serializer[mutable.LongMap[CompactPatternList]]{
+  override def read(kryo: Kryo, input: Input, type1: Class[mutable.LongMap[CompactPatternList]]): mutable.LongMap[CompactPatternList] = {
+
+
+    val keys = kryo.readObject(input,classOf[Array[Long]])
+    val values = kryo.readObject(input,classOf[Array[CompactPatternList]])
+
+
+    mutable.LongMap.fromZip(keys,values)
+  }
+
+  override def write(kryo: Kryo, output: Output, object1: mutable.LongMap[CompactPatternList]): Unit = {
+
+    kryo.writeObject(output,object1.keys.toArray)
+    kryo.writeObject(output,object1.values.toArray)
+
+  }
+}
+
+
 
 
 

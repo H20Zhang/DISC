@@ -229,18 +229,17 @@ object MapBuilder {
       }
     }
 
-
-
-    val x = 0
     if (valueSize == 1){
       hashmap.mapValuesNow{f =>
         val compactList = f.toCompactList()
         Sorting.quickSort(compactList.asInstanceOf[CompactOnePatternList].rawData)
+        compactList
       }
     }
     else{
       hashmap.mapValuesNow(f => f.toCompactList())
     }
+
   }
 
 //  def fromListToMapFast[A](data:Seq[Seq[A]],keys:Set[Int]) = {

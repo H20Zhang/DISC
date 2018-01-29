@@ -4,6 +4,7 @@ import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, PointToNumConverter}
 import org.apache.spark.graphx.VertexId
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.Dataset
 import org.apache.spark.{HashPartitioner, Partitioner, SparkContext}
 
 import scala.reflect.ClassTag
@@ -96,52 +97,88 @@ class SimpleRowLogoRDDMaker[A:ClassTag](rdd:RDD[(Seq[Int],A)], default:A) extend
   }
 }
 
-///**
-//  * @param rdd The RDD used to make a logoRDD
-//  * List[Int] Key Type
-//  */
-//class CompactRowLogoRDDMaker(rdd:RDD[(Int,Int)]) extends RowLogoRDDMaker(rdd){
-//
-//  @transient val sc = rdd.sparkContext
-//  lazy val keyCol = partitioner.partitioners.map(_.slotNum)
-//
-//
-//
-//  def generateSentry() = {
-//
-//    var sentryNode:Seq[(Int,Int)] = null
-//    var sentry:Seq[(Int,Int)] = null
-//    var sentryRDD:RDD[(Int,Int)] = null
-//
-//
-//    val slotNums = partitioner.partitioners.map(_.slotNum)
-//    val baseList = partitioner.partitioners.map(_.p1)
-//    sentryNode = ListGenerator.fillListListIntoSlots(ListGenerator.cartersianSizeList(baseList),_nodeSize,slotNums).map(f => (f(0),f(1)))
-//    sentry = sentryNode
-//    sentryRDD = sc.parallelize(sentry)
-//
-//    sentryRDD
-//  }
-//
-//  def build(): RDD[RowLogoBlock[(Seq[Int])]] ={
-//
-//    require(_edges != null, "edge must be designated before build")
-//    require(_keySizeMap != null, "keySizeMap must be designated before build")
-//
-//    val sentryRDD = generateSentry
-//    val baseList = partitioner.partitioners.map(_.p1)
-//
-//    val sentriedRDD = rdd.union(sentryRDD)
-//
-//    val schema = _schema.clone().asInstanceOf[LogoSchema]
-//
-//    sentriedRDD.partitionBy(partitioner).mapPartitionsWithIndex[RowLogoBlock[()]({case (index,f) =>
-//      val blockGenerator = new rowBlockGenerator(schema,index,f)
-//      val block = blockGenerator.generate()
-//      Iterator(block)
-//    },true).cache()
-//  }
-//}
+
+
+abstract class CompactRowLogoRDDMaker[A:ClassTag, B: ClassTag](val rdd: Dataset[(A,B)]) extends Serializable{
+
+  var _edges:Seq[(Int,Int)] = _
+  var _keySizeMap:KeyMapping = _
+  var _name:String = ""
+
+
+  lazy val _schema = LogoSchema(_keySizeMap,_name)
+  lazy val _nodeSize = _schema.nodeSize
+  lazy val partitioner:CompositeParitioner = _schema.partitioner
+
+  def setEdges(edges:Seq[(Int,Int)]) = {
+    this._edges = edges
+    this
+  }
+
+  def setKeySizeMap(keySizeMap:Map[Int,Int]) = {
+    _keySizeMap = KeyMapping(keySizeMap)
+    this
+  }
+
+  def setName(name:String) = {
+    _name = name
+    this
+  }
+
+
+  def getSchema = _schema
+
+
+  def build():RDD[RowLogoBlock[(A,B)]]
+}
+
+/**
+  * @param rdd The RDD used to make a logoRDD
+  * List[Int] Key Type
+  */
+class SimpleCompactRowLogoRDDMaker(rdd:Dataset[((Int,Int),Int)]) extends CompactRowLogoRDDMaker(rdd){
+
+  @transient val sc = rdd.sparkSession.sparkContext
+  @transient val spark = rdd.sparkSession
+  lazy val keyCol = partitioner.partitioners.map(_.slotNum)
+
+
+  def generateSentry() = {
+
+    import spark.implicits._
+
+    var sentryNode:Seq[((Int,Int),Int)] = null
+    var sentry:Seq[((Int,Int),Int)] = null
+    var sentryRDD:Dataset[((Int,Int),Int)] = null
+
+    val slotNums = partitioner.partitioners.map(_.slotNum)
+    val baseList = partitioner.partitioners.map(_.p1)
+    sentryNode = ListGenerator.fillListListIntoSlots(ListGenerator.cartersianSizeList(baseList),_nodeSize,slotNums).map(f => ((f(0),f(1)),null.asInstanceOf[Int]))
+    sentry = sentryNode
+    sentryRDD = sc.parallelize(sentry).toDS()
+
+    sentryRDD
+  }
+
+  def build(): RDD[CompactConcretePatternLogoBlock] ={
+
+    require(_edges != null, "edge must be designated before build")
+    require(_keySizeMap != null, "keySizeMap must be designated before build")
+
+    val sentryRDD = generateSentry
+    val baseList = partitioner.partitioners.map(_.p1)
+
+    val sentriedRDD = rdd.union(sentryRDD)
+
+    val schema = _schema.clone().asInstanceOf[LogoSchema]
+
+    sentriedRDD.rdd.partitionBy(partitioner).mapPartitionsWithIndex({case (index,f) =>
+      val blockGenerator = new  CompactRowGenerator(schema,index,f)
+      val block = blockGenerator.generate()
+      Iterator(block)
+    },true).cache()
+  }
+}
 
 
 

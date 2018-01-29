@@ -12,13 +12,13 @@ class PatternBlockTest extends FunSuite{
     println(edgeBlock)
   }
 
-  test("KeyValueBlock"){
-    val edgeBlock = TestPatternBlockData.edgeBlock.toKeyValueLogoBlock(Set(0))
-    val value = edgeBlock.getValue(new OneKeyPatternInstance(1))
-    assert(
-      TestUtil.listEqual(value.get,
-        Seq.fill(10)(ValuePatternInstance(Seq(2)))))
-  }
+//  test("KeyValueBlock"){
+//    val edgeBlock = TestPatternBlockData.edgeBlock.toKeyValueLogoBlock(Set(0))
+//    val value = edgeBlock.getValue(new OneKeyPatternInstance(1))
+//    assert(
+//      TestUtil.listEqual(value.get,
+//        Seq.fill(10)(ValuePatternInstance(Seq(2)))))
+//  }
 
   test("PlannedTwoCompositeBlock"){
     val planned2Schema = LogoSchema(KeyMapping(Seq(3,3,3)))

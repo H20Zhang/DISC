@@ -366,24 +366,31 @@ object ValuePatternInstance extends Serializable {
 
 
 //TODO: test
-trait compactPatternList{
-  def iterator:Iterator[PatternInstance]
+
+trait enumerateIterator extends Iterator[ValuePatternInstance]{
+
+//  def setNextValue()
+}
+
+trait CompactPatternList {
+  def iterator:Iterator[ValuePatternInstance]
+  def getRaw():Array[Int]
 }
 
 
-class CompactArrayPatternList(var rawData:Array[Int], patternWitdth:Int) extends compactPatternList {
+class CompactArrayPatternList(var rawData:Array[Int], var patternWitdth:Int) extends CompactPatternList{
 
-  class enumeratePatternIterator extends Iterator[EnumeratePatternInstance]{
+  final class enumeratePatternIterator extends Iterator[ValuePatternInstance]{
 
     var cur = 0
     val end = rawData.length
     val array = Array.fill(patternWitdth)(0)
-    val currentPattern:EnumeratePatternInstance = new EnumeratePatternInstance(array)
+    val currentPattern:ValuePatternInstance = new ValuePatternInstance(array)
 
 
     override def hasNext: Boolean = cur  < end
 
-    override def next(): EnumeratePatternInstance = {
+    override def next(): ValuePatternInstance = {
       var i = 0
       while (i < patternWitdth){
         array(i) = rawData(cur + i)
@@ -394,12 +401,15 @@ class CompactArrayPatternList(var rawData:Array[Int], patternWitdth:Int) extends
     }
   }
 
-  def iterator:Iterator[EnumeratePatternInstance] = new enumeratePatternIterator
+  override def getRaw(): Array[Int] = rawData
+  def iterator:Iterator[ValuePatternInstance] = new enumeratePatternIterator
+
+
 }
 
-class CompactOnePatternList(var rawData:Array[Int]) extends compactPatternList {
+class CompactOnePatternList(var rawData:Array[Int]) extends CompactPatternList{
 
-  class PatternIterator extends Iterator[PatternInstance]{
+  final class PatternIterator extends Iterator[ValuePatternInstance]{
 
     var cur = 0
     val end = rawData.length
@@ -408,19 +418,22 @@ class CompactOnePatternList(var rawData:Array[Int]) extends compactPatternList {
 
     override def hasNext: Boolean = cur < end
 
-    override def next(): PatternInstance = {
+    override def next(): ValuePatternInstance = {
       currentPattern.node1 = rawData(cur)
       cur += 1
       currentPattern
     }
   }
 
-  def iterator:Iterator[PatternInstance] = new PatternIterator
+  override def getRaw(): Array[Int] = rawData
+  def iterator:Iterator[ValuePatternInstance] = new PatternIterator
+
+
 }
 
-class CompactTwoPatternList(var rawData:Array[Int]) extends compactPatternList {
+class CompactTwoPatternList(var rawData:Array[Int]) extends CompactPatternList{
 
-  class PatternIterator extends Iterator[PatternInstance]{
+  final class PatternIterator extends Iterator[ValuePatternInstance]{
 
     var cur = 0
     val end = rawData.length
@@ -429,7 +442,7 @@ class CompactTwoPatternList(var rawData:Array[Int]) extends compactPatternList {
 
     override def hasNext: Boolean = cur < end
 
-    override def next(): PatternInstance = {
+    override def next(): ValuePatternInstance = {
       currentPattern.node1 = rawData(cur)
       currentPattern.node2 = rawData(cur+1)
       cur += 2
@@ -437,7 +450,10 @@ class CompactTwoPatternList(var rawData:Array[Int]) extends compactPatternList {
     }
   }
 
-  def iterator:Iterator[PatternInstance] = new PatternIterator
+  override def getRaw(): Array[Int] = rawData
+  def iterator:Iterator[ValuePatternInstance] = new PatternIterator
+
+
 }
 
 class CompactListAppendBuilder(patternWidth:Int) {
@@ -461,7 +477,7 @@ class CompactListAppendBuilder(patternWidth:Int) {
 
 object CompactListBuilder{
 
-  def apply(data:Seq[Seq[Int]], patternWidth:Int):compactPatternList  = {
+  def apply(data:Seq[Seq[Int]], patternWidth:Int):CompactPatternList  = {
     if (patternWidth == 1){
       new CompactOnePatternList(data.map(f => f(0)).toArray)
     } else if (patternWidth == 2){

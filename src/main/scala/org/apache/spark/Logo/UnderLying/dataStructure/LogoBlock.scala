@@ -59,6 +59,8 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
     val rawData = assemble()
     val keys = schema.keys.toSet
 
+
+
     if (keys.size == 1){
 
 //      MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq)
@@ -71,10 +73,11 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
 
       MapBuilder.fromListToMapLongFastCompact(rawData.map(_.pattern),keys,keys.toSeq)
 
+    } else{
+      null.asInstanceOf[mutable.LongMap[CompactPatternList]]
     }
-    else{
-      null
-    }
+
+
 
   }
 
@@ -125,6 +128,13 @@ class ConcretePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawDat
 
 }
 
+class CompactConcretePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:CompactPatternList) extends PatternLogoBlock(schema,metaData,rawData){
+  override def assemble(): Seq[PatternInstance] = ???
+  override def iterator(): Iterator[PatternInstance] = ???
+  override def enumerateIterator(): Iterator[PatternInstance] = ???
+
+}
+
 /**
   * Basic LogoBlock Class representing edges.
   * @param schema schema for the block
@@ -143,7 +153,7 @@ class EdgePatternLogoBlock(schema:LogoSchema, metaData: LogoMetaData, rawData:Se
   * @param metaData metaData for the block
   * @param rawData rawData for the block, here we assume the nodeIds are represented using Int.
   */
-class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:mutable.LongMap[Array[ValuePatternInstance]]) extends PatternLogoBlock(schema,metaData,rawData){
+class KeyValuePatternLogoBlock(schema:KeyValueLogoSchema, metaData: LogoMetaData, rawData:mutable.LongMap[CompactPatternList]) extends PatternLogoBlock(schema,metaData,rawData){
   def valueMapping(keyMapping:KeyMapping)= KeyMapping(schema.valueKeyMapping(keyMapping))
 
   //get the values from the key in KeyValuePatternLogoBlock
@@ -267,7 +277,7 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
 
 
       optValues match {
-        case Some(values) => arrayToIterator(values)
+        case Some(values) =>   values.iterator   //arrayToIterator(values)
         case _ => null
       }
   }
@@ -496,26 +506,26 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
 
   //generate the leaf instance grow from this core, actually the Iterator is just a wrapper the leafs are concrefied
   //the intersection node is not included in the returned iterator.
-  def genereateLeftLeafsNode(coreInstance:PatternInstance):Array[ValuePatternInstance] = {
+  def genereateLeftLeafsNode(coreInstance:PatternInstance):Array[Int] = {
 
     val optValues = leftLeafsBlock.
       getValue(coreInstance.toSubKeyPattern(leftCoreLeafJoints.coreJoints,leftCoreJointsSeq))
 
     optValues match {
-      case Some(values) => values
+      case Some(values) => values.getRaw()
       case _ => null
     }
   }
 
   //generate the leaf instance grow from this core, actually the Iterator is just a wrapper the leafs are concrefied
   //the intersection node is not included in the returned iterator.
-  def genereateRightLeafsNode(coreInstance:PatternInstance):Array[ValuePatternInstance] = {
+  def genereateRightLeafsNode(coreInstance:PatternInstance):Array[Int] = {
 
     val optValues = rightLeafsBlock.
       getValue(coreInstance.toSubKeyPattern(rightCoreLeafJoints.coreJoints,rightCoreJointsSeq))
 
     optValues match {
-      case Some(values) => values
+      case Some(values) => values.getRaw()
       case _ => null
     }
   }
@@ -547,7 +557,7 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
 
 
   //TODO this method currently only work for one node cases
-  def generateIntersectionIterator(leftIterator:Array[ValuePatternInstance], rightIterator:Array[ValuePatternInstance]):Iterator[ValuePatternInstance] ={
+  def generateIntersectionIterator(leftIterator:Array[Int], rightIterator:Array[Int]):Iterator[ValuePatternInstance] ={
 
     if (leftIterator == null || !(leftIterator.size != 0)){
       return new AbstractIterator[ValuePatternInstance] {override def hasNext: Boolean =
@@ -573,7 +583,7 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
 
     new AbstractIterator[ValuePatternInstance] {
 
-      var nextEle:ValuePatternInstance = _
+      var nextEle:OneValuePatternInstance = new OneValuePatternInstance(0)
       var leftArray = leftIterator
       var rightArray = rightIterator
       var uCur = 0
@@ -587,10 +597,10 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
           (uCur < uD) && (vCur < vD)
         }) {
 
-          if (leftArray(uCur).getValue(0) < rightArray(vCur).getValue(0)) uCur += 1
-          else if (leftArray(uCur).getValue(0) > rightArray(vCur).getValue(0)) vCur += 1
+          if (leftArray(uCur) < rightArray(vCur)) uCur += 1
+          else if (leftArray(uCur) > rightArray(vCur)) vCur += 1
           else {
-            nextEle = leftArray(uCur)
+            nextEle.node1 = leftArray(uCur)
             uCur += 1
             vCur += 1
             return true
@@ -640,8 +650,8 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
   //the iterator to iterate through the pattern, core is iterated but leaf are concrefied but treat as a iterator for convinence.
   class patternIterator extends Iterator[PatternInstance]{
 
-    var leftLeafsIterator:Array[ValuePatternInstance] = _
-    var rightLeafsIterator:Array[ValuePatternInstance] = _
+    var leftLeafsIterator:Array[Int] = _
+    var rightLeafsIterator:Array[Int] = _
     var intersectIterator:Iterator[ValuePatternInstance] = _
     val coreIterator:Iterator[PatternInstance] = coreBlock.iterator()
     var currentCore:PatternInstance = _
@@ -674,8 +684,8 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
 
   class EnumerateIterator extends Iterator[PatternInstance]{
 
-    var leftLeafsIterator:Array[ValuePatternInstance] = _
-    var rightLeafsIterator:Array[ValuePatternInstance] = _
+    var leftLeafsIterator:Array[Int] = _
+    var rightLeafsIterator:Array[Int] = _
     var intersectIterator:Iterator[ValuePatternInstance] = _
     val coreIterator:Iterator[PatternInstance] = coreBlock.enumerateIterator()
     var currentCore:PatternInstance = _
