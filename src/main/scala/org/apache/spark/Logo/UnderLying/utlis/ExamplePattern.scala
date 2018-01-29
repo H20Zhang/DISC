@@ -9,17 +9,16 @@ class ExamplePattern(data:String) {
   var h1 = 6
   var h2 = 6
 
+  lazy val rawEdge = {
+    new EdgeLoader(data) rawEdgeRDD
+  }
+
   lazy val edge = {
-
-    //    "./wikiV.txt"
-    //  val dataSource="./debugData.txt"
-    //  val dataSource = "/Users/zhanghao/Downloads/as-skitter.txt"
-
-    new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
+    new EdgePatternLoader(rawEdge,Seq(h1,h2)) edgeLogoRDDReference
   }
 
   def getEdge(hNumber:(Int,Int)) = {
-    new EdgeLoader(data,Seq(hNumber._1,hNumber._2)) edgeLogoRDDReference
+    new EdgePatternLoader(rawEdge,Seq(hNumber._1,hNumber._2)) edgeLogoRDDReference
   }
 
 
@@ -105,9 +104,9 @@ class ExamplePattern(data:String) {
         pattern.pattern(0) < pattern.pattern(1)
     },true)
 
-    val lastEdge =  new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
+    val lastEdge =  getEdge(h1,h2)
 
-    val edge = new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
+    val edge = getEdge(h1,h2)
     val leftEdge = edge.filter(filterCondition1).toIdentitySubPattern()
     val rightEdge = edge.toSubPattern((0,1),(1,2))
 
@@ -135,9 +134,9 @@ class ExamplePattern(data:String) {
         pattern.pattern(0) < pattern.pattern(1)
     },true)
 
-    val lastEdge =  new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
+    val lastEdge =  getEdge(h1,h2)
 
-    val edge = new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
+    val edge = getEdge(h1,h2)
     val leftEdge = edge.filter(filterCondition1).toIdentitySubPattern()
     val rightEdge = edge.toSubPattern((0,1),(1,2))
 
@@ -312,8 +311,8 @@ class ExamplePattern(data:String) {
         pattern.pattern(0) < pattern.pattern(1)
     },true)
 
-        val edge3_1 =  new EdgeLoader(data,Seq(h1,1)) edgeLogoRDDReference
-        val edge3_3 =  new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
+        val edge3_1 =  getEdge(h1,1)
+        val edge3_3 =  getEdge(h1,h2)
         val leftEdge = edge3_3.filter(filterCondition1).toIdentitySubPattern()
         val rightEdge = edge3_1.toSubPattern((0,1),(1,2))
 
@@ -369,8 +368,8 @@ class ExamplePattern(data:String) {
 
 
   lazy val houseFast = {
-    val edge4_1 =  new EdgeLoader(data,Seq(h1,1)) edgeLogoRDDReference
-    val edge4_4 =  new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
+    val edge4_1 =  getEdge(h1,1)
+    val edge4_4 =  getEdge(h1,h2)
 
     val filterCondition = FilteringCondition({
       pattern =>
@@ -399,8 +398,8 @@ class ExamplePattern(data:String) {
 
 
   lazy val houseIntersectionFast = {
-    val edge4_1 =  new EdgeLoader(data,Seq(h1,1)) edgeLogoRDDReference
-    val edge4_4 =  new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
+    val edge4_1 =  getEdge(h1,2)
+    val edge4_4 =  getEdge(h1,h2)
 
     val filterCondition = FilteringCondition({
       pattern =>
@@ -471,8 +470,8 @@ val filterCondition1 = FilteringCondition({
   }
 
   lazy val threeTriangleFast = {
-    val edge4_1 =  new EdgeLoader(data,Seq(h1,1)) edgeLogoRDDReference
-    val edge4_4 =  new EdgeLoader(data,Seq(h1,h2)) edgeLogoRDDReference
+    val edge4_1 =  getEdge(h1,1)
+    val edge4_4 =  getEdge(h1,h2)
 
     val leftEdge = edge4_4.toIdentitySubPattern()
     val rightEdge = edge4_4.toSubPattern((0,0),(1,2))

@@ -5,7 +5,7 @@ import com.esotericsoftware.kryo.{Kryo, Serializer}
 import org.apache.spark.serializer.{KryoRegistrator, KryoSerializer}
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
+
 
 class KryoRegistor extends KryoRegistrator {
   override def registerClasses(kryo: Kryo) {

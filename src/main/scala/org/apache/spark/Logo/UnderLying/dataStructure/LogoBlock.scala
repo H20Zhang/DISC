@@ -12,7 +12,7 @@ import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, ListSelector, MapB
 import org.apache.spark.graphx.VertexId
 
 import scala.Predef
-import scala.collection.mutable.ArrayBuffer
+
 import scala.reflect.ClassTag
 
 
@@ -61,27 +61,19 @@ abstract class PatternLogoBlock[A:ClassTag](schema:LogoSchema, metaData: LogoMet
 
     if (keys.size == 1){
 
-//      println(MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq).getClass)
-      MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq)
+//      MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq)
 
-//      MapBuilder
-//        .fromListToMapFast(rawData.map(_.pattern),keys)
-//        .map(f => (PatternInstance(f._1).toOneKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
+      MapBuilder.fromListToMapLongFastCompact(rawData.map(_.pattern),keys,keys.toSeq)
+
     } else if (keys.size == 2){
 
-      MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq)
-//      MapBuilder
-//        .fromListToMapFast(rawData.map(_.pattern),keys)
-//        .map(f => (PatternInstance(f._1).toTwoKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
+//      MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq)
+
+      MapBuilder.fromListToMapLongFastCompact(rawData.map(_.pattern),keys,keys.toSeq)
+
     }
     else{
-
-      null.asInstanceOf[mutable.LongMap[Array[ValuePatternInstance]]]
-
-//
-//      MapBuilder
-//        .fromListToMapFast(rawData.map(_.pattern),keys)
-//        .map(f => (PatternInstance(f._1).toKeyPatternInstance(),f._2.map(t => PatternInstance(t).toValuePatternInstance())))
+      null
     }
 
   }
@@ -194,8 +186,7 @@ class FilteringPatternLogoBlock[A:ClassTag](var logoBlock: PatternLogoBlock[A], 
 
       private var hd: PatternInstance = _
 
-
-      def hasNext: Boolean =  {
+      final def hasNext: Boolean =  {
         do {
           if (!it.hasNext) return false
           hd = it.next()
@@ -203,7 +194,7 @@ class FilteringPatternLogoBlock[A:ClassTag](var logoBlock: PatternLogoBlock[A], 
         true
       }
 
-      def next() = hd
+      final def next() = hd
     }
   }
 
@@ -249,9 +240,9 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
       private var curEle:ValuePatternInstance = _
 
 
-      def hasNext: Boolean = cur < end
+      final def hasNext: Boolean = cur < end
 
-      def next(): ValuePatternInstance = {
+      final def next(): ValuePatternInstance = {
 
         curEle = array(cur)
         cur += 1
@@ -405,7 +396,7 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
     val coreLen = coreMapping.length
     val valueLen = valueKeyMapping.length
 
-    var NonJoinCore:ArrayBuffer[Int] = _
+
 
 
     override def hasNext: Boolean = {
@@ -419,18 +410,12 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
             var i = 0
 
             while (i < coreLen) {
-//              val temp = coreMapping(i)
-
 
               array.update(coreMapping2(i),currentCore.pattern(coreMapping1(i)))
               i += 1
             }
 
-//            NonJoinCore = ListSelector.notSelectElements(array,coreLeafJoints.coreJoints).asInstanceOf[ArrayBuffer[Int]]
 
-//            coreMapping.foreach{
-//              f => array.update(f._2,currentCore.pattern(f._1))
-//            }
           }else{
             return false
           }
@@ -463,10 +448,6 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
           array.update(valueKeyMapping2(i),leafs.getValue(valueKeyMapping1(i)))
           i += 1
         }
-
-//        valueKeyMapping.foreach{
-//          f => array.update(f._2,leafs.pattern(f._1))
-//        }
 
         currentPattern
     }
@@ -600,7 +581,7 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
       val uD = leftArray.size
       val vD = rightArray.size
 
-      override def hasNext: Boolean = {
+      final override def hasNext: Boolean = {
 
         while ( {
           (uCur < uD) && (vCur < vD)
@@ -620,7 +601,7 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
       }
 
 
-      override def next(): ValuePatternInstance = {
+      final override def next(): ValuePatternInstance = {
         nextEle
       }
     }

@@ -1,6 +1,6 @@
 package Underlying
 
-import org.apache.spark.Logo.UnderLying.dataStructure.{KeyMapping, PatternInstance}
+import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.Logo.UnderLying.utlis.TestUtil
 import org.scalatest.FunSuite
 
@@ -42,7 +42,54 @@ class BaseStructureTest extends FunSuite{
 
     assert(TestUtil.listEqual(PatternInstance(Seq(1,2,3,4)).pattern,pattern3.pattern),"build failed")
 
+  }
 
+
+  test("compactListTestOne"){
+
+    val list1 = List(0)
+    val list2 = List(1)
+    val list3 = List(3)
+    val list4 = List(4)
+    val list = List(list1,list2,list3,list4)
+
+    val compactList = CompactListBuilder(list,1)
+
+    compactList.iterator.foreach{f =>
+      val s = f.asInstanceOf[OneValuePatternInstance];
+      println(s"${s.node1}")}
+  }
+
+  test("compactListTestTwo"){
+
+    val list1 = List(0,1)
+    val list2 = List(1,2)
+    val list3 = List(3,4)
+    val list4 = List(4,5)
+    val list = List(list1,list2,list3,list4)
+
+    val compactList = CompactListBuilder(list,2)
+
+    compactList.iterator.foreach{f =>
+      val s = f.asInstanceOf[TwoValuePatternInstance];
+      println(s"${s.node1} ${s.node2}")}
+  }
+
+  test("compactListTestMany"){
+
+    val list1 = List(0,1,3)
+    val list2 = List(1,2,5)
+    val list3 = List(3,4,7)
+    val list4 = List(4,5,8)
+    val list = List(list1,list2,list3,list4)
+
+    val compactList = CompactListBuilder(list,3)
+
+    compactList.iterator.foreach{f =>
+      val s = f.asInstanceOf[EnumeratePatternInstance];
+      s.pattern.foreach(print)
+      println()
+    }
   }
 
 }

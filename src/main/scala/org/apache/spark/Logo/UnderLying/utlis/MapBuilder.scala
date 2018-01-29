@@ -2,7 +2,7 @@ package org.apache.spark.Logo.UnderLying.utlis
 
 //import com.koloboke.collect.map.hash.HashObjObjMaps
 
-import org.apache.spark.Logo.UnderLying.dataStructure.{KeyPatternInstance, OneKeyPatternInstance, TwoKeyPatternInstance, ValuePatternInstance}
+import org.apache.spark.Logo.UnderLying.dataStructure._
 
 import scala.collection.mutable
 import scala.collection.mutable.AnyRefMap.AnyRefMapBuilder
@@ -38,7 +38,6 @@ object MapBuilder {
 
           hashmap
   }
-
 
   def fromListToMapLongFast(data:Seq[Array[Int]], keySet:Set[Int], keys:Seq[Int]) ={
 
@@ -127,6 +126,123 @@ object MapBuilder {
     }
 //    hashmap
   }
+
+
+  def fromListToMapLongFastCompact(data:Seq[Array[Int]], keySet:Set[Int], keys:Seq[Int]) ={
+
+    val hashmap = new mutable.LongMap[CompactListAppendBuilder]()
+    val valueSize = data(0).length - keys.size
+
+    if (keys.size == 1){
+      data.foreach{
+        f =>
+          val key = f(keys(0)).toLong
+          //            ListSelector.selectElements(f,keys)
+          val value = ListSelector.notSelectElements(f,keySet)
+
+          if (valueSize == 1){
+            if (hashmap.contains(key)){
+              hashmap.get(key).get.append(value(0))
+            }else{
+              hashmap.put(key,new CompactListAppendBuilder(valueSize))
+              hashmap.get(key).get.append(value(0))
+            }
+          } else if (valueSize == 2){
+            if (hashmap.contains(key)){
+              val list = hashmap.get(key).get
+              list.append(value(0))
+              list.append(value(1))
+            }else{
+              hashmap.put(key,new CompactListAppendBuilder(valueSize))
+              val list = hashmap.get(key).get
+              list.append(value(0))
+              list.append(value(1))
+
+            }
+          } else{
+            if (hashmap.contains(key)){
+              val list = hashmap.get(key).get
+              var i = 0
+              while (i < valueSize){
+                list.append(value(i))
+                i += 1
+              }
+
+            }else{
+              hashmap.put(key,new CompactListAppendBuilder(valueSize))
+              val list = hashmap.get(key).get
+              var i = 0
+              while (i < valueSize){
+                list.append(value(i))
+                i += 1
+              }
+            }
+          }
+      }
+    } else if(keys.size == 2){
+      data.foreach{
+        f =>
+          val key1 = f(keys(0))
+          val key2 = f(keys(1))
+          val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
+          val value = ListSelector.notSelectElements(f,keySet)
+
+          if (valueSize == 1){
+            if (hashmap.contains(key)){
+              hashmap.get(key).get.append(value(0))
+            }else{
+              hashmap.put(key,new CompactListAppendBuilder(valueSize))
+              hashmap.get(key).get.append(value(0))
+            }
+          } else if (valueSize == 2){
+            if (hashmap.contains(key)){
+              val list = hashmap.get(key).get
+              list.append(value(0))
+              list.append(value(1))
+            }else{
+              hashmap.put(key,new CompactListAppendBuilder(valueSize))
+              val list = hashmap.get(key).get
+              list.append(value(0))
+              list.append(value(1))
+
+            }
+          } else{
+            if (hashmap.contains(key)){
+              val list = hashmap.get(key).get
+              var i = 0
+              while (i < valueSize){
+                list.append(value(i))
+                i += 1
+              }
+
+            }else{
+              hashmap.put(key,new CompactListAppendBuilder(valueSize))
+              val list = hashmap.get(key).get
+              var i = 0
+              while (i < valueSize){
+                list.append(value(i))
+                i += 1
+              }
+            }
+
+          }
+      }
+    }
+
+
+
+    val x = 0
+    if (valueSize == 1){
+      hashmap.mapValuesNow{f =>
+        val compactList = f.toCompactList()
+        Sorting.quickSort(compactList.asInstanceOf[CompactOnePatternList].rawData)
+      }
+    }
+    else{
+      hashmap.mapValuesNow(f => f.toCompactList())
+    }
+  }
+
 //  def fromListToMapFast[A](data:Seq[Seq[A]],keys:Set[Int]) = {
 //    val hashmap = HashObjObjMaps.newMutableMap[Seq[A],ArrayBuffer[Seq[A]]](data.size)
 //
