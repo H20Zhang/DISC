@@ -5,11 +5,14 @@ import org.apache.spark.Logo.UnderLying.Joiner.LogoBuildScriptStep
 import org.apache.spark.Logo.UnderLying.dataStructure.{PatternInstance, _}
 
 
+
+
 case class FilteringCondition(var f:PatternInstance => Boolean, var isStrictCondition:Boolean) {
   override def clone(): AnyRef = {
     new FilteringCondition(f,isStrictCondition)
   }
 }
+
 
 
 
@@ -167,7 +170,6 @@ class SubPatternLogoRDDReference(val patternLogoRDDReference:PatternLogoRDDRefer
 
     new ComposingPatternLogoRDDReference(Seq(patternLogoRDDReference,subPattern.patternLogoRDDReference),logoRDDReference.patternSchema,logoRDDReference.buildScript)
   }
-
 
   //TODO this only intended for pattern like square, more cases need to be further implemented
   def build(subPattern1:SubPatternLogoRDDReference, subPattern2:SubPatternLogoRDDReference):ComposingPatternLogoRDDReference = {

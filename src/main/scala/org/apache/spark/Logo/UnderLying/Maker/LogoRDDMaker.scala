@@ -1,11 +1,9 @@
 package org.apache.spark.Logo.UnderLying.Maker
 
 import org.apache.spark.Logo.UnderLying.dataStructure._
-import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, PointToNumConverter}
-import org.apache.spark.graphx.VertexId
+import org.apache.spark.Logo.UnderLying.utlis.ListGenerator
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
-import org.apache.spark.{HashPartitioner, Partitioner, SparkContext}
 
 import scala.reflect.ClassTag
 

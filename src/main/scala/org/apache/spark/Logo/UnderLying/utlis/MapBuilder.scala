@@ -5,7 +5,6 @@ package org.apache.spark.Logo.UnderLying.utlis
 import org.apache.spark.Logo.UnderLying.dataStructure._
 
 import scala.collection.mutable
-import scala.collection.mutable.AnyRefMap.AnyRefMapBuilder
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Sorting
 
@@ -131,7 +130,12 @@ object MapBuilder {
   def fromListToMapLongFastCompact(data:Seq[Array[Int]], keySet:Set[Int], keys:Seq[Int]) ={
 
     val hashmap = new mutable.LongMap[CompactListAppendBuilder]()
-    val valueSize = data(0).length - keys.size
+
+    var valueSize = 0
+    if (data.size >= 1){
+       valueSize = data(0).length - keys.size
+    }
+
 
     if (keys.size == 1){
       data.foreach{

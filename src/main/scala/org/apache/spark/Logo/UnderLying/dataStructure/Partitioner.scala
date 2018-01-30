@@ -1,10 +1,8 @@
 package org.apache.spark.Logo.UnderLying.dataStructure
 
 import org.apache.spark.Logo.UnderLying.utlis.PointToNumConverter
-import org.apache.spark.{HashPartitioner, Partitioner}
+import org.apache.spark.Partitioner
 import org.apache.spark.util.Utils
-
-import scala.collection.mutable.ArrayBuffer
 
 class CustomPartitioner();
 

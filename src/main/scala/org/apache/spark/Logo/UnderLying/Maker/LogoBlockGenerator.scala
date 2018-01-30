@@ -1,8 +1,6 @@
 package org.apache.spark.Logo.UnderLying.Maker
 
 import org.apache.spark.Logo.UnderLying.dataStructure._
-import org.apache.spark.Logo.UnderLying.utlis.PointToNumConverter
-import org.apache.spark.Partitioner
 import spire.ClassTag
 
 abstract class LogoBlockGenerator[A:ClassTag, B:ClassTag](val schema: LogoSchema, val index:Int, val data:Iterator[A]) {

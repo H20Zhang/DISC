@@ -12,8 +12,9 @@ object LegoMainEntry {
 
     SparkSingle.isCluster = true
     algorithm match {
-      case "triangle" => val triangle = new ExamplePattern(data).triangle; println(triangle.size())
+      case "triangle" => val triangle = new ExamplePattern(data).triangleIntersectionVersion; println(triangle.size())
       case "house" => val house = new ExamplePattern(data).houseIntersectionFast; println(s"house:" + house.size())
+      case "chordalSquare" => val chordalSquare = new ExamplePattern(data).chordalSquareFast; println(chordalSquare.size())
       case "square" => val square = new ExamplePattern(data).squareIntersectionVerificationFast; println(square.size())
       case "threeTriangle" => val threeTriangle = new ExamplePattern(data).threeTriangleFast; println(threeTriangle.size())
       case "trianglePlusOneEdge" => val trianglePlusOneEdge = new ExamplePattern(data).trianglePlusOneEdge; println(trianglePlusOneEdge.size())

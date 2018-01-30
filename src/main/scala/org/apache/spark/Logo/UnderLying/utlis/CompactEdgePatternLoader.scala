@@ -1,8 +1,8 @@
 package org.apache.spark.Logo.UnderLying.utlis
 
 import org.apache.spark.Logo.Plan.LogoEdgePatternPhysicalPlan
-import org.apache.spark.Logo.UnderLying.Maker.{CompactRowLogoRDDMaker, SimpleCompactRowLogoRDDMaker, SimpleRowLogoRDDMaker}
-import org.apache.spark.Logo.UnderLying.dataStructure.{ConcreteLogoRDD, EdgePatternLogoBlock, LogoBlockRef, PatternInstance}
+import org.apache.spark.Logo.UnderLying.Maker.SimpleCompactRowLogoRDDMaker
+import org.apache.spark.Logo.UnderLying.dataStructure.{ConcreteLogoRDD, LogoBlockRef}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 

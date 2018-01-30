@@ -3,8 +3,6 @@ package org.apache.spark.Logo.UnderLying.utlis
 import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import com.esotericsoftware.minlog.Log
-import com.esotericsoftware.minlog.Log.LEVEL_TRACE
 
 import scala.collection.mutable
 
@@ -52,19 +50,20 @@ object SparkSingle {
   //        .config("spark.memory.offHeap.size","500M")
 
   var isCluster = false
+  var appName = "Logo"
 
   private def getSparkInternal() = {
     isCluster match {
       case true =>  SparkSession
         .builder()
         .master("yarn")
-        .appName("Lego")
+        .appName(appName)
         .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
         .config(getConf())
 //        .config("spark.yarn.executor.memoryOverhead","600")
-        .config("spark.externalBlockStore.blockManager", "org.apache.spark.storage.GigaSpacesBlockManager")
-        .config("spark.memory.offHeap.enabled","true")
-        .config("spark.memory.offHeap.size","800M")
+//        .config("spark.externalBlockStore.blockManager", "org.apache.spark.storage.GigaSpacesBlockManager")
+//        .config("spark.memory.offHeap.enabled","true")
+//        .config("spark.memory.offHeap.size","800M")
           .config("spark.kryo.unsafe","true")
           .config("spark.shuffle.file.buffer","1M")
         .config("conf spark.network.timeout","10000000")
@@ -73,13 +72,13 @@ object SparkSingle {
       case false =>  SparkSession
         .builder()
         .master("local[1]")
-        .appName("Lego")
+        .appName(appName)
         .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
         .config(getConf())
 //        .config("spark.yarn.executor.memoryOverhead","600")
-        .config("spark.externalBlockStore.blockManager", "org.apache.spark.storage.GigaSpacesBlockManager")
-          .config("spark.memory.offHeap.enabled","true")
-          .config("spark.memory.offHeap.size","800M")
+//        .config("spark.externalBlockStore.blockManager", "org.apache.spark.storage.GigaSpacesBlockManager")
+//          .config("spark.memory.offHeap.enabled","true")
+//          .config("spark.memory.offHeap.size","800M")
         .config("spark.shuffle.file.buffer","1M")
         .config("spark.kryo.unsafe","true")
           .config("conf spark.network.timeout","10000000")

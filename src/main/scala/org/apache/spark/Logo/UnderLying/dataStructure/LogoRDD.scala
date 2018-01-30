@@ -1,7 +1,6 @@
 package org.apache.spark.Logo.UnderLying.dataStructure
 
 import org.apache.spark.Logo.Plan.FilteringCondition
-import org.apache.spark.Logo.UnderLying.Joiner.LogoBuildScriptStep
 import org.apache.spark.Logo.UnderLying.Maker.{ToConcreteTransformer, ToFilteringTransformer, ToKeyValueTransformer}
 import org.apache.spark.rdd.RDD
 
@@ -107,6 +106,10 @@ class FilteringLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema: LogoSchema, 
 
 class KeyValueLogoRDD(patternRDD:RDD[LogoBlockRef], override val patternSchema: KeyValueLogoSchema) extends PatternLogoRDD(patternRDD,patternSchema){
 
+  override def toKeyValuePatternLogoRDD(key: Set[Int]): KeyValueLogoRDD = {
+    require(patternSchema.keys.diff(key).size == 0, "only same key can be reused")
+    this
+  }
 }
 
 class ConcreteLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema: LogoSchema) extends PatternLogoRDD(patternRDD,patternSchema){

@@ -1,7 +1,5 @@
 package org.apache.spark.Logo.UnderLying.utlis
 
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.Logo.Plan.LogoEdgePatternPhysicalPlan
 import org.apache.spark.Logo.UnderLying.Maker.SimpleRowLogoRDDMaker
 import org.apache.spark.Logo.UnderLying.dataStructure.{ConcreteLogoRDD, EdgePatternLogoBlock, LogoBlockRef, PatternInstance}
@@ -11,41 +9,6 @@ class EdgeLoader(data:String, sizes:Int = 64) {
 
   lazy val (_,sc) = SparkSingle.getSpark()
   lazy val spark = SparkSingle.getSparkSession()
-
-
-
-  def rawEdgeRDD1 = {
-
-    import spark.implicits._
-    val rawData = spark.read.textFile(data).repartition(sizes).map{
-      f =>
-        var res:(Int,Int) = null
-        if (!f.startsWith("#")){
-          val splittedString = f.split("\\s")
-          res = (splittedString(0).toInt,splittedString(1).toInt)
-        }
-        res
-    }.filter(f => f != null).flatMap(f => Iterable(f,f.swap)).distinct()
-
-    rawData.cache()
-  }
-
-
-  def rawTupleEdgeRDD = {
-    val rawData = sc.textFile(data).repartition(sizes)
-
-    val rawRDD = rawData.map{
-      f =>
-        var res:(Int,Int) = null
-        if (!f.startsWith("#")){
-          val splittedString = f.split("\\s")
-          res = (splittedString(0).toInt,splittedString(1).toInt)
-        }
-        res
-    }.filter(f => f != null).flatMap(f => Iterable(f,f.swap)).distinct()
-
-    rawRDD.cache()
-  }
 
   def rawEdgeRDD = {
     val rawData = sc.textFile(data).repartition(sizes)
@@ -66,13 +29,13 @@ class EdgeLoader(data:String, sizes:Int = 64) {
 
 class EdgePatternLoader(rawRDD:RDD[(Seq[Int], Int)], sizes:Seq[Int]) {
 
-  lazy val edgeLogoRDDReference = new LogoEdgePatternPhysicalPlan(debugEdgePatternLogoRDD) toLogoRDDReference()
+  lazy val edgeLogoRDDReference = new LogoEdgePatternPhysicalPlan(EdgePatternLogoRDD) toLogoRDDReference()
   lazy val (_,sc) = SparkSingle.getSpark()
 
 
 
 
-  def debugEdgePatternLogoRDD = {
+  def EdgePatternLogoRDD = {
     val (edgeRDD,schema) = EdgeRowLogoRDD
 
     val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema,f.metaData,f.rawData.map(t => PatternInstance(t._1) )))
@@ -101,7 +64,6 @@ class EdgePatternLoader(rawRDD:RDD[(Seq[Int], Int)], sizes:Seq[Int]) {
 
     val logoRDD = logoRDDMaker.build()
     val schema = logoRDDMaker.getSchema
-    logoRDD.cache()
 
     (logoRDD,schema)
   }

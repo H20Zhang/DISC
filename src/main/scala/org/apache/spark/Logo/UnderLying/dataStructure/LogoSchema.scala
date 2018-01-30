@@ -4,9 +4,6 @@ package org.apache.spark.Logo.UnderLying.dataStructure
 import org.apache.spark.Logo.UnderLying.Joiner.{BlockBlockJoints, SnapPoint}
 import org.apache.spark.Logo.UnderLying.Maker.PartitionerMaker
 import org.apache.spark.Logo.UnderLying.utlis._
-import org.apache.spark.Partitioner
-
-import scala.collection.mutable.ArrayBuffer
 
 sealed trait LogoColType
 case object KeyType extends LogoColType

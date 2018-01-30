@@ -2,15 +2,12 @@ package org.apache.spark.Logo.UnderLying.Joiner
 
 import java.io.{IOException, ObjectOutputStream}
 
-import org.apache.spark.Logo.UnderLying.dataStructure.{CompositeLogoSchema, LogoBlockRef, LogoSchema}
-import org.apache.spark.Logo.UnderLying.utlis.ListGenerator
-import org.apache.spark.{NarrowDependency, Partition, SparkEnv, TaskContext}
+import org.apache.spark.Logo.UnderLying.dataStructure.CompositeLogoSchema
 import org.apache.spark.rdd.RDD
 import org.apache.spark.scheduler.TaskLocation
-import org.apache.spark.storage.{BlockId, RDDBlockId, StorageLevel}
+import org.apache.spark.storage.RDDBlockId
 import org.apache.spark.util.Utils
-
-import scala.collection.mutable.HashSet
+import org.apache.spark.{Partition, SparkEnv}
 
 
 /**

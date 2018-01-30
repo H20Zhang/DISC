@@ -1,17 +1,7 @@
 package org.apache.spark.Logo.UnderLying.dataStructure
-import java.io.{Externalizable, ObjectInput, ObjectOutput}
-
-import com.esotericsoftware.kryo.io.{Input, Output}
-import com.esotericsoftware.kryo.{Kryo, KryoSerializable}
-import gnu.trove.list.array.TIntArrayList
-
-import scala.collection.Iterator.empty
 import scala.collection.{AbstractIterator, Iterator, mutable}
 //import com.koloboke.collect.map.hash.HashObjObjMap
-import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, ListSelector, MapBuilder}
-import org.apache.spark.graphx.VertexId
-
-import scala.Predef
+import org.apache.spark.Logo.UnderLying.utlis.MapBuilder
 
 import scala.reflect.ClassTag
 
@@ -304,52 +294,6 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
     )
   }
 
-//TODO:finish this place
-  class FastEnumerateIterator extends Iterator[PatternInstance]{
-
-    require(coreBlock.isInstanceOf[CompositeTwoPatternLogoBlock])
-    val _coreBlock = coreBlock.asInstanceOf[CompositeTwoPatternLogoBlock]
-    val oldCoreBlock = _coreBlock.coreBlock
-    val oldLeafBlock = _coreBlock.leafsBlock
-    val curLeafBlock = leafsBlock
-
-
-  def isFeasible() ={
-
-  }
-
-    val oldCoreIterator:Iterator[PatternInstance] = oldCoreBlock.enumerateIterator()
-    val oldLeafIterator:Iterator[PatternInstance] = null
-    var leafsIterator:Iterator[PatternInstance] = null
-
-
-    var currentCore:PatternInstance = null
-    val array = Array.fill(totalNodes)(0)
-    val currentPattern:EnumeratePatternInstance = new EnumeratePatternInstance(array)
-
-
-    def genereateLeafsNodeWithBlock(coreInstance:PatternInstance, block:KeyValuePatternLogoBlock):Iterator[PatternInstance] = {
-
-      //    val optValues = leafsBlock.
-      //      getValue(coreInstance.subPatterns(coreLeafJoints.coreJoints).toKeyPatternInstance())
-
-      val optValues = block.
-        getValue(coreInstance.toSubKeyPattern(coreLeafJoints.coreJoints,coreJointsSeq))
-
-
-      optValues match {
-        case Some(values) => values.iterator
-        case _ => null
-      }
-    }
-
-
-    override def hasNext: Boolean = ???
-
-    override def next(): PatternInstance = ???
-  }
-
-
   //the iterator to iterate through the pattern, core is iterated but leaf are concrefied but treat as a iterator for convinence.
   class patternIterator extends Iterator[PatternInstance]{
 
@@ -382,7 +326,6 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
 
   class EnumerateIterator extends Iterator[PatternInstance]{
 
-
     var leafsIterator:Iterator[ValuePatternInstance] = _
     val coreIterator:Iterator[PatternInstance] = coreBlock.enumerateIterator()
     var currentCore:PatternInstance = _
@@ -394,87 +337,253 @@ class CompositeTwoPatternLogoBlock(schema:PlannedTwoCompositeLogoSchema, metaDat
     val coreMapping1 = coreMapping.map(_._1)
     val coreMapping2 = coreMapping.map(_._2)
 
-
-
     val valueKeyMapping = valueMapping.keyMapping.toArray
 
     val valueKeyMapping1 = valueKeyMapping.map(_._1)
     val valueKeyMapping2 = valueKeyMapping.map(_._2)
+
+    val valueKeyMapping1Value =  valueKeyMapping1.size match {
+      case 1 => valueKeyMapping1(0)
+      case _ => 0
+    }
+
+    val valueKeyMapping2Value = valueKeyMapping2.size match {
+      case 1 => valueKeyMapping2(0)
+      case _ => 0
+    }
 
     val updateArray = coreMapping ++ valueKeyMapping
     val coreLen = coreMapping.length
     val valueLen = valueKeyMapping.length
 
 
+    val valueMappingSize = valueMapping.keyMapping.size
 
+    def hasNext: Boolean = {
 
-    override def hasNext: Boolean = {
-
-      if (leafsIterator == null || !leafsIterator.hasNext){
+      if (leafsIterator == null || !leafsIterator.hasNext) {
         do {
-          if (coreIterator.hasNext){
+          if (coreIterator.hasNext) {
             currentCore = coreIterator.next()
-
 
             var i = 0
 
             while (i < coreLen) {
-
-              array.update(coreMapping2(i),currentCore.pattern(coreMapping1(i)))
+              array.update(coreMapping2(i), currentCore.pattern(coreMapping1(i)))
               i += 1
             }
 
 
-          }else{
+          } else {
             return false
           }
           leafsIterator = genereateLeafsNode(currentCore)
 
-//          //TODO:experiment test
-//          if (valueMappingSize == 1 && leafsIterator != null){
-//            leafsIterator = leafsIterator.filter(p => !NonJoinCore.contains(p.pattern(0)))
-//          }
         } while (leafsIterator == null)
       }
+
+      val leafs = leafsIterator.next()
+
+      if (valueMappingSize != 0) {
+          var i = 0
+
+          while (i < valueLen) {
+            array.update(valueKeyMapping2(i), leafs.getValue(valueKeyMapping1(i)))
+            i += 1
+          }
+        }
+
+        return true
+      }
+
+
+      override def next(): PatternInstance = {
+        currentPattern
+      }
+
+
+  }
+
+
+  class OneValueLenEnumerateIterator extends Iterator[PatternInstance]{
+
+    var leafsIterator:Iterator[ValuePatternInstance] = _
+    val coreIterator:Iterator[PatternInstance] = coreBlock.enumerateIterator()
+    var currentCore:PatternInstance = _
+    //    val TintBuffer = new TIntArrayList(totalNodes)
+    val array = Array.fill(totalNodes)(0)
+    val currentPattern:EnumeratePatternInstance = new EnumeratePatternInstance(array)
+    val coreMapping = coreKeyMapping.keyMapping.toArray
+
+    val coreMapping1 = coreMapping.map(_._1)
+    val coreMapping2 = coreMapping.map(_._2)
+
+    val valueKeyMapping = valueMapping.keyMapping.toArray
+
+    val valueKeyMapping1 = valueKeyMapping.map(_._1)
+    val valueKeyMapping2 = valueKeyMapping.map(_._2)
+
+    val valueKeyMapping1Value =  valueKeyMapping1.size match {
+      case 1 => valueKeyMapping1(0)
+      case _ => 0
+    }
+
+    val valueKeyMapping2Value = valueKeyMapping2.size match {
+      case 1 => valueKeyMapping2(0)
+      case _ => 0
+    }
+
+    val updateArray = coreMapping ++ valueKeyMapping
+    val coreLen = coreMapping.length
+    val valueLen = valueKeyMapping.length
+
+
+    val valueMappingSize = valueMapping.keyMapping.size
+
+    def hasNext: Boolean = {
+
+      if (leafsIterator == null || !leafsIterator.hasNext) {
+        do {
+          if (coreIterator.hasNext) {
+            currentCore = coreIterator.next()
+
+            var i = 0
+
+            while (i < coreLen) {
+              array.update(coreMapping2(i), currentCore.pattern(coreMapping1(i)))
+              i += 1
+            }
+
+
+          } else {
+            return false
+          }
+          leafsIterator = genereateLeafsNode(currentCore)
+
+        } while (leafsIterator == null)
+      }
+
+      val leafs = leafsIterator.next()
+      array.update(valueKeyMapping2Value,leafs.getValue(valueKeyMapping2Value))
 
       return true
     }
 
 
-
-    val valueMappingSize = valueMapping.keyMapping.size
-
     override def next(): PatternInstance = {
-      val leafs = leafsIterator.next()
-      val core = currentCore
-
-      if (valueMappingSize == 0){
-        core
-      }else {
-        var i = 0
-
-        while (i < valueLen) {
-          array.update(valueKeyMapping2(i),leafs.getValue(valueKeyMapping1(i)))
-          i += 1
-        }
-
-        currentPattern
+      currentPattern
     }
   }
 
-  }
+
+
+//  class filterNullIterator extends Iterator[PatternInstance]{
+//
+//    private var it = new OneValueNullLenEnumerateIterator
+//    private var hd: PatternInstance = _
+//
+//    final def hasNext: Boolean =  {
+//      do {
+//        if (!it.hasNext) return false
+//        hd = it.next()
+//      } while (hd == null)
+//      true
+//    }
+//
+//    final def next() = hd
+//
+//  }
+//
+//  class OneValueNullLenEnumerateIterator extends Iterator[PatternInstance] {
+//
+//    var leafsIterator: Iterator[ValuePatternInstance] = _
+//    val coreIterator: Iterator[PatternInstance] = coreBlock.enumerateIterator()
+//    var currentCore: PatternInstance = _
+//    //    val TintBuffer = new TIntArrayList(totalNodes)
+//    val array = Array.fill(totalNodes)(0)
+//    val currentPattern: EnumeratePatternInstance = new EnumeratePatternInstance(array)
+//    val coreMapping = coreKeyMapping.keyMapping.toArray
+//
+//    val coreMapping1 = coreMapping.map(_._1)
+//    val coreMapping2 = coreMapping.map(_._2)
+//
+//    val valueKeyMapping = valueMapping.keyMapping.toArray
+//
+//    val valueKeyMapping1 = valueKeyMapping.map(_._1)
+//    val valueKeyMapping2 = valueKeyMapping.map(_._2)
+//
+//    val valueKeyMapping1Value = valueKeyMapping1.size match {
+//      case 1 => valueKeyMapping1(0)
+//      case _ => 0
+//    }
+//
+//    val valueKeyMapping2Value = valueKeyMapping2.size match {
+//      case 1 => valueKeyMapping2(0)
+//      case _ => 0
+//    }
+//
+//    val updateArray = coreMapping ++ valueKeyMapping
+//    val coreLen = coreMapping.length
+//    val valueLen = valueKeyMapping.length
+//
+//
+//    val valueMappingSize = valueMapping.keyMapping.size
+//
+//    def hasNext: Boolean = {
+//
+//      if (leafsIterator == null || !leafsIterator.hasNext) {
+//        do {
+//          if (coreIterator.hasNext) {
+//            currentCore = coreIterator.next()
+//
+//            var i = 0
+//
+//            while (i < coreLen) {
+//              array.update(coreMapping2(i), currentCore.pattern(coreMapping1(i)))
+//              i += 1
+//            }
+//
+//
+//          } else {
+//            return false
+//          }
+//          leafsIterator = genereateLeafsNode(currentCore)
+//
+//        } while (leafsIterator == null)
+//      }
+//
+//
+//      return true
+//    }
+//
+//    val nullPattern: PatternInstance = null
+//
+//    override def next(): PatternInstance = {
+//      val leafs = leafsIterator.next()
+//      array.update(valueKeyMapping2Value, leafs.getValue(valueKeyMapping2Value))
+//
+//      if (currentCore.contain(leafs.getValue(valueKeyMapping2Value))) {
+//        nullPattern
+//      } else {
+//        currentPattern
+//      }
+//    }
+//  }
 
   /**
     * generate a ConcretePatternLogoBlock
     */
   override def iterator() = new patternIterator
-  override def enumerateIterator() = new EnumerateIterator
+  override def enumerateIterator() = valueMapping.keyMapping.toArray.size match {
+    case 1 => new OneValueLenEnumerateIterator
+    case _ => new EnumerateIterator
+  }
 
 }
 
 
 
-//TODO now we limit the implementation to that leaf and leaf must have intesection
+//TODO now we limit the implementation to that leaf and leaf must have intesection, only work for intList intersection intList, more generic version should be implemented.
 /**
   * Composite LogoBlock Class for UnlabeledPatternMatching, which is assembled using multiple basic PatternLogoBlock.
   * In this specific class, there are only two blocks to build the new composite block.s
@@ -556,33 +665,19 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
 
 
   //TODO this method currently only work for one node cases
-  def generateIntersectionIterator(leftIterator:Array[Int], rightIterator:Array[Int]):Iterator[ValuePatternInstance] ={
+  def generateIntersectionIterator(leftIterator:Array[Int], rightIterator:Array[Int]):Iterator[Int] ={
 
     if (leftIterator == null || !(leftIterator.size != 0)){
-      return new AbstractIterator[ValuePatternInstance] {override def hasNext: Boolean =
-      {
-        false
-      }
-        override def next(): ValuePatternInstance = {
-          null
-        }
-      }
+      return null.asInstanceOf[Iterator[Int]]
     }
 
     if (rightIterator == null || !(rightIterator.size != 0)){
-      return new AbstractIterator[ValuePatternInstance] {override def hasNext: Boolean =
-      {
-        false
-      }
-        override def next(): ValuePatternInstance = {
-          null
-        }
-      }
+      return null.asInstanceOf[Iterator[Int]]
     }
 
-    new AbstractIterator[ValuePatternInstance] {
+    new AbstractIterator[Int] {
 
-      var nextEle:OneValuePatternInstance = new OneValuePatternInstance(0)
+      var nextEle:Int = 0
       var leftArray = leftIterator
       var rightArray = rightIterator
       var uCur = 0
@@ -599,7 +694,7 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
           if (leftArray(uCur) < rightArray(vCur)) uCur += 1
           else if (leftArray(uCur) > rightArray(vCur)) vCur += 1
           else {
-            nextEle.node1 = leftArray(uCur)
+            nextEle = leftArray(uCur)
             uCur += 1
             vCur += 1
             return true
@@ -610,7 +705,7 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
       }
 
 
-      final override def next(): ValuePatternInstance = {
+      final override def next(): Int = {
         nextEle
       }
     }
@@ -651,7 +746,7 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
 
     var leftLeafsIterator:Array[Int] = _
     var rightLeafsIterator:Array[Int] = _
-    var intersectIterator:Iterator[ValuePatternInstance] = _
+    var intersectIterator:Iterator[Int] = _
     val coreIterator:Iterator[PatternInstance] = coreBlock.iterator()
     var currentCore:PatternInstance = _
 
@@ -675,7 +770,7 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
     }
 
     override def next(): PatternInstance = {
-      val leafs = intersectIterator.next()
+      val leafs = ValuePatternInstance(intersectIterator.next())
       val core = currentCore
       assembleCoreAndLeafInstance(core,leafs)
     }
@@ -685,7 +780,7 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
 
     var leftLeafsIterator:Array[Int] = _
     var rightLeafsIterator:Array[Int] = _
-    var intersectIterator:Iterator[ValuePatternInstance] = _
+    var intersectIterator:Iterator[Int] = _
     val coreIterator:Iterator[PatternInstance] = coreBlock.enumerateIterator()
     var currentCore:PatternInstance = _
     //    val TintBuffer = new TIntArrayList(totalNodes)
@@ -705,28 +800,17 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
     val coreLen = coreMapping.length
     val valueLen = valueKeyMapping.length
 
+    val valueKeyMapping2Value = valueKeyMapping2(0)
+    val valueKeyMapping1Value = valueKeyMapping1(0)
+
     override def hasNext: Boolean = {
 
-//      if (intersectIterator.hasNext){
-//        return true
-//      }
-
-      var hasNext1 = false
       if (intersectIterator == null || !intersectIterator.hasNext){
         do {
           if (coreIterator.hasNext){
             currentCore = coreIterator.next()
-//            var i = 0
-
-//            while (i < coreLen) {
-//              val temp = coreMapping(i)
-//              array.update(temp._2,currentCore.pattern(temp._1))
-//              i += 1
-//            }
-
             var i = 0
             while (i < coreLen) {
-              //                            val temp = coreMapping(i)
               array.update(coreMapping2(i),currentCore.pattern(coreMapping1(i)))
               i += 1
             }
@@ -737,49 +821,16 @@ class CompositeThreePatternLogoBlock(schema:PlannedThreeCompositeLogoSchema, met
           rightLeafsIterator = genereateRightLeafsNode(currentCore)
           intersectIterator = generateIntersectionIterator(leftLeafsIterator,rightLeafsIterator)
 
-
-//          if (intersectIterator.hasNext){
-//           var i = 0
-//            while (i < coreLen) {
-////                            val temp = coreMapping(i)
-//                            array.update(coreMapping2(i),currentCore.pattern(coreMapping1(i)))
-//                            i += 1
-//                          }
-//          }
-
-//          hasNext1 =
-
-//          val x = 1
         } while (!intersectIterator.hasNext)
       }
 
       return true
     }
 
-
-
-
     override def next(): PatternInstance = {
       val leafs = intersectIterator.next()
-      val core = currentCore
-
-      if (leftvalueMapping.keyMapping.size == 0){
-        core
-      }else {
-        var i = 0
-
-        while (i < valueLen) {
-          val temp = valueKeyMapping(i)
-          array.update(valueKeyMapping2(i),leafs.getValue(valueKeyMapping1(i)))
-          i += 1
-        }
-
-        //        valueKeyMapping.foreach{
-        //          f => array.update(f._2,leafs.pattern(f._1))
-        //        }
-
-        currentPattern
-      }
+      array.update(valueKeyMapping2Value,leafs)
+      currentPattern
     }
 
   }

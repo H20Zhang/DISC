@@ -47,7 +47,7 @@ class ExamplePatternTest extends FunSuite{
       assert(house.size() == 9488779111L)
     }
 
-
+//
 //  test("threeTriangleFast"){
 //    val threeTriangle = new ExamplePattern(data).threeTriangleFast
 //    assert(threeTriangle.size() == 4105908615L)

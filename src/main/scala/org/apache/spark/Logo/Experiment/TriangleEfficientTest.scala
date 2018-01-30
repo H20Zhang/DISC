@@ -2,17 +2,14 @@ package org.apache.spark.Logo.Experiment
 
 
 
+import org.apache.log4j.Logger
+import org.apache.spark.Logo.UnderLying.Joiner.{LogoBuildPhyiscalStep, SnapPoint}
 import org.apache.spark.Logo.UnderLying.Maker.SimpleRowLogoRDDMaker
 import org.apache.spark.Logo.UnderLying.dataStructure._
-import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
-import org.apache.log4j.Logger
-import org.apache.spark.Logo.UnderLying.Joiner.{LogoBuildPhyiscalStep, SnapPoint}
 import org.apache.spark.storage.StorageLevel
-
-import scala.collection.SortedSet
 
 
 object TriangleEfficientTest{

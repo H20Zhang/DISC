@@ -1,10 +1,8 @@
 package org.apache.spark.Logo.UnderLying.Catalog
 
 import org.apache.spark.Logo.UnderLying.dataStructure._
-import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable
-import scala.reflect.ClassTag
 
 /**
   * catlog used to associate a name with a RDD[LogoRDDReference],

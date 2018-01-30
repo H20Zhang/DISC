@@ -1,6 +1,5 @@
 package org.apache.spark.Logo.UnderLying.utlis
 
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.reflect.ClassTag
 
 object ListGenerator {

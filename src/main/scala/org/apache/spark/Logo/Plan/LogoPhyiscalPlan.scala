@@ -2,10 +2,8 @@ package org.apache.spark.Logo.Plan
 
 
 import org.apache.spark.Logo.UnderLying.Joiner.{LogoBuildPhyiscalStep, LogoBuildScriptStep}
-import org.apache.spark.Logo.UnderLying.Maker.ToFilteringTransformer
 import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.SparkContext
-import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
 
 class LogoLogicalBuildScript {

@@ -3,7 +3,7 @@ package org.apache.spark.Logo.UnderLying.dataStructure
 import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.{Kryo, KryoSerializable}
 import gnu.trove.list.array.TIntArrayList
-import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, ListSelector, TestUtil}
+import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, ListSelector}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -88,7 +88,9 @@ class PatternInstance(var pattern:Array[Int]) extends Serializable with KryoSeri
   def toValuePatternInstance():ValuePatternInstance = new ValuePatternInstance(pattern)
 
 
-
+  def contain(value:Int) = {
+    pattern.contains(value)
+  }
 
   override def toString: String = {
     pattern.toString()
@@ -366,12 +368,9 @@ object ValuePatternInstance extends Serializable {
 
 
 //TODO: test
-
-trait enumerateIterator extends Iterator[ValuePatternInstance]{
-
-//  def setNextValue()
-}
-
+/**
+  * a trait that represent pattern instance in a more compact form which improve the memory efficiency.
+  */
 trait CompactPatternList {
   def iterator:Iterator[ValuePatternInstance]
   def getRaw():Array[Int]
@@ -414,7 +413,6 @@ class CompactOnePatternList(var rawData:Array[Int]) extends CompactPatternList{
     var cur = 0
     val end = rawData.length
     val currentPattern:OneValuePatternInstance = new OneValuePatternInstance(0)
-
 
     override def hasNext: Boolean = cur < end
 

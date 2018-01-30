@@ -2,8 +2,7 @@ package org.apache.spark.Logo.UnderLying.Maker
 
 import org.apache.spark.Logo.Plan.FilteringCondition
 import org.apache.spark.Logo.UnderLying.dataStructure.{LogoBlockRef, PatternLogoBlock}
-import org.apache.spark.rdd.{RDD, UnionRDD}
-import org.apache.spark.storage.StorageLevel
+import org.apache.spark.rdd.RDD
 
 
 /**
