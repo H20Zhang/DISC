@@ -8,17 +8,18 @@ import org.apache.spark.rdd.RDD
 /**
   * Fetch Join is an implementation of HyberCube Join, but difference in, even after the Join is perform the index is still
   * usable which means it preserve the index information through carefully designed subTasks(whose id).
-  * @param sc SparkContext
+  *
+  * @param sc       SparkContext
   * @param subTasks Generated Task from the LogoOneStepScript
-  * @param schema CompositeSchema for the generated Logo
-  * @param f function to make blocks into the schema designed new block
-  * @param rdds Logo used to construct new Logo
+  * @param schema   CompositeSchema for the generated Logo
+  * @param f        function to make blocks into the schema designed new block
+  * @param rdds     Logo used to construct new Logo
   */
-class FetchJoinRDD(sc:SparkContext,
-                   subTasks:Seq[SubTask],
-                   schema:CompositeLogoSchema,
+class FetchJoinRDD(sc: SparkContext,
+                   subTasks: Seq[SubTask],
+                   schema: CompositeLogoSchema,
                    var f: (Seq[LogoBlockRef], CompositeLogoSchema, Int) => LogoBlockRef,
-                   var rdds:Seq[RDD[LogoBlockRef]]) extends RDD[LogoBlockRef](sc,rdds.map(x => new OneToOneDependency(x))){
+                   var rdds: Seq[RDD[LogoBlockRef]]) extends RDD[LogoBlockRef](sc, rdds.map(x => new OneToOneDependency(x))) {
   override val partitioner = Some(schema.partitioner)
 
   //reorder the subTaskPartitions according to their idx
@@ -40,9 +41,9 @@ class FetchJoinRDD(sc:SparkContext,
 
   override def compute(split: Partition, context: TaskContext) = {
     val subTaskPartition = split.asInstanceOf[SubTaskPartition]
-    val blockList = subTaskPartition.partitionValues.map{
+    val blockList = subTaskPartition.partitionValues.map {
       f =>
-        val iterator1 = rdds(f._1).iterator(f._2,context)
+        val iterator1 = rdds(f._1).iterator(f._2, context)
         val block = iterator1.next()
         iterator1.hasNext
         block

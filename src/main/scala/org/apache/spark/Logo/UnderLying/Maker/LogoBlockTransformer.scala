@@ -10,23 +10,23 @@ import org.apache.spark.rdd.RDD
   */
 abstract class LogoBlockTransformer extends Serializable {
 
-  def transform(rdd:RDD[LogoBlockRef]):RDD[LogoBlockRef]
+  def transform(rdd: RDD[LogoBlockRef]): RDD[LogoBlockRef]
 }
 
 
 /**
   * transform the ConcreteLogoBlock into KeyValueLogoBlock defined by KeyValueLogoSchema
   */
-class ToKeyValueTransformer extends LogoBlockTransformer{
+class ToKeyValueTransformer extends LogoBlockTransformer {
 
-  var key:Set[Int] = _
+  var key: Set[Int] = _
 
-  def setKey(key:Set[Int]):ToKeyValueTransformer = {
+  def setKey(key: Set[Int]): ToKeyValueTransformer = {
     this.key = key
     this
   }
 
-  override def transform(rdd: RDD[LogoBlockRef]):RDD[LogoBlockRef] = {
+  override def transform(rdd: RDD[LogoBlockRef]): RDD[LogoBlockRef] = {
 
     require(key != null, "should set key before calling transform")
     val resRDD = rdd.mapPartitions({
@@ -37,31 +37,31 @@ class ToKeyValueTransformer extends LogoBlockTransformer{
 
         val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
         Iterator(patternBlock.toKeyValueLogoBlock(key).asInstanceOf[LogoBlockRef])
-    },true)
+    }, true)
 
 
 
 
-//    resRDD.persist(StorageLevel.DISK_ONLY)
-//    resRDD.persist(StorageLevel.OFF_HEAP)
-//    resRDD.persist(StorageLevel.MEMORY_ONLY)
-//    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    //    resRDD.persist(StorageLevel.DISK_ONLY)
+    //    resRDD.persist(StorageLevel.OFF_HEAP)
+    //    resRDD.persist(StorageLevel.MEMORY_ONLY)
+    //    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
     resRDD.cache()
     resRDD.count()
-//    resRDD.count()
-//    resRDD.count()
-//    new UnionRDD(resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))
-//val res = new UnionRDD[LogoBlockRef](resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))
+    //    resRDD.count()
+    //    resRDD.count()
+    //    new UnionRDD(resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))
+    //val res = new UnionRDD[LogoBlockRef](resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))
 
 
-//    resRDD.countAsync()
+    //    resRDD.countAsync()
     resRDD
-//    res
+    //    res
   }
 }
 
-class ToConcreteTransformer extends LogoBlockTransformer{
-  override def transform(rdd: RDD[LogoBlockRef]):RDD[LogoBlockRef] = {
+class ToConcreteTransformer extends LogoBlockTransformer {
+  override def transform(rdd: RDD[LogoBlockRef]): RDD[LogoBlockRef] = {
 
     val resRDD = rdd.mapPartitions({
       it =>
@@ -70,53 +70,49 @@ class ToConcreteTransformer extends LogoBlockTransformer{
 
         val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
         Iterator(patternBlock.toConcreteLogoBlock.asInstanceOf[LogoBlockRef])
-    },true)
+    }, true)
 
-//    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
-//    resRDD.cache()
-
-
+    //    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    //    resRDD.cache()
 
 
-//    resRDD.persist(StorageLevel.DISK_ONLY)
-//    resRDD.persist(StorageLevel.OFF_HEAP)
-//    resRDD.countAsync()
+    //    resRDD.persist(StorageLevel.DISK_ONLY)
+    //    resRDD.persist(StorageLevel.OFF_HEAP)
+    //    resRDD.countAsync()
     resRDD.cache()
     resRDD.count()
-//    resRDD.union(resRDD.sparkContext.emptyRDD)
-//    val res = new UnionRDD[LogoBlockRef](resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))
+    //    resRDD.union(resRDD.sparkContext.emptyRDD)
+    //    val res = new UnionRDD[LogoBlockRef](resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))
 
     resRDD
-//    res
+    //    res
   }
 }
 
 //TODO: test needed
 
 
+class ToFilteringTransformer extends LogoBlockTransformer {
 
+  var isCached: Boolean = false
 
-class ToFilteringTransformer extends LogoBlockTransformer{
+  var filteringCondition: FilteringCondition = null
 
-  var isCached:Boolean = false
-
-  var filteringCondition:FilteringCondition = null
-
-  def setFilteringCondition(f:FilteringCondition): Unit ={
+  def setFilteringCondition(f: FilteringCondition): Unit = {
     filteringCondition = f
   }
 
-  def setIsCached(isCached:Boolean): Unit ={
+  def setIsCached(isCached: Boolean): Unit = {
     this.isCached = isCached
   }
 
   override def transform(rdd: RDD[LogoBlockRef]): RDD[LogoBlockRef] = {
     require(filteringCondition != null, "should set filteringCondition before calling transform")
 
-    var resRDD:RDD[LogoBlockRef] = null
+    var resRDD: RDD[LogoBlockRef] = null
     val fCondition = filteringCondition
 
-    if (filteringCondition.isStrictCondition){
+    if (filteringCondition.isStrictCondition) {
       resRDD = rdd.mapPartitions({
         it =>
           val block = it.next()
@@ -124,11 +120,11 @@ class ToFilteringTransformer extends LogoBlockTransformer{
 
           val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
           Iterator(patternBlock.toFilteringLogoBlock(fCondition.f).toConcreteLogoBlock.asInstanceOf[LogoBlockRef])
-      },true)
+      }, true)
 
 
     }
-    else{
+    else {
       resRDD = rdd.mapPartitions({
         it =>
           val block = it.next()
@@ -136,13 +132,13 @@ class ToFilteringTransformer extends LogoBlockTransformer{
 
           val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
           Iterator(patternBlock.toFilteringLogoBlock(fCondition.f).asInstanceOf[LogoBlockRef])
-      },true)
+      }, true)
 
     }
 
-//    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    //    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
 
-    if (isCached){
+    if (isCached) {
       resRDD.cache()
       resRDD.count()
     }

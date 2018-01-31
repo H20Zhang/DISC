@@ -7,57 +7,55 @@ import org.apache.spark.rdd.RDD
 /**
   * a reference to the logoRDD containing its actual rdd and its schema
   */
-class LogoRDD(val logoRDD:RDD[LogoBlockRef], val schema: LogoSchema){}
+class LogoRDD(val logoRDD: RDD[LogoBlockRef], val schema: LogoSchema) {}
 
 
-class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSchema) extends LogoRDD(patternRDD,patternSchema){
+class PatternLogoRDD(val patternRDD: RDD[LogoBlockRef], val patternSchema: LogoSchema) extends LogoRDD(patternRDD, patternSchema) {
 
-  var keyValueLogoRDD:KeyValueLogoRDD = null
-  var filteringLogoRDD:FilteringLogoRDD = null
-
-
+  var keyValueLogoRDD: KeyValueLogoRDD = null
+  var filteringLogoRDD: FilteringLogoRDD = null
 
 
   //
-  def toKeyValuePatternLogoRDD(key:Set[Int]):KeyValueLogoRDD = {
+  def toKeyValuePatternLogoRDD(key: Set[Int]): KeyValueLogoRDD = {
 
-//    if (keyValueLogoRDD == null){
-      val toKeyValueTransformer = new ToKeyValueTransformer
-      toKeyValueTransformer.setKey(key)
-      val keyValueRDDData = toKeyValueTransformer.transform(patternRDD)
-      val keyValueSchema = KeyValueLogoSchema(patternSchema,key)
-      keyValueLogoRDD = new KeyValueLogoRDD(keyValueRDDData,keyValueSchema)
-//    }
+    //    if (keyValueLogoRDD == null){
+    val toKeyValueTransformer = new ToKeyValueTransformer
+    toKeyValueTransformer.setKey(key)
+    val keyValueRDDData = toKeyValueTransformer.transform(patternRDD)
+    val keyValueSchema = KeyValueLogoSchema(patternSchema, key)
+    keyValueLogoRDD = new KeyValueLogoRDD(keyValueRDDData, keyValueSchema)
+    //    }
     keyValueLogoRDD
   }
 
-  def toConcretePatternLogoRDD:ConcreteLogoRDD = {
+  def toConcretePatternLogoRDD: ConcreteLogoRDD = {
 
     val toConcreteTransformer = new ToConcreteTransformer
     val concreteRDDData = toConcreteTransformer.transform(patternRDD)
     val concreteSchema = patternSchema match {
-      case c:CompositeLogoSchema => c.schema
+      case c: CompositeLogoSchema => c.schema
       case _ => patternSchema
     }
 
-    new ConcreteLogoRDD(concreteRDDData,concreteSchema)
+    new ConcreteLogoRDD(concreteRDDData, concreteSchema)
   }
 
-  def toFilteringPatternLogoRDD(f:FilteringCondition):FilteringLogoRDD = {
+  def toFilteringPatternLogoRDD(f: FilteringCondition): FilteringLogoRDD = {
 
-    if (filteringLogoRDD == null){
+    if (filteringLogoRDD == null) {
       val toFilteringTransformer = new ToFilteringTransformer
       toFilteringTransformer.setFilteringCondition(f)
       val filteringData = toFilteringTransformer.transform(patternRDD)
       val filteringSchema = patternSchema match {
-        case c:CompositeLogoSchema => c.schema
+        case c: CompositeLogoSchema => c.schema
         case _ => patternSchema
       }
 
       //TODO, this place actually filter is not always executed.
-      if (f.isStrictCondition){
+      if (f.isStrictCondition) {
         filteringLogoRDD = new FilteringLogoRDD(filteringData, filteringSchema, true)
-      } else{
+      } else {
         filteringLogoRDD = new FilteringLogoRDD(filteringData, filteringSchema, false)
       }
     }
@@ -67,23 +65,23 @@ class PatternLogoRDD(val patternRDD:RDD[LogoBlockRef], val patternSchema: LogoSc
 }
 
 
-class ComposingLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema:LogoSchema) extends PatternLogoRDD(patternRDD,patternSchema){
+class ComposingLogoRDD(patternRDD: RDD[LogoBlockRef], patternSchema: LogoSchema) extends PatternLogoRDD(patternRDD, patternSchema) {
 
   override def toFilteringPatternLogoRDD(f: FilteringCondition): FilteringLogoRDD = {
-    if (filteringLogoRDD == null){
+    if (filteringLogoRDD == null) {
       val toFilteringTransformer = new ToFilteringTransformer
       toFilteringTransformer.setFilteringCondition(f)
       toFilteringTransformer.setIsCached(false)
       val filteringData = toFilteringTransformer.transform(patternRDD)
       val filteringSchema = patternSchema match {
-        case c:CompositeLogoSchema => c.schema
+        case c: CompositeLogoSchema => c.schema
         case _ => patternSchema
       }
 
       //TODO, this place actually filter is not always executed.
-      if (f.isStrictCondition){
+      if (f.isStrictCondition) {
         filteringLogoRDD = new FilteringLogoRDD(filteringData, filteringSchema, true)
-      } else{
+      } else {
         filteringLogoRDD = new FilteringLogoRDD(filteringData, filteringSchema, false)
       }
     }
@@ -91,12 +89,12 @@ class ComposingLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema:LogoSchema) e
   }
 }
 
-class FilteringLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema: LogoSchema, isFilterExecuted:Boolean) extends PatternLogoRDD(patternRDD,patternSchema){
+class FilteringLogoRDD(patternRDD: RDD[LogoBlockRef], patternSchema: LogoSchema, isFilterExecuted: Boolean) extends PatternLogoRDD(patternRDD, patternSchema) {
 
   override def toConcretePatternLogoRDD: ConcreteLogoRDD = {
-    if (isFilterExecuted){
-      new ConcreteLogoRDD(patternRDD,patternSchema)
-    }else{
+    if (isFilterExecuted) {
+      new ConcreteLogoRDD(patternRDD, patternSchema)
+    } else {
       super.toConcretePatternLogoRDD
     }
   }
@@ -104,7 +102,7 @@ class FilteringLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema: LogoSchema, 
 
 }
 
-class KeyValueLogoRDD(patternRDD:RDD[LogoBlockRef], override val patternSchema: KeyValueLogoSchema) extends PatternLogoRDD(patternRDD,patternSchema){
+class KeyValueLogoRDD(patternRDD: RDD[LogoBlockRef], override val patternSchema: KeyValueLogoSchema) extends PatternLogoRDD(patternRDD, patternSchema) {
 
   override def toKeyValuePatternLogoRDD(key: Set[Int]): KeyValueLogoRDD = {
     require(patternSchema.keys.diff(key).size == 0, "only same key can be reused")
@@ -112,26 +110,26 @@ class KeyValueLogoRDD(patternRDD:RDD[LogoBlockRef], override val patternSchema: 
   }
 }
 
-class ConcreteLogoRDD(patternRDD:RDD[LogoBlockRef], patternSchema: LogoSchema) extends PatternLogoRDD(patternRDD,patternSchema){
+class ConcreteLogoRDD(patternRDD: RDD[LogoBlockRef], patternSchema: LogoSchema) extends PatternLogoRDD(patternRDD, patternSchema) {
 
   override def toConcretePatternLogoRDD: ConcreteLogoRDD = this
-//  override def toFilteringPatternLogoRDD(f: FilteringCondition): FilteringLogoRDD = {
-//    val toFilteringTransformer = new ToFilteringTransformer
-//    toFilteringTransformer.setFilteringCondition(FilteringCondition(f.f,true))
-//    val filteringData = toFilteringTransformer.transform(patternRDD)
-//    val filteringSchema = patternSchema match {
-//      case c:CompositeLogoSchema => c.schema
-//      case _ => patternSchema
-//    }
-//
-//    new FilteringLogoRDD(filteringData, filteringSchema,true)
-//  }
 
+  //  override def toFilteringPatternLogoRDD(f: FilteringCondition): FilteringLogoRDD = {
+  //    val toFilteringTransformer = new ToFilteringTransformer
+  //    toFilteringTransformer.setFilteringCondition(FilteringCondition(f.f,true))
+  //    val filteringData = toFilteringTransformer.transform(patternRDD)
+  //    val filteringSchema = patternSchema match {
+  //      case c:CompositeLogoSchema => c.schema
+  //      case _ => patternSchema
+  //    }
+  //
+  //    new FilteringLogoRDD(filteringData, filteringSchema,true)
+  //  }
 
 
 }
 
-class SubPatternLogoRDDReference(patternLogoRDDReference:PatternLogoRDD, keyMapping:KeyMapping){
+class SubPatternLogoRDDReference(patternLogoRDDReference: PatternLogoRDD, keyMapping: KeyMapping) {
 
-//  def generate() = ???
+  //  def generate() = ???
 }

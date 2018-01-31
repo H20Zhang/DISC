@@ -4,7 +4,7 @@ class PreprocessingData {
 
   val sc = SparkSingle.getSparkContext()
 
-  def removeComment(address:String, output:String): Unit ={
+  def removeComment(address: String, output: String): Unit = {
     val rawRDD = sc.textFile(address).map {
       f =>
         var res: (Int, Int) = null

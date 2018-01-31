@@ -1,7 +1,6 @@
 package org.apache.spark.Logo.Experiment
 
 
-
 import org.apache.log4j.Logger
 import org.apache.spark.Logo.UnderLying.Joiner.{LogoBuildPhyiscalStep, SnapPoint}
 import org.apache.spark.Logo.UnderLying.Maker.SimpleRowLogoRDDMaker
@@ -12,12 +11,11 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.storage.StorageLevel
 
 
-object TriangleEfficientTest{
-
+object TriangleEfficientTest {
 
 
   @throws[InterruptedException]
-  private def intersect(uN: IndexedSeq[Int], vN: IndexedSeq[Int], node:Int): Long = {
+  private def intersect(uN: IndexedSeq[Int], vN: IndexedSeq[Int], node: Int): Long = {
     if ((uN == null) || (vN == null)) return 0L
     var count = 0L
     var uCur = 0
@@ -39,10 +37,10 @@ object TriangleEfficientTest{
 
   def edgeLogoRDD(rawRDD: RDD[(Seq[Int], Int)]) = {
 
-    val edges = List((0,1))
-    val keySizeMap = Map((0,7),(1,7))
+    val edges = List((0, 1))
+    val keySizeMap = Map((0, 7), (1, 7))
 
-    val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD,1).setEdges(edges).setKeySizeMap(keySizeMap)
+    val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD, 1).setEdges(edges).setKeySizeMap(keySizeMap)
 
     val logoRDD = logoRDDMaker.build()
     val schema = logoRDDMaker.getSchema
@@ -53,29 +51,29 @@ object TriangleEfficientTest{
           Iterator(new LogoBlock(
             block.schema,
             block.metaData,
-            block.rawData.map(f => (f._1.toArray,f._2))))
+            block.rawData.map(f => (f._1.toArray, f._2))))
       },
       true
     ).persist(StorageLevel.MEMORY_ONLY_SER)
     outputRDD.count()
 
-    (outputRDD,schema)
+    (outputRDD, schema)
   }
 
 
-  def debugEdgeLogoRDD(sc:SparkContext, dataSource:String) = {
+  def debugEdgeLogoRDD(sc: SparkContext, dataSource: String) = {
 
     val data = sc.textFile(dataSource, 64)
 
-    val rawRDD = data.map{
+    val rawRDD = data.map {
       f =>
-        var res:(Int,Int) = null
-        if (!f.startsWith("#")){
+        var res: (Int, Int) = null
+        if (!f.startsWith("#")) {
           val splittedString = f.split("\\s")
-          res = (splittedString(0).toInt,splittedString(1).toInt)
+          res = (splittedString(0).toInt, splittedString(1).toInt)
         }
         res
-    }.filter(f => f != null).flatMap(f => Iterable(f,f.swap)).distinct().map(f => (Seq(f._1,f._2),1))
+    }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).distinct().map(f => (Seq(f._1, f._2), 1))
 
     //    val rawRDD = sc.parallelize(List.range(0,100)).map(f => (Seq(f,f),1))
     edgeLogoRDD(rawRDD)
@@ -88,16 +86,16 @@ object TriangleEfficientTest{
       .getOrCreate()
     val sc = spark.sparkContext
 
-    val (edgeLogoRDD,schema) = debugEdgeLogoRDD(sc,args(0))
+    val (edgeLogoRDD, schema) = debugEdgeLogoRDD(sc, args(0))
 
     val keyValueLogoRDD0 = edgeLogoRDD.mapPartitions(
       {
         it =>
           val block = it.next()
-           Iterator(new LogoBlock(
-             block.schema,
-             block.metaData,
-             block.rawData.map(f => (f._1(0),f._1(1))).groupBy(f => f._1).map(f => (f._1,f._2.map(_._2).sorted.toIndexedSeq))))
+          Iterator(new LogoBlock(
+            block.schema,
+            block.metaData,
+            block.rawData.map(f => (f._1(0), f._1(1))).groupBy(f => f._1).map(f => (f._1, f._2.map(_._2).sorted.toIndexedSeq))))
       },
       true
     )
@@ -109,7 +107,7 @@ object TriangleEfficientTest{
           Iterator(new LogoBlock(
             block.schema,
             block.metaData,
-            block.rawData.map(f => (f._1(1),f._1(0))).groupBy(f => f._1).map(f => (f._1,f._2.map(_._2).sorted.toIndexedSeq))))
+            block.rawData.map(f => (f._1(1), f._1(0))).groupBy(f => f._1).map(f => (f._1, f._2.map(_._2).sorted.toIndexedSeq))))
       },
       true
     )
@@ -121,26 +119,26 @@ object TriangleEfficientTest{
     keyValueLogoRDD2.count()
 
 
-    val edgeRef0 = new LogoRDD(keyValueLogoRDD0.asInstanceOf[RDD[LogoBlockRef]],schema)
-    val edgeRef1 = new LogoRDD(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]],schema)
-    val edgeRef2 = new LogoRDD(keyValueLogoRDD2.asInstanceOf[RDD[LogoBlockRef]],schema)
+    val edgeRef0 = new LogoRDD(keyValueLogoRDD0.asInstanceOf[RDD[LogoBlockRef]], schema)
+    val edgeRef1 = new LogoRDD(edgeLogoRDD.asInstanceOf[RDD[LogoBlockRef]], schema)
+    val edgeRef2 = new LogoRDD(keyValueLogoRDD2.asInstanceOf[RDD[LogoBlockRef]], schema)
 
-    val logoRDDRefs = List(edgeRef0,edgeRef1,edgeRef2)
+    val logoRDDRefs = List(edgeRef0, edgeRef1, edgeRef2)
     val snapPoints = List(
-      SnapPoint(0,0,1,0),
-      SnapPoint(1,1,2,1),
-      SnapPoint(0,1,2,0)
+      SnapPoint(0, 0, 1, 0),
+      SnapPoint(1, 1, 2, 1),
+      SnapPoint(0, 1, 2, 0)
     )
 
 
-    val handler = (blocks:Seq[LogoBlockRef], schema:CompositeLogoSchema, index:Int) => {
+    val handler = (blocks: Seq[LogoBlockRef], schema: CompositeLogoSchema, index: Int) => {
 
 
       val logger = Logger.getRootLogger
 
-      val edgeBlock0 = blocks(0).asInstanceOf[LogoBlock[Map[Int,IndexedSeq[Int]]]]
-      val edgeBlock1 = blocks(1).asInstanceOf[LogoBlock[Seq[(Array[Int],Int)]]]
-      val edgeBlock2 = blocks(2).asInstanceOf[LogoBlock[Map[Int,IndexedSeq[Int]]]]
+      val edgeBlock0 = blocks(0).asInstanceOf[LogoBlock[Map[Int, IndexedSeq[Int]]]]
+      val edgeBlock1 = blocks(1).asInstanceOf[LogoBlock[Seq[(Array[Int], Int)]]]
+      val edgeBlock2 = blocks(2).asInstanceOf[LogoBlock[Map[Int, IndexedSeq[Int]]]]
 
 
       val stringBuilder = new StringBuilder
@@ -151,10 +149,10 @@ object TriangleEfficientTest{
       stringBuilder.append(edgeBlock2.metaData + "\n")
 
 
-//      val edge0 = edgeBlock0.rawData.map(f => (f._1(0),f._1(1))).groupBy(f => f._1).map(f => (f._1,f._2.map(_._2).sorted.toIndexedSeq))
+      //      val edge0 = edgeBlock0.rawData.map(f => (f._1(0),f._1(1))).groupBy(f => f._1).map(f => (f._1,f._2.map(_._2).sorted.toIndexedSeq))
 
       //need to swap the src and dst
-//      val edge2 = edgeBlock2.rawData.map(f => (f._1(1),f._1(0))).groupBy(f => f._1).map(f => (f._1,f._2.map(_._2).sorted.toIndexedSeq))
+      //      val edge2 = edgeBlock2.rawData.map(f => (f._1(1),f._1(0))).groupBy(f => f._1).map(f => (f._1,f._2.map(_._2).sorted.toIndexedSeq))
 
       val edge0 = edgeBlock0.rawData
       val edge2 = edgeBlock2.rawData
@@ -165,14 +163,14 @@ object TriangleEfficientTest{
 
         var res = 0L
 
-        if (f(0) < f(1)){
-          if (edge0.contains(f(0)) && edge2.contains(f(1))){
+        if (f(0) < f(1)) {
+          if (edge0.contains(f(0)) && edge2.contains(f(1))) {
             val leftNeighbors = edge0(f(0))
             val rightNeighbors = edge2(f(1))
-//            val intersectList = leftNeighbors.intersect(rightNeighbors)
+            //            val intersectList = leftNeighbors.intersect(rightNeighbors)
 
-            res = intersect(leftNeighbors,rightNeighbors,f(1))
-//            res = intersectList.filter(p => p > f(1)).size.toLong
+            res = intersect(leftNeighbors, rightNeighbors, f(1))
+            //            res = intersectList.filter(p => p > f(1)).size.toLong
           }
         }
 
@@ -180,9 +178,9 @@ object TriangleEfficientTest{
       }
 
       stringBuilder.append(s"triangleSize:${triangleSize.sum} \n")
-//      new CountLogo(triangleSize.sum)
+      //      new CountLogo(triangleSize.sum)
       new DebugLogo(stringBuilder.toString(), triangleSize.sum)
-//      new CountLogo(0)
+      //      new CountLogo(0)
     }
 
 
@@ -190,17 +188,17 @@ object TriangleEfficientTest{
 
     //logoScriptOneStep
     //Compiling Test
-    val oneStep = LogoBuildPhyiscalStep(logoRDDRefs,compositeSchema,handler,"Triangle")
+    val oneStep = LogoBuildPhyiscalStep(logoRDDRefs, compositeSchema, handler, "Triangle")
 
     println("keymapping is:")
     println(oneStep.compositeSchema.keyMappings)
     val fetchJoinRDD = oneStep.performFetchJoin(sc)
 
     //TODO This requires further testing
-    val triangleMessages = fetchJoinRDD.map{
+    val triangleMessages = fetchJoinRDD.map {
       f =>
-//        val countLogo = f.asInstanceOf[CountLogo]
-//        countLogo.count
+        //        val countLogo = f.asInstanceOf[CountLogo]
+        //        countLogo.count
 
         val deBugLogo = f.asInstanceOf[DebugLogo]
         deBugLogo
@@ -210,7 +208,7 @@ object TriangleEfficientTest{
 
 
 
-//    println(triangleMessages)
+    //    println(triangleMessages)
 
     triangleMessages.foreach(f => println(f.message))
     println(triangleMessages.map(_.value).sum)

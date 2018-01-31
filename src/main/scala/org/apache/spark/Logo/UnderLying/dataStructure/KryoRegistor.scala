@@ -35,40 +35,39 @@ class KryoRegistor extends KryoRegistrator {
 }
 
 
-
-class LongMapSerializer extends Serializer[mutable.LongMap[Array[ValuePatternInstance]]]{
+class LongMapSerializer extends Serializer[mutable.LongMap[Array[ValuePatternInstance]]] {
   override def read(kryo: Kryo, input: Input, type1: Class[mutable.LongMap[Array[ValuePatternInstance]]]): mutable.LongMap[Array[ValuePatternInstance]] = {
 
 
-    val keys = kryo.readObject(input,classOf[Array[Long]])
-    val values = kryo.readObject(input,classOf[Array[Array[ValuePatternInstance]]])
+    val keys = kryo.readObject(input, classOf[Array[Long]])
+    val values = kryo.readObject(input, classOf[Array[Array[ValuePatternInstance]]])
 
-    mutable.LongMap.fromZip(keys,values)
+    mutable.LongMap.fromZip(keys, values)
   }
 
   override def write(kryo: Kryo, output: Output, object1: mutable.LongMap[Array[ValuePatternInstance]]): Unit = {
 
-    kryo.writeObject(output,object1.keys.toArray)
-    kryo.writeObject(output,object1.values.toArray)
+    kryo.writeObject(output, object1.keys.toArray)
+    kryo.writeObject(output, object1.values.toArray)
 
   }
 }
 
-class LongMapCompactSerializer extends Serializer[mutable.LongMap[CompactPatternList]]{
+class LongMapCompactSerializer extends Serializer[mutable.LongMap[CompactPatternList]] {
   override def read(kryo: Kryo, input: Input, type1: Class[mutable.LongMap[CompactPatternList]]): mutable.LongMap[CompactPatternList] = {
 
 
-    val keys = kryo.readObject(input,classOf[Array[Long]])
-    val values = kryo.readObject(input,classOf[Array[CompactPatternList]])
+    val keys = kryo.readObject(input, classOf[Array[Long]])
+    val values = kryo.readObject(input, classOf[Array[CompactPatternList]])
 
 
-    mutable.LongMap.fromZip(keys,values)
+    mutable.LongMap.fromZip(keys, values)
   }
 
   override def write(kryo: Kryo, output: Output, object1: mutable.LongMap[CompactPatternList]): Unit = {
 
-    kryo.writeObject(output,object1.keys.toArray)
-    kryo.writeObject(output,object1.values.toArray)
+    kryo.writeObject(output, object1.keys.toArray)
+    kryo.writeObject(output, object1.values.toArray)
 
   }
 }

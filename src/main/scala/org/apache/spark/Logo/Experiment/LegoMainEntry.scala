@@ -23,8 +23,8 @@ object LegoMainEntry {
     }
 
 
-//    val chordalSquare = new ExamplePattern(data).chordalSquareFast
-//    println(chordalSquare.size())
+    //    val chordalSquare = new ExamplePattern(data).chordalSquareFast
+    //    println(chordalSquare.size())
 
 
   }
