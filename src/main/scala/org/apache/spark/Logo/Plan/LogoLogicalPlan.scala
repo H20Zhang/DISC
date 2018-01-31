@@ -115,13 +115,12 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
         val block = f.asInstanceOf[PatternLogoBlock[_]]
         val iterator = block.enumerateIterator()
 
-        //        var result = 0L
-        //        for (x <- iterator) result += 1
-        //        result
-        //
-        while (iterator.hasNext) {
-          iterator.next()
-          size += 1
+        if (iterator.isInstanceOf[enumerateIterator]){
+          size += iterator.asInstanceOf[enumerateIterator].longSize()
+        } else{
+          while (iterator.hasNext) {
+            size += 1
+          }
         }
 
         size

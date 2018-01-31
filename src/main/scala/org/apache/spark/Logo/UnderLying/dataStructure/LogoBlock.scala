@@ -162,15 +162,6 @@ final class KeyValuePatternLogoBlock(schema: KeyValueLogoSchema, metaData: LogoM
       case _ => Some(resRaw)
     }
 
-
-
-    //
-    //    if (rawData.contains(key)){
-    //      print(s"contain key $key")
-    //      val result = rawData(key)
-    //      print(result)
-    //    }
-
     res
   }
 
@@ -185,25 +176,37 @@ final class KeyValuePatternLogoBlock(schema: KeyValueLogoSchema, metaData: LogoM
   //    iterator()
 }
 
+trait enumerateIterator {
+  def longSize():Long
+}
 
 //TODO: test filtering
 final class FilteringPatternLogoBlock[A: ClassTag](var logoBlock: PatternLogoBlock[A], var f: PatternInstance => Boolean) extends PatternLogoBlock(logoBlock.schema, logoBlock.metaData, logoBlock.rawData) {
 
 
-  def toFilteringIterator(it: Iterator[PatternInstance]): Iterator[PatternInstance] = {
-    new AbstractIterator[PatternInstance] {
+  var num:Long = 0L
 
-      private var hd: PatternInstance = _
+  def toFilteringIterator(it: Iterator[PatternInstance]): Iterator[PatternInstance] = new AbstractIterator[PatternInstance] with enumerateIterator {
 
-      final def hasNext: Boolean = {
-        do {
-          if (!it.hasNext) return false
-          hd = it.next()
-        } while (!f(hd))
-        true
+    private var hd: PatternInstance = _
+
+    final def hasNext: Boolean = {
+      do {
+        if (!it.hasNext) return false
+        hd = it.next()
+      } while (!f(hd))
+      true
+    }
+
+    final def next() = hd
+
+    override def longSize():Long = {
+      while (it.hasNext){
+        if (f(it.next())){
+          num = num + 1
+        }
       }
-
-      final def next() = hd
+      num
     }
   }
 
@@ -223,9 +226,7 @@ final class FilteringPatternLogoBlock[A: ClassTag](var logoBlock: PatternLogoBlo
 }
 
 
-trait enumerateIterator {
 
-}
 
 /**
   * Composite LogoBlock Class for UnlabeledPatternMatching, which is assembled using multiple basic PatternLogoBlock.
@@ -255,7 +256,6 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
       private var end = array.length
       private var curEle: ValuePatternInstance = _
 
-
       final def hasNext: Boolean = cur < end
 
       final def next(): ValuePatternInstance = {
@@ -284,6 +284,21 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
 
     optValues match {
       case Some(values) => values.iterator //arrayToIterator(values)
+      case _ => null
+    }
+  }
+
+  def oneValueGenereateLeafsNode(coreInstance: PatternInstance): Array[Int] = {
+
+    //    val optValues = leafsBlock.
+    //      getValue(coreInstance.subPatterns(coreLeafJoints.coreJoints).toKeyPatternInstance())
+
+    val optValues = leafsBlock.
+      getValue(coreInstance.toSubKeyPattern(coreLeafJoints.coreJoints, coreJointsSeq))
+
+
+    optValues match {
+      case Some(values) => values.getRaw() //arrayToIterator(values)
       case _ => null
     }
   }
@@ -418,13 +433,22 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
       currentPattern
     }
 
+    var longCount = 0
+    override def longSize(): Long = {
+      while (hasNext){
+        longCount += 1
+      }
 
+      longCount
+    }
   }
 
 
   final class OneValueLenEnumerateIterator extends Iterator[PatternInstance] with enumerateIterator {
 
-    var leafsIterator: Iterator[ValuePatternInstance] = _
+    var curLeafPos = 0
+    var leafEnd = 0
+    var leafsIterator: Array[Int] = _
     val coreIterator: Iterator[PatternInstance] = coreBlock.enumerateIterator()
     var currentCore: PatternInstance = _
     //    val TintBuffer = new TIntArrayList(totalNodes)
@@ -454,7 +478,6 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
     val coreLen = coreMapping.length
     val valueLen = valueKeyMapping.length
 
-
     val isCoreIteratorEnumerate = coreIterator.isInstanceOf[enumerateIterator]
     val valueMappingSize = valueMapping.keyMapping.size
 
@@ -474,7 +497,13 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
         } else {
           return Some(false)
         }
-        leafsIterator = genereateLeafsNode(currentCore)
+        curLeafPos = 0
+        leafsIterator = oneValueGenereateLeafsNode(currentCore)
+
+        if (leafsIterator != null){
+          leafEnd = leafsIterator.length
+        }
+
 
       } while (leafsIterator == null)
       None
@@ -482,21 +511,31 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
 
     def hasNext: Boolean = {
 
-      if (leafsIterator == null || !leafsIterator.hasNext) {
+      if (leafsIterator == null || curLeafPos == leafEnd) {
         moveToNext match {
           case Some(toReturn) => return toReturn
           case None =>
         }
       }
 
-      val leafs = leafsIterator.next()
-      array.update(valueKeyMapping2Value, leafs.getValue(valueKeyMapping2Value))
+      val leafs = leafsIterator(curLeafPos)
+      array.update(valueKeyMapping2Value, leafs)
+      curLeafPos += 1
 
       return true
     }
 
     override def next(): PatternInstance = {
       currentPattern
+    }
+
+    var longCount = 0
+    override def longSize(): Long = {
+      while (hasNext){
+        longCount += 1
+      }
+
+      longCount
     }
   }
 
@@ -887,8 +926,16 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
     }
 
     override def next(): PatternInstance = {
-
       currentPattern
+    }
+
+    var longCount = 0
+    override def longSize(): Long = {
+      while (hasNext){
+        longCount += 1
+      }
+
+      longCount
     }
 
   }

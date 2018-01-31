@@ -18,6 +18,6 @@
       </SbtProjectSettings>
     </option>
     <option name="maximumHeapSize" value="4096" />
-    <option name="vmParameters" value="-XX:MaxPermSize=2048M -XX:+UseFastAccessorMethods -XX:+UseCompressedOops" />
+    <option name="vmParameters" value="-XX:+UseFastAccessorMethods -XX:+UseCompressedOops" />
   </component>
 </project>

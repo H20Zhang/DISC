@@ -499,8 +499,7 @@ class ExamplePattern(data: String) {
     ////    val wedge1 = leftEdge1.build(rightEdge1).toIdentitySubPattern()
     ////    val middleEdge1 = edge4_1.toSubPattern((0,1),(1,2))
 
-    val indexTriangle = leftEdge.build(edge4_1.toSubPattern((0, 0), (1, 2)), edge4_1.toSubPattern((0, 1), (1, 2))).filter(filterCondition).toConcrete()
-
+    val indexTriangle = leftEdge.build(edge4_1.toSubPattern((0, 0), (1, 2)), edge4_1.toSubPattern((0, 1), (1, 2))).toConcrete()
 
     val chordalSquareTemp = triangle.toIdentitySubPattern().build(indexTriangle.toSubPattern((0, 0), (1, 1), (2, 3)))
 
