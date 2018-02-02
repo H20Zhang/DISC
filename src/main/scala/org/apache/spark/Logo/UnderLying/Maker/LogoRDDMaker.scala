@@ -4,6 +4,7 @@ import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.Logo.UnderLying.utlis.ListGenerator
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
+import org.apache.spark.storage.StorageLevel
 
 import scala.reflect.ClassTag
 
@@ -91,7 +92,7 @@ class SimpleRowLogoRDDMaker[A: ClassTag](rdd: RDD[(Seq[Int], A)], default: A) ex
       val blockGenerator = new rowBlockGenerator(schema, index, f)
       val block = blockGenerator.generate()
       Iterator(block)
-    }, true).cache()
+    }, true)
   }
 }
 
@@ -175,7 +176,7 @@ class SimpleCompactRowLogoRDDMaker(rdd: Dataset[((Int, Int), Int)]) extends Comp
       val blockGenerator = new CompactRowGenerator(schema, index, f)
       val block = blockGenerator.generate()
       Iterator(block)
-    }, true).cache()
+    }, true)
   }
 }
 

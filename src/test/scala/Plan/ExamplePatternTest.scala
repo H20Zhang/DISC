@@ -1,11 +1,30 @@
 package Plan
 
-import org.apache.spark.Logo.UnderLying.utlis.{ExamplePattern, PointToNumConverter}
-import org.scalatest.FunSuite
+import org.apache.spark.Logo.UnderLying.utlis.{ExamplePattern, PointToNumConverter, SparkSingle}
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class ExamplePatternTest extends FunSuite{
+class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
 
   val data = "./wikiV.txt"
+//  val data = "./email-Eu-core.txt"
+//  val queries = List("house")
+//  val queries = List("squarePlusOneEdgeF", "trianglePlusTwoEdgeF")
+//val queries = List("trianglePlusTwoEdgeF")
+
+//  val queries = List("threeTriangleF")
+val queries = List("square")
+  val sizeReference = List(("trianglePlusTwoEdgeF",1),("squarePlusOneEdgeF",1),("square",57654491L),("triangle",608389L),("chordalSquare",40544543L),("houseF",2365994715L),("house",9488779111L),("threeTriangle",4105908615L),("threeTriangleF",4105908615L)).toMap
+
+
+  test("Pattern"){
+    SparkSingle.appName = s"Logo-${data}"
+    val pattern = new ExamplePattern(data)
+    queries.foreach{
+      f =>
+        println(s"execute $f")
+        assert(pattern.pattern(f).size() == sizeReference(f))
+    }
+  }
 
 //  test("Triangle"){
 //    val triangle = new ExamplePattern(data).triangle
@@ -42,14 +61,24 @@ class ExamplePatternTest extends FunSuite{
 //    assert(house.size() == 9488779111L)
 //  }
 
-    test("houseIntersectionFast"){
-      val house = new ExamplePattern(data).houseIntersectionFast
-      assert(house.size() == 9488779111L)
-    }
+//    test("houseIntersectionFast"){
+//      val house = new ExamplePattern(data).houseIntersectionFast
+//      assert(house.size() == 9488779111L)
+//    }
 
 
 //  test("threeTriangleFast"){
 //    val threeTriangle = new ExamplePattern(data).threeTriangleFast
+//    assert(threeTriangle.size() == 4105908615L)
+//  }
+
+//  test("threeTriangleFilterFast"){
+//    val threeTriangle = new ExamplePattern(data).threeTriangleFilterFast
+//    assert(threeTriangle.size() == 4105908615L)
+//  }
+
+//  test("houseIntersectionFilterFast"){
+//    val threeTriangle = new ExamplePattern(data).houseIntersectionFilterFast
 //    assert(threeTriangle.size() == 4105908615L)
 //  }
 
@@ -87,6 +116,8 @@ class ExamplePatternTest extends FunSuite{
 //  }
 
 
-
+  override protected def afterAll(): Unit = {
+    SparkSingle.close()
+  }
 
 }

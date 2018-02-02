@@ -1,5 +1,7 @@
 package org.apache.spark.Logo.UnderLying.utlis
 
+import org.apache.spark.Logo.UnderLying.dataStructure.PatternInstance
+
 import scala.collection.mutable.ArrayBuffer
 
 
@@ -10,9 +12,13 @@ object ListSelector {
     val keySet = keys
 
     val arraybuffer = new ArrayBuffer[A]()
-    for (i <- 0 until elems.size) {
+
+    var i = 0
+    var size = elems.length
+    while (i < size){
       if (keySet.contains(i))
         arraybuffer.append(elems(i))
+      i += 1
     }
 
     arraybuffer
@@ -24,9 +30,30 @@ object ListSelector {
     val keySet = keys
 
     val arraybuffer = new ArrayBuffer[A]()
-    for (i <- 0 until elems.size) {
+    var i = 0
+    var size = elems.length
+    while (i < size){
       if (!keySet.contains(i))
         arraybuffer.append(elems(i))
+      i += 1
+    }
+
+    arraybuffer
+  }
+
+
+  def notSelectElementsIntPattern(elems: PatternInstance, keys: Set[Int]): Seq[Int] = {
+
+    val keySet = keys
+
+    val arraybuffer = new ArrayBuffer[Int]()
+
+    var i = 0
+    var size = elems.size()
+    while (i < size){
+      if (!keySet.contains(i))
+        arraybuffer.append(elems.getValue(i))
+      i += 1
     }
 
     arraybuffer

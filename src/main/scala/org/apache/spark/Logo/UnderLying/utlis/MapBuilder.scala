@@ -126,22 +126,16 @@ object MapBuilder {
   }
 
 
-  def fromListToMapLongFastCompact(data: Seq[Array[Int]], keySet: Set[Int], keys: Seq[Int]) = {
+  def fromListToMapLongFastCompact(data: Iterator[PatternInstance], keySet: Set[Int], keys: Seq[Int], valueSize:Int, needSorting:Boolean) = {
 
     val hashmap = new mutable.LongMap[CompactListAppendBuilder]()
-
-    var valueSize = 0
-    if (data.size >= 1) {
-      valueSize = data(0).length - keys.size
-    }
-
 
     if (keys.size == 1) {
       data.foreach {
         f =>
-          val key = f(keys(0)).toLong
+          val key = f.getValue(keys(0)).toLong
           //            ListSelector.selectElements(f,keys)
-          val value = ListSelector.notSelectElements(f, keySet)
+          val value = ListSelector.notSelectElementsIntPattern(f, keySet)
 
           if (valueSize == 1) {
             if (hashmap.contains(key)) {
@@ -185,10 +179,10 @@ object MapBuilder {
     } else if (keys.size == 2) {
       data.foreach {
         f =>
-          val key1 = f(keys(0))
-          val key2 = f(keys(1))
+          val key1 = f.getValue(keys(0))
+          val key2 = f.getValue(keys(1))
           val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
-          val value = ListSelector.notSelectElements(f, keySet)
+          val value = ListSelector.notSelectElementsIntPattern(f, keySet)
 
           if (valueSize == 1) {
             if (hashmap.contains(key)) {
@@ -235,10 +229,13 @@ object MapBuilder {
     if (valueSize == 1) {
       hashmap.mapValuesNow { f =>
         val compactList = f.toCompactList()
-        Sorting.quickSort(compactList.asInstanceOf[CompactOnePatternList].rawData)
+        if (needSorting){
+          Sorting.quickSort(compactList.asInstanceOf[CompactOnePatternList].rawData)
+        }
         compactList
       }
     }
+
     else {
       hashmap.mapValuesNow(f => f.toCompactList())
     }

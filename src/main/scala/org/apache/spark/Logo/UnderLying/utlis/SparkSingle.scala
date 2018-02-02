@@ -1,7 +1,7 @@
 package org.apache.spark.Logo.UnderLying.utlis
 
 import org.apache.spark.Logo.UnderLying.dataStructure._
-import org.apache.spark.SparkConf
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SparkSession
 
 import scala.collection.mutable
@@ -84,19 +84,16 @@ object SparkSingle {
     }
   }
 
-  private var spark = getSparkInternal()
+  private var spark:SparkSession = _
 
-  private var sc = spark.sparkContext
+  private var sc:SparkContext = _
   //  sc.setLogLevel("ERROR")
 
   var counter = 0
 
   def getSpark() = {
-    counter += 1
-
-    if (sc.isStopped) {
-      spark = getSparkInternal()
-    }
+    spark = getSparkInternal()
+    sc = spark.sparkContext
     (spark, sc)
   }
 
@@ -109,10 +106,7 @@ object SparkSingle {
   }
 
   def close(): Unit = {
-    //    counter -= 1
-    //    if(counter == 0){
-    //      spark.close()
-    //    }
+    spark.close()
   }
 
 }

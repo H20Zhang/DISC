@@ -3,6 +3,7 @@ package org.apache.spark.Logo.UnderLying.Maker
 import org.apache.spark.Logo.Plan.FilteringCondition
 import org.apache.spark.Logo.UnderLying.dataStructure.{LogoBlockRef, PatternLogoBlock}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.storage.StorageLevel
 
 
 /**
@@ -20,9 +21,15 @@ abstract class LogoBlockTransformer extends Serializable {
 class ToKeyValueTransformer extends LogoBlockTransformer {
 
   var key: Set[Int] = _
+  var needSorting: Boolean = false
 
   def setKey(key: Set[Int]): ToKeyValueTransformer = {
     this.key = key
+    this
+  }
+
+  def setNeedSorting(_needSorting:Boolean) = {
+    this.needSorting = _needSorting
     this
   }
 
@@ -36,7 +43,7 @@ class ToKeyValueTransformer extends LogoBlockTransformer {
         it.hasNext
 
         val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
-        Iterator(patternBlock.toKeyValueLogoBlock(key).asInstanceOf[LogoBlockRef])
+        Iterator(patternBlock.toKeyValueLogoBlock(key,needSorting).asInstanceOf[LogoBlockRef])
     }, true)
 
 
@@ -79,7 +86,8 @@ class ToConcreteTransformer extends LogoBlockTransformer {
     //    resRDD.persist(StorageLevel.DISK_ONLY)
     //    resRDD.persist(StorageLevel.OFF_HEAP)
     //    resRDD.countAsync()
-    resRDD.cache()
+//    resRDD.cache()
+    resRDD.persist(StorageLevel.DISK_ONLY)
     resRDD.count()
     //    resRDD.union(resRDD.sparkContext.emptyRDD)
     //    val res = new UnionRDD[LogoBlockRef](resRDD.sparkContext,Seq(resRDD,resRDD.sparkContext.emptyRDD))

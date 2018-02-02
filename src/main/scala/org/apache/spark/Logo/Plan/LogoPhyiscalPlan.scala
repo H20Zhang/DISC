@@ -166,11 +166,11 @@ class LogoComposite3IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
   lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs, compositeSchema, handler)
 
   def generateLeftLeafPhyiscal(): PatternLogoRDD = {
-    leftLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreLeftLeafJoins().leafJoints)
+    leftLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreLeftLeafJoins().leafJoints,true)
   }
 
   def generateRightLeafPhysical(): PatternLogoRDD = {
-    rightLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreRightLeafJoins().leafJoints)
+    rightLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreRightLeafJoins().leafJoints,true)
   }
 
   override def generateCorePhyiscal(): PatternLogoRDD = {

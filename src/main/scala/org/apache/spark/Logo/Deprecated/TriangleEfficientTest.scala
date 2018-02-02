@@ -1,5 +1,4 @@
-package org.apache.spark.Logo.Experiment
-
+package org.apache.spark.Logo.Deprecated
 
 import org.apache.log4j.Logger
 import org.apache.spark.Logo.UnderLying.Joiner.{LogoBuildPhyiscalStep, SnapPoint}

@@ -17,11 +17,12 @@ class PatternLogoRDD(val patternRDD: RDD[LogoBlockRef], val patternSchema: LogoS
 
 
   //
-  def toKeyValuePatternLogoRDD(key: Set[Int]): KeyValueLogoRDD = {
+  def toKeyValuePatternLogoRDD(key: Set[Int],needSorting:Boolean=false): KeyValueLogoRDD = {
 
     //    if (keyValueLogoRDD == null){
     val toKeyValueTransformer = new ToKeyValueTransformer
     toKeyValueTransformer.setKey(key)
+    toKeyValueTransformer.setNeedSorting(needSorting)
     val keyValueRDDData = toKeyValueTransformer.transform(patternRDD)
     val keyValueSchema = KeyValueLogoSchema(patternSchema, key)
     keyValueLogoRDD = new KeyValueLogoRDD(keyValueRDDData, keyValueSchema)
@@ -104,7 +105,7 @@ class FilteringLogoRDD(patternRDD: RDD[LogoBlockRef], patternSchema: LogoSchema,
 
 class KeyValueLogoRDD(patternRDD: RDD[LogoBlockRef], override val patternSchema: KeyValueLogoSchema) extends PatternLogoRDD(patternRDD, patternSchema) {
 
-  override def toKeyValuePatternLogoRDD(key: Set[Int]): KeyValueLogoRDD = {
+  override def toKeyValuePatternLogoRDD(key: Set[Int],needSorting:Boolean): KeyValueLogoRDD = {
     require(patternSchema.keys.diff(key).size == 0, "only same key can be reused")
     this
   }

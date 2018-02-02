@@ -74,8 +74,12 @@ object ListGenerator {
   def fillListIntoTargetList(list: Seq[Int], totalSlot: Int, slotMapping: Seq[Int], targetList: Seq[Int]) = {
     val resultList = targetList.toArray
 
-    for (i <- 0 until slotMapping.size) {
+    var i = 0
+    var size = slotMapping.size
+
+    while (i < size){
       resultList(slotMapping(i)) = list(i)
+      i += 1
     }
 
     //TODO need test to verify correctness

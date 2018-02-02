@@ -83,6 +83,11 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
     new PatternLogoRDDReference(patternSchema, newBuildScript)
   }
 
+  def toKeyValue() = {
+    val newBuildScript = new LogoEdgePatternPhysicalPlan(buildScript.generateNewPatternJState())
+    new PatternLogoRDDReference(patternSchema, newBuildScript)
+  }
+
   def toIdentitySubPattern(): SubPatternLogoRDDReference = new SubPatternLogoRDDReference(this, KeyMapping(List.range(0, patternSchema.nodeSize)))
 
   //prepare for build operation.

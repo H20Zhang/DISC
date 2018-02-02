@@ -4,12 +4,7 @@ import org.apache.spark.Logo.UnderLying.dataStructure._
 import spire.ClassTag
 
 abstract class LogoBlockGenerator[A: ClassTag, B: ClassTag](val schema: LogoSchema, val index: Int, val data: Iterator[A]) {
-  lazy val baseList = schema.slotSize
-  lazy val numList = schema.IndexToKey(index)
-  lazy val numParts = filteredData.length
-  var filteredData: List[A] = _
 
-  lazy val metaData = LogoMetaData(numList, numParts)
 
   def generate(): B
 }
@@ -18,9 +13,12 @@ abstract class LogoBlockGenerator[A: ClassTag, B: ClassTag](val schema: LogoSche
 class rowBlockGenerator[A: ClassTag](schema: LogoSchema,
                                      index: Int,
                                      data: Iterator[(Seq[Int], A)]) extends LogoBlockGenerator[(Seq[Int], A), RowLogoBlock[(Seq[Int], A)]](schema, index, data) {
+  lazy val baseList = schema.slotSize
+  lazy val numList = schema.IndexToKey(index)
+  var filteredData = data.filter(_._2 != null).toBuffer
+  lazy val numParts = filteredData.length
+  lazy val metaData = LogoMetaData(numList, numParts)
 
-
-  filteredData = data.filter(_._2 != null).toList
 
   override def generate() = {
     val rowBlock = new RowLogoBlock[(Seq[Int], A)](schema, metaData, filteredData)
@@ -32,7 +30,12 @@ class CompactRowGenerator(schema: LogoSchema,
                           index: Int,
                           data: Iterator[((Int, Int), Int)]) extends LogoBlockGenerator[((Int, Int), Int), CompactConcretePatternLogoBlock](schema, index, data) {
 
-  filteredData = data.filter(_._2 != null).toList
+  lazy val baseList = schema.slotSize
+  lazy val numList = schema.IndexToKey(index)
+  var filteredData = data.filter(_._2 != null)
+  lazy val numParts = filteredData.length
+  lazy val metaData = LogoMetaData(numList, numParts)
+
 
   override def generate(): CompactConcretePatternLogoBlock = {
 

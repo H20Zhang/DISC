@@ -1,7 +1,7 @@
 package org.apache.spark.Logo.UnderLying.dataStructure
 
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.{AbstractIterator, Iterator, mutable}
+import scala.collection.{AbstractIterator, Iterator, Searching, mutable}
 import org.apache.spark.Logo.UnderLying.utlis.MapBuilder
 
 import scala.reflect.ClassTag
@@ -47,27 +47,25 @@ class CompressedLogoBlock[A: ClassTag, B: ClassTag](schema: LogoSchema, metaData
 abstract class PatternLogoBlock[A: ClassTag](schema: LogoSchema, metaData: LogoMetaData, rawData: A) extends LogoBlock(schema, metaData, rawData) {
 
   //TODO testing required for below, this place needs further optimization
-  def buildIndex(schema: KeyValueLogoSchema) = {
-    val rawData = assemble()
+  def buildIndex(schema: KeyValueLogoSchema,needSorting:Boolean) = {
+//    val rawData = assemble()
     val keys = schema.keys.toSet
-
 
     if (keys.size == 1) {
 
       //      MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq)
 
-      MapBuilder.fromListToMapLongFastCompact(rawData.map(_.pattern), keys, keys.toSeq)
+      MapBuilder.fromListToMapLongFastCompact(iterator(), keys, keys.toSeq, schema.keyCol.size-keys.size, needSorting)
 
     } else if (keys.size == 2) {
 
       //      MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq)
 
-      MapBuilder.fromListToMapLongFastCompact(rawData.map(_.pattern), keys, keys.toSeq)
+      MapBuilder.fromListToMapLongFastCompact(iterator(), keys, keys.toSeq, schema.keyCol.size-keys.size, needSorting)
 
     } else {
       null.asInstanceOf[mutable.LongMap[CompactPatternList]]
     }
-
 
   }
 
@@ -76,12 +74,15 @@ abstract class PatternLogoBlock[A: ClassTag](schema: LogoSchema, metaData: LogoM
 
   def enumerateIterator(): Iterator[PatternInstance]
 
-  def assemble(): Seq[PatternInstance] = iterator().toList
+  def assemble(): Seq[PatternInstance] = {
+    val array = iterator().toBuffer
+    array
+  }
 
-  def toKeyValueLogoBlock(key: Set[Int]): KeyValuePatternLogoBlock = {
+  def toKeyValueLogoBlock(key: Set[Int],needSorting:Boolean): KeyValuePatternLogoBlock = {
 
     val keyValueSchema = new KeyValueLogoSchema(schema, key)
-    val keyValueRawData = buildIndex(keyValueSchema)
+    val keyValueRawData = buildIndex(keyValueSchema,needSorting)
     new KeyValuePatternLogoBlock(
       keyValueSchema,
       metaData,
@@ -123,10 +124,12 @@ class ConcretePatternLogoBlock(schema: LogoSchema, metaData: LogoMetaData, rawDa
 }
 
 class CompactConcretePatternLogoBlock(schema: LogoSchema, metaData: LogoMetaData, rawData: CompactPatternList) extends PatternLogoBlock(schema, metaData, rawData) {
-  override def assemble(): Seq[PatternInstance] = rawData.iterator.toList
+  override def assemble(): Seq[PatternInstance] = {
+    val array = rawData.iterator.toArray
+    array
+  }
 
-  override def iterator(): Iterator[PatternInstance] = rawData.iterator
-
+  override def iterator(): Iterator[PatternInstance] = rawData.iterator()
   override def enumerateIterator(): Iterator[PatternInstance] = iterator()
 }
 
@@ -303,7 +306,8 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
     }
   }
 
-
+  val coreKeyMappingArray = coreKeyMapping.keyMapping.toArray
+  val valueMappingArray = valueMapping.keyMapping.toArray
   @transient lazy val totalNodes = (coreKeyMapping.values ++ valueMapping.values).toSeq.max + 1
 
   //assmeble the core and leafs instance into a single instance
@@ -319,9 +323,9 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
 
     PatternInstance.quickBuild(
       coreInstance,
-      coreKeyMapping,
+      coreKeyMappingArray,
       leafInstanceNode,
-      valueMapping,
+      valueMappingArray,
       totalNodes
     )
   }
@@ -401,7 +405,7 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
             var i = 0
 
             while (i < coreLen) {
-              array.update(coreMapping2(i), currentCore.pattern(coreMapping1(i)))
+              array.update(coreMapping2(i), currentCore.getValue(coreMapping1(i)))
               i += 1
             }
 
@@ -490,7 +494,7 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
 
           var i = 0
           while (i < coreLen) {
-            array.update(coreMapping2(i), currentCore.pattern(coreMapping1(i)))
+            array.update(coreMapping2(i), currentCore.getValue(coreMapping1(i)))
             i += 1
           }
 
@@ -704,6 +708,9 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
 
   @transient lazy val totalNodes = (coreKeyMapping.values ++ leftvalueMapping.values ++ rightvalueMapping.values).toSeq.max + 1
 
+
+  val coreKeyMappingArray = coreKeyMapping.keyMapping.toArray
+  val leftValueMappingArray = leftvalueMapping.keyMapping.toArray
   //assmeble the core and leafs instance into a single instance
   def assembleCoreAndLeafInstance(coreInstance: PatternInstance, leftLeafInstanceNode: ValuePatternInstance): PatternInstance = {
 
@@ -714,17 +721,25 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
     //      valueMapping,
     //      totalNodes
     //    )
-
     PatternInstance.quickBuild(
       coreInstance,
-      coreKeyMapping,
+      coreKeyMappingArray,
       leftLeafInstanceNode,
-      leftvalueMapping,
+      leftValueMappingArray,
       totalNodes
     )
   }
 
+  val resultMap = new mutable.LongMap[resetableIterator](initialBufferSize = 65536)
 
+
+  abstract class resetableIterator extends Iterator[Int]{
+    def reset():Unit
+    def getArray():ArrayBuffer[Int]
+  }
+
+
+  //  val resultMap = new mutable.HashMap[(Array[Int],Array[Int]),Iterator[Int]]()
   //TODO this method currently only work for one node cases
   def generateIntersectionIterator(leftIterator: Array[Int], rightIterator: Array[Int]): Iterator[Int] = {
 
@@ -744,7 +759,19 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       }
     }
 
-    new AbstractIterator[Int] {
+    val key1 = leftIterator.hashCode()
+    val key2 = rightIterator.hashCode()
+    val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
+        if (resultMap.contains(key)){
+          val res = resultMap(key)
+//          println("invoked")
+          res.reset()
+          return res
+        }
+
+    var res: resetableIterator = null
+
+    res = new resetableIterator {
 
       var nextEle: Int = 0
       var leftArray = leftIterator
@@ -756,26 +783,8 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       val buffer = ArrayBuffer[Int]()
       var bufferFilled = false
       fillBuffer()
-      val bufferedIterator = buffer.iterator
 
-      //      final override def hasNext: Boolean = {
-      //
-      //        while ( {
-      //          (uCur < uD) && (vCur < vD)
-      //        }) {
-      //
-      //          if (leftArray(uCur) < rightArray(vCur)) uCur += 1
-      //          else if (leftArray(uCur) > rightArray(vCur)) vCur += 1
-      //          else {
-      //            nextEle = leftArray(uCur)
-      //            uCur += 1
-      //            vCur += 1
-      //            return true
-      //          }
-      //        }
-      //
-      //        return false
-      //      }
+      var bufferedIterator = buffer.iterator
 
       final override def hasNext: Boolean = {
         bufferedIterator.hasNext
@@ -800,32 +809,20 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       final override def next(): Int = {
         bufferedIterator.next()
       }
+
+      override def reset(): Unit = {
+        bufferedIterator = buffer.iterator
+      }
+
+      override def getArray(): ArrayBuffer[Int] = {
+        buffer
+      }
     }
+//  }
+    resultMap.put(key,res)
 
+    res
   }
-
-
-  //  {
-  //    @throws[InterruptedException]
-  //    private def intersect(uN: IndexedSeq[Int], vN: IndexedSeq[Int], node:Int): Long = {
-  //      if ((uN == null) || (vN == null)) return 0L
-  //      var count = 0L
-  //      var uCur = 0
-  //      var vCur = 0
-  //      val uD = uN.size
-  //      val vD = vN.size
-  //      while ( {
-  //        (uCur < uD) && (vCur < vD)
-  //      }) if (uN(uCur) < vN(vCur)) uCur += 1
-  //      else if (vN(vCur) < uN(uCur)) vCur += 1
-  //      else {
-  //        if (uN(uCur) > node) count += 1L
-  //        uCur += 1
-  //        vCur += 1
-  //      }
-  //      count
-  //    }
-  //  }
 
   //the iterator to iterate through the pattern, core is iterated but leaf are concrefied but treat as a iterator for convinence.
   final class patternIterator extends Iterator[PatternInstance] {
@@ -855,10 +852,14 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       return true
     }
 
+    val valuePatternInstance:OneValuePatternInstance = new OneValuePatternInstance(0)
+
+
     override def next(): PatternInstance = {
-      val leafs = ValuePatternInstance(intersectIterator.next())
-      val core = currentCore
-      assembleCoreAndLeafInstance(core, leafs)
+      valuePatternInstance.node1 = intersectIterator.next()
+//      val leafs = ValuePatternInstance(intersectIterator.next())
+//      val core = currentCore
+      assembleCoreAndLeafInstance(currentCore, valuePatternInstance)
     }
   }
 
@@ -890,13 +891,18 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
     val valueKeyMapping1Value = valueKeyMapping1(0)
 
 
+
+//    private def generateAllCoreAndGroup = {
+//      coreBlock.iterator().toBuffer
+//    }
+
     private def moveToNext: Option[Boolean] = {
       do {
         if (coreIterator.hasNext) {
           currentCore = coreIterator.next()
           var i = 0
           while (i < coreLen) {
-            array.update(coreMapping2(i), currentCore.pattern(coreMapping1(i)))
+            array.update(coreMapping2(i), currentCore.getValue(coreMapping1(i)))
             i += 1
           }
         } else {

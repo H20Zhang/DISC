@@ -6,6 +6,7 @@ import gnu.trove.list.array.TIntArrayList
 import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, ListSelector}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.reflect.ClassTag
 
 
 class BaseStructure
@@ -87,34 +88,42 @@ class KeyMapping(val keyMapping: Map[Int, Int]) extends Serializable {
 class PatternInstance(var pattern: Array[Int]) extends Serializable with KryoSerializable {
   //  lazy val patternSize = pattern.size
 
-  def toOneKeyPatternInstance(): KeyPatternInstance = new OneKeyPatternInstance(pattern(0))
+//  def toOneKeyPatternInstance(): KeyPatternInstance = new OneKeyPatternInstance(pattern(0))
 
-  def toTwoKeyPatternInstance(): KeyPatternInstance = new TwoKeyPatternInstance(pattern(0), pattern(1))
+//  def toTwoKeyPatternInstance(): KeyPatternInstance = new TwoKeyPatternInstance(pattern(0), pattern(1))
 
-  def toKeyPatternInstance(): KeyPatternInstance = new KeyPatternInstance(pattern)
+//  def toKeyPatternInstance(): KeyPatternInstance = new KeyPatternInstance(pattern)
 
-  def toValuePatternInstance(): ValuePatternInstance = new ValuePatternInstance(pattern)
+//  def toValuePatternInstance(): ValuePatternInstance = new ValuePatternInstance(pattern)
 
+  def toArray = {
+    pattern
+  }
+
+  def size() = {
+    pattern.size
+  }
 
   def contain(value: Int) = {
     pattern.contains(value)
+  }
+
+  def getValue(idx: Int): Int = {
+    pattern(idx)
   }
 
   override def toString: String = {
     pattern.toString()
   }
 
-  def subPatterns(colToPreserve: Set[Int]) = {
-    PatternInstance(ListSelector.selectElements(pattern, colToPreserve))
-  }
 
   //for keyPattern with just one node or two node, we make specific optimization here.
   def toSubKeyPattern(colToPreserveSet: Set[Int], colToPreserve: Seq[Int]) = {
 
     val colSizes = colToPreserve.size
     val res = colSizes match {
-      case 1 => new OneKeyPatternInstance(pattern(colToPreserve(0)))
-      case 2 => new TwoKeyPatternInstance(pattern(colToPreserve(0)), pattern(colToPreserve(1)))
+      case 1 => new OneKeyPatternInstance(getValue(colToPreserve(0)))
+      case 2 => new TwoKeyPatternInstance(getValue(colToPreserve(0)), getValue(colToPreserve(1)))
       case _ => throw new Exception("keys must be 2 or 1, more need to be implemented")
     }
 
@@ -182,6 +191,8 @@ final class OneKeyPatternInstance(pattern0: Int) extends KeyPatternInstance(null
   override def write(kryo: Kryo, output: Output): Unit = {
     output.writeLong(node, true)
   }
+
+  override def size(): Int = 1
 }
 
 /**
@@ -224,6 +235,8 @@ final class TwoKeyPatternInstance(pattern0: Int, pattern1: Int) extends KeyPatte
   override def write(kryo: Kryo, output: Output): Unit = {
     output.writeLong(node, true)
   }
+
+  override def size(): Int = 2
 }
 
 
@@ -246,9 +259,11 @@ class rawPatternInstance(tIntArrayList: TIntArrayList) extends PatternInstance(n
 
 class ValuePatternInstance(pattern1: Array[Int]) extends PatternInstance(pattern1) {
 
-  def getValue(idx: Int): Int = {
+  override def getValue(idx: Int): Int = {
     pattern(idx)
   }
+
+
 }
 
 
@@ -264,6 +279,9 @@ final class OneValuePatternInstance(var node1: Int) extends ValuePatternInstance
   override def read(kryo: Kryo, input: Input): Unit = {
     node1 = input.readInt(true)
   }
+
+
+  override def size(): Int = 1
 
 
 }
@@ -287,6 +305,7 @@ final class TwoValuePatternInstance(var node1: Int, var node2: Int) extends Valu
     node2 = input.readInt(true)
   }
 
+  override def size(): Int = 2
 
 }
 
@@ -304,6 +323,8 @@ object KeyMapping extends Serializable {
 object PatternInstance extends Serializable {
 
   def apply(pattern: Seq[Int]): PatternInstance = new PatternInstance(pattern.toArray)
+  def apply(pattern: Array[Int]): PatternInstance = new PatternInstance(pattern)
+
 
   def slowBuild(lInstance: PatternInstance, lKeyMapping: KeyMapping, rInstance: PatternInstance, rKeyMapping: KeyMapping, totalNodes: Int): PatternInstance = {
 
@@ -318,18 +339,18 @@ object PatternInstance extends Serializable {
     }
   }
 
-  def quickBuild(lInstance: PatternInstance, lKeyMapping: KeyMapping, rInstance: ValuePatternInstance, rKeyMapping: KeyMapping, totalNodes: Int) = {
+  def quickBuild(lInstance: PatternInstance, lKeyMapping: Array[(Int,Int)], rInstance: ValuePatternInstance, rKeyMapping: Array[(Int,Int)], totalNodes: Int) = {
 
-    if (rKeyMapping.keyMapping.size == 0) {
+    if (rKeyMapping.size == 0) {
       lInstance
     } else {
 
       val array = new Array[Int](totalNodes)
-      lKeyMapping.keyMapping.foreach { f =>
-        array(f._2) = lInstance.pattern(f._1)
+      lKeyMapping.foreach { f =>
+        array(f._2) = lInstance.getValue(f._1)
       }
 
-      rKeyMapping.keyMapping.foreach { f =>
+      rKeyMapping.foreach { f =>
         array(f._2) = rInstance.getValue(f._1)
       }
 
@@ -345,15 +366,15 @@ object PatternInstance extends Serializable {
 
       val array = new Array[Int](totalNodes)
       lKeyMapping.keyMapping.foreach { f =>
-        array(f._2) = lInstance.pattern(f._1)
+        array(f._2) = lInstance.getValue(f._1)
       }
 
       rKeyMapping.keyMapping.foreach { f =>
-        array(f._2) = rInstance.pattern(f._1)
+        array(f._2) = rInstance.getValue(f._1)
       }
 
       rrKeyMapping.keyMapping.foreach { f =>
-        array(f._2) = rrInstance.pattern(f._1)
+        array(f._2) = rrInstance.getValue(f._1)
       }
 
       apply(array)
@@ -390,8 +411,7 @@ object ValuePatternInstance extends Serializable {
   * a trait that represent pattern instance in a more compact form which improve the memory efficiency.
   */
 trait CompactPatternList {
-  def iterator: Iterator[ValuePatternInstance]
-
+  def iterator(): Iterator[ValuePatternInstance]
   def getRaw(): Array[Int]
 }
 
@@ -417,11 +437,20 @@ class CompactArrayPatternList(var rawData: Array[Int], var patternWitdth: Int) e
       cur += patternWitdth
       currentPattern
     }
+
+    override def toArray[B >: ValuePatternInstance](implicit evidence$1: ClassTag[B]): Array[B] = {
+      val buffer = new ArrayBuffer[ValuePatternInstance]()
+      while (hasNext){
+        next()
+        buffer.append(ValuePatternInstance(array.clone()))
+      }
+      buffer.toArray
+    }
   }
 
   override def getRaw(): Array[Int] = rawData
 
-  def iterator: Iterator[ValuePatternInstance] = new enumeratePatternIterator
+  def iterator(): Iterator[ValuePatternInstance] = new enumeratePatternIterator
 
 
 }
@@ -441,11 +470,20 @@ class CompactOnePatternList(var rawData: Array[Int]) extends CompactPatternList 
       cur += 1
       currentPattern
     }
+
+    override def toArray[B >: ValuePatternInstance](implicit evidence$1: ClassTag[B]): Array[B] = {
+      val buffer = new ArrayBuffer[ValuePatternInstance]()
+      while (hasNext){
+        next()
+        buffer.append(new OneValuePatternInstance(currentPattern.node1))
+      }
+      buffer.toArray
+    }
   }
 
   override def getRaw(): Array[Int] = rawData
 
-  def iterator: Iterator[ValuePatternInstance] = new PatternIterator
+  def iterator(): Iterator[ValuePatternInstance] = new PatternIterator
 
 
 }
@@ -467,11 +505,20 @@ class CompactTwoPatternList(var rawData: Array[Int]) extends CompactPatternList 
       cur += 2
       currentPattern
     }
+
+    override def toArray[B >: ValuePatternInstance](implicit evidence$1: ClassTag[B]): Array[B] = {
+      val buffer = new ArrayBuffer[ValuePatternInstance]()
+      while (hasNext){
+        next()
+        buffer.append(new TwoValuePatternInstance(currentPattern.node1,currentPattern.node2))
+      }
+      buffer.toArray
+    }
   }
 
   override def getRaw(): Array[Int] = rawData
 
-  def iterator: Iterator[ValuePatternInstance] = new PatternIterator
+  def iterator(): Iterator[ValuePatternInstance] = new PatternIterator
 
 
 }
