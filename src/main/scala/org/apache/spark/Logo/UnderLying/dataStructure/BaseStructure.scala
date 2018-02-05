@@ -4,6 +4,7 @@ import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.{Kryo, KryoSerializable}
 import gnu.trove.list.array.TIntArrayList
 import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, ListSelector}
+import sun.misc.Unsafe
 
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag
@@ -96,6 +97,8 @@ class PatternInstance(var pattern: Array[Int]) extends Serializable with KryoSer
 
 //  def toValuePatternInstance(): ValuePatternInstance = new ValuePatternInstance(pattern)
 
+//  var needFiltered = false
+
   def toArray = {
     pattern
   }
@@ -156,7 +159,42 @@ class PatternInstance(var pattern: Array[Int]) extends Serializable with KryoSer
   }
 }
 
-final class EnumeratePatternInstance(pattern: Array[Int]) extends PatternInstance(pattern) {
+final class EnumeratePatternInstance(pattern:Array[Int]) extends PatternInstance(pattern) {
+
+//  import java.lang.reflect.Field
+//
+//  @SuppressWarnings(Array("restriction")) private def getUnsafe:Unsafe = try {
+//    val singleoneInstanceField = classOf[Unsafe].getDeclaredField("theUnsafe")
+//    singleoneInstanceField.setAccessible(true)
+//    return singleoneInstanceField.get(null).asInstanceOf[Unsafe]
+//  } catch {
+//    case e: IllegalArgumentException =>
+//      throw new Exception(e)
+//    case e: SecurityException =>
+//      throw new Exception(e)
+//    case e: NoSuchFieldException =>
+//      throw new Exception(e)
+//    case e: IllegalAccessException =>
+//      throw new Exception(e)
+//  }
+//
+//
+//  lazy val unsafe = getUnsafe
+//
+//  override def getValue(idx: Int): Int = {
+//
+//    val x = 1
+//    unsafe.getInt(pattern,idx)
+//  }
+
+
+
+//  override def getValue(idx: Int): Int = {
+//    array.get(idx)
+//  }
+
+
+
 }
 
 class KeyPatternInstance(pattern: Seq[Int]) extends PatternInstance(null) {

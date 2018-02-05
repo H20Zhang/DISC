@@ -7,13 +7,14 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
 
   val data = "./wikiV.txt"
 //  val data = "./email-Eu-core.txt"
-//  val queries = List("house")
+  val queries = List("house")
+//  val queries = List("debug")
 //  val queries = List("squarePlusOneEdgeF", "trianglePlusTwoEdgeF")
 //val queries = List("trianglePlusTwoEdgeF")
 
 //  val queries = List("threeTriangleF")
-val queries = List("square")
-  val sizeReference = List(("trianglePlusTwoEdgeF",1),("squarePlusOneEdgeF",1),("square",57654491L),("triangle",608389L),("chordalSquare",40544543L),("houseF",2365994715L),("house",9488779111L),("threeTriangle",4105908615L),("threeTriangleF",4105908615L)).toMap
+//val queries = List("square")
+  val sizeReference = List(("debug",1L),("trianglePlusTwoEdgeF",1),("squarePlusOneEdgeF",1),("square",57654491L),("triangle",608389L),("chordalSquare",40544543L),("houseF",2365994715L),("house",9488779111L),("threeTriangle",4105908615L),("threeTriangleF",4105908615L)).toMap
 
 
   test("Pattern"){

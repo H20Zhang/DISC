@@ -2,13 +2,14 @@ package org.apache.spark.Logo.UnderLying.dataStructure
 
 import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.{Kryo, Serializer}
+import org.apache.spark.Logo.Plan.FilteringCondition
 import org.apache.spark.serializer.KryoRegistrator
 
 import scala.collection.mutable
 
 
 class KryoRegistor extends KryoRegistrator {
-  override def registerClasses(kryo: Kryo) {
+  override def registerClasses(kryo: Kryo): Unit = {
     kryo.register(classOf[mutable.LongMap[Array[ValuePatternInstance]]], new LongMapSerializer())
     kryo.register(classOf[mutable.LongMap[CompactPatternList]], new LongMapCompactSerializer())
     kryo.register(classOf[LogoSchema])
@@ -31,6 +32,7 @@ class KryoRegistor extends KryoRegistrator {
     kryo.register(classOf[CompactArrayPatternList])
     kryo.register(classOf[scala.collection.mutable.WrappedArray.ofRef[_]])
     kryo.register(classOf[scala.collection.mutable.WrappedArray.ofInt])
+    kryo.register(classOf[FilteringCondition])
   }
 }
 

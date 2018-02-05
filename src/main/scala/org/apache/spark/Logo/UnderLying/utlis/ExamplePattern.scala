@@ -1,11 +1,16 @@
 package org.apache.spark.Logo.UnderLying.utlis
 
 import org.apache.spark.Logo.Plan.FilteringCondition
+import org.apache.spark.Logo.UnderLying.dataStructure.EnumeratePatternInstance
+import sun.misc.Unsafe
+
+import scala.runtime.BoxesRunTime
 
 class ExamplePattern(data: String) {
 
   var h1 = 6
   var h2 = 6
+  val filterCoefficient = 2
 
   lazy val rawEdge = {
 //        new CompactEdgeLoader(data) rawEdgeRDD
@@ -27,6 +32,7 @@ class ExamplePattern(data: String) {
       case "triangle" => triangleIntersectionVersion
       case "chordalSquare" => chordalSquareFast
       case "square" => squareIntersectionVerificationFast
+      case "debug" => square3
       case "house" => houseIntersectionFast
       case "houseF" => houseIntersectionF
       case "threeTriangle" => threeTriangleFast
@@ -280,6 +286,41 @@ class ExamplePattern(data: String) {
   }
 
 
+  lazy val square2 = {
+    val edge4_1 = getEdge(h1, 1)
+    val edge1_4 = getEdge(1,h1)
+    val edge4_4 = getEdge(h1, h2)
+
+    val filterCondition = FilteringCondition({ p =>
+      p.pattern(0) < p.pattern(1)
+    }, false)
+
+    val leftEdge = edge4_1.toIdentitySubPattern()
+    val wedge = leftEdge.build(edge1_4.toSubPattern((0, 1), (1, 2))).toIdentitySubPattern()
+
+    val squareTemp = wedge.build(edge4_4.toSubPattern((0, 2), (1, 3)), edge4_4.filter(filterCondition).toSubPattern((0, 0), (1, 3)))
+
+    squareTemp
+  }
+
+  lazy val square3 = {
+    val edge4_1 = getEdge(h1, 1)
+    val edge4_2 = getEdge(h1, 1)
+    val edge4_4 = getEdge(h1, h2)
+
+    val filterCondition = FilteringCondition({ p =>
+      p.pattern(0) < p.pattern(1)
+    }, true)
+
+
+    val leftEdge = edge4_4.filter(filterCondition).toIdentitySubPattern()
+    val wedge = leftEdge.build(edge4_4.toSubPattern((0, 1), (1, 2))).toIdentitySubPattern()
+
+    val squareTemp = wedge.build(edge4_2.toSubPattern((0, 2), (1, 3)), edge4_2.toSubPattern((0, 0), (1, 3)))
+
+    squareTemp
+  }
+
   lazy val square = {
 
     val filterCondition = FilteringCondition({
@@ -437,30 +478,92 @@ class ExamplePattern(data: String) {
     val edge4_4 = getEdge(h1, h2)
 
     val filterCondition = FilteringCondition({ p =>
-      p.pattern(0) < p.pattern(1)
+       p.getValue(0) < p.getValue(1)
     }, true)
 
 
     val leftEdge = edge4_4.filter(filterCondition).toIdentitySubPattern()
     val wedge = leftEdge.build(edge4_4.toSubPattern((0, 1), (1, 2))).toIdentitySubPattern()
 
-    val squareTemp = wedge.build(edge4_2.toSubPattern((0, 2), (1, 3)), edge4_2.toSubPattern((0, 0), (1, 3))).toIdentitySubPattern()
-
-
     val filterCondition2 = FilteringCondition({ pattern =>
       val p = pattern.pattern
-      p(3) != p(4) && p(2) != p(4) && p(0) != p(2) && p(1) != p(3)
+      val node0 = p(0)
+      val node1 = p(1)
+      val node2 = p(2)
+      val node3 = p(3)
+
+      (node0 != node2 && node1 != node3 )
     }
       , false)
+
+    val squareTemp = wedge.build(edge4_2.toSubPattern((0, 2), (1, 3)), edge4_2.toSubPattern((0, 0), (1, 3)))
+      .filter(filterCondition2)
+      .toIdentitySubPattern()
+
+
+//    { pattern =>
+//      val p = pattern.pattern
+//      val node2 = p(2)
+//      val node3 = p(3)
+//      val node4 = p(4)
+//
+//      (node3 != node4 && node2 != node4)
+//    }
+    val filterCondition3 = FilteringCondition(
+      {
+        pattern =>
+        val p = pattern.pattern
+        val node2 = p(2)
+        val node3 = p(3)
+        val node4 = p(4)
+
+        (node3 != node4 && node2 != node4)
+      }
+      , false)
+
+//
+
 
 
     val indexTriangle = leftEdge.build(edge4_1.toSubPattern((0, 1), (1, 2)), edge4_1.toSubPattern((0, 0), (1, 2)))
 
     val house = squareTemp.build(indexTriangle.toSubPattern((0, 0), (1, 1), (2, 4)))
-      .filter(filterCondition2)
+      .filter(filterCondition3)
 
     house
   }
+
+//  lazy val houseIntersectionFast2 = {
+//    val edge4_1 = getEdge(h1, 1)
+//    val edge1_4 = getEdge(1,h1)
+//    val edge4_2 = getEdge(h1, 1)
+//    val edge4_4 = getEdge(h1, h2)
+//
+//    val filterCondition = FilteringCondition({ p =>
+//      p.pattern(0) < p.pattern(1)
+//    }, false)
+//
+//
+//    val leftEdge = edge4_1.toIdentitySubPattern()
+//    val wedge = leftEdge.build(edge1_4.toSubPattern((0, 1), (1, 2))).toIdentitySubPattern()
+//
+//    val squareTemp = wedge.build(edge4_4.toSubPattern((0, 2), (1, 3)), edge4_4.filter(filterCondition).toSubPattern((0, 0), (1, 3))).toIdentitySubPattern()
+//
+//
+//    val filterCondition2 = FilteringCondition({ pattern =>
+//      val p = pattern.pattern
+//      p(0) != p(2) && p(1) != p(3) && p(1) != p(4) && p(2) != p(4)
+//    }
+//      , false)
+//
+//
+//    val indexTriangle = leftEdge.build(edge4_1.toSubPattern((0, 1), (1, 2)), edge4_1.toSubPattern((0, 0), (1, 2)))
+//
+//    val house = squareTemp.build(indexTriangle.toSubPattern((0, 0), (1, 3), (2, 4)))
+//      .filter(filterCondition2)
+//
+//    house
+//  }
 
   lazy val houseIntersectionF = {
     val edge4_1 = getEdge(h1, 1)
@@ -477,7 +580,7 @@ class ExamplePattern(data: String) {
     val filterCondition1 = FilteringCondition({
       pattern =>
             val p = pattern.pattern
-        (((p(0)*31+p(1))*31+p(2))*31+p(3)) % 10 < 5
+        (((p(0)*31+p(1))*31+p(2))*31+p(3)) % 10 < filterCoefficient
         },false)
 
     val squareTemp = wedge.build(edge4_2.toSubPattern((0, 2), (1, 3)), edge4_2.toSubPattern((0, 0), (1, 3))).filter(filterCondition1)
@@ -486,7 +589,7 @@ class ExamplePattern(data: String) {
     val filterCondition2 = FilteringCondition({
         pattern =>
           val p = pattern.pattern
-          ((p(0)*31+p(1))*31+p(2)) % 10 < 5
+          ((p(0)*31+p(1))*31+p(2)) % 10 < filterCoefficient
       },false)
 
     val filterCondition3 = FilteringCondition({ pattern =>
@@ -541,7 +644,7 @@ class ExamplePattern(data: String) {
     val filterCondition = FilteringCondition({
       pattern =>
         val p = pattern.pattern
-        ((p(0)*31+p(1))*31+p(2)) % 10 < 5 && p(1) < p(2)
+        ((p(0)*31+p(1))*31+p(2)) % 10 < filterCoefficient && p(1) < p(2)
     }, false)
 
 //    ((p(0)*31+p(1))*31+p(2) % 10) < 2
@@ -552,7 +655,7 @@ class ExamplePattern(data: String) {
         val triangleFilterCondition = FilteringCondition({
           pattern =>
             val p = pattern.pattern
-            ((p(0)*31+p(1))*31+p(2)) % 10 < 5
+            ((p(0)*31+p(1))*31+p(2)) % 10 < filterCoefficient
 //              (p(0)%2+ p(1)%2 + p(2)%2) < 2
         },false)
 

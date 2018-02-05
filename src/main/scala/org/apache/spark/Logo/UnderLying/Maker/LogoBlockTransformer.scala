@@ -127,7 +127,7 @@ class ToFilteringTransformer extends LogoBlockTransformer {
           it.hasNext
 
           val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
-          Iterator(patternBlock.toFilteringLogoBlock(fCondition.f).toConcreteLogoBlock.asInstanceOf[LogoBlockRef])
+          Iterator(patternBlock.toFilteringLogoBlock(fCondition).toConcreteLogoBlock.asInstanceOf[LogoBlockRef])
       }, true)
 
 
@@ -139,7 +139,7 @@ class ToFilteringTransformer extends LogoBlockTransformer {
           it.hasNext
 
           val patternBlock = block.asInstanceOf[PatternLogoBlock[_]]
-          Iterator(patternBlock.toFilteringLogoBlock(fCondition.f).asInstanceOf[LogoBlockRef])
+          Iterator(patternBlock.toFilteringLogoBlock(fCondition).asInstanceOf[LogoBlockRef])
       }, true)
 
     }

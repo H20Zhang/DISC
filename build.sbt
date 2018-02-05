@@ -3,9 +3,10 @@ name := "Logo"
 
 version := "1.0"
 
-scalaVersion := "2.11.11"
+scalaVersion := "2.11.12"
 
 
+//scalacOptions += "–optimise"
 
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 

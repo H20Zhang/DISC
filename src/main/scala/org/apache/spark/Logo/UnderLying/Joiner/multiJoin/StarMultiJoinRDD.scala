@@ -80,7 +80,7 @@ abstract class StarMultiJoinRDD[V: ClassTag](sc: SparkContext,
     s.asInstanceOf[subJoinPartition].preferredLocations
   }
 
-  override def clearDependencies() {
+  override def clearDependencies(): Unit = {
     super.clearDependencies()
     rdds = null
   }
@@ -105,7 +105,7 @@ class MultiJoinRDD3
       rdd3.iterator(subJoinParition.partitions(1), context))
   }
 
-  override def clearDependencies() {
+  override def clearDependencies(): Unit = {
     super.clearDependencies()
     rdd1 = null
     rdd2 = null

@@ -5,12 +5,17 @@ import org.apache.spark.Logo.UnderLying.Joiner.LogoBuildScriptStep
 import org.apache.spark.Logo.UnderLying.dataStructure.{PatternInstance, _}
 
 
-case class FilteringCondition(var f: PatternInstance => Boolean, var isStrictCondition: Boolean) {
+class FilteringCondition(var f: PatternInstance => Boolean, var isStrictCondition: Boolean, var nodesNotSameTuple:Array[(Int,Int)]) extends Serializable {
   override def clone(): AnyRef = {
-    new FilteringCondition(f, isStrictCondition)
+    new FilteringCondition(f, isStrictCondition,nodesNotSameTuple)
   }
 }
 
+object FilteringCondition{
+  def apply(f: PatternInstance => Boolean,isStrictCondition: Boolean, nodesNotSameTuple:Array[(Int,Int)]=null): FilteringCondition = {
+      new FilteringCondition(f,isStrictCondition,nodesNotSameTuple)
+  }
+}
 
 //object FilteringCondition{
 //  def apply(f: PatternInstance => Boolean, isStrictCondition: Boolean

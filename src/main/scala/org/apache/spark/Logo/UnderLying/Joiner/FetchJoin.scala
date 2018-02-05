@@ -34,7 +34,7 @@ class FetchJoinRDD(sc: SparkContext,
     s.asInstanceOf[SubTaskPartition].calculatePreferedLocation
   }
 
-  override def clearDependencies() {
+  override def clearDependencies(): Unit = {
     super.clearDependencies()
     rdds = null
   }

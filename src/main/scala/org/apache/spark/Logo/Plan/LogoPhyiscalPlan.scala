@@ -108,11 +108,11 @@ class LogoFilterPatternPhysicalPlan(@transient f: FilteringCondition, @transient
   override def generateNewPatternFState(): PatternLogoRDD = {
     if (cachedFState == null) {
       if (f.isStrictCondition == true) {
-        val filteringCondition = FilteringCondition(f.f, f.isStrictCondition)
+        val filteringCondition = FilteringCondition(f.f, f.isStrictCondition,f.nodesNotSameTuple)
         cachedFState = buildLogicalStep.generateNewPatternFState()
           .toFilteringPatternLogoRDD(filteringCondition.clone().asInstanceOf[FilteringCondition]).toConcretePatternLogoRDD
       } else {
-        val filteringCondition = FilteringCondition(f.f, f.isStrictCondition)
+        val filteringCondition = FilteringCondition(f.f, f.isStrictCondition,f.nodesNotSameTuple)
         cachedFState = buildLogicalStep.generateNewPatternFState()
           .toFilteringPatternLogoRDD(filteringCondition.clone().asInstanceOf[FilteringCondition])
       }
@@ -123,7 +123,7 @@ class LogoFilterPatternPhysicalPlan(@transient f: FilteringCondition, @transient
 
   override def generateNewPatternJState(): ConcreteLogoRDD = {
     if (cachedJState == null) {
-      val filteringCondition = FilteringCondition(f.f, f.isStrictCondition)
+      val filteringCondition = FilteringCondition(f.f, f.isStrictCondition,f.nodesNotSameTuple)
       cachedJState = buildLogicalStep.generateNewPatternJState()
         .toFilteringPatternLogoRDD(filteringCondition.clone().asInstanceOf[FilteringCondition])
         .toConcretePatternLogoRDD
