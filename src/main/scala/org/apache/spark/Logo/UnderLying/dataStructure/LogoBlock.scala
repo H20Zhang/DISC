@@ -178,6 +178,7 @@ final class KeyValuePatternLogoBlock(schema: KeyValueLogoSchema, metaData: LogoM
 
 trait enumerateIterator {
   def longSize():Long
+  def setFilteringCondition(filteringCondition:FilteringCondition):Unit
 }
 
 trait generateIterator {
@@ -210,16 +211,30 @@ final class FilteringPatternLogoBlock[A: ClassTag](var logoBlock: PatternLogoBlo
 
     override def longSize():Long = {
 
-      while (true){
-        if (!it.hasNext){
-          return num
-        }
 
-        if (f(it.next())){
-          num = num + 1
+
+      if (it.isInstanceOf[enumerateIterator]){
+        val enumerateIt = it.asInstanceOf[enumerateIterator]
+        enumerateIt.setFilteringCondition(fc)
+        num = enumerateIt.longSize()
+      } else {
+        while (true){
+          if (!it.hasNext){
+            return num
+          }
+
+          if (f(it.next())){
+            num = num + 1
+          }
+
         }
       }
+
       num
+    }
+
+    override def setFilteringCondition(filteringCondition: FilteringCondition): Unit = {
+      require(filteringCondition == null, "this iterator shouldn't accpet another filtering condition")
     }
   }
 
@@ -241,7 +256,6 @@ final class FilteringPatternLogoBlock[A: ClassTag](var logoBlock: PatternLogoBlo
     final def next() = hd
 
     override def longSize():Long = {
-
       while (true){
         if (!it.hasNext){
           return num
@@ -253,6 +267,10 @@ final class FilteringPatternLogoBlock[A: ClassTag](var logoBlock: PatternLogoBlo
         }
       }
       num
+    }
+
+    override def setFilteringCondition(filteringCondition: FilteringCondition): Unit = {
+      require(filteringCondition == null, "this iterator shouldn't accpet another filtering condition")
     }
   }
 
@@ -286,14 +304,6 @@ final class FilteringPatternLogoBlock[A: ClassTag](var logoBlock: PatternLogoBlo
 
         hd = it.next()
 
-//        !(hd.getValue(v10) == hd.getValue(v20) && hd.getValue(v11) == hd.getValue(v21))
-//        !(hd.getValue(v10) == hd.getValue(v20) || hd.getValue(v11) == hd.getValue(v21))
-
-//        val temp10 = hd.getValue(v10)
-//        val temp20 = hd.getValue(v20)
-//        val temp11 = hd.getValue(v11)
-//        val temp21 = hd.getValue(v21)
-
         val p = hd.pattern
 
         if (p(v10) != p(v20) && p(v10) != p(v21)){
@@ -302,6 +312,10 @@ final class FilteringPatternLogoBlock[A: ClassTag](var logoBlock: PatternLogoBlo
       }
       num
     }
+
+    override def setFilteringCondition(filteringCondition: FilteringCondition): Unit = {
+      require(filteringCondition == null, "this iterator shouldn't accpet another filtering condition")
+    }
   }
 
   override def iterator(): Iterator[PatternInstance] = toFilteringIterator(logoBlock.iterator())
@@ -309,6 +323,7 @@ final class FilteringPatternLogoBlock[A: ClassTag](var logoBlock: PatternLogoBlo
 
   //TODO test and select the best performance
   override def enumerateIterator(): Iterator[PatternInstance] = {
+
     if (fc.f != null){
       toFilteringIterator(logoBlock.enumerateIterator())
     } else {
@@ -318,6 +333,14 @@ final class FilteringPatternLogoBlock[A: ClassTag](var logoBlock: PatternLogoBlo
         toFilteringIteratorForNode(logoBlock.enumerateIterator())
       }
     }
+
+
+
+
+
+
+
+
   }
 }
 
@@ -528,10 +551,26 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
       currentPattern
     }
 
+    var filteringCondition:FilteringCondition = null
+
+    override def setFilteringCondition(filteringCondition: FilteringCondition): Unit = {
+      this.filteringCondition = filteringCondition
+    }
+
     var longCount = 0
     override def longSize(): Long = {
-      while (hasNext){
-        longCount += 1
+      val f = filteringCondition.f
+
+      if (filteringCondition == null){
+        while (hasNext){
+          longCount += 1
+        }
+      } else {
+        while (hasNext){
+          if (f(currentPattern)){
+            longCount += 1
+          }
+        }
       }
 
       longCount
@@ -616,6 +655,7 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
         }
       }
 
+
       val leafs = leafsIterator(curLeafPos)
       array.update(valueKeyMapping2Value, leafs)
       curLeafPos += 1
@@ -624,21 +664,60 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
     }
 
     override def next(): PatternInstance = {
-
-
       currentPattern
     }
 
+    var filteringCondition:FilteringCondition = null
 
-
+    override def setFilteringCondition(filteringCondition: FilteringCondition): Unit = {
+      this.filteringCondition = filteringCondition
+    }
 
     var longCount = 0
     override def longSize(): Long = {
-      while (hasNext){
-        longCount += 1
+
+      if (filteringCondition == null){
+        while (true){
+
+          moveToNext match {
+            case Some(toReturn) => return longCount
+            case None => {
+              while (curLeafPos != leafEnd){
+
+                val leafs = leafsIterator(curLeafPos)
+                array.update(valueKeyMapping2Value, leafs)
+                curLeafPos += 1
+                longCount += 1
+              }
+            }
+          }
+        }
+      } else{
+        while (true){
+
+          val f = filteringCondition.f
+          moveToNext match {
+            case Some(toReturn) => return longCount
+            case None => {
+              while (curLeafPos != leafEnd){
+
+                val leafs = leafsIterator(curLeafPos)
+                array.update(valueKeyMapping2Value, leafs)
+                curLeafPos += 1
+
+                if (f(currentPattern)){
+                  longCount += 1
+                }
+              }
+            }
+          }
+        }
       }
 
+
       longCount
+
+
     }
   }
 
@@ -861,13 +940,13 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
 //      }
     }
 
-    val key1 = leftIterator.hashCode()
-    val key2 = rightIterator.hashCode()
-    val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
-        if (resultMap.contains(key)){
-          val res = resultMap(key)
-          return res
-        }
+//    val key1 = leftIterator.hashCode()
+//    val key2 = rightIterator.hashCode()
+//    val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
+//        if (resultMap.contains(key)){
+//          val res = resultMap(key)
+//          return res
+//        }
 
     var res: resetableIterator = null
 
@@ -919,7 +998,7 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       }
     }
 //  }
-    resultMap.put(key,res.getArray())
+//    resultMap.put(key,res.getArray())
 
     res.getArray()
   }
@@ -977,7 +1056,7 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
     var currentCore: PatternInstance = _
     //    val TintBuffer = new TIntArrayList(totalNodes)
     val array = Array.fill(totalNodes)(0)
-//    val array = new FixSizeArray(totalNodes)
+    //    val array = new FixSizeArray(totalNodes)
     val currentPattern: EnumeratePatternInstance = new EnumeratePatternInstance(array)
     val coreMapping = coreKeyMapping.keyMapping.toArray
 
@@ -1000,9 +1079,9 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
     var cur = 0
     var end = 0
 
-//    private def generateAllCoreAndGroup = {
-//      coreBlock.iterator().toBuffer
-//    }
+    //    private def generateAllCoreAndGroup = {
+    //      coreBlock.iterator().toBuffer
+    //    }
 
     private def moveToNext: Option[Boolean] = {
       do {
@@ -1020,12 +1099,12 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
         rightLeafsIterator = genereateRightLeafsNode(currentCore)
         intersectIterator = generateIntersectionIterator(leftLeafsIterator, rightLeafsIterator)
 
-        if (intersectIterator != null){
+        if (intersectIterator != null) {
           cur = 0
           end = intersectIterator.size
         }
 
-      } while (intersectIterator == null|| end == 0)
+      } while (intersectIterator == null || end == 0)
       None
     }
 
@@ -1049,17 +1128,64 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       currentPattern
     }
 
+    var filteringCondition: FilteringCondition = null
+
+    override def setFilteringCondition(filteringCondition: FilteringCondition): Unit = {
+      this.filteringCondition = filteringCondition
+    }
+
     var longCount = 0
+
     override def longSize(): Long = {
-      while (hasNext){
-        longCount += 1
+      val f = filteringCondition.f
+
+      if (filteringCondition == null) {
+        while (true) {
+
+          moveToNext match {
+            case Some(toReturn) => return longCount
+            case None => {
+              while (cur != end) {
+
+                val leafs = intersectIterator(cur)
+                array.update(valueKeyMapping2Value, leafs)
+                cur += 1
+                longCount += 1
+              }
+            }
+          }
+        }
+      } else {
+        while (true) {
+          val f = filteringCondition.f
+          moveToNext match {
+            case Some(toReturn) => return longCount
+            case None => {
+              while (cur != end) {
+
+                val leafs = intersectIterator(cur)
+                array.update(valueKeyMapping2Value, leafs)
+                cur += 1
+
+                if (f(currentPattern)) {
+                  longCount += 1
+                }
+
+              }
+            }
+          }
+        }
       }
 
       longCount
     }
 
-  }
 
+
+
+
+
+  }
   /**
     * generate a ConcretePatternLogoBlock
     */

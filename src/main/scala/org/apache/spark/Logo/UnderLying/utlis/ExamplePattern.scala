@@ -6,7 +6,7 @@ import sun.misc.Unsafe
 
 import scala.runtime.BoxesRunTime
 
-class ExamplePattern(data: String) {
+class ExamplePattern(data: String)  {
 
   var h1 = 6
   var h2 = 6
@@ -32,7 +32,7 @@ class ExamplePattern(data: String) {
       case "triangle" => triangleIntersectionVersion
       case "chordalSquare" => chordalSquareFast
       case "square" => squareIntersectionVerificationFast
-      case "debug" => square3
+      case "debug" => houseIntersectionFast
       case "house" => houseIntersectionFast
       case "houseF" => houseIntersectionF
       case "threeTriangle" => threeTriangleFast
@@ -123,7 +123,7 @@ class ExamplePattern(data: String) {
         pattern.pattern(0) < pattern.pattern(1)
     }, true)
 
-    val lastEdge = getEdge(h1, h2)
+    val lastEdge = getEdge(h1, 1)
 
     val edge = getEdge(h1, h2)
     val leftEdge = edge.filter(filterCondition1).toIdentitySubPattern()
@@ -570,6 +570,8 @@ class ExamplePattern(data: String) {
     val edge4_2 = getEdge(h1, 1)
     val edge4_4 = getEdge(h1, h2)
 
+    val filterC = this.filterCoefficient
+
     val filterCondition = FilteringCondition({ p =>
       p.pattern(0) < p.pattern(1)
     }, true)
@@ -580,7 +582,7 @@ class ExamplePattern(data: String) {
     val filterCondition1 = FilteringCondition({
       pattern =>
             val p = pattern.pattern
-        (((p(0)*31+p(1))*31+p(2))*31+p(3)) % 10 < filterCoefficient
+        (((p(0)*31+p(1))*31+p(2))*31+p(3)) % 10 < filterC
         },false)
 
     val squareTemp = wedge.build(edge4_2.toSubPattern((0, 2), (1, 3)), edge4_2.toSubPattern((0, 0), (1, 3))).filter(filterCondition1)
@@ -589,7 +591,7 @@ class ExamplePattern(data: String) {
     val filterCondition2 = FilteringCondition({
         pattern =>
           val p = pattern.pattern
-          ((p(0)*31+p(1))*31+p(2)) % 10 < filterCoefficient
+          ((p(0)*31+p(1))*31+p(2)) % 10 < filterC
       },false)
 
     val filterCondition3 = FilteringCondition({ pattern =>
@@ -640,11 +642,14 @@ class ExamplePattern(data: String) {
     val edge4_4 = getEdge(h1, h2)
 
     val leftEdge = edge4_4.toIdentitySubPattern()
+    val filterC = this.filterCoefficient
+
+
 
     val filterCondition = FilteringCondition({
       pattern =>
         val p = pattern.pattern
-        ((p(0)*31+p(1))*31+p(2)) % 10 < filterCoefficient && p(1) < p(2)
+        ((p(0)*31+p(1))*31+p(2)) % 10 < filterC && p(1) < p(2)
     }, false)
 
 //    ((p(0)*31+p(1))*31+p(2) % 10) < 2
@@ -655,7 +660,7 @@ class ExamplePattern(data: String) {
         val triangleFilterCondition = FilteringCondition({
           pattern =>
             val p = pattern.pattern
-            ((p(0)*31+p(1))*31+p(2)) % 10 < filterCoefficient
+            ((p(0)*31+p(1))*31+p(2)) % 10 < filterC
 //              (p(0)%2+ p(1)%2 + p(2)%2) < 2
         },false)
 
