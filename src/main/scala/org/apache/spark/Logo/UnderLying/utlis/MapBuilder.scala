@@ -126,118 +126,147 @@ object MapBuilder {
   }
 
 
-  def fromListToMapLongFastCompact(data: Iterator[PatternInstance], keySet: Set[Int], keys: Seq[Int], valueSize:Int, needSorting:Boolean) = {
+  def fromListToMapLongFastCompact(data: Iterator[PatternInstance], keySet: Set[Int], keys: Seq[Int], values:Seq[Int] ,valueSize:Int, needSorting:Boolean) = {
 
     val hashmap = new mutable.LongMap[CompactListAppendBuilder]()
 
+
+
     if (keys.size == 1) {
-      data.foreach {
-        f =>
-          val key = f.getValue(keys(0)).toLong
-          //            ListSelector.selectElements(f,keys)
-          val value = ListSelector.notSelectElementsIntPattern(f, keySet)
+      if (valueSize == 1){
+        val valueIndex0 = values(0)
+        data.foreach {
+          f =>
+            val key = f.getValue(keys(0)).toLong
 
-          if (valueSize == 1) {
             if (hashmap.contains(key)) {
-              hashmap.get(key).get.append(value(0))
+              hashmap.get(key).get.append(f.getValue(valueIndex0))
             } else {
               hashmap.put(key, new CompactListAppendBuilder(valueSize))
-              hashmap.get(key).get.append(value(0))
+              hashmap.get(key).get.append(f.getValue(valueIndex0))
             }
-          } else if (valueSize == 2) {
+
+        }
+      } else if (valueSize == 2){
+
+        val valueIndex0 = values(0)
+        val valueIndex1 = values(1)
+        data.foreach {
+          f =>
+            val key = f.getValue(keys(0)).toLong
+
             if (hashmap.contains(key)) {
               val list = hashmap.get(key).get
-              list.append(value(0))
-              list.append(value(1))
-            } else {
-              hashmap.put(key, new CompactListAppendBuilder(valueSize))
-              val list = hashmap.get(key).get
-              list.append(value(0))
-              list.append(value(1))
-
-            }
-          } else {
-            if (hashmap.contains(key)) {
-              val list = hashmap.get(key).get
-              var i = 0
-              while (i < valueSize) {
-                list.append(value(i))
-                i += 1
-              }
-
+              list.append(f.getValue(valueIndex0))
+              list.append(f.getValue(valueIndex1))
             } else {
               hashmap.put(key, new CompactListAppendBuilder(valueSize))
               val list = hashmap.get(key).get
-              var i = 0
-              while (i < valueSize) {
-                list.append(value(i))
-                i += 1
-              }
+              list.append(f.getValue(valueIndex0))
+              list.append(f.getValue(valueIndex1))
             }
-          }
+        }
+
+      } else{
+        data.foreach {
+          f =>
+            val key = f.getValue(keys(0)).toLong
+            val value = ListSelector.notSelectElementsIntPattern(f, keySet)
+
+            hashmap.put(key, new CompactListAppendBuilder(valueSize))
+            val list = hashmap.get(key).get
+            var i = 0
+            while (i < valueSize) {
+              list.append(value(i))
+              i += 1
+            }
+        }
       }
     } else if (keys.size == 2) {
-      data.foreach {
-        f =>
-          val key1 = f.getValue(keys(0))
-          val key2 = f.getValue(keys(1))
-          val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
-          val value = ListSelector.notSelectElementsIntPattern(f, keySet)
 
-          if (valueSize == 1) {
-            if (hashmap.contains(key)) {
-              hashmap.get(key).get.append(value(0))
-            } else {
-              hashmap.put(key, new CompactListAppendBuilder(valueSize))
-              hashmap.get(key).get.append(value(0))
-            }
-          } else if (valueSize == 2) {
-            if (hashmap.contains(key)) {
-              val list = hashmap.get(key).get
-              list.append(value(0))
-              list.append(value(1))
-            } else {
-              hashmap.put(key, new CompactListAppendBuilder(valueSize))
-              val list = hashmap.get(key).get
-              list.append(value(0))
-              list.append(value(1))
+      if (valueSize == 1){
+        val valueIndex0 = values(0)
+        data.foreach {
+          f =>
+            val key1 = f.getValue(keys(0))
+            val key2 = f.getValue(keys(1))
+            val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
 
-            }
-          } else {
-            if (hashmap.contains(key)) {
-              val list = hashmap.get(key).get
-              var i = 0
-              while (i < valueSize) {
-                list.append(value(i))
-                i += 1
+              if (hashmap.contains(key)) {
+                hashmap.get(key).get.append(f.getValue(valueIndex0))
+              } else {
+                hashmap.put(key, new CompactListAppendBuilder(valueSize))
+                hashmap.get(key).get.append(f.getValue(valueIndex0))
               }
 
+        }
+      } else if (valueSize == 2){
+
+        val valueIndex0 = values(0)
+        val valueIndex1 = values(1)
+        data.foreach {
+          f =>
+            val key1 = f.getValue(keys(0))
+            val key2 = f.getValue(keys(1))
+            val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
+
+            if (hashmap.contains(key)) {
+              val list = hashmap.get(key).get
+              list.append(f.getValue(valueIndex0))
+              list.append(f.getValue(valueIndex1))
             } else {
               hashmap.put(key, new CompactListAppendBuilder(valueSize))
               val list = hashmap.get(key).get
-              var i = 0
-              while (i < valueSize) {
-                list.append(value(i))
-                i += 1
-              }
+              list.append(f.getValue(valueIndex0))
+              list.append(f.getValue(valueIndex1))
             }
+        }
 
-          }
+      } else{
+        data.foreach {
+          f =>
+            val key1 = f.getValue(keys(0))
+            val key2 = f.getValue(keys(1))
+            val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
+            val value = ListSelector.notSelectElementsIntPattern(f, keySet)
+
+                hashmap.put(key, new CompactListAppendBuilder(valueSize))
+                val list = hashmap.get(key).get
+                var i = 0
+                while (i < valueSize) {
+                  list.append(value(i))
+                  i += 1
+                }
+            }
+        }
       }
-    }
+
+    var count = 0L
 
     if (valueSize == 1) {
-      hashmap.mapValuesNow { f =>
+      val res = hashmap.mapValuesNow { f =>
         val compactList = f.toCompactList()
         if (needSorting){
           Sorting.quickSort(compactList.asInstanceOf[CompactOnePatternList].rawData)
         }
+        count += compactList.getRaw().length
         compactList
       }
+      res.repack()
+      println(s"MapBuilder:$count")
+      res
+
     }
 
     else {
-      hashmap.mapValuesNow(f => f.toCompactList())
+      val res = hashmap.mapValuesNow{f =>
+        val compactList = f.toCompactList()
+        count += compactList.getRaw().length
+        compactList
+      }
+      res.repack()
+      println(s"MapBuilder:$count")
+      res
     }
 
   }

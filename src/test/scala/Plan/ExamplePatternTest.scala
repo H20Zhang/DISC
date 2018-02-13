@@ -8,12 +8,12 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
   val data = "./wikiV.txt"
 //  val data = "./email-Eu-core.txt"
 //  val queries = List("houseF", "threeTriangleF", "trianglePlusOneEdge")
-  val queries = List("debug")
+//  val queries = List("debug")
 //  val queries = List("squarePlusOneEdgeF", "trianglePlusTwoEdgeF")
 //val queries = List("trianglePlusTwoEdgeF")
 
 //  val queries = List("threeTriangleF")
-//val queries = List("square")
+val queries = List("square", "triangle", "chordalSquare", "house", "threeTriangle")
   val sizeReference = List(("debug",1L), ("trianglePlusOneEdge",1L),("trianglePlusTwoEdgeF",1),("squarePlusOneEdgeF",1),("square",57654491L),("triangle",608389L),("chordalSquare",40544543L),("houseF",2365994715L),("house",9488779111L),("threeTriangle",4105908615L),("threeTriangleF",2106389L)).toMap
 
 

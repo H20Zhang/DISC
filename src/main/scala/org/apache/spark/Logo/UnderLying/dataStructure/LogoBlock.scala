@@ -57,13 +57,13 @@ abstract class PatternLogoBlock[A: ClassTag](schema: LogoSchema, metaData: LogoM
 
       //      MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq)
 
-      MapBuilder.fromListToMapLongFastCompact(iterator(), keys, keys.toSeq, schema.keyCol.size-keys.size, needSorting)
+      MapBuilder.fromListToMapLongFastCompact(enumerateIterator(), keys, keys.toSeq, schema.keyCol.toSeq.diff(schema.keys.toSeq),schema.keyCol.size-keys.size, needSorting)
 
     } else if (keys.size == 2) {
 
       //      MapBuilder.fromListToMapLongFast(rawData.map(_.pattern),keys,keys.toSeq)
 
-      MapBuilder.fromListToMapLongFastCompact(iterator(), keys, keys.toSeq, schema.keyCol.size-keys.size, needSorting)
+      MapBuilder.fromListToMapLongFastCompact(enumerateIterator(), keys, keys.toSeq, schema.keyCol.toSeq.diff(schema.keys.toSeq),schema.keyCol.size-keys.size, needSorting)
 
     } else {
       null.asInstanceOf[mutable.LongMap[CompactPatternList]]
@@ -557,7 +557,7 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
       this.filteringCondition = filteringCondition
     }
 
-    var longCount = 0
+    var longCount = 0L
     override def longSize(): Long = {
       val f = filteringCondition.f
 
@@ -673,7 +673,7 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
       this.filteringCondition = filteringCondition
     }
 
-    var longCount = 0
+    var longCount = 0L
     override def longSize(): Long = {
 
       if (filteringCondition == null){
@@ -693,9 +693,8 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
           }
         }
       } else{
+        val f = filteringCondition.f
         while (true){
-
-          val f = filteringCondition.f
           moveToNext match {
             case Some(toReturn) => return longCount
             case None => {
@@ -708,6 +707,7 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
                 if (f(currentPattern)){
                   longCount += 1
                 }
+
               }
             }
           }
@@ -1134,10 +1134,11 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       this.filteringCondition = filteringCondition
     }
 
-    var longCount = 0
+    var longCount = 0L
 
     override def longSize(): Long = {
-      val f = filteringCondition.f
+
+
 
       if (filteringCondition == null) {
         while (true) {
@@ -1156,8 +1157,8 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
           }
         }
       } else {
+        val f = filteringCondition.f
         while (true) {
-          val f = filteringCondition.f
           moveToNext match {
             case Some(toReturn) => return longCount
             case None => {

@@ -8,8 +8,8 @@ import scala.runtime.BoxesRunTime
 
 class ExamplePattern(data: String)  {
 
-  var h1 = 6
-  var h2 = 6
+  var h1 = 8
+  var h2 = 8
   val filterCoefficient = 2
 
   lazy val rawEdge = {
@@ -480,7 +480,6 @@ class ExamplePattern(data: String)  {
     val filterCondition = FilteringCondition({ p =>
        p.getValue(0) < p.getValue(1)
     }, true)
-
 
     val leftEdge = edge4_4.filter(filterCondition).toIdentitySubPattern()
     val wedge = leftEdge.build(edge4_4.toSubPattern((0, 1), (1, 2))).toIdentitySubPattern()
