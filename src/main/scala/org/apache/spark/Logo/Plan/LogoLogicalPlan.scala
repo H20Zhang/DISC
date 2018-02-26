@@ -3,6 +3,7 @@ package org.apache.spark.Logo.Plan
 
 import org.apache.spark.Logo.UnderLying.Joiner.LogoBuildScriptStep
 import org.apache.spark.Logo.UnderLying.dataStructure.{PatternInstance, _}
+import org.apache.spark.rdd.{MapPartitionsRDD, RDD}
 
 
 class FilteringCondition(var f: PatternInstance => Boolean, var isStrictCondition: Boolean, var nodesNotSameTuple:Array[(Int,Int)]) extends Serializable {
@@ -38,6 +39,16 @@ abstract class LogoRDDReference(schema: LogoSchema, buildScriptStep: LogoBuildSc
   def size(): Long
 
   def blockCount(): Long
+
+  def rdd():RDD[PatternInstance]
+
+  def filter(f: PatternInstance => Boolean, isStrict:Boolean = false): PatternLogoRDDReference
+
+  def filter(f: FilteringCondition): PatternLogoRDDReference
+
+  def build(subPattern: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference
+
+  def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference
 }
 
 /**
@@ -102,6 +113,12 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
     new SubPatternLogoRDDReference(this, KeyMapping(keyMapping.toMap))
   }
 
+  def to(keyMapping: Int*): SubPatternLogoRDDReference = {
+    new SubPatternLogoRDDReference(this, KeyMapping(keyMapping.zipWithIndex.map(f => (f._2,f._1)).toMap))
+  }
+
+
+
   //generate the F-state Logo
   override def generateF() = {
     optimize()
@@ -116,6 +133,15 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
 
   override def optimize(): Unit = {
     //    buildScript.setFilteringCondition(filteringCondition)
+  }
+
+  override def rdd() = {
+    new MapPartitionsRDD[PatternInstance,LogoBlockRef](generateF().logoRDD,
+      {(context, pid, iter) =>
+        val block = iter.next().asInstanceOf[PatternLogoBlock[_]]
+        block.enumerateIterator()
+      }
+    )
   }
 
   override def size(): Long = {
@@ -151,6 +177,21 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
         size
 
     }.count()
+  }
+
+  override def build(subPattern: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+    this.toIdentitySubPattern().build(subPattern)
+  }
+
+  override def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+    this.toIdentitySubPattern().build(subPattern1,subPattern2)
+  }
+
+  override def filter(f: PatternInstance => Boolean, isStrict:Boolean = false): PatternLogoRDDReference = {
+
+    val filteringCondition = FilteringCondition(f, isStrict)
+
+    this.filter(filteringCondition)
   }
 }
 

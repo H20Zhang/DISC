@@ -145,7 +145,6 @@ object MapBuilder {
               hashmap.put(key, new CompactListAppendBuilder(valueSize))
               hashmap.get(key).get.append(f.getValue(valueIndex0))
             }
-
         }
       } else if (valueSize == 2){
 

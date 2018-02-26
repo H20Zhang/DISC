@@ -3,17 +3,20 @@ package Plan
 import org.apache.spark.Logo.UnderLying.utlis.{ExamplePattern, PointToNumConverter, SparkSingle}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
+import scala.util.Random
+
+
 class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
 
   val data = "./wikiV.txt"
 //  val data = "./email-Eu-core.txt"
 //  val queries = List("houseF", "threeTriangleF", "trianglePlusOneEdge")
-//  val queries = List("debug")
+  val queries = List("debug")
 //  val queries = List("squarePlusOneEdgeF", "trianglePlusTwoEdgeF")
 //val queries = List("trianglePlusTwoEdgeF")
 
 //  val queries = List("threeTriangleF")
-val queries = List("square", "triangle", "chordalSquare", "house", "threeTriangle")
+//val queries = List("square", "triangle", "chordalSquare", "house", "threeTriangle")
   val sizeReference = List(("debug",1L), ("trianglePlusOneEdge",1L),("trianglePlusTwoEdgeF",1),("squarePlusOneEdgeF",1),("square",57654491L),("triangle",608389L),("chordalSquare",40544543L),("houseF",2365994715L),("house",9488779111L),("threeTriangle",4105908615L),("threeTriangleF",2106389L)).toMap
 
 
@@ -26,6 +29,32 @@ val queries = List("square", "triangle", "chordalSquare", "house", "threeTriangl
         assert(pattern.pattern(f).size() == sizeReference(f))
     }
   }
+
+//  test("testAggregation"){
+//        val pattern = new ExamplePattern(data)
+////        val x = pattern.houseIntersectionFast.rdd().count()
+////    val z = pattern.houseIntersectionFast.rdd().count()
+//
+////    val triangle = pattern.triangleIntersectionVersion.rdd()
+//
+////    println(triangle.countApprox(100))
+//
+//
+//    val theList = pattern.edge.rdd().flatMap(f => Iterable(f.getValue(0),f.getValue(1))).distinct().collect()
+//    val theMap = theList.map(f => (f, Random.nextInt() % 10)).toMap
+//    val y = pattern.squareIntersectionVerificationFast.rdd().filter(f => (theMap(f.getValue(0)) == theMap(f.getValue(1)))).map(f => ((f.getValue(0),f.getValue(1)),1)).reduceByKey(_ + _).max()(new Ordering[((Int,Int),Int)]() {
+//        override def compare(x: ((Int,Int),Int), y: ((Int,Int),Int)): Int =
+//        Ordering[Int].compare(x._2, y._2)
+//})
+//    println(y)
+////    y.foreach(println)
+////    println("size is" + z)
+//  }
+
+//  test("testHand"){
+//    val pattern = new ExamplePattern(data)
+//    pattern.houseHand
+//  }
 
 //  test("Triangle"){
 //    val triangle = new ExamplePattern(data).triangle

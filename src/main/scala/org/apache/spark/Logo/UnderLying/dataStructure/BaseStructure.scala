@@ -32,11 +32,11 @@ class KeyMapping(val keyMapping: Map[Int, Int]) extends Serializable {
 
   def getNumOfKey() = keyMapping.size
 
-  def getKeys() = keyMapping.keys.toSeq
+  def getKeys() = toList().map(_._1)
 
   def getValues() = values
 
-  @transient lazy val values = keyMapping.values.toSeq
+  @transient lazy val values = toList().map(_._2)
 
 
   def keySet() = keyMapping.keySet
@@ -57,7 +57,7 @@ class KeyMapping(val keyMapping: Map[Int, Int]) extends Serializable {
   }
 
   def toList() = {
-    keyMapping.toList
+    keyMapping.toList.sortBy(_._1)
   }
 
   def toMap(): Map[Int, Int] = {
@@ -157,6 +157,11 @@ class PatternInstance(var pattern: Array[Int]) extends Serializable with KryoSer
     val size = input.readInt(true)
     pattern = input.readInts(size, true)
   }
+
+  def apply(idx: Int): Int = {
+    getValue(idx)
+  }
+
 }
 
 final class EnumeratePatternInstance(pattern:Array[Int]) extends PatternInstance(pattern) {
@@ -253,6 +258,9 @@ final class TwoKeyPatternInstance(pattern0: Int, pattern1: Int) extends KeyPatte
 
   override def canEqual(other: Any): Boolean = other.isInstanceOf[OneKeyPatternInstance]
 
+  def setNode(_pattern0: Int, _pattern1: Int): Unit ={
+    node = (_pattern0.toLong << 32) | (_pattern1 & 0xffffffffL)
+  }
 
   override def equals(other: Any): Boolean = other match {
     case that: TwoKeyPatternInstance =>

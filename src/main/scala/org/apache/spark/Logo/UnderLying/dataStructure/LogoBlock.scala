@@ -6,6 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.{AbstractIterator, Iterator, Searching, mutable}
 import org.apache.spark.Logo.UnderLying.utlis.MapBuilder
 
+import scala.collection.Iterator.empty
 import scala.reflect.ClassTag
 
 
@@ -199,15 +200,30 @@ final class FilteringPatternLogoBlock[A: ClassTag](var logoBlock: PatternLogoBlo
     var num:Long = 0L
     private var hd: PatternInstance = _
 
-    final def hasNext: Boolean = {
+//    final def hasNext: Boolean = {
+//      do {
+//        if (!it.hasNext) return false
+//        hd = it.next()
+//      } while (!f(hd))
+//      true
+//    }
+
+    private var hdDefined: Boolean = false
+
+    final def hasNext: Boolean = hdDefined || {
       do {
         if (!it.hasNext) return false
         hd = it.next()
       } while (!f(hd))
+      hdDefined = true
       true
     }
 
-    final def next() = hd
+    final def next() = { hdDefined = false; hd }
+
+
+
+//    final def next() = hd
 
     override def longSize():Long = {
 
@@ -546,7 +562,6 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
       return true
     }
 
-
     override def next(): PatternInstance = {
       currentPattern
     }
@@ -559,13 +574,13 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
 
     var longCount = 0L
     override def longSize(): Long = {
-      val f = filteringCondition.f
 
       if (filteringCondition == null){
         while (hasNext){
           longCount += 1
         }
       } else {
+        val f = filteringCondition.f
         while (hasNext){
           if (f(currentPattern)){
             longCount += 1
@@ -655,15 +670,19 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
         }
       }
 
-
-      val leafs = leafsIterator(curLeafPos)
-      array.update(valueKeyMapping2Value, leafs)
-      curLeafPos += 1
+//      val leafs = leafsIterator(curLeafPos)
+//      array.update(valueKeyMapping2Value, leafs)
+//      curLeafPos += 1
 
       return true
     }
 
     override def next(): PatternInstance = {
+
+      val leafs = leafsIterator(curLeafPos)
+      array.update(valueKeyMapping2Value, leafs)
+      curLeafPos += 1
+
       currentPattern
     }
 
@@ -911,7 +930,7 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
     )
   }
 
-  val resultMap = new mutable.LongMap[ArrayBuffer[Int]](initialBufferSize = 4096)
+//  val resultMap = new mutable.LongMap[ArrayBuffer[Int]](initialBufferSize = 4096)
 
 
   abstract class resetableIterator extends Iterator[Int]{

@@ -8,10 +8,11 @@ object LegoMainEntry {
   def main(args: Array[String]): Unit = {
     val data = args(0)
     val patternName = args(1)
+    val h = args(2).toInt
 
     SparkSingle.isCluster = true
     SparkSingle.appName = s"Logo-${data}-${patternName}"
-    val pattern = new ExamplePattern(data)
+    val pattern = new ExamplePattern(data,h,h)
     println(s"$patternName size is ${pattern.pattern(patternName).size()}")
 
   }
