@@ -42,12 +42,24 @@ abstract class LogoRDDReference(schema: LogoSchema, buildScriptStep: LogoBuildSc
 
   def rdd():RDD[PatternInstance]
 
+//  def join(pattern1:PatternLogoRDDReference, pattern2:PatternLogoRDDReference, joinAttr1:String, joinAttr2:String):ComposingPatternLogoRDDReference
+//
+//  def join(pattern1:PatternLogoRDDReference, joinAttr:String):ComposingPatternLogoRDDReference
+
+  //filter patterns using a f function, and specify what state the filtered function should be in.
   def filter(f: PatternInstance => Boolean, isStrict:Boolean = false): PatternLogoRDDReference
 
+  //filter a pattern using a Filtering Condition.
   def filter(f: FilteringCondition): PatternLogoRDDReference
 
+  //manual assign a pattern to be in J mode, the default mode of pattern is F mode.
+  //(J equals to eager mode(pattern materialized), J equals to lazy mode(local join is delayed))
+  def toConcrete():PatternLogoRDDReference
+
+  //build a larger pattern using two sub-pattern, this works like a Binary Join.
   def build(subPattern: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference
 
+  //build a larger pattern using three sub-pattern, this works like a GJ Join.
   def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference
 }
 
@@ -94,12 +106,12 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
     }
   }
 
-  def toConcrete() = {
+  override def toConcrete():PatternLogoRDDReference = {
     val newBuildScript = new LogoEdgePatternPhysicalPlan(buildScript.generateNewPatternJState())
     new PatternLogoRDDReference(patternSchema, newBuildScript)
   }
 
-  def toKeyValue() = {
+  def toKeyValue():PatternLogoRDDReference = {
     val newBuildScript = new LogoEdgePatternPhysicalPlan(buildScript.generateNewPatternJState())
     new PatternLogoRDDReference(patternSchema, newBuildScript)
   }
@@ -116,7 +128,6 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
   def to(keyMapping: Int*): SubPatternLogoRDDReference = {
     new SubPatternLogoRDDReference(this, KeyMapping(keyMapping.zipWithIndex.map(f => (f._2,f._1)).toMap))
   }
-
 
 
   //generate the F-state Logo
@@ -187,12 +198,29 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
     this.toIdentitySubPattern().build(subPattern1,subPattern2)
   }
 
+
+
+
   override def filter(f: PatternInstance => Boolean, isStrict:Boolean = false): PatternLogoRDDReference = {
 
     val filteringCondition = FilteringCondition(f, isStrict)
 
     this.filter(filteringCondition)
   }
+
+//  override def join(pattern1: PatternLogoRDDReference, pattern2: PatternLogoRDDReference, joinAttr1: String, joinAttr2: String): ComposingPatternLogoRDDReference = ???
+//
+//  override def join(pattern1: PatternLogoRDDReference, joinAttr: String): ComposingPatternLogoRDDReference = {
+//    val schema = patternSchema
+//    val nextEle = schema.keyCol.size
+//
+//    val schema1 = pattern1.patternSchema
+//
+//    val joinAttrs = joinAttr.split(";").map(f => f.split("on")).map(f => (f(0).toInt, f(1).toInt)).toMap
+//    pattern1.toSubPattern(KeyMapping(joinAttrs))
+//
+//
+//  }
 }
 
 /**
