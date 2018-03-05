@@ -130,8 +130,6 @@ object MapBuilder {
 
     val hashmap = new mutable.LongMap[CompactListAppendBuilder]()
 
-
-
     if (keys.size == 1) {
       if (valueSize == 1){
         val valueIndex0 = values(0)
@@ -139,11 +137,12 @@ object MapBuilder {
           f =>
             val key = f.getValue(keys(0)).toLong
 
-            if (hashmap.contains(key)) {
-              hashmap.get(key).get.append(f.getValue(valueIndex0))
+            val res = hashmap.getOrNull(key)
+            if (res != null) {
+              res.append(f.getValue(valueIndex0))
             } else {
               hashmap.put(key, new CompactListAppendBuilder(valueSize))
-              hashmap.get(key).get.append(f.getValue(valueIndex0))
+              hashmap.getOrNull(key).append(f.getValue(valueIndex0))
             }
         }
       } else if (valueSize == 2){
@@ -154,13 +153,13 @@ object MapBuilder {
           f =>
             val key = f.getValue(keys(0)).toLong
 
-            if (hashmap.contains(key)) {
-              val list = hashmap.get(key).get
-              list.append(f.getValue(valueIndex0))
-              list.append(f.getValue(valueIndex1))
+            val res = hashmap.getOrNull(key)
+            if (res != null) {
+              res.append(f.getValue(valueIndex0))
+              res.append(f.getValue(valueIndex1))
             } else {
               hashmap.put(key, new CompactListAppendBuilder(valueSize))
-              val list = hashmap.get(key).get
+              val list = hashmap.getOrNull(key)
               list.append(f.getValue(valueIndex0))
               list.append(f.getValue(valueIndex1))
             }
@@ -173,7 +172,7 @@ object MapBuilder {
             val value = ListSelector.notSelectElementsIntPattern(f, keySet)
 
             hashmap.put(key, new CompactListAppendBuilder(valueSize))
-            val list = hashmap.get(key).get
+            val list = hashmap.getOrNull(key)
             var i = 0
             while (i < valueSize) {
               list.append(value(i))
@@ -191,11 +190,12 @@ object MapBuilder {
             val key2 = f.getValue(keys(1))
             val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
 
-              if (hashmap.contains(key)) {
-                hashmap.get(key).get.append(f.getValue(valueIndex0))
+            val res = hashmap.getOrNull(key)
+              if (res != null) {
+                res.append(f.getValue(valueIndex0))
               } else {
                 hashmap.put(key, new CompactListAppendBuilder(valueSize))
-                hashmap.get(key).get.append(f.getValue(valueIndex0))
+                hashmap.getOrNull(key).append(f.getValue(valueIndex0))
               }
 
         }
@@ -209,13 +209,13 @@ object MapBuilder {
             val key2 = f.getValue(keys(1))
             val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
 
-            if (hashmap.contains(key)) {
-              val list = hashmap.get(key).get
-              list.append(f.getValue(valueIndex0))
-              list.append(f.getValue(valueIndex1))
+            val res = hashmap.getOrNull(key)
+            if (res != null) {
+              res.append(f.getValue(valueIndex0))
+              res.append(f.getValue(valueIndex1))
             } else {
               hashmap.put(key, new CompactListAppendBuilder(valueSize))
-              val list = hashmap.get(key).get
+              val list = hashmap.getOrNull(key)
               list.append(f.getValue(valueIndex0))
               list.append(f.getValue(valueIndex1))
             }
@@ -230,7 +230,7 @@ object MapBuilder {
             val value = ListSelector.notSelectElementsIntPattern(f, keySet)
 
                 hashmap.put(key, new CompactListAppendBuilder(valueSize))
-                val list = hashmap.get(key).get
+                val list = hashmap.getOrNull(key)
                 var i = 0
                 while (i < valueSize) {
                   list.append(value(i))

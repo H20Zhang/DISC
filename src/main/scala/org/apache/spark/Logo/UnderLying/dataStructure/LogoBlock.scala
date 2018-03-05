@@ -1,5 +1,7 @@
 package org.apache.spark.Logo.UnderLying.dataStructure
 
+import java.util
+
 import org.apache.spark.Logo.Plan.FilteringCondition
 
 import scala.collection.mutable.ArrayBuffer
@@ -980,6 +982,8 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       val vD = rightArray.size
       val buffer = ArrayBuffer[Int]()
       var bufferFilled = false
+      val bound1 = 5
+      val bound2 = 10
       fillBuffer()
 
       var bufferedIterator = buffer.iterator
@@ -988,7 +992,9 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
         bufferedIterator.hasNext
       }
 
-      def fillBuffer(): Unit = {
+
+      //for balance cases
+      def _fillBuffer1(): Unit = {
         while ( {
           (uCur < uD) && (vCur < vD)
         }) {
@@ -1001,6 +1007,69 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
             vCur += 1
           }
         }
+      }
+
+      //for uD > vD * bound
+      def _fillBuffer2(): Unit = {
+
+        var pos = util.Arrays.binarySearch(leftArray,rightArray(vD-1))
+        if (pos <= uD-1) {
+          pos += 1
+        }
+
+        if (pos >= bound2 * vD){
+          //fill the buffer
+          var prev = 0
+          while (vCur < vD){
+
+            val temp = util.Arrays.binarySearch(leftArray,prev,pos,rightArray(vCur))
+            if (temp >= 0){
+              buffer += rightArray(vCur)
+              prev = temp
+            }
+            vCur += 1
+          }
+        } else {
+          _fillBuffer1()
+        }
+      }
+
+      //for vD > uD * bound
+      def _fillBuffer3(): Unit = {
+        var pos = util.Arrays.binarySearch(rightArray,leftArray(uD-1))
+        if (pos <= vD-1){
+          pos += 1
+        }
+
+        if (pos >= bound2 * uD){
+          //fill the buffer
+          var prev = 0
+          while (uCur < uD){
+
+            val temp = util.Arrays.binarySearch(rightArray,prev,pos,leftArray(uCur))
+            if (temp >= 0){
+              buffer += leftArray(uCur)
+              prev = temp
+            }
+            uCur += 1
+          }
+
+        } else {
+          _fillBuffer1()
+        }
+      }
+
+
+
+      def fillBuffer(): Unit = {
+        _fillBuffer1()
+//        if (uD < bound1*vD && vD < bound1*uD){
+//          _fillBuffer1()
+//        } else if (uD >= bound1 * vD) {
+//          _fillBuffer2()
+//        } else if (vD >= bound1 * uD) {
+//          _fillBuffer3()
+//        }
       }
 
 

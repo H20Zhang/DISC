@@ -8,7 +8,7 @@ import sun.misc.Unsafe
 
 import scala.runtime.BoxesRunTime
 
-class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
+class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
 
 //  var h1 = 13
 //  var h2 = 13
@@ -34,7 +34,7 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
       case "triangle" => triangleIntersectionVersion
       case "chordalSquare" => chordalSquareFast
       case "square" => squareIntersectionVerificationFast
-      case "debug" => triangleNew
+      case "debug" => squareBush
       case "house" => houseIntersectionFast
       case "houseF" => houseIntersectionF
       case "threeTriangle" => threeTriangleFast
@@ -46,6 +46,12 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
       case "near5Clique" => near5Clique
       case "chordalRoof" => chordalRoof
     }
+  }
+
+
+  lazy val wedge = {
+    val edge = getEdge(h1,h2)
+    edge.build(edge.to(0,2))
   }
 
   //simple pattern
@@ -256,6 +262,19 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
       .filter(filterCondition2)
       .toIdentitySubPattern()
     val square = threeLineTemp.build(edge4_1.toSubPattern((0, 2), (1, 3)))
+    square
+  }
+
+
+  lazy val squareBush = {
+
+    val edge1_4 = getEdge(h1, h2).filter(p => p(0) < p(1),true)
+    val edge4_4 = getEdge(h1, h2)
+
+    val indexWedge = edge1_4.build(edge1_4.to(0,2)).filter(p =>  p(1) < p(2))
+    val wedge = edge4_4.build(edge4_4.to(0,2)).filter(p =>  p(1) < p(2))
+
+    val square = wedge.build(indexWedge.to(3,1,2)).filter(p => p(3) < p(0))
     square
   }
 
