@@ -21,7 +21,20 @@ case class QTree(root:QTreeNode) {
   }
 
   def costString(patternSizeMap:Map[String,Int], lazyMap:Map[String,Boolean]) = {
-    root.costComputationString(patternSizeMap,lazyMap)
+    val computationCost = root.costComputationString(patternSizeMap,lazyMap)
+
+    val stringBuilder = new mutable.StringBuilder()
+    stringBuilder.append("0")
+    leftDeepTraverse { Q =>
+      if (Q.name != "Edge") {
+        stringBuilder.append(s" + ${Q.costCommunicationString(patternSizeMap, lazyMap)}")
+      }
+    }
+
+    val communicationCost = stringBuilder.toString()
+
+    val cost = computationCost + " + " + communicationCost
+    cost
   }
 
 }
@@ -133,8 +146,11 @@ class QTreeNode(_name:String, _attributes:Seq[Int], val lNode:QTreeNode, val rNo
       }
     }
     stringBuilder.append(")")
-
     stringBuilder.toString()
+  }
+
+  def eagerCommunicationCostString(patternSizeMap:Map[String,Int], lazyMap:Map[String,Boolean]):String = {
+    s"${patternSizeMap("Communication")}*${patternSizeMap(name)}"
   }
 
   def costComputationString(patternSizeMap:Map[String,Int], lazyMap:Map[String,Boolean]):String = {
@@ -158,6 +174,50 @@ class QTreeNode(_name:String, _attributes:Seq[Int], val lNode:QTreeNode, val rNo
     stringBuilder.toString()
   }
 
+  def costCommunicationString(patternSizeMap:Map[String,Int], lazyMap:Map[String,Boolean]):String = {
+    val stringBuilder = new mutable.StringBuilder()
+
+    stringBuilder.append("(")
+    if (lNode != null){
+      if (lazyMap(lNode.name)){
+        if (multipleVaribles(rUniqueVaribles) != ""){
+          stringBuilder.append(s"${lNode.eagerCommunicationCostString(patternSizeMap,lazyMap)}*${multipleVaribles(rUniqueVaribles)}")
+        } else{
+          stringBuilder.append(s"${lNode.eagerCommunicationCostString(patternSizeMap,lazyMap)}")
+        }
+      } else{
+        if (multipleVaribles(rUniqueVaribles) != ""){
+//          println(lNode.costCommunicationString(patternSizeMap,lazyMap))
+          stringBuilder.append(s"${lNode.costCommunicationString(patternSizeMap,lazyMap)}*${multipleVaribles(rUniqueVaribles)}")
+        } else{
+//          println(lNode.costCommunicationString(patternSizeMap,lazyMap))
+          stringBuilder.append(s"${lNode.costCommunicationString(patternSizeMap,lazyMap)}")
+        }
+      }
+    }
+
+    if (rNode != null){
+      if (lazyMap(rNode.name)){
+        if (multipleVaribles(lUniqueVaribles) != ""){
+          stringBuilder.append(s"+${rNode.eagerCommunicationCostString(patternSizeMap,lazyMap)}*${multipleVaribles(lUniqueVaribles)}")
+        } else{
+          stringBuilder.append(s"+${rNode.eagerCommunicationCostString(patternSizeMap,lazyMap)}")
+        }
+      } else{
+        if (multipleVaribles(lUniqueVaribles) != ""){
+//          println(rNode.costCommunicationString(patternSizeMap,lazyMap))
+          stringBuilder.append(s"+${rNode.costCommunicationString(patternSizeMap,lazyMap)}*${multipleVaribles(lUniqueVaribles)}")
+        } else{
+//          println(rNode.costCommunicationString(patternSizeMap,lazyMap))
+          stringBuilder.append(s"+${rNode.costCommunicationString(patternSizeMap,lazyMap)}")
+        }
+      }
+    }
+    stringBuilder.append(")")
+
+
+    stringBuilder.toString()
+  }
 }
 
 
