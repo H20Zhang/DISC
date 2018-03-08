@@ -1,8 +1,11 @@
 package Plan
 
+import org.apache.spark.Logo.UnderLying.dataStructure.ValuePatternInstance
 import org.apache.spark.Logo.UnderLying.utlis.{ExamplePattern, PointToNumConverter, SparkSingle}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 
@@ -26,7 +29,31 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
     queries.foreach{
       f =>
         println(s"execute $f")
-        assert(pattern.pattern(f).size() == sizeReference(f))
+//        assert(pattern.pattern(f).size() == sizeReference(f))
+//        println(pattern.pattern(f).rdd().map(f => ((f.getValue(0),f.getValue(1)),1)).reduceByKey(_ + _).count())
+
+
+
+
+        pattern.pattern(f).rdd().mapPartitions({
+          f =>
+
+            val longMap = new mutable.LongMap[Int]()
+            while (f.hasNext){
+              val p = f.next()
+              val key = (p(0).toLong << 32) | (p(1) & 0xffffffffL)
+
+              val v = longMap.getOrNull(key)
+              if (v != null) {
+                longMap.update(key,v+1)
+              } else {
+                longMap.put(key, 1)
+              }
+            }
+            longMap.iterator
+        },true).reduceByKey(_ + _).count()
+
+
     }
   }
 

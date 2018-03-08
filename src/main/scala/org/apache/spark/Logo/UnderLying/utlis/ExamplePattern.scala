@@ -34,7 +34,7 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
       case "triangle" => triangleIntersectionVersion
       case "chordalSquare" => chordalSquareFast
       case "square" => squareIntersectionVerificationFast
-      case "debug" => squareBush
+      case "debug" => houseIntersectionFastNoSymmetryNew
       case "house" => houseIntersectionFast
       case "houseF" => houseIntersectionF
       case "threeTriangle" => threeTriangleFast
@@ -554,6 +554,24 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
     val edge4_4 = getEdge(h1, h2)
 
     val leftEdge = edge4_4.filter(p => p(0) < p(1),true)
+    val wedge = leftEdge.build(edge4_4.toSubPattern((0, 1), (1, 2)))
+
+    val squareTemp = wedge.build(edge4_1.toSubPattern((0, 2), (1, 3)), edge4_1.toSubPattern((0, 0), (1, 3)))
+      .filter(p => p(0) != p(2) && p(1) != p(3))
+
+    val indexTriangle = leftEdge.build(edge4_1.toSubPattern((0, 1), (1, 2)), edge4_1.toSubPattern((0, 0), (1, 2)))
+
+    val house = squareTemp.build(indexTriangle.toSubPattern((0, 0), (1, 1), (2, 4)))
+      .filter(p => p(3) != p(4) && p(2) != p(4))
+
+    house
+  }
+
+  lazy val houseIntersectionFastNoSymmetryNew = {
+    val edge4_1 = getEdge(h1, 1)
+    val edge4_4 = getEdge(h1, h2)
+
+    val leftEdge = edge4_4
     val wedge = leftEdge.build(edge4_4.toSubPattern((0, 1), (1, 2)))
 
     val squareTemp = wedge.build(edge4_1.toSubPattern((0, 2), (1, 3)), edge4_1.toSubPattern((0, 0), (1, 3)))
