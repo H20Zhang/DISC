@@ -42,7 +42,7 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
       f =>
         println(s"execute $f")
 
-        if (pattern.pattern(f) != null){
+        if (pattern.aggregatePattern(f) != null){
           pattern.aggregatePattern(f).count()
         }
     }
