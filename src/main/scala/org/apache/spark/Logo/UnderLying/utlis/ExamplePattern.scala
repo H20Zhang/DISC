@@ -2,10 +2,14 @@ package org.apache.spark.Logo.UnderLying.utlis
 
 import java.util
 
+import gnu.trove.map.hash.{TIntIntHashMap, TLongIntHashMap}
 import org.apache.spark.Logo.Plan.FilteringCondition
 import org.apache.spark.Logo.UnderLying.dataStructure.{CompositeTwoPatternLogoBlock, EnumeratePatternInstance, PatternLogoBlock, TwoKeyPatternInstance}
+import org.apache.spark.rdd.RDD
 import sun.misc.Unsafe
 
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 import scala.runtime.BoxesRunTime
 
 class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
@@ -34,7 +38,7 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
       case "triangle" => triangleIntersectionVersion
       case "chordalSquare" => chordalSquareFast
       case "square" => squareIntersectionVerificationFast
-      case "debug" => houseIntersectionFastNoSymmetryNew
+      case "debug" => fourClique
       case "house" => houseIntersectionFast
       case "houseF" => houseIntersectionF
       case "threeTriangle" => threeTriangleFast
@@ -45,7 +49,21 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
       case "squarePlusOneEdgeF" => squarePlusOneEdge
       case "near5Clique" => near5Clique
       case "chordalRoof" => chordalRoof
+      case _ => null
     }
+  }
+
+  def aggregatePattern(name:String) = {
+      name match {
+        case "triangleAgg" => triangleAgg
+        case "squareAgg" => squareAgg
+        case "chordalSquareAgg" => chordalSquareAgg
+        case "fourCliqueAgg" => fourCliqueAgg
+        case "houseAgg" => houseAgg
+        case "threeTriangleAgg" => threeTriangleAgg
+        case "near5CliqueAgg" => near5CliqueAgg
+        case _ => null
+      }
   }
 
 
@@ -74,8 +92,6 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
     triangle
   }
 
-
-  //TODO test
   lazy val triangleIntersectionVersion = {
     val filterCondition = FilteringCondition({
       pattern =>
@@ -97,16 +113,6 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
     val filteredEdge = edge.filter(p => p(0) < p(1),true)
     val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2))
     triangle
-  }
-
-  //TODO finish this
-  lazy val twinTriangle = {
-
-  }
-
-
-  lazy val fourClique = {
-
   }
 
   lazy val threeLine = {
@@ -314,42 +320,6 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
     square
   }
 
-
-  lazy val square2 = {
-    val edge4_1 = getEdge(h1, 1)
-    val edge1_4 = getEdge(1,h1)
-    val edge4_4 = getEdge(h1, h2)
-
-    val filterCondition = FilteringCondition({ p =>
-      p.pattern(0) < p.pattern(1)
-    }, false)
-
-    val leftEdge = edge4_1.toIdentitySubPattern()
-    val wedge = leftEdge.build(edge1_4.toSubPattern((0, 1), (1, 2))).toIdentitySubPattern()
-
-    val squareTemp = wedge.build(edge4_4.toSubPattern((0, 2), (1, 3)), edge4_4.filter(filterCondition).toSubPattern((0, 0), (1, 3)))
-
-    squareTemp
-  }
-
-  lazy val square3 = {
-    val edge4_1 = getEdge(h1, 1)
-    val edge4_2 = getEdge(h1, 1)
-    val edge4_4 = getEdge(h1, h2)
-
-    val filterCondition = FilteringCondition({ p =>
-      p.pattern(0) < p.pattern(1)
-    }, true)
-
-
-    val leftEdge = edge4_4.filter(filterCondition).toIdentitySubPattern()
-    val wedge = leftEdge.build(edge4_4.toSubPattern((0, 1), (1, 2))).toIdentitySubPattern()
-
-    val squareTemp = wedge.build(edge4_2.toSubPattern((0, 2), (1, 3)), edge4_2.toSubPattern((0, 0), (1, 3)))
-
-    squareTemp
-  }
-
   lazy val square = {
 
     val filterCondition = FilteringCondition({
@@ -441,6 +411,19 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
     val chordalSquare = leftTriangle.build(rightTriangle).filter(filterCondition2)
 
     chordalSquare
+  }
+
+  lazy val fourClique = {
+      val edge3_1 = getEdge(h1, 1).filter(p => p(0) < p(1), true)
+      val edge3_3 = getEdge(h1, h2).filter(p => p(0) < p(1), true)
+
+      val triangle = edge3_3.build(edge3_3.to(1,2), edge3_3.to(0,2))
+      val triangle2 = edge3_3.build(edge3_1.to(1,2), edge3_1.to(0,2))
+      val chordalSquare = triangle
+        .build(triangle2.to(0,1,3))
+
+      val fourClique = chordalSquare.build(edge3_1.to(2,3))
+    fourClique
   }
 
   lazy val squarePlusOneEdge = {
@@ -1021,13 +1004,216 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
     twoSquare
   }
 
-  //complex pattern
-  lazy val deep2Tree = {
 
+
+  lazy val triangleAgg = {
+    val filteredEdge = edge.filter(p => p(0) < p(1),true)
+    val triangle =  filteredEdge.build(edge.to(1,2),edge.to(0,2))
+
+    triangle.rdd().mapPartitions({
+      f =>
+
+        val intMap = new TIntIntHashMap()
+        while (f.hasNext){
+          val p = f.next()
+          val key = p(0)
+          intMap.adjustOrPutValue(key,1,1)
+        }
+
+        intMap.keys().zip(intMap.values()).iterator
+    },true).reduceByKey(_ + _)
   }
 
-  lazy val triangleWithlength2Path = {
+  lazy val squareAgg = {
+    val edge4_1 = getEdge(h1, 1)
+    val edge4_4 = getEdge(h1, h2)
 
+    val wedge = edge4_4.build(edge4_4.to(0,2)).filter(p => p(1) < p(2))
+    val square = wedge.build(edge4_1.to(1,3), edge4_1.to(2,3)).filter(p => p(0) != p(3))
+
+    square.rdd().mapPartitions({
+      f =>
+        val intMap = new TIntIntHashMap()
+        while (f.hasNext){
+          val p = f.next()
+          val key = p(0)
+          intMap.adjustOrPutValue(key,1,1)
+        }
+
+        intMap.keys().zip(intMap.values()).iterator
+
+    },true).reduceByKey(_ + _)
+  }
+
+  lazy val chordalSquareAgg = {
+    val edge3_1 = getEdge(h1, 1)
+    val edge3_3 = getEdge(h1, h2)
+
+    val triangle = edge3_3.build(edge3_1.to(1,2), edge3_1.to(0,2))
+    val chordalSquare = triangle
+      .build(triangle.to(0,1,3))
+      .filter(p => p(2) < p(3))
+
+    chordalSquare.rdd().mapPartitions({
+      f =>
+
+        val intMap = new TIntIntHashMap()
+        while (f.hasNext){
+          val p = f.next()
+          val key = p(0)
+          intMap.adjustOrPutValue(key,1,1)
+        }
+
+        intMap.keys().zip(intMap.values()).iterator
+
+    },true).reduceByKey(_ + _)
+  }
+
+  lazy val fourCliqueAgg = {
+    val edge3_1 = getEdge(h1, 1).filter(p => p(0) < p(1), true)
+    val edge3_3 = getEdge(h1, h2).filter(p => p(0) < p(1), true)
+    val edge3_1u = getEdge(h1, 1)
+
+    val triangle = edge3_3.build(edge3_3.to(1,2), edge3_3.to(0,2))
+    val triangle2 = edge3_3.build(edge3_1u.to(1,2), edge3_1u.to(0,2))
+    val chordalSquare = triangle
+      .build(triangle2.to(0,1,3))
+
+    val fourClique = chordalSquare.build(edge3_1u.to(2,3))
+    fourClique.rdd().mapPartitions({
+      f =>
+
+
+        val intMap = new TIntIntHashMap()
+        while (f.hasNext){
+          val p = f.next()
+          val key = p(3)
+          intMap.adjustOrPutValue(key,1,1)
+        }
+
+        intMap.keys().zip(intMap.values()).iterator
+
+    },true).reduceByKey(_ + _)
+  }
+
+  lazy val houseAgg = {
+    val edge4_1 = getEdge(h1, 1)
+    val edge4_4 = getEdge(h1, h2)
+
+    val leftEdge = edge4_4.filter(p => p(0) < p(1),true)
+    val wedge = leftEdge.build(edge4_4.to(1,2))
+
+    val squareTemp = wedge.build(edge4_1.toSubPattern((0, 2), (1, 3)), edge4_1.toSubPattern((0, 0), (1, 3)))
+      .filter(p => p(2) < p(3) && p(0) != p(2) && p(1) != p(3))
+
+    val indexTriangle = leftEdge.build(edge4_1.toSubPattern((0, 1), (1, 2)), edge4_1.toSubPattern((0, 0), (1, 2)))
+
+    val house = squareTemp.build(indexTriangle.toSubPattern((0, 0), (1, 1), (2, 4)))
+      .filter(p => p(3) != p(4) && p(2) != p(4))
+
+    house.rdd().mapPartitions({
+      f =>
+
+        val longMap = new TLongIntHashMap()
+        while (f.hasNext){
+          val p = f.next()
+          val key = (p(2).toLong << 32) | (p(3) & 0xffffffffL)
+          longMap.adjustOrPutValue(key,1,1)
+
+        }
+
+        longMap.keys().zip(longMap.values()).iterator
+
+    },true).reduceByKey(_ + _)
+  }
+
+  lazy val threeTriangleAgg = {
+    val edge4_1 = getEdge(h1, 1)
+    val edge4_4 = getEdge(h1, h2)
+
+
+    val filterCondition = FilteringCondition({
+      pattern =>
+        val p = pattern.pattern
+        p(1) < p(2)
+    }, false)
+
+    val triangle = edge4_4.build(edge4_4.to(0,2), edge4_4.to(1,2)).filter(p => p(1) < p(2))
+
+    val indexTriangle = edge4_4.build(edge4_1.to(0,2), edge4_1.to(1,2))
+
+    val chordalSquareTemp = triangle.build(indexTriangle.to(0,1,3))
+
+    val threeTriangle = chordalSquareTemp.build(indexTriangle.to(0,2,4))
+      .filter(p => p(3) < p(4) && p(3) != p(2) && p(4) != p(1) && p(3) != p(4))
+
+    threeTriangle.rdd().mapPartitions({
+      f =>
+
+
+
+        val longMap = new TLongIntHashMap()
+        while (f.hasNext){
+          val p = f.next()
+          val key = (p(0).toLong << 32) | (p(1) & 0xffffffffL)
+          longMap.adjustOrPutValue(key,1,1)
+
+        }
+
+        longMap.keys().zip(longMap.values()).iterator
+
+    },true).reduceByKey(_ + _)
+  }
+
+  lazy val near5CliqueAgg = {
+    val edge4_1 = getEdge(h1, 1)
+    val edge4_4 = getEdge(h1, h2)
+
+    val leftEdge = edge4_4.toIdentitySubPattern()
+
+    val filterCondition = FilteringCondition({
+      pattern =>
+        val p = pattern.pattern
+        p(1) < p(2)
+    }, false)
+
+    val triangle = edge4_4.build(edge4_1.to(0,2), edge4_1.to(1,2)).filter(p => p(0) < p(1))
+
+    val indexTriangle = edge4_4.build(edge4_1.to(0,2), edge4_1.to(1,2))
+
+    val filterCondition1 = FilteringCondition({
+      pattern =>
+        val p = pattern.pattern
+        p(0) < p(3)
+    }, false)
+
+    val chordalSquareTemp = triangle.toIdentitySubPattern().build(indexTriangle.toSubPattern((1, 1), (2, 2), (0, 3))).filter(filterCondition1)
+
+    val filterCondition2 = FilteringCondition({
+      pattern =>
+        val p = pattern.pattern
+        p(4) != p(1) && p(4) != p(2)
+    }, false)
+
+    val near5Clique = chordalSquareTemp.toIdentitySubPattern().build(indexTriangle.toSubPattern((0, 0), (1, 3), (2, 4)))
+      .filter(filterCondition2)
+
+    near5Clique.rdd().mapPartitions({
+      f =>
+
+        val longMap = new TLongIntHashMap()
+        while (f.hasNext){
+          val p = f.next()
+          val key = (p(0).toLong << 32) | (p(1) & 0xffffffffL)
+          longMap.adjustOrPutValue(key,1,1)
+
+        }
+
+        longMap.keys().zip(longMap.values()).iterator
+
+
+
+    },true).reduceByKey(_ + _)
   }
 
 

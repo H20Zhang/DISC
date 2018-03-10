@@ -13,7 +13,11 @@ object LegoMainEntry {
     SparkSingle.isCluster = true
     SparkSingle.appName = s"Logo-${data}-${patternName}"
     val pattern = new ExamplePattern(data,h,h)
-    println(s"$patternName size is ${pattern.pattern(patternName).size()}")
 
+    if (pattern.pattern(patternName) != null){
+      println(s"$patternName size is ${pattern.pattern(patternName).size()}")
+    } else{
+      pattern.aggregatePattern(patternName).count()
+    }
   }
 }
