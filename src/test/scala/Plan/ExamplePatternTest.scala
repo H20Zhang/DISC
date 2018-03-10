@@ -28,6 +28,7 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
   test("Pattern"){
     SparkSingle.appName = s"Logo-${data}"
     val pattern = new ExamplePattern(data)
+
     queries.foreach{
       f =>
         println(s"execute $f")
@@ -41,11 +42,10 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
       f =>
         println(s"execute $f")
 
-        if (pattern != null){
+        if (pattern.pattern(f) != null){
           pattern.aggregatePattern(f).count()
         }
     }
-
   }
 
 
