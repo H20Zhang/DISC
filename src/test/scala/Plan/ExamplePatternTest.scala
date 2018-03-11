@@ -38,6 +38,7 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
         }
     }
 
+
     queries.foreach{
       f =>
         println(s"execute $f")

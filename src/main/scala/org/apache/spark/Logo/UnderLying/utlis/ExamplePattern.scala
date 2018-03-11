@@ -39,6 +39,7 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
       case "chordalSquare" => chordalSquareFast
       case "square" => squareIntersectionVerificationFast
       case "debug" => fourClique
+      case "fourClique" => fourClique
       case "house" => houseIntersectionFast
       case "houseF" => houseIntersectionF
       case "threeTriangle" => threeTriangleFast
