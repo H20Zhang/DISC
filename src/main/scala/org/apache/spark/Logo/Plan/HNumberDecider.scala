@@ -67,6 +67,7 @@ case class HNumberDecider(val patternMap:Map[String,Int], val lazyMap:Map[String
     val cmd3 = s"rm ./temp${index}.m".!
 
     (xValues,objValues)
+
   }
 
 
