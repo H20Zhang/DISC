@@ -1088,7 +1088,7 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
 
     val edge3_1 = getEdge(h1, 1).filter(p => p(0) < p(1), true)
     val edge3_3 = getEdge(h1, h2).filter(p => p(0) < p(1), true)
-    val edge3_3u = getEdge(h1, 1)
+    val edge3_3u = getEdge(h1, h2)
 
     val triangle = edge3_3u.build(edge3_1.to(0,2), edge3_1.to(1,2))
     val chordalSquare = triangle
@@ -1146,13 +1146,6 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
     val edge4_1 = getEdge(h1, 1)
     val edge4_4 = getEdge(h1, h2)
 
-
-    val filterCondition = FilteringCondition({
-      pattern =>
-        val p = pattern.pattern
-        p(1) < p(2)
-    }, false)
-
     val triangle = edge4_4.build(edge4_4.to(0,2), edge4_4.to(1,2)).filter(p => p(1) < p(2))
 
     val indexTriangle = edge4_4.build(edge4_1.to(0,2), edge4_1.to(1,2))
@@ -1160,17 +1153,15 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
     val chordalSquareTemp = triangle.build(indexTriangle.to(0,1,3))
 
     val threeTriangle = chordalSquareTemp.build(indexTriangle.to(0,2,4))
-      .filter(p => p(3) < p(4) && p(3) != p(2) && p(4) != p(1) && p(3) != p(4))
+      .filter(p => p(3) < p(4) && p(3) != p(2) && p(4) != p(1) )
 
     threeTriangle.rdd().mapPartitions({
       f =>
 
-
-
         val longMap = new TLongIntHashMap()
         while (f.hasNext){
           val p = f.next()
-          val key = (p(0).toLong << 32) | (p(1) & 0xffffffffL)
+          val key = (p(1).toLong << 32) | (p(2) & 0xffffffffL)
           longMap.adjustOrPutValue(key,1,1)
 
         }
