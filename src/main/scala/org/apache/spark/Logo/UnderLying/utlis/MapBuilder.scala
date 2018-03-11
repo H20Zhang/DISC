@@ -83,6 +83,7 @@ object MapBuilder {
           val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
           val value = ListSelector.notSelectElements(f, keySet)
 
+
           if (valueSize == 1) {
             if (hashmap.contains(key)) {
               hashmap.get(key).get.append(ValuePatternInstance(value(0)))

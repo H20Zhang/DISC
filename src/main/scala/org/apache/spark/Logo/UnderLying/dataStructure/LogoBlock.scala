@@ -437,6 +437,18 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
     }
   }
 
+  def zeroValueGenereateLeafsNode(coreInstance: PatternInstance): Array[Int] = {
+
+    val optValues = leafsBlock.
+      getValue(coreInstance.toSubKeyPattern(coreLeafJoints.coreJoints, coreJointsSeq))
+
+    if (optValues != null){
+      Array(0)
+    } else {
+      null
+    }
+  }
+
   val coreKeyMappingArray = coreKeyMapping.keyMapping.toArray
   val valueMappingArray = valueMapping.keyMapping.toArray
   @transient lazy val totalNodes = (coreKeyMapping.values ++ valueMapping.values).toSeq.max + 1
@@ -743,98 +755,122 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
   }
 
 
-  //  class filterNullIterator extends Iterator[PatternInstance]{
-  //
-  //    private var it = new OneValueNullLenEnumerateIterator
-  //    private var hd: PatternInstance = _
-  //
-  //    final def hasNext: Boolean =  {
-  //      do {
-  //        if (!it.hasNext) return false
-  //        hd = it.next()
-  //      } while (hd == null)
-  //      true
-  //    }
-  //
-  //    final def next() = hd
-  //
-  //  }
-  //
-  //  class OneValueNullLenEnumerateIterator extends Iterator[PatternInstance] {
-  //
-  //    var leafsIterator: Iterator[ValuePatternInstance] = _
-  //    val coreIterator: Iterator[PatternInstance] = coreBlock.enumerateIterator()
-  //    var currentCore: PatternInstance = _
-  //    //    val TintBuffer = new TIntArrayList(totalNodes)
-  //    val array = Array.fill(totalNodes)(0)
-  //    val currentPattern: EnumeratePatternInstance = new EnumeratePatternInstance(array)
-  //    val coreMapping = coreKeyMapping.keyMapping.toArray
-  //
-  //    val coreMapping1 = coreMapping.map(_._1)
-  //    val coreMapping2 = coreMapping.map(_._2)
-  //
-  //    val valueKeyMapping = valueMapping.keyMapping.toArray
-  //
-  //    val valueKeyMapping1 = valueKeyMapping.map(_._1)
-  //    val valueKeyMapping2 = valueKeyMapping.map(_._2)
-  //
-  //    val valueKeyMapping1Value = valueKeyMapping1.size match {
-  //      case 1 => valueKeyMapping1(0)
-  //      case _ => 0
-  //    }
-  //
-  //    val valueKeyMapping2Value = valueKeyMapping2.size match {
-  //      case 1 => valueKeyMapping2(0)
-  //      case _ => 0
-  //    }
-  //
-  //    val updateArray = coreMapping ++ valueKeyMapping
-  //    val coreLen = coreMapping.length
-  //    val valueLen = valueKeyMapping.length
-  //
-  //
-  //    val valueMappingSize = valueMapping.keyMapping.size
-  //
-  //    def hasNext: Boolean = {
-  //
-  //      if (leafsIterator == null || !leafsIterator.hasNext) {
-  //        do {
-  //          if (coreIterator.hasNext) {
-  //            currentCore = coreIterator.next()
-  //
-  //            var i = 0
-  //
-  //            while (i < coreLen) {
-  //              array.update(coreMapping2(i), currentCore.pattern(coreMapping1(i)))
-  //              i += 1
-  //            }
-  //
-  //
-  //          } else {
-  //            return false
-  //          }
-  //          leafsIterator = genereateLeafsNode(currentCore)
-  //
-  //        } while (leafsIterator == null)
-  //      }
-  //
-  //
-  //      return true
-  //    }
-  //
-  //    val nullPattern: PatternInstance = null
-  //
-  //    override def next(): PatternInstance = {
-  //      val leafs = leafsIterator.next()
-  //      array.update(valueKeyMapping2Value, leafs.getValue(valueKeyMapping2Value))
-  //
-  //      if (currentCore.contain(leafs.getValue(valueKeyMapping2Value))) {
-  //        nullPattern
-  //      } else {
-  //        currentPattern
-  //      }
-  //    }
-  //  }
+  final class ZeroValueLenEnumerateIterator extends Iterator[PatternInstance] with enumerateIterator {
+
+    var curLeafPos = 0
+    var leafEnd = 0
+    var leafsIterator: Array[Int] = _
+    val coreIterator: Iterator[PatternInstance] = coreBlock.enumerateIterator()
+    var currentCore: PatternInstance = _
+    //    val TintBuffer = new TIntArrayList(totalNodes)
+    val array = Array.fill(totalNodes)(0)
+
+    //    val array = new FixSizeArray(totalNodes)
+
+    val currentPattern: EnumeratePatternInstance = new EnumeratePatternInstance(array)
+    val coreMapping = coreKeyMapping.keyMapping.toArray
+
+    val coreMapping1 = coreMapping.map(_._1)
+    val coreMapping2 = coreMapping.map(_._2)
+
+    val updateArray = coreMapping
+    final val coreLen = coreMapping.length
+    final val valueLen = 0
+
+    val isCoreIteratorEnumerate = coreIterator.isInstanceOf[enumerateIterator]
+    val valueMappingSize = valueMapping.keyMapping.size
+
+    private def moveToNext: Option[Boolean] = {
+      do {
+        if (coreIterator.hasNext) {
+
+          currentCore = coreIterator.next()
+
+          var i = 0
+          while (i < coreLen) {
+            array.update(coreMapping2(i), currentCore.getValue(coreMapping1(i)))
+            i += 1
+          }
+
+
+        } else {
+          return Some(false)
+        }
+        curLeafPos = 0
+        leafsIterator = zeroValueGenereateLeafsNode(currentCore)
+
+        if (leafsIterator != null){
+          leafEnd = leafsIterator.length
+        }
+
+
+      } while (leafsIterator == null)
+      None
+    }
+
+    def hasNext: Boolean = {
+
+      if (leafsIterator == null) {
+        moveToNext match {
+          case Some(toReturn) => return toReturn
+          case None =>
+        }
+      }
+
+
+      return true
+    }
+
+    override def next(): PatternInstance = {
+      curLeafPos += 1
+
+      currentPattern
+    }
+
+    var filteringCondition:FilteringCondition = null
+
+    override def setFilteringCondition(filteringCondition: FilteringCondition): Unit = {
+      this.filteringCondition = filteringCondition
+    }
+
+    var longCount = 0L
+    override def longSize(): Long = {
+
+      if (filteringCondition == null){
+        while (true){
+
+          moveToNext match {
+            case Some(toReturn) => return longCount
+            case None => {
+
+                longCount += 1
+              }
+
+          }
+        }
+      } else{
+        val f = filteringCondition.f
+        while (true){
+          moveToNext match {
+            case Some(toReturn) => return longCount
+            case None => {
+
+                if (f(currentPattern)){
+                  longCount += 1
+                }
+
+
+            }
+          }
+        }
+      }
+
+
+      longCount
+
+
+    }
+  }
 
   /**
     * generate a ConcretePatternLogoBlock
@@ -842,6 +878,7 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
   override def iterator() = new patternIterator
 
   override def enumerateIterator() = valueMapping.keyMapping.toArray.size match {
+    case 0 => new ZeroValueLenEnumerateIterator
     case 1 => new OneValueLenEnumerateIterator
     case _ => new EnumerateIterator
   }

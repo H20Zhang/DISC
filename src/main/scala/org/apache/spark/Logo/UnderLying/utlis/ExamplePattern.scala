@@ -415,16 +415,29 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
   }
 
   lazy val fourClique = {
+
+//    val edge3_1 = getEdge(h1, 1).filter(p => p(0) < p(1), true)
+//    val edge3_3 = getEdge(h1, h2).filter(p => p(0) < p(1), true)
+//
+//    val triangle = edge3_3.build(edge3_3.to(1,2), edge3_3.to(0,2))
+//    val triangle2 = edge3_3.build(edge3_1.to(1,2), edge3_1.to(0,2))
+//    val chordalSquare = triangle
+//      .build(triangle2.to(0,1,3))
+//
+//    val fourClique = chordalSquare.build(edge3_1.to(2,3))
+//    fourClique
+
       val edge3_1 = getEdge(h1, 1).filter(p => p(0) < p(1), true)
       val edge3_3 = getEdge(h1, h2).filter(p => p(0) < p(1), true)
 
-      val triangle = edge3_3.build(edge3_3.to(1,2), edge3_3.to(0,2))
-      val triangle2 = edge3_3.build(edge3_1.to(1,2), edge3_1.to(0,2))
+      val triangle = edge3_3.build(edge3_1.to(0,2), edge3_1.to(1,2))
       val chordalSquare = triangle
-        .build(triangle2.to(0,1,3))
+        .build(triangle.toSubPattern((1, 1), (2, 2), (0, 3)))
 
-      val fourClique = chordalSquare.build(edge3_1.to(2,3))
+      val fourClique = chordalSquare.build(edge3_3.to(0,3))
     fourClique
+
+
   }
 
   lazy val squarePlusOneEdge = {
@@ -1071,24 +1084,25 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
   }
 
   lazy val fourCliqueAgg = {
+
+
     val edge3_1 = getEdge(h1, 1).filter(p => p(0) < p(1), true)
     val edge3_3 = getEdge(h1, h2).filter(p => p(0) < p(1), true)
-    val edge3_1u = getEdge(h1, 1)
+    val edge3_3u = getEdge(h1, 1)
 
-    val triangle = edge3_3.build(edge3_3.to(1,2), edge3_3.to(0,2))
-    val triangle2 = edge3_3.build(edge3_1u.to(1,2), edge3_1u.to(0,2))
+    val triangle = edge3_3u.build(edge3_1.to(0,2), edge3_1.to(1,2))
     val chordalSquare = triangle
-      .build(triangle2.to(0,1,3))
+      .build(triangle.toSubPattern((1, 1), (2, 2), (0, 3)))
 
-    val fourClique = chordalSquare.build(edge3_1u.to(2,3))
+    val fourClique = chordalSquare.build(edge3_3.to(0,3))
+
     fourClique.rdd().mapPartitions({
       f =>
-
 
         val intMap = new TIntIntHashMap()
         while (f.hasNext){
           val p = f.next()
-          val key = p(3)
+          val key = p(1)
           intMap.adjustOrPutValue(key,1,1)
         }
 

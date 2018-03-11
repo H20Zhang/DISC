@@ -7,7 +7,7 @@ scalaVersion := "2.11.12"
 
 
 //scalacOptions += "–optimise"
-
+test in assembly := {}
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 
 libraryDependencies += "org.apache.spark" % "spark-sql_2.11" % "2.2.0" % "provided"
@@ -20,3 +20,8 @@ libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.3" % "test"
 
 // https://mvnrepository.com/artifact/net.sf.trove4j/trove4j
 libraryDependencies += "net.sf.trove4j" % "trove4j" % "3.0.3"
+
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
