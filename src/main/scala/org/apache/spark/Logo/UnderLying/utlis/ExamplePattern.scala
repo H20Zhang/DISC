@@ -12,7 +12,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.runtime.BoxesRunTime
 
-class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
+class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
 
 //  var h1 = 13
 //  var h2 = 13
@@ -38,9 +38,11 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
       case "triangle" => triangleIntersectionVersion
       case "chordalSquare" => chordalSquareFast
       case "square" => squareIntersectionVerificationFast
-      case "debug" => fourClique
+      case "debug" => squareIntersectionVerificationFast
       case "fourClique" => fourClique
       case "house" => houseIntersectionFast
+      case "houseGJ" => houseIntersectionGJ
+      case "houseGHD" => houseIntersectionGHD
       case "houseF" => houseIntersectionF
       case "threeTriangle" => threeTriangleFast
       case "threeTriangleF" => threeTriangleF
@@ -564,6 +566,60 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
     house
   }
 
+
+  lazy val houseIntersectionGJ = {
+    val edge4_1 = getEdge(h1, h2)
+    val edge4_4 = getEdge(h1, h2)
+
+    val leftEdge = edge4_4.filter(p => p(0) < p(1),true)
+    val wedge = leftEdge.build(edge4_4.toSubPattern((0, 1), (1, 2)))
+
+    val squareTemp = wedge.build(edge4_1.toSubPattern((0, 2), (1, 3)), edge4_1.toSubPattern((0, 0), (1, 3)))
+      .filter(p => p(0) != p(2) && p(1) != p(3))
+
+    val indexTriangle = leftEdge.build(edge4_1.toSubPattern((0, 1), (1, 2)), edge4_1.toSubPattern((0, 0), (1, 2)))
+
+    val house = squareTemp.build(edge4_1.to(0,4),edge4_1.to(1,4))
+      .filter(p => p(3) != p(4) && p(2) != p(4))
+    house
+  }
+
+  lazy val houseIntersectionGJ_AssignOptimized = {
+    val edge4_1 = getEdge(h1, 1)
+    val edge4_4 = getEdge(h1, h2)
+
+    val leftEdge = edge4_4.filter(p => p(0) < p(1),true)
+    val wedge = leftEdge.build(edge4_4.toSubPattern((0, 1), (1, 2)))
+
+    val squareTemp = wedge.build(edge4_1.toSubPattern((0, 2), (1, 3)), edge4_1.toSubPattern((0, 0), (1, 3)))
+      .filter(p => p(0) != p(2) && p(1) != p(3))
+
+    val indexTriangle = leftEdge.build(edge4_1.toSubPattern((0, 1), (1, 2)), edge4_1.toSubPattern((0, 0), (1, 2)))
+
+    val house = squareTemp.build(edge4_1.to(0,4),edge4_1.to(1,4))
+      .filter(p => p(3) != p(4) && p(2) != p(4))
+    house
+  }
+
+  lazy val houseIntersectionGHD = {
+    val edge4_1 = getEdge(h1, h2)
+    val edge4_4 = getEdge(h1, h2)
+
+    val leftEdge = edge4_4.filter(p => p(0) < p(1),true)
+    val wedge = leftEdge.build(edge4_4.toSubPattern((0, 1), (1, 2)))
+
+    val squareTemp = wedge.build(edge4_1.toSubPattern((0, 2), (1, 3)), edge4_1.toSubPattern((0, 0), (1, 3)))
+      .filter(p => p(0) != p(2) && p(1) != p(3))
+
+    val indexTriangle = leftEdge.build(edge4_1.toSubPattern((0, 1), (1, 2)), edge4_1.toSubPattern((0, 0), (1, 2)))
+
+    val house = squareTemp.build(indexTriangle.toSubPattern((0, 0), (1, 1), (2, 4)))
+      .filter(p => p(3) != p(4) && p(2) != p(4))
+
+    house
+  }
+
+
   lazy val houseIntersectionFastNoSymmetryNew = {
     val edge4_1 = getEdge(h1, 1)
     val edge4_4 = getEdge(h1, h2)
@@ -1084,6 +1140,18 @@ class ExamplePattern(data: String,h1:Int=8,h2:Int=8)  {
   }
 
   lazy val fourCliqueAgg = {
+
+
+//    val edge3_1 = getEdge(h1, 1).filter(p => p(0) < p(1), true)
+//    val edge3_3 = getEdge(h1, h2).filter(p => p(0) < p(1), true)
+//
+//    val triangle = edge3_3.build(edge3_1.to(0,2), edge3_1.to(1,2))
+//    val chordalSquare = triangle
+//      .build(triangle.toSubPattern((1, 1), (2, 2), (0, 3)))
+//
+//    val fourClique = chordalSquare.build(edge3_3.to(0,3))
+//    fourClique
+
 
 
     val edge3_1 = getEdge(h1, 1).filter(p => p(0) < p(1), true)

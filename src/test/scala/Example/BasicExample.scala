@@ -16,6 +16,7 @@ class BasicExample extends FunSuite{
   //loading the edge into the systems.
   lazy val rawEdge = {
     new EdgeLoader(data) rawEdgeRDD
+
   }
 
   //partitioning the edge using hash function H:R=>h or each node.

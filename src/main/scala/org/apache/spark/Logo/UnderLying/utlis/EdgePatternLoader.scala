@@ -40,9 +40,12 @@ class EdgeLoader(data: String, sizes: Int = 64) {
           res = (splittedString(0).toInt, splittedString(1).toInt)
         }
         res
-    }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).filter(f => f._1 != f._2).distinct().map(f => (Array(f._1, f._2), 1)).map(f => (f._1.toSeq, f._2)).repartition(sizes)
+    }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).filter(f => f._1 != f._2).filter(f => f._1%5==3 && f._2%5==3).distinct().map(f => (Array(f._1, f._2), 1)).map(f => (f._1.toSeq, f._2)).repartition(sizes)
 
     rawRDD.persist(StorageLevel.DISK_ONLY)
+
+
+
 
     val resRDD = rawRDD.rdd
     resRDD

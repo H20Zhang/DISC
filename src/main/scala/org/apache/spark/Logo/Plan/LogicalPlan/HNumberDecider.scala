@@ -1,6 +1,7 @@
-package org.apache.spark.Logo.Plan
+package org.apache.spark.Logo.Plan.LogicalPlan
 
 import java.io.PrintWriter
+
 import scala.sys.process._
 
 case class HNumberDecider(val patternMap:Map[String,Int], val lazyMap:Map[String,Boolean], val tree:QTree, val index:Int) {

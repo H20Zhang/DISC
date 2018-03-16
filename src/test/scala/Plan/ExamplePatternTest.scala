@@ -18,7 +18,7 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
 //  val queries = List("triangleAgg","squareAgg","chordalSquareAgg","houseAgg","threeTriangleAgg","near5CliqueAgg")
 //  val queries = List("squarePlusOneEdgeF", "trianglePlusTwoEdgeF")
 //val queries = List("trianglePlusTwoEdgeF")
-  val queries = List("fourClique")
+  val queries = List("debug")
 
 //  val queries = List("threeTriangleF")
 //val queries = List("square", "triangle", "chordalSquare", "house", "threeTriangle")
@@ -47,6 +47,7 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
           pattern.aggregatePattern(f).count()
         }
     }
+
   }
 
 

@@ -84,7 +84,7 @@ class LogoRDDReferenceTest extends FunSuite{
         pattern.pattern(0) < pattern.pattern(1)
     },true)
 
-
+    
     val edgeRDDReference = TestLogoRDDReferenceData.edgeLogoRDDReference
 
     edgeRDDReference.generateJ().patternRDD.map{

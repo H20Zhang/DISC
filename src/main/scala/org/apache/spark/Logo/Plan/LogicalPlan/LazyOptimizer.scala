@@ -1,4 +1,4 @@
-package org.apache.spark.Logo.Plan
+package org.apache.spark.Logo.Plan.LogicalPlan
 
 import org.apache.spark.Logo.UnderLying.utlis.ListGenerator
 

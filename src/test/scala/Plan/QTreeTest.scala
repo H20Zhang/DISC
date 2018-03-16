@@ -1,6 +1,7 @@
 package Plan
 
-import org.apache.spark.Logo.Plan.{HNumberDecider, LazyOptimizer, QTree, QTreeNode}
+import org.apache.spark.Logo.Plan.LogicalPlan.{HNumberDecider, LazyOptimizer, QTree, QTreeNode}
+import org.apache.spark.Logo.Plan.{LazyOptimizer, QTree, QTreeNode}
 import org.scalatest.FunSuite
 
 class QTreeTest extends FunSuite{
@@ -83,11 +84,11 @@ class QTreeTest extends FunSuite{
     queryTree.leftDeepTraverse(f => stringBuilder.append("\n" + f.name))
     println(stringBuilder)
 
-
     val patternMap = Seq(("Computation",1),("Communication",20),("Machine",64),("Edge",1),("Wedge",300),("Triangle1",10),("Triangle2",10),("ChordalSquare",5000)).toMap
 
     val lazyOptimizer = new LazyOptimizer(patternMap,queryTree)
     lazyOptimizer.optimize()
+
 
   }
 

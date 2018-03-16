@@ -1,4 +1,4 @@
-package org.apache.spark.Logo.Plan
+package org.apache.spark.Logo.Plan.LogicalPlan
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
