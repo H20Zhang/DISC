@@ -38,6 +38,7 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
       case "triangle" => triangleIntersectionVersion
       case "chordalSquare" => chordalSquareFast
       case "square" => squareIntersectionVerificationFast
+      case "wedge" => wedge
       case "debug" => squareIntersectionVerificationFast
       case "fourClique" => fourClique
       case "house" => houseIntersectionFast
@@ -72,7 +73,7 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
 
   lazy val wedge = {
     val edge = getEdge(h1,h2)
-    edge.build(edge.to(0,2))
+    edge.build(edge.to(0,2)).filter(p => p(1) < p(2))
   }
 
   //simple pattern

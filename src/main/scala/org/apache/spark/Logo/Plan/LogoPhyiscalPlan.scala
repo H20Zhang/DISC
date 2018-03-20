@@ -166,10 +166,19 @@ class LogoComposite3IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
   lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs, compositeSchema, handler)
 
   def generateLeftLeafPhyiscal(): PatternLogoRDD = {
+    //warning should only work for sampling mode, doesn't use it for normal enumeration
+    if (leftLeafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
+      return leftLeafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    }
     leftLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreLeftLeafJoins().leafJoints,true)
   }
 
   def generateRightLeafPhysical(): PatternLogoRDD = {
+
+    //warning should only work for sampling mode, doesn't use it for normal enumeration
+    if (rightLeafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
+      return rightLeafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    }
     rightLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreRightLeafJoins().leafJoints,true)
   }
 
@@ -230,6 +239,9 @@ class LogoComposite2PatternPhysicalPlan(@transient logoRDDRefs: Seq[LogoPatternP
   lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs, compositeSchema, handler)
 
   override def generateLeafPhyiscal(): PatternLogoRDD = {
+    if (leafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
+      return leafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    }
     leafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreLeafJoins().leafJoints)
   }
 
@@ -287,6 +299,32 @@ class LogoEdgePatternPhysicalPlan(@transient edgeLogoRDD: ConcreteLogoRDD) exten
 
   override def generateNewPatternJState() = {
     edgeLogoRDD
+  }
+}
+
+/**
+  * The class represent the edge pattern for starting the building
+  *
+  * @param edgeLogoRDD the actually data of the edge
+  */
+class LogoKeyValuePatternPhysicalPlan(@transient edgeLogoRDD: KeyValueLogoRDD) extends LogoPatternPhysicalPlan(List(), List()) {
+
+  override def generateNewPatternFState(): PatternLogoRDD = {
+    edgeLogoRDD
+  }
+
+  override def getSchema(): LogoSchema = edgeLogoRDD.patternSchema
+
+  override def generateLeafPhyiscal(): PatternLogoRDD = {
+    generateNewPatternFState()
+  }
+
+  override def generateCorePhyiscal(): PatternLogoRDD = {
+    generateNewPatternJState()
+  }
+
+  override def generateNewPatternJState() = {
+    edgeLogoRDD.toConcretePatternLogoRDD
   }
 }
 

@@ -1,23 +1,22 @@
-package Plan
+package org.apache.spark.Logo.Experiment
 
 import org.apache.spark.Logo.UnderLying.utlis.{ExamplePattern, ExamplePatternSampler, SparkSingle}
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class SampledExamplePatternTest extends FunSuite with BeforeAndAfterAll{
+object LegoSampleMainEntry {
+  def main(args: Array[String]): Unit = {
+    val data = args(0)
+//    val patternName = args(1)
+//    val h = args(2).toInt
 
-  val data = "./wikiV.txt"
-  val sampledPattern = new ExamplePatternSampler(data, k=1)
-  val pattern = new ExamplePattern(data)
+    SparkSingle.isCluster = true
+//    SparkSingle.appName = s"Logo-${data}-${patternName}"
 
-  test("triangleSample"){
+    val pattern = new ExamplePattern(data)
 
-//    val kList = List(1,2,3,4,5,10,15,20,30)
     val kList = List(1)
     val query = List("wedge","triangle","chordalSquare","square").toParArray
     val realSizes = query.map{f =>
-
-      1
-//      pattern.pattern(f).size()
+      pattern.pattern(f).size()
     }
 
     kList.foreach{
@@ -35,9 +34,6 @@ class SampledExamplePatternTest extends FunSuite with BeforeAndAfterAll{
       }
     }
 
-  }
 
-  override protected def afterAll(): Unit = {
-    SparkSingle.close()
   }
 }
