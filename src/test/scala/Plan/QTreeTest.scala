@@ -1,7 +1,6 @@
 package Plan
 
 import org.apache.spark.Logo.Plan.LogicalPlan.{HNumberDecider, LazyOptimizer, QTree, QTreeNode}
-import org.apache.spark.Logo.Plan.{LazyOptimizer, QTree, QTreeNode}
 import org.scalatest.FunSuite
 
 class QTreeTest extends FunSuite{

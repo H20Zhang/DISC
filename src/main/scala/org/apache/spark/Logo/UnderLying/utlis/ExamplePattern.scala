@@ -1283,6 +1283,9 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
 
         }
 
+        mutable.LongMap
+
+
         longMap.keys().zip(longMap.values()).iterator
 
 

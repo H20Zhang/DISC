@@ -87,13 +87,14 @@ object SparkSingle {
   private var spark:SparkSession = _
 
   private var sc:SparkContext = _
-  //  sc.setLogLevel("ERROR")
+//    sc.setLogLevel("ERROR")
 
   var counter = 0
 
   def getSpark() = {
     spark = getSparkInternal()
     sc = spark.sparkContext
+    sc.setLogLevel("ERROR")
     (spark, sc)
   }
 

@@ -5,6 +5,9 @@ import org.apache.spark.Logo.UnderLying.Maker.SimpleRowLogoRDDMaker
 import org.apache.spark.Logo.UnderLying.dataStructure.{ConcreteLogoRDD, EdgePatternLogoBlock, LogoBlockRef, PatternInstance}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
+import org.apache.spark.util.Utils
+
+import scala.util.Random
 
 class EdgeLoader(data: String, sizes: Int = 64) {
 
@@ -40,16 +43,51 @@ class EdgeLoader(data: String, sizes: Int = 64) {
           res = (splittedString(0).toInt, splittedString(1).toInt)
         }
         res
-    }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).filter(f => f._1 != f._2).filter(f => f._1%5==3 && f._2%5==3).distinct().map(f => (Array(f._1, f._2), 1)).map(f => (f._1.toSeq, f._2)).repartition(sizes)
+    }.filter(f => f != null)
+      .flatMap(f => Iterable(f, f.swap))
+      .filter(f => f._1 != f._2)
+      .distinct()
+//      .filter(f => f._1 % 10 == 3)
+      .map(f => (Array(f._1, f._2), 1))
+      .map(f => (f._1.toSeq, f._2))
+      .repartition(sizes)
 
     rawRDD.persist(StorageLevel.DISK_ONLY)
-
-
-
 
     val resRDD = rawRDD.rdd
     resRDD
   }
+
+  def sampledRawEdgeRDD(k:Int) = {
+
+    import spark.implicits._
+    val rawData = spark.read.textFile(data)
+
+
+    val rawRDD = rawData.map {
+      f =>
+        var res: (Int, Int) = null
+        if (!f.startsWith("#")) {
+          val splittedString = f.split("\\s")
+          res = (splittedString(0).toInt, splittedString(1).toInt)
+        }
+        res
+    }.filter(f => f != null).mapPartitions{f =>
+      val random = Random
+      random.setSeed(System.nanoTime())
+
+      f.filter(p => random.nextInt(1000) < k)
+    }.flatMap(f => Iterable(f, f.swap)).filter(f => f._1 != f._2)
+      .distinct()
+//      .filter(f => f._1 % 10 == 3)
+      .map(f => (Array(f._1, f._2), 1))
+      .map(f => (f._1.toSeq, f._2))
+      .repartition(sizes)
+
+    val resRDD = rawRDD.rdd
+    resRDD
+  }
+
 }
 
 class EdgePatternLoader(rawRDD: RDD[(Seq[Int], Int)], sizes: Seq[Int]) {
