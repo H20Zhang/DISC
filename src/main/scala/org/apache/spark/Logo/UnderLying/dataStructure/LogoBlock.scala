@@ -1017,9 +1017,9 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       var vCur = 0
       val uD = leftArray.size
       val vD = rightArray.size
-      val buffer = ArrayBuffer[Int]()
+      val buffer = new ArrayBuffer[Int](Math.min(uD,vD))
       var bufferFilled = false
-      val bound1 = 5
+      val bound1 = 10
       val bound2 = 10
       fillBuffer()
 
@@ -1036,10 +1036,13 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
           (uCur < uD) && (vCur < vD)
         }) {
 
-          if (leftArray(uCur) < rightArray(vCur)) uCur += 1
-          else if (leftArray(uCur) > rightArray(vCur)) vCur += 1
+          val lValue = leftArray(uCur)
+          val rValue = rightArray(vCur)
+
+          if (lValue < rValue) uCur += 1
+          else if (lValue > rValue) vCur += 1
           else {
-            buffer += leftArray(uCur)
+            buffer += lValue
             uCur += 1
             vCur += 1
           }
@@ -1049,64 +1052,66 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       //for uD > vD * bound
       def _fillBuffer2(): Unit = {
 
-        var pos = util.Arrays.binarySearch(leftArray,rightArray(vD-1))
-        if (pos <= uD-1) {
-          pos += 1
-        }
+//        var pos = util.Arrays.binarySearch(leftArray,rightArray(vD-1))
+//        if (pos <= uD-1) {
+//          pos += 1
+//        }
 
-        if (pos >= bound2 * vD){
+//        if (1+uD.toDouble/vD > bound2 * Math.log(vD.toDouble)) {
           //fill the buffer
           var prev = 0
-          while (vCur < vD){
+          while (vCur < vD) {
 
-            val temp = util.Arrays.binarySearch(leftArray,prev,pos,rightArray(vCur))
-            if (temp >= 0){
+            val temp = util.Arrays.binarySearch(leftArray, prev, uD, rightArray(vCur))
+            if (temp >= 0) {
               buffer += rightArray(vCur)
               prev = temp
             }
             vCur += 1
           }
-        } else {
-          _fillBuffer1()
-        }
+//        }
+//        } else {
+//          _fillBuffer1()
+//        }
       }
 
       //for vD > uD * bound
       def _fillBuffer3(): Unit = {
-        var pos = util.Arrays.binarySearch(rightArray,leftArray(uD-1))
-        if (pos <= vD-1){
-          pos += 1
-        }
+//        var pos = util.Arrays.binarySearch(rightArray,leftArray(uD-1))
+//        if (pos <= vD-1){
+//          pos += 1
+//        }
 
-        if (pos >= bound2 * uD){
+//        if (1+vD.toDouble/uD > bound2 * Math.log(uD.toDouble)) {
           //fill the buffer
           var prev = 0
-          while (uCur < uD){
+          while (uCur < uD) {
 
-            val temp = util.Arrays.binarySearch(rightArray,prev,pos,leftArray(uCur))
-            if (temp >= 0){
+            val temp = util.Arrays.binarySearch(rightArray, prev, vD, leftArray(uCur))
+            if (temp >= 0) {
               buffer += leftArray(uCur)
               prev = temp
             }
             uCur += 1
           }
-
-        } else {
-          _fillBuffer1()
-        }
+//        }
+//        } else {
+//          _fillBuffer1()
+//        }
       }
 
 
 
       def fillBuffer(): Unit = {
-        _fillBuffer1()
-//        if (uD < bound1*vD && vD < bound1*uD){
-//          _fillBuffer1()
-//        } else if (uD >= bound1 * vD) {
-//          _fillBuffer2()
-//        } else if (vD >= bound1 * uD) {
-//          _fillBuffer3()
-//        }
+
+
+        if (1+uD.toDouble/vD > bound1 * (Math.log(vD.toDouble)/Math.log(2))) {
+          _fillBuffer2()
+        } else if (1+vD.toDouble/uD > bound1 * (Math.log(uD.toDouble)/Math.log(2))) {
+          _fillBuffer3()
+        } else{
+          _fillBuffer1()
+        }
       }
 
 

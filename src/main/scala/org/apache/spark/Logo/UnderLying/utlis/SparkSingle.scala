@@ -94,7 +94,7 @@ object SparkSingle {
   def getSpark() = {
     spark = getSparkInternal()
     sc = spark.sparkContext
-    sc.setLogLevel("ERROR")
+//    sc.setLogLevel("ERROR")
     (spark, sc)
   }
 
