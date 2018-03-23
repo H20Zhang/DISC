@@ -39,13 +39,14 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
       case "chordalSquare" => chordalSquareFast
       case "square" => squareIntersectionVerificationFast
       case "wedge" => wedge
-      case "debug" => houseIntersectionFast
+      case "debug" => threeTriangleNoAdaptive
       case "fourClique" => fourClique
       case "house" => houseIntersectionFast
       case "houseGJ" => houseIntersectionGJ
       case "houseGHD" => houseIntersectionGHD
       case "houseF" => houseIntersectionF
       case "threeTriangle" => threeTriangleFast
+      case "threeTriangleNoAD" => threeTriangleNoAdaptive
       case "threeTriangleF" => threeTriangleF
       case "trianglePlusOneEdge" => trianglePlusOneEdge
       case "trianglePlusTwoEdgeF" => trianglePlusTwoEdgeF
@@ -913,6 +914,36 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
     }, false)
 
     val threeTriangle = chordalSquareTemp.toIdentitySubPattern().build(indexTriangle.toSubPattern((0, 0), (1, 2), (2, 4)))
+      .filter(filterCondition1)
+
+    threeTriangle
+  }
+
+  lazy val threeTriangleNoAdaptive = {
+    val edge4_1 = getEdge(h1, 1)
+    val edge4_4 = getEdge(h1, h2)
+
+    val leftEdge = edge4_4.toIdentitySubPattern()
+
+    val filterCondition = FilteringCondition({
+      pattern =>
+        val p = pattern.pattern
+        p(1) < p(2)
+    }, false)
+
+    val triangle = leftEdge.build(edge4_4.toSubPattern((0, 0), (1, 2)), edge4_4.toSubPattern((0, 1), (1, 2))).filter(filterCondition)
+
+//    val indexTriangle = leftEdge.build(edge4_1.toSubPattern((0, 0), (1, 2)), edge4_1.toSubPattern((0, 1), (1, 2)))
+
+    val chordalSquareTemp = triangle.toIdentitySubPattern().build(edge4_1.toSubPattern((0, 0), (1, 3)), edge4_1.toSubPattern((0, 1), (1, 3)))
+
+    val filterCondition1 = FilteringCondition({
+      pattern =>
+        val p = pattern.pattern
+        p(3) != p(2) && p(4) != p(1) && p(3) != p(4)
+    }, false)
+
+    val threeTriangle = chordalSquareTemp.toIdentitySubPattern().build(edge4_1.toSubPattern((0, 0), (1, 4)), edge4_1.toSubPattern((0, 2), (1, 4)))
       .filter(filterCondition1)
 
     threeTriangle

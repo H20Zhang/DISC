@@ -160,7 +160,10 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
       f =>
         var size = 0L
         val block = f.asInstanceOf[PatternLogoBlock[_]]
+
         val iterator = block.enumerateIterator()
+
+        val time = System.nanoTime()
 
         if (iterator.isInstanceOf[enumerateIterator]){
           size += iterator.asInstanceOf[enumerateIterator].longSize()
@@ -169,6 +172,10 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
             size += 1
           }
         }
+
+        val time2 = System.nanoTime()
+
+        println(s"computation time is: ${(time2-time).toDouble/1000000000}")
 
         size
     }.sum().toLong

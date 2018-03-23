@@ -969,7 +969,7 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
     )
   }
 
-//  val resultMap = new mutable.LongMap[ArrayBuffer[Int]](initialBufferSize = 4096)
+  val resultMap = new mutable.HashMap[(Array[Int],Array[Int]),ArrayBuffer[Int]]()
 
 
   abstract class resetableIterator extends Iterator[Int]{
@@ -978,7 +978,6 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
   }
 
 
-  //  val resultMap = new mutable.HashMap[(Array[Int],Array[Int]),Iterator[Int]]()
   //TODO this method currently only work for one node cases
   def generateIntersectionIterator(leftIterator: Array[Int], rightIterator: Array[Int]): ArrayBuffer[Int] = {
 
@@ -998,13 +997,12 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
 //      }
     }
 
-//    val key1 = leftIterator.hashCode()
-//    val key2 = rightIterator.hashCode()
-//    val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
-//        if (resultMap.contains(key)){
-//          val res = resultMap(key)
-//          return res
-//        }
+
+    if (resultMap.contains((leftIterator,rightIterator))){
+          val res = resultMap((leftIterator,rightIterator))
+//          println(s"contains $key")
+          return res
+        }
 
     var res: resetableIterator = null
 
@@ -1128,7 +1126,7 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       }
     }
 //  }
-//    resultMap.put(key,res.getArray())
+    resultMap.put((leftIterator,rightIterator),res.getArray())
 
     res.getArray()
   }
