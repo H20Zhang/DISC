@@ -969,7 +969,7 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
     )
   }
 
-  val resultMap = new mutable.HashMap[(Array[Int],Array[Int]),ArrayBuffer[Int]]()
+//  val resultMap = new mutable.HashMap[(Array[Int],Array[Int]),ArrayBuffer[Int]]()
 
 
   abstract class resetableIterator extends Iterator[Int]{
@@ -998,11 +998,11 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
     }
 
 
-    if (resultMap.contains((leftIterator,rightIterator))){
-          val res = resultMap((leftIterator,rightIterator))
-//          println(s"contains $key")
-          return res
-        }
+//    if (resultMap.contains((leftIterator,rightIterator))){
+//          val res = resultMap((leftIterator,rightIterator))
+////          println(s"contains $key")
+//          return res
+//        }
 
     var res: resetableIterator = null
 
@@ -1126,7 +1126,7 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
       }
     }
 //  }
-    resultMap.put((leftIterator,rightIterator),res.getArray())
+//    resultMap.put((leftIterator,rightIterator),res.getArray())
 
     res.getArray()
   }
