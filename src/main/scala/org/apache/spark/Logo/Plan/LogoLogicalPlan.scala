@@ -61,6 +61,9 @@ abstract class LogoRDDReference(schema: LogoSchema, buildScriptStep: LogoBuildSc
 
   //build a larger pattern using three sub-pattern, this works like a GJ Join.
   def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference
+
+  //build a larger pattern using four sub-pattern, this works like a GJ Join.
+  def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference, subPattern3: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference
 }
 
 /**
@@ -205,6 +208,10 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
     this.toIdentitySubPattern().build(subPattern1,subPattern2)
   }
 
+  override def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference, subPattern3: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+    this.toIdentitySubPattern().build(subPattern1,subPattern2,subPattern3)
+  }
+
 
 
 
@@ -267,6 +274,16 @@ class SubPatternLogoRDDReference(val patternLogoRDDReference: PatternLogoRDDRefe
     val logoRDDReference = newLogoBuildScriptStep.toLogoRDDReference()
 
     new ComposingPatternLogoRDDReference(Seq(patternLogoRDDReference, subPattern1.patternLogoRDDReference, subPattern2.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
+  }
+
+  //TODO this only intended for pattern like fourClique, more cases need to be further implemented
+  def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference, subPattern3: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+    val logoBuildScriptSteps = Seq(patternLogoRDDReference.buildScript, subPattern1.patternLogoRDDReference.buildScript, subPattern2.patternLogoRDDReference.buildScript, subPattern3.patternLogoRDDReference.buildScript)
+    val keyMappings = Seq(keyMapping, subPattern1.keyMapping, subPattern2.keyMapping, subPattern3.patternLogoRDDReference.buildScript)
+    val newLogoBuildScriptStep = new LogoComposite4IntersectionPatternPhysicalPlan(logoBuildScriptSteps, keyMappings)
+    val logoRDDReference = newLogoBuildScriptStep.toLogoRDDReference()
+
+    new ComposingPatternLogoRDDReference(Seq(patternLogoRDDReference, subPattern1.patternLogoRDDReference, subPattern2.patternLogoRDDReference, subPattern3.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
   }
 }
 

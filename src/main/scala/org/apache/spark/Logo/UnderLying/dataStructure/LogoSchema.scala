@@ -155,6 +155,10 @@ class CompositeLogoSchema(val schema: LogoSchema,
     PlannedThreeCompositeLogoSchema(coreId, schema, oldSchemas, keyMappings)
   }
 
+  def toPlan4CompositeSchema(coreId: Int) = {
+    PlannedFourCompositeLogoSchema(coreId, schema, oldSchemas, keyMappings)
+  }
+
 
 }
 

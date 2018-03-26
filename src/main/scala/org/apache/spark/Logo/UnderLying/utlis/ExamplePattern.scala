@@ -120,6 +120,15 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
     triangle
   }
 
+
+  //TODO need testing
+  lazy val fourCliqueNew = {
+    val filteredEdge = edge.filter(p => p(0) < p(1),true)
+    val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2))
+    val fourClique = triangle.build(filteredEdge.to(1,3),filteredEdge.to(0,3),,filteredEdge.to(2,3))
+    fourClique
+  }
+
   lazy val threeLine = {
     val edge = this.edge
 

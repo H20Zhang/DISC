@@ -1407,7 +1407,7 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
   }
 
 
-  @transient lazy val totalNodes = (coreKeyMapping.values ++ leftvalueMapping.values ++ rightvalueMapping.values).toSeq.max + 1
+  @transient lazy val totalNodes = (coreKeyMapping.values ++ leftvalueMapping.values ++ rightvalueMapping.values ++ midvalueMapping.values).toSeq.max + 1
 
 
   val coreKeyMappingArray = coreKeyMapping.keyMapping.toArray
@@ -1431,8 +1431,6 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
     )
   }
 
-  //  val resultMap = new mutable.HashMap[(Array[Int],Array[Int]),ArrayBuffer[Int]]()
-
 
   abstract class resetableIterator extends Iterator[Int]{
     def reset():Unit
@@ -1440,23 +1438,122 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
   }
 
 
+  class reIterator(leftIterator:Array[Int], rightIterator:Array[Int]) extends Iterator[Int]{
+    var nextEle: Int = 0
+
+    var leftArray = leftIterator
+    var rightArray = rightIterator
+
+    var uCur = 0
+    var vCur = 0
+    val uD = leftArray.size
+    val vD = rightArray.size
+    val buffer = new ArrayBuffer[Int](Math.min(uD,vD))
+    var bufferFilled = false
+    val bound1 = 10
+    val bound2 = 10
+    fillBuffer()
+
+    var bufferedIterator = buffer.iterator
+
+    final override def hasNext: Boolean = {
+      bufferedIterator.hasNext
+    }
+
+
+    //for balance cases
+    def _fillBuffer1(): Unit = {
+      while ( {
+        (uCur < uD) && (vCur < vD)
+      }) {
+
+        val lValue = leftArray(uCur)
+        val rValue = rightArray(vCur)
+
+        if (lValue < rValue) uCur += 1
+        else if (lValue > rValue) vCur += 1
+        else {
+          buffer += lValue
+          uCur += 1
+          vCur += 1
+        }
+      }
+    }
+
+    //for uD > vD * bound
+    def _fillBuffer2(): Unit = {
+
+      var prev = 0
+      while (vCur < vD) {
+
+        val temp = util.Arrays.binarySearch(leftArray, prev, uD, rightArray(vCur))
+        if (temp >= 0) {
+          buffer += rightArray(vCur)
+          prev = temp
+        }
+        vCur += 1
+      }
+    }
+
+    //for vD > uD * bound
+    def _fillBuffer3(): Unit = {
+      var prev = 0
+      while (uCur < uD) {
+
+        val temp = util.Arrays.binarySearch(rightArray, prev, vD, leftArray(uCur))
+        if (temp >= 0) {
+          buffer += leftArray(uCur)
+          prev = temp
+        }
+        uCur += 1
+      }
+    }
+
+
+
+    def fillBuffer(): Unit = {
+
+
+      if (1+uD.toDouble/vD > bound1 * (Math.log(vD.toDouble)/Math.log(2))) {
+        _fillBuffer2()
+      } else if (1+vD.toDouble/uD > bound1 * (Math.log(uD.toDouble)/Math.log(2))) {
+        _fillBuffer3()
+      } else{
+        _fillBuffer1()
+      }
+    }
+
+
+    final override def next(): Int = {
+      bufferedIterator.next()
+    }
+
+    override def reset(): Unit = {
+      bufferedIterator = buffer.iterator
+    }
+
+    override def getArray(): ArrayBuffer[Int] = {
+      buffer
+    }
+  }
+
+
+
+
+
   //TODO this method currently only work for one node cases
-  def generateIntersectionIterator(leftIterator: Array[Int], rightIterator: Array[Int]): ArrayBuffer[Int] = {
+  def generateIntersectionIterator(leftIterator: Array[Int], rightIterator: Array[Int], midIterator: Array[Int]): ArrayBuffer[Int] = {
 
     if (leftIterator == null || !(leftIterator.size != 0)) {
       return null.asInstanceOf[ArrayBuffer[Int]]
-      //      return new AbstractIterator[Int] {
-      //        override def hasNext: Boolean = false
-      //        override def next(): Int = 0
-      //      }
     }
 
     if (rightIterator == null || !(rightIterator.size != 0)) {
       return null.asInstanceOf[ArrayBuffer[Int]]
-      //      return new AbstractIterator[Int] {
-      //        override def hasNext: Boolean = false
-      //        override def next(): Int = 0
-      //      }
+    }
+
+    if (midIterator == null || !(midIterator.size != 0)) {
+      return null.asInstanceOf[ArrayBuffer[Int]]
     }
 
 
@@ -1470,127 +1567,19 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
 
     var res: resetableIterator = null
 
-    res = new resetableIterator {
+    if (leftIterator.size > rightIterator.size && leftIterator.size > midIterator.size){
 
-      var nextEle: Int = 0
-      var leftArray = leftIterator
-      var rightArray = rightIterator
-      var uCur = 0
-      var vCur = 0
-      val uD = leftArray.size
-      val vD = rightArray.size
-      val buffer = new ArrayBuffer[Int](Math.min(uD,vD))
-      var bufferFilled = false
-      val bound1 = 10
-      val bound2 = 10
-      fillBuffer()
+      val resTemp = new reIterator(rightIterator,midIterator)
+      res = new reIterator(resTemp.getArray(),leftIterator)
 
-      var bufferedIterator = buffer.iterator
+    } else if(rightIterator.size > leftIterator.size && rightIterator.size > midIterator.size) {
+      val resTemp = new reIterator(leftIterator,midIterator)
+      res = new reIterator(resTemp.getArray(),rightIterator)
 
-      final override def hasNext: Boolean = {
-        bufferedIterator.hasNext
-      }
-
-
-      //for balance cases
-      def _fillBuffer1(): Unit = {
-        while ( {
-          (uCur < uD) && (vCur < vD)
-        }) {
-
-          val lValue = leftArray(uCur)
-          val rValue = rightArray(vCur)
-
-          if (lValue < rValue) uCur += 1
-          else if (lValue > rValue) vCur += 1
-          else {
-            buffer += lValue
-            uCur += 1
-            vCur += 1
-          }
-        }
-      }
-
-      //for uD > vD * bound
-      def _fillBuffer2(): Unit = {
-
-        //        var pos = util.Arrays.binarySearch(leftArray,rightArray(vD-1))
-        //        if (pos <= uD-1) {
-        //          pos += 1
-        //        }
-
-        //        if (1+uD.toDouble/vD > bound2 * Math.log(vD.toDouble)) {
-        //fill the buffer
-        var prev = 0
-        while (vCur < vD) {
-
-          val temp = util.Arrays.binarySearch(leftArray, prev, uD, rightArray(vCur))
-          if (temp >= 0) {
-            buffer += rightArray(vCur)
-            prev = temp
-          }
-          vCur += 1
-        }
-        //        }
-        //        } else {
-        //          _fillBuffer1()
-        //        }
-      }
-
-      //for vD > uD * bound
-      def _fillBuffer3(): Unit = {
-        //        var pos = util.Arrays.binarySearch(rightArray,leftArray(uD-1))
-        //        if (pos <= vD-1){
-        //          pos += 1
-        //        }
-
-        //        if (1+vD.toDouble/uD > bound2 * Math.log(uD.toDouble)) {
-        //fill the buffer
-        var prev = 0
-        while (uCur < uD) {
-
-          val temp = util.Arrays.binarySearch(rightArray, prev, vD, leftArray(uCur))
-          if (temp >= 0) {
-            buffer += leftArray(uCur)
-            prev = temp
-          }
-          uCur += 1
-        }
-        //        }
-        //        } else {
-        //          _fillBuffer1()
-        //        }
-      }
-
-
-
-      def fillBuffer(): Unit = {
-
-
-        if (1+uD.toDouble/vD > bound1 * (Math.log(vD.toDouble)/Math.log(2))) {
-          _fillBuffer2()
-        } else if (1+vD.toDouble/uD > bound1 * (Math.log(uD.toDouble)/Math.log(2))) {
-          _fillBuffer3()
-        } else{
-          _fillBuffer1()
-        }
-      }
-
-
-      final override def next(): Int = {
-        bufferedIterator.next()
-      }
-
-      override def reset(): Unit = {
-        bufferedIterator = buffer.iterator
-      }
-
-      override def getArray(): ArrayBuffer[Int] = {
-        buffer
-      }
+    } else {
+      val resTemp = new reIterator(rightIterator,leftIterator)
+      res = new reIterator(resTemp.getArray(),midIterator)
     }
-    //  }
-    //    resultMap.put((leftIterator,rightIterator),res.getArray())
 
     res.getArray()
   }
@@ -1600,6 +1589,7 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
 
     var leftLeafsIterator: Array[Int] = _
     var rightLeafsIterator: Array[Int] = _
+    var midLeafsIterator: Array[Int] = _
     var intersectIterator: ArrayBuffer[Int] = _
     val coreIterator: Iterator[PatternInstance] = coreBlock.iterator()
     var currentCore: PatternInstance = _
@@ -1618,7 +1608,8 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
           }
           leftLeafsIterator = genereateLeftLeafsNode(currentCore)
           rightLeafsIterator = genereateRightLeafsNode(currentCore)
-          intersectIterator = generateIntersectionIterator(leftLeafsIterator, rightLeafsIterator)
+          midLeafsIterator = genereateMidLeafsNode(currentCore)
+          intersectIterator = generateIntersectionIterator(leftLeafsIterator, rightLeafsIterator, midLeafsIterator)
           cur = 0
           if (intersectIterator != null){
             end = intersectIterator.size
@@ -1643,12 +1634,13 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
 
     var leftLeafsIterator: Array[Int] = _
     var rightLeafsIterator: Array[Int] = _
+    var midLeafsIterator: Array[Int] = _
     var intersectIterator: ArrayBuffer[Int] = _
     val coreIterator: Iterator[PatternInstance] = coreBlock.enumerateIterator()
     var currentCore: PatternInstance = _
-    //    val TintBuffer = new TIntArrayList(totalNodes)
+
     val array = Array.fill(totalNodes)(0)
-    //    val array = new FixSizeArray(totalNodes)
+
     val currentPattern: EnumeratePatternInstance = new EnumeratePatternInstance(array)
     val coreMapping = coreKeyMapping.keyMapping.toArray
 
@@ -1671,9 +1663,6 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
     var cur = 0
     var end = 0
 
-    //    private def generateAllCoreAndGroup = {
-    //      coreBlock.iterator().toBuffer
-    //    }
 
     private def moveToNext: Option[Boolean] = {
       do {
@@ -1689,7 +1678,8 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
         }
         leftLeafsIterator = genereateLeftLeafsNode(currentCore)
         rightLeafsIterator = genereateRightLeafsNode(currentCore)
-        intersectIterator = generateIntersectionIterator(leftLeafsIterator, rightLeafsIterator)
+        midLeafsIterator = genereateMidLeafsNode(currentCore)
+        intersectIterator = generateIntersectionIterator(leftLeafsIterator, rightLeafsIterator, midLeafsIterator)
 
         if (intersectIterator != null) {
           cur = 0

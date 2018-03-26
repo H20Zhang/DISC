@@ -76,7 +76,7 @@ class Planned2HandlerGenerator(coreId: Int) extends Serializable {
   }
 }
 
-// the generator for generating the handler for converting blocks into a planned2CompositeBlock.
+// the generator for generating the handler for converting blocks into a planned3CompositeBlock.
 class Planned3HandlerGenerator(coreId: Int) extends Serializable {
   def generate(): (Seq[LogoBlockRef], CompositeLogoSchema, Int) => LogoBlockRef = {
     (blocks, schema, index) =>
@@ -90,6 +90,23 @@ class Planned3HandlerGenerator(coreId: Int) extends Serializable {
       val planne3CompositeLogoBlock = new CompositeThreePatternLogoBlock(planned3CompositeSchema, metaData, subBlocks)
 
       planne3CompositeLogoBlock
+  }
+}
+
+// the generator for generating the handler for converting blocks into a planned2CompositeBlock.
+class Planned4HandlerGenerator(coreId: Int) extends Serializable {
+  def generate(): (Seq[LogoBlockRef], CompositeLogoSchema, Int) => LogoBlockRef = {
+    (blocks, schema, index) =>
+
+      val planned4CompositeSchema = schema.toPlan4CompositeSchema(coreId)
+      val subBlocks = blocks.asInstanceOf[Seq[PatternLogoBlock[_]]]
+
+      //TODO this place needs to implement later, although currently it has no use.
+      val metaData = LogoMetaData(schema.IndexToKey(index), 10)
+
+      val planne4CompositeLogoBlock = new CompositeFourPatternLogoBlock(planned4CompositeSchema, metaData, subBlocks)
+
+      planne4CompositeLogoBlock
   }
 }
 
@@ -133,6 +150,92 @@ class LogoFilterPatternPhysicalPlan(@transient f: FilteringCondition, @transient
 
   override def getSchema(): LogoSchema = buildLogicalStep.getSchema()
 
+}
+
+
+/**
+  * The class that represent composing a new Pattern using two existing pattern
+  *
+  * @param logoRDDRefs logical logoRDD used to build this LogoRDD
+  * @param keyMapping  the keyMapping between the old Logo and new Logo
+  */
+class LogoComposite4IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[LogoPatternPhysicalPlan], @transient keyMapping: Seq[KeyMapping]) extends LogoPatternPhysicalPlan(logoRDDRefs, keyMapping) {
+
+  lazy val schema = getSchema()
+  lazy val coreLogoRef = logoRDDRefs(coreId)
+
+  lazy val leftLeafLogoRef = logoRDDRefs(1)
+
+  lazy val rightLeafLogoRef = logoRDDRefs(2)
+
+  lazy val midLeafLogoRef = logoRDDRefs(3)
+
+  lazy val leftLogo = generateLeftLeafPhyiscal()
+  lazy val rightLogo = generateRightLeafPhysical()
+  lazy val midLogo = generateMidLeafPhysical()
+
+
+  lazy val logoRDDs = Seq(corePhysical, leftLogo, rightLogo, midLogo)
+
+
+  lazy val handler = {
+    new Planned4HandlerGenerator(coreId) generate()
+  }
+
+  lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs, compositeSchema, handler)
+
+  def generateLeftLeafPhyiscal(): PatternLogoRDD = {
+    //warning should only work for sampling mode, doesn't use it for normal enumeration
+    if (leftLeafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
+      return leftLeafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    }
+    leftLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreLeftLeafJoins().leafJoints,true)
+  }
+
+  def generateRightLeafPhysical(): PatternLogoRDD = {
+
+    //warning should only work for sampling mode, doesn't use it for normal enumeration
+    if (rightLeafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
+      return rightLeafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    }
+    rightLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreRightLeafJoins().leafJoints,true)
+  }
+
+  def generateMidLeafPhysical(): PatternLogoRDD = {
+
+    //warning should only work for sampling mode, doesn't use it for normal enumeration
+    if (midLeafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
+      return midLeafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    }
+    midLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreMidLeafJoins().leafJoints,true)
+  }
+
+  override def generateCorePhyiscal(): PatternLogoRDD = {
+    val corePatternLogoRDD = coreLogoRef.generateNewPatternFState()
+
+    if (corePatternLogoRDD.patternRDD.getStorageLevel == null) {
+
+      corePatternLogoRDD.patternRDD.persist(StorageLevel.OFF_HEAP)
+      corePatternLogoRDD.patternRDD.count()
+    }
+
+    corePatternLogoRDD
+  }
+
+  override def generateNewPatternFState(): PatternLogoRDD = {
+    val fStatePatternLogoRDD = new PatternLogoRDD(logoStep.performFetchJoin(sc), getSchema())
+    //    fStatePatternLogoRDD.patternRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    fStatePatternLogoRDD
+  }
+
+  override def getSchema(): PlannedFourCompositeLogoSchema = compositeSchema.toPlan4CompositeSchema(coreId)
+
+  override def generateNewPatternJState(): ConcreteLogoRDD = {
+    generateNewPatternFState().toConcretePatternLogoRDD
+  }
+
+  //TODO this method is not used
+  override def generateLeafPhyiscal(): PatternLogoRDD = null
 }
 
 
