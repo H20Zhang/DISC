@@ -39,8 +39,9 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
       case "chordalSquare" => chordalSquareFast
       case "square" => squareIntersectionVerificationFast
       case "wedge" => wedge
-      case "debug" => threeTriangleNoAdaptive
-      case "fourClique" => fourClique
+      case "edge" => edge
+      case "debug" => near5CliqueNew
+      case "fourClique" => fourCliqueNew
       case "house" => houseIntersectionFast
       case "houseGJ" => houseIntersectionGJ
       case "houseGHD" => houseIntersectionGHD
@@ -52,7 +53,7 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
       case "trianglePlusTwoEdgeF" => trianglePlusTwoEdgeF
       case "trianglePlusWedge" => trianglePlusWedge
       case "squarePlusOneEdgeF" => squarePlusOneEdge
-      case "near5Clique" => near5Clique
+      case "near5Clique" => near5CliqueNew
       case "chordalRoof" => chordalRoof
       case _ => null
     }
@@ -125,7 +126,10 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
   lazy val fourCliqueNew = {
     val filteredEdge = edge.filter(p => p(0) < p(1),true)
     val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2))
-    val fourClique = triangle.build(filteredEdge.to(1,3),filteredEdge.to(0,3),,filteredEdge.to(2,3))
+
+    val filteredEdge4_1 = getEdge(h1,1).filter(p => p(0) < p(1),true)
+
+    val fourClique = triangle.build(filteredEdge4_1.to(0,3),filteredEdge4_1.to(1,3),filteredEdge4_1.to(2,3))
     fourClique
   }
 
@@ -1031,6 +1035,23 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
 
     near5Clique
   }
+
+  lazy val near5CliqueNew = {
+    val filteredEdge = edge
+    val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2))
+
+    val filteredEdge4_1 = getEdge(h1,1)
+
+    val fourClique = triangle.build(filteredEdge4_1.to(0,3),filteredEdge4_1.to(1,3),filteredEdge4_1.to(2,3)).filter(p => p(0) < p(1) && p(2) < p(3))
+
+    val indexTriangle = filteredEdge.build(filteredEdge4_1.to(1,2),filteredEdge4_1.to(0,2)).filter(p => p(0) < p(1))
+
+    val near5Clique = fourClique.build(indexTriangle.to(0,1,4)).filter(p => p(4) != p(2) && p(4) != p(3))
+
+
+    near5Clique
+  }
+
 
   lazy val chordalRoof = {
     val edge4_1 = getEdge(h1, 1)

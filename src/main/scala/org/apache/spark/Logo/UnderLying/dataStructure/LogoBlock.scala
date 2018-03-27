@@ -1337,7 +1337,7 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
   lazy val coreBlock = schema.getCoreBlock(rawData)
   lazy val leftLeafsBlock = schema.getLeftLeafBlock(rawData)
   lazy val rightLeafsBlock = schema.getRightLeafBlock(rawData)
-  lazy val midLeafsBlock = schema.getRightLeafBlock(rawData)
+  lazy val midLeafsBlock = schema.getMidLeafBlock(rawData)
 
   lazy val leftCoreLeafJoints = schema.getCoreLeftLeafJoins()
   lazy val rightCoreLeafJoints = schema.getCoreRightLeafJoins()
@@ -1438,7 +1438,7 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
   }
 
 
-  class reIterator(leftIterator:Array[Int], rightIterator:Array[Int]) extends Iterator[Int]{
+  class reIterator(leftIterator:Array[Int], rightIterator:Array[Int]) extends resetableIterator{
     var nextEle: Int = 0
 
     var leftArray = leftIterator
@@ -1570,15 +1570,15 @@ final class CompositeFourPatternLogoBlock(schema: PlannedFourCompositeLogoSchema
     if (leftIterator.size > rightIterator.size && leftIterator.size > midIterator.size){
 
       val resTemp = new reIterator(rightIterator,midIterator)
-      res = new reIterator(resTemp.getArray(),leftIterator)
+      res = new reIterator(resTemp.getArray().toArray,leftIterator)
 
     } else if(rightIterator.size > leftIterator.size && rightIterator.size > midIterator.size) {
       val resTemp = new reIterator(leftIterator,midIterator)
-      res = new reIterator(resTemp.getArray(),rightIterator)
+      res = new reIterator(resTemp.getArray().toArray,rightIterator)
 
     } else {
       val resTemp = new reIterator(rightIterator,leftIterator)
-      res = new reIterator(resTemp.getArray(),midIterator)
+      res = new reIterator(resTemp.getArray().toArray,midIterator)
     }
 
     res.getArray()

@@ -2,7 +2,7 @@ package org.apache.spark.Logo.Experiment
 
 import org.apache.spark.Logo.UnderLying.utlis.{ExamplePattern, SparkSingle}
 
-object LegoMainEntry {
+object LegoCommunicationMainEntry {
 
 
   def main(args: Array[String]): Unit = {
@@ -16,9 +16,7 @@ object LegoMainEntry {
     val pattern = new ExamplePattern(data,h,h)
 
     if (pattern.pattern(patternName) != null){
-      println(s"$patternName size is ${pattern.pattern(patternName).size()}")
-    } else{
-      pattern.aggregatePattern(patternName).count()
+      println(s"$patternName size is ${pattern.pattern(patternName).count()}")
     }
   }
 }

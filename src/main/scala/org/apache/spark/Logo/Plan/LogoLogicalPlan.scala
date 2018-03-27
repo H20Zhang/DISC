@@ -178,7 +178,7 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
 
         val time2 = System.nanoTime()
 
-        println(s"computation time is: ${(time2-time).toDouble/1000000000}")
+//        println(s"computation time is: ${(time2-time).toDouble/1000000000}")
 
         size
     }.sum().toLong
@@ -197,6 +197,16 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
         }
         size
 
+    }.count()
+  }
+
+  def count(): Long = {
+    generateF().logoRDD.map {
+      f =>
+        var size = 0L
+        val block = f.asInstanceOf[PatternLogoBlock[_]]
+        val iterator = block.enumerateIterator()
+        1
     }.count()
   }
 
@@ -279,7 +289,7 @@ class SubPatternLogoRDDReference(val patternLogoRDDReference: PatternLogoRDDRefe
   //TODO this only intended for pattern like fourClique, more cases need to be further implemented
   def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference, subPattern3: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
     val logoBuildScriptSteps = Seq(patternLogoRDDReference.buildScript, subPattern1.patternLogoRDDReference.buildScript, subPattern2.patternLogoRDDReference.buildScript, subPattern3.patternLogoRDDReference.buildScript)
-    val keyMappings = Seq(keyMapping, subPattern1.keyMapping, subPattern2.keyMapping, subPattern3.patternLogoRDDReference.buildScript)
+    val keyMappings = Seq(keyMapping, subPattern1.keyMapping, subPattern2.keyMapping, subPattern3.keyMapping)
     val newLogoBuildScriptStep = new LogoComposite4IntersectionPatternPhysicalPlan(logoBuildScriptSteps, keyMappings)
     val logoRDDReference = newLogoBuildScriptStep.toLogoRDDReference()
 

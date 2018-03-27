@@ -20,7 +20,7 @@ class EdgeLoader(data: String, sizes: Int = 64) {
     val rawRDD = rawData.map {
       f =>
         var res: (Int, Int) = null
-        if (!f.startsWith("#")) {
+        if (!f.startsWith("#") && !f.startsWith("%")) {
           val splittedString = f.split("\\s")
           res = (splittedString(0).toInt, splittedString(1).toInt)
         }
@@ -30,6 +30,27 @@ class EdgeLoader(data: String, sizes: Int = 64) {
     rawRDD.persist(StorageLevel.DISK_ONLY)
   }
 
+  def EdgeDataset = {
+    import spark.implicits._
+    val rawData = spark.read.textFile(data)
+
+    val rawRDD = rawData.map {
+      f =>
+        var res: (Int, Int) = null
+        if (!f.startsWith("#") && !f.startsWith("%")) {
+          val splittedString = f.split("\\s")
+          res = (splittedString(0).toInt, splittedString(1).toInt)
+        }
+        res
+    }.filter(f => f != null)
+      .flatMap(f => Iterable(f, f.swap))
+      .filter(f => f._1 != f._2)
+      .distinct()
+
+    rawRDD
+  }
+
+
   def rawEdgeRDD = {
 
     import spark.implicits._
@@ -38,7 +59,7 @@ class EdgeLoader(data: String, sizes: Int = 64) {
     val rawRDD = rawData.map {
       f =>
         var res: (Int, Int) = null
-        if (!f.startsWith("#")) {
+        if (!f.startsWith("#") && !f.startsWith("%")) {
           val splittedString = f.split("\\s")
           res = (splittedString(0).toInt, splittedString(1).toInt)
         }
@@ -67,7 +88,7 @@ class EdgeLoader(data: String, sizes: Int = 64) {
     val rawRDD = rawData.map {
       f =>
         var res: (Int, Int) = null
-        if (!f.startsWith("#")) {
+        if (!f.startsWith("#") && !f.startsWith("%")) {
           val splittedString = f.split("\\s")
           res = (splittedString(0).toInt, splittedString(1).toInt)
         }
