@@ -27,7 +27,8 @@ class EdgeLoader(data: String, sizes: Int = 64) {
         res
     }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).filter(f => f._1 != f._2).distinct().map(f => (Array(f._1, f._2), 1)).map(f => (f._1.toSeq, f._2))
 
-    rawRDD.persist(StorageLevel.DISK_ONLY)
+//    rawRDD.persist(StorageLevel.DISK_ONLY)
+    rawRDD.persist(StorageLevel.MEMORY_ONLY)
   }
 
   def EdgeDataset = {
@@ -47,6 +48,7 @@ class EdgeLoader(data: String, sizes: Int = 64) {
       .filter(f => f._1 != f._2)
       .distinct()
 
+    rawRDD.persist(StorageLevel.MEMORY_ONLY)
     rawRDD
   }
 
@@ -70,10 +72,10 @@ class EdgeLoader(data: String, sizes: Int = 64) {
       .distinct()
 //      .filter(f => f._1 % 10 == 3)
       .map(f => (Array(f._1, f._2), 1))
-      .map(f => (f._1.toSeq, f._2))
       .repartition(sizes)
 
-    rawRDD.persist(StorageLevel.DISK_ONLY)
+//    rawRDD.persist(StorageLevel.DISK_ONLY)
+    rawRDD.persist(StorageLevel.MEMORY_ONLY)
 
     val resRDD = rawRDD.rdd
     resRDD
@@ -96,13 +98,10 @@ class EdgeLoader(data: String, sizes: Int = 64) {
     }.filter(f => f != null).mapPartitions{f =>
       val random = Random
       random.setSeed(System.nanoTime())
-
       f.filter(p => random.nextInt(1000) < k)
     }.flatMap(f => Iterable(f, f.swap)).filter(f => f._1 != f._2)
       .distinct()
-//      .filter(f => f._1 % 10 == 3)
       .map(f => (Array(f._1, f._2), 1))
-      .map(f => (f._1.toSeq, f._2))
       .repartition(sizes)
 
     val resRDD = rawRDD.rdd
@@ -111,7 +110,7 @@ class EdgeLoader(data: String, sizes: Int = 64) {
 
 }
 
-class EdgePatternLoader(rawRDD: RDD[(Seq[Int], Int)], sizes: Seq[Int]) {
+class EdgePatternLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
 
   lazy val edgeLogoRDDReference = new LogoEdgePatternPhysicalPlan(EdgePatternLogoRDD) toLogoRDDReference()
   lazy val (_, sc) = SparkSingle.getSpark()
@@ -121,7 +120,10 @@ class EdgePatternLoader(rawRDD: RDD[(Seq[Int], Int)], sizes: Seq[Int]) {
     val (edgeRDD, schema) = EdgeRowLogoRDD
 
     val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema, f.metaData, f.rawData.map(t => PatternInstance(t._1))))
-    edgePatternLogoRDD.persist(StorageLevel.DISK_ONLY)
+//    edgePatternLogoRDD.persist(StorageLevel.DISK_ONLY)
+//    edgePatternLogoRDD.cache()
+//    edgePatternLogoRDD.persist(StorageLevel.MEMORY_ONLY_2)
+    edgePatternLogoRDD.persist(StorageLevel.MEMORY_ONLY)
 
     new ConcreteLogoRDD(edgePatternLogoRDD.asInstanceOf[RDD[LogoBlockRef]], schema)
   }
@@ -136,7 +138,7 @@ class EdgePatternLoader(rawRDD: RDD[(Seq[Int], Int)], sizes: Seq[Int]) {
     *
     * @return a edgeLogoRDD, whose content is specified by dataSource in TestLogoRDDData
     */
-  def RowLogoRDDMaker(rawRDD: RDD[(Seq[Int], Int)]) = {
+  def RowLogoRDDMaker(rawRDD: RDD[(Array[Int], Int)]) = {
 
     val edges = List((0, 1))
     val keySizeMap = Map((0, sizes(0)), (1, sizes(1)))

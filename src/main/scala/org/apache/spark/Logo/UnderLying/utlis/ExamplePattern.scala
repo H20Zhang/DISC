@@ -24,6 +24,8 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
   }
 
   lazy val edge = {
+
+
     getEdge(h1,h2)
   }
 
@@ -48,6 +50,7 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
       case "houseF" => houseIntersectionF
       case "threeTriangle" => threeTriangleFast
       case "threeTriangleNoAD" => threeTriangleNoAdaptive
+      case "threeTriangleNoPNoA" => threeTriangleNoPNoA
       case "threeTriangleF" => threeTriangleF
       case "trianglePlusOneEdge" => trianglePlusOneEdge
       case "trianglePlusTwoEdgeF" => trianglePlusTwoEdgeF
@@ -517,7 +520,6 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
 
   lazy val houseIntersectionFast = {
     val edge4_1 = getEdge(h1, 1)
-    val edge4_2 = getEdge(h1, 1)
     val edge4_4 = getEdge(h1, h2)
 
     val filterCondition = FilteringCondition({ p =>
@@ -538,7 +540,7 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
     }
       , false)
 
-    val squareTemp = wedge.build(edge4_2.toSubPattern((0, 2), (1, 3)), edge4_2.toSubPattern((0, 0), (1, 3)))
+    val squareTemp = wedge.build(edge4_1.toSubPattern((0, 2), (1, 3)), edge4_1.toSubPattern((0, 0), (1, 3)))
       .filter(filterCondition2)
       .toIdentitySubPattern()
 
@@ -932,6 +934,36 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
     threeTriangle
   }
 
+  lazy val threeTriangleNoPNoA = {
+    val edge4_1 = getEdge(h1, h2)
+    val edge4_4 = getEdge(h1, h2)
+
+    val leftEdge = edge4_4.toIdentitySubPattern()
+
+    val filterCondition = FilteringCondition({
+      pattern =>
+        val p = pattern.pattern
+        p(1) < p(2)
+    }, false)
+
+    val triangle = leftEdge.build(edge4_4.toSubPattern((0, 0), (1, 2)), edge4_4.toSubPattern((0, 1), (1, 2))).filter(filterCondition)
+
+    //    val indexTriangle = leftEdge.build(edge4_1.toSubPattern((0, 0), (1, 2)), edge4_1.toSubPattern((0, 1), (1, 2)))
+
+    val chordalSquareTemp = triangle.toIdentitySubPattern().build(edge4_1.toSubPattern((0, 0), (1, 3)), edge4_1.toSubPattern((0, 1), (1, 3)))
+
+    val filterCondition1 = FilteringCondition({
+      pattern =>
+        val p = pattern.pattern
+        p(3) != p(2) && p(4) != p(1) && p(3) != p(4)
+    }, false)
+
+    val threeTriangle = chordalSquareTemp.toIdentitySubPattern().build(edge4_1.toSubPattern((0, 0), (1, 4)), edge4_1.toSubPattern((0, 2), (1, 4)))
+      .filter(filterCondition1)
+
+    threeTriangle
+  }
+
   lazy val threeTriangleNoAdaptive = {
     val edge4_1 = getEdge(h1, 1)
     val edge4_4 = getEdge(h1, h2)
@@ -1038,11 +1070,12 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
 
   lazy val near5CliqueNew = {
     val filteredEdge = edge
-    val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2))
+    val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2)).filter(p => p(0) < p(1))
 
     val filteredEdge4_1 = getEdge(h1,1)
 
-    val fourClique = triangle.build(filteredEdge4_1.to(0,3),filteredEdge4_1.to(1,3),filteredEdge4_1.to(2,3)).filter(p => p(0) < p(1) && p(2) < p(3))
+    val fourClique = triangle.build(filteredEdge4_1.to(0,3),filteredEdge4_1.to(1,3),filteredEdge4_1.filter(p => p(0) < p(1)).to(2,3))
+//      .filter(p => p(0) < p(1) && p(2) < p(3))
 
     val indexTriangle = filteredEdge.build(filteredEdge4_1.to(1,2),filteredEdge4_1.to(0,2)).filter(p => p(0) < p(1))
 

@@ -30,7 +30,7 @@ class SampledExamplePatternTest extends FunSuite with BeforeAndAfterAll{
           f =>
             val sampledSize = sampledPattern.pattern(f._1)
             val realSize = f._2
-            println(s"sampledSize:${sampledSize} realSize:${realSize} Ratio:${sampledSize / realSize}")
+//            println(s"sampledSize:${sampledSize} realSize:${realSize} Ratio:${sampledSize / realSize}")
         }
       }
     }

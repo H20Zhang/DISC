@@ -996,7 +996,7 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
 //      }
     }
 
-
+//
 //    if (resultMap.contains((leftIterator,rightIterator))){
 //          val res = resultMap((leftIterator,rightIterator))
 ////          println(s"contains $key")

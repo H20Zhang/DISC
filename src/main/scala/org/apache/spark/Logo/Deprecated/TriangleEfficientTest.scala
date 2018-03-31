@@ -34,7 +34,7 @@ object TriangleEfficientTest {
   }
 
 
-  def edgeLogoRDD(rawRDD: RDD[(Seq[Int], Int)]) = {
+  def edgeLogoRDD(rawRDD: RDD[(Array[Int], Int)]) = {
 
     val edges = List((0, 1))
     val keySizeMap = Map((0, 7), (1, 7))
@@ -72,7 +72,7 @@ object TriangleEfficientTest {
           res = (splittedString(0).toInt, splittedString(1).toInt)
         }
         res
-    }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).distinct().map(f => (Seq(f._1, f._2), 1))
+    }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).distinct().map(f => (Array(f._1, f._2), 1))
 
     //    val rawRDD = sc.parallelize(List.range(0,100)).map(f => (Seq(f,f),1))
     edgeLogoRDD(rawRDD)

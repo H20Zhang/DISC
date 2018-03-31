@@ -134,9 +134,10 @@ object MapBuilder {
     if (keys.size == 1) {
       if (valueSize == 1){
         val valueIndex0 = values(0)
+        val keyIndex0 = keys(0)
         data.foreach {
           f =>
-            val key = f.getValue(keys(0)).toLong
+            val key = f.getValue(keyIndex0).toLong
 
             val res = hashmap.getOrNull(key)
             if (res != null) {
@@ -150,9 +151,10 @@ object MapBuilder {
 
         val valueIndex0 = values(0)
         val valueIndex1 = values(1)
+        val keyIndex0 = keys(0)
         data.foreach {
           f =>
-            val key = f.getValue(keys(0)).toLong
+            val key = f.getValue(keyIndex0).toLong
 
             val res = hashmap.getOrNull(key)
             if (res != null) {
@@ -185,10 +187,12 @@ object MapBuilder {
 
       if (valueSize == 1){
         val valueIndex0 = values(0)
+        val keyIndex0 = keys(0)
+        val keyIndex1 = keys(1)
         data.foreach {
           f =>
-            val key1 = f.getValue(keys(0))
-            val key2 = f.getValue(keys(1))
+            val key1 = f.getValue(keyIndex0)
+            val key2 = f.getValue(keyIndex1)
             val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
 
             val res = hashmap.getOrNull(key)
@@ -204,10 +208,12 @@ object MapBuilder {
 
         val valueIndex0 = values(0)
         val valueIndex1 = values(1)
+        val keyIndex0 = keys(0)
+        val keyIndex1 = keys(1)
         data.foreach {
           f =>
-            val key1 = f.getValue(keys(0))
-            val key2 = f.getValue(keys(1))
+            val key1 = f.getValue(keyIndex0)
+            val key2 = f.getValue(keyIndex1)
             val key = (key1.toLong << 32) | (key2 & 0xffffffffL)
 
             val res = hashmap.getOrNull(key)
@@ -249,7 +255,7 @@ object MapBuilder {
         if (needSorting){
           Sorting.quickSort(compactList.asInstanceOf[CompactOnePatternList].rawData)
         }
-        count += compactList.getRaw().length
+//        count += compactList.getRaw().length
         compactList
       }
       res.repack()
@@ -261,7 +267,7 @@ object MapBuilder {
     else {
       val res = hashmap.mapValuesNow{f =>
         val compactList = f.toCompactList()
-        count += compactList.getRaw().length
+//        count += compactList.getRaw().length
         compactList
       }
       res.repack()

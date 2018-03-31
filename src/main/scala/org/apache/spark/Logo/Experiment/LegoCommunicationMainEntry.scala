@@ -1,6 +1,6 @@
 package org.apache.spark.Logo.Experiment
 
-import org.apache.spark.Logo.UnderLying.utlis.{ExamplePattern, SparkSingle}
+import org.apache.spark.Logo.UnderLying.utlis.{EdgeLoader, ExamplePattern, SparkSingle}
 
 object LegoCommunicationMainEntry {
 
@@ -17,6 +17,10 @@ object LegoCommunicationMainEntry {
 
     if (pattern.pattern(patternName) != null){
       println(s"$patternName size is ${pattern.pattern(patternName).count()}")
+    } else if(patternName == "edge"){
+      val loader = new EdgeLoader(data)
+      val edge = loader.EdgeDataset
+      edge.count()
     }
   }
 }

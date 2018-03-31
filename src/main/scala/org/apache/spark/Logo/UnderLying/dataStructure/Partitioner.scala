@@ -27,6 +27,30 @@ class SlotPartitioner(val p1: Int, val slotNum: Int, var partitioner: Partitione
 
 
     }
+    case listKey: Array[Any] => {
+      if (listKey.length < slotNum + 1) {
+        throw new Exception("slotNum must be smaller or equal to the total slots of the key")
+      }
+
+      partitioner match {
+        case null => Utils.nonNegativeMod(listKey(slotNum).hashCode(), p1)
+        case _ => partitioner.getPartition(listKey(slotNum))
+      }
+
+
+    }
+    case listKey: Array[Int] => {
+      if (listKey.length < slotNum + 1) {
+        throw new Exception("slotNum must be smaller or equal to the total slots of the key")
+      }
+
+      partitioner match {
+        case null => Utils.nonNegativeMod(listKey(slotNum).hashCode(), p1)
+        case _ => partitioner.getPartition(listKey(slotNum))
+      }
+
+
+    }
     case tupleKey: Tuple1[Any] => {
       partitioner match {
         case null => Utils.nonNegativeMod(tupleKey.productElement(slotNum).hashCode(), p1)
@@ -103,6 +127,25 @@ class CompositeParitioner(val partitioners: Seq[SlotPartitioner], val sizeLimits
     case listKey: Seq[Any] => {
       //      println(partitioners.map(f => f.getPartition(key)))
       //      println(converter.parts)
+
+      sizeLimitsMap match {
+        case null => converter.convertToNum(partitioners.map(f => f.getPartition(key)))
+        case _ => converter.convertToNum(partitioners.zipWithIndex.map(f => Utils.nonNegativeMod(f._1.getPartition(key), sizeLimitsMap(f._2))))
+      }
+    }
+    case listKey: Array[Any] => {
+      //      println(partitioners.map(f => f.getPartition(key)))
+      //      println(converter.parts)
+
+      sizeLimitsMap match {
+        case null => converter.convertToNum(partitioners.map(f => f.getPartition(key)))
+        case _ => converter.convertToNum(partitioners.zipWithIndex.map(f => Utils.nonNegativeMod(f._1.getPartition(key), sizeLimitsMap(f._2))))
+      }
+    }
+    case listKey: Array[Int] => {
+      //      println(partitioners.map(f => f.getPartition(key)))
+      //      println(converter.parts)
+
       sizeLimitsMap match {
         case null => converter.convertToNum(partitioners.map(f => f.getPartition(key)))
         case _ => converter.convertToNum(partitioners.zipWithIndex.map(f => Utils.nonNegativeMod(f._1.getPartition(key), sizeLimitsMap(f._2))))

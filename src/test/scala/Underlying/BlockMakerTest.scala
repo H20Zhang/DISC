@@ -18,10 +18,10 @@ class BlockMakerTest extends FunSuite with BeforeAndAfterAll{
     val index = schema.partitioner.getPartition(List(0,1,2))
 
     val data = List(
-      (List(0,1,2),1),
-      (List(0,1,2),1),
-      (List(0,1,2),1),
-      (List(0,1,2),1)
+      (Array(0,1,2),1),
+      (Array(0,1,2),1),
+      (Array(0,1,2),1),
+      (Array(0,1,2),1)
     ).toIterator
 
     val blockGenerator = new rowBlockGenerator(schema, index, data)
@@ -30,7 +30,7 @@ class BlockMakerTest extends FunSuite with BeforeAndAfterAll{
 
   test("LogoRDDMaker"){
 
-    val data = List.range(0,10).map(f => (f,f)).map(f => (Seq(f._1,f._2),1))
+    val data = List.range(0,10).map(f => (f,f)).map(f => (Array(f._1,f._2),1))
 
 
     val rawRDD = sc.parallelize(data)

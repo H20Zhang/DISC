@@ -12,7 +12,7 @@ abstract class LogoBlockGenerator[A: ClassTag, B: ClassTag](val schema: LogoSche
 
 class rowBlockGenerator[A: ClassTag](schema: LogoSchema,
                                      index: Int,
-                                     data: Iterator[(Seq[Int], A)]) extends LogoBlockGenerator[(Seq[Int], A), RowLogoBlock[(Seq[Int], A)]](schema, index, data) {
+                                     data: Iterator[(Array[Int], A)]) extends LogoBlockGenerator[(Array[Int], A), RowLogoBlock[(Array[Int], A)]](schema, index, data) {
   lazy val baseList = schema.slotSize
   lazy val numList = schema.IndexToKey(index)
   var filteredData = data.filter(_._2 != null).toBuffer
@@ -21,7 +21,7 @@ class rowBlockGenerator[A: ClassTag](schema: LogoSchema,
 
 
   override def generate() = {
-    val rowBlock = new RowLogoBlock[(Seq[Int], A)](schema, metaData, filteredData)
+    val rowBlock = new RowLogoBlock[(Array[Int], A)](schema, metaData, filteredData)
     rowBlock
   }
 }

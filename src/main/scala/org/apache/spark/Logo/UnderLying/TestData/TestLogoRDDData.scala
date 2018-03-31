@@ -41,7 +41,7 @@ object TestLogoRDDData {
           res = (splittedString(0).toInt, splittedString(1).toInt)
         }
         res
-    }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).distinct().map(f => (Array(f._1, f._2), 1)).map(f => (f._1.toSeq, f._2))
+    }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).distinct().map(f => (Array(f._1, f._2), 1))
 
 
     //    val rawRDD = sc.parallelize(List.range(0,100)).map(f => (Seq(f,f),1))
@@ -53,7 +53,7 @@ object TestLogoRDDData {
     *
     * @return a edgeLogoRDD, whose content is specified by dataSource in TestLogoRDDData
     */
-  def RowLogoRDDMaker(rawRDD: RDD[(Seq[Int], Int)]) = {
+  def RowLogoRDDMaker(rawRDD: RDD[(Array[Int], Int)]) = {
 
     val edges = List((0, 1))
     val keySizeMap = Map((0, 3), (1, 3))

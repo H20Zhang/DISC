@@ -575,7 +575,7 @@ class CompactListAppendBuilder(patternWidth: Int) {
   def append(node: Int): Unit = {
     arrayBuffer += node
 //    arrayBuffer.append(node)
-    arrayBuffer.append()
+//    arrayBuffer.append()
   }
 
   def toCompactList() = {
