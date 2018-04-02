@@ -431,6 +431,32 @@ class LogoKeyValuePatternPhysicalPlan(@transient edgeLogoRDD: KeyValueLogoRDD) e
   }
 }
 
+/**
+  * The class represent the edge pattern for starting the building
+  *
+  * @param edgeLogoRDD the actually data of the edge
+  */
+class LogoCompactPatternPhysicalPlan(@transient edgeLogoRDD: PatternLogoRDD) extends LogoPatternPhysicalPlan(List(), List()) {
+
+  override def generateNewPatternFState(): PatternLogoRDD = {
+    edgeLogoRDD
+  }
+
+  override def getSchema(): LogoSchema = edgeLogoRDD.patternSchema
+
+  override def generateLeafPhyiscal(): PatternLogoRDD = {
+    generateNewPatternFState()
+  }
+
+  override def generateCorePhyiscal(): PatternLogoRDD = {
+    generateNewPatternJState()
+  }
+
+  override def generateNewPatternJState() = {
+    edgeLogoRDD.toConcretePatternLogoRDD
+  }
+}
+
 //class LogoKeyValuePatternPhysicalPlan(@transient keyValueLogoRDD: KeyValueLogoRDD) extends LogoPatternPhysicalPlan(List(),List()){
 //  override def generateLeafPhyiscal(): PatternLogoRDD = ???
 //

@@ -22,4 +22,9 @@ object TestUtil {
 
   def objectEqual[A: ClassTag, B: ClassTag](l: A, r: B) = l == r
 
+
+  def printList[A: ClassTag](lList: Seq[A]) = {
+    println()
+    lList.foreach(f => print(f + " "))
+  }
 }

@@ -54,7 +54,7 @@ class ToKeyValueTransformer extends LogoBlockTransformer {
     //    resRDD.persist(StorageLevel.MEMORY_ONLY)
     //    resRDD.persist(StorageLevel.MEMORY_AND_DISK_SER)
 //    resRDD.persist(StorageLevel.MEMORY_ONLY_2)
-    resRDD.persist(StorageLevel.MEMORY_ONLY)
+    resRDD.persist(StorageLevel.MEMORY_ONLY_2)
     resRDD.count()
 
 

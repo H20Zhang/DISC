@@ -19,14 +19,14 @@ object TestLogoRDDData {
   //  val dataSource = "/Users/zhanghao/Downloads/as-skitter.txt"
 
 
-  def debugEdgePatternLogoRDD = {
-    val (edgeRDD, schema) = EdgeRowLogoRDD
-
-    val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema, f.metaData, f.rawData.map(t => PatternInstance(t._1))))
-
-    edgePatternLogoRDD.cache()
-    new ConcreteLogoRDD(edgePatternLogoRDD.asInstanceOf[RDD[LogoBlockRef]], schema)
-  }
+//  def debugEdgePatternLogoRDD = {
+//    val (edgeRDD, schema) = EdgeRowLogoRDD
+//
+//    val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema, f.metaData, f.rawData.map(t => PatternInstance(t._1))))
+//
+//    edgePatternLogoRDD.cache()
+//    new ConcreteLogoRDD(edgePatternLogoRDD.asInstanceOf[RDD[LogoBlockRef]], schema)
+//  }
 
 
   def EdgeRowLogoRDD = {

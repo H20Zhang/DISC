@@ -130,6 +130,25 @@ class ConcreteLogoRDD(patternRDD: RDD[LogoBlockRef], patternSchema: LogoSchema) 
 
 }
 
+class CompactLogoRDD(patternRDD: RDD[LogoBlockRef], patternSchema: LogoSchema) extends PatternLogoRDD(patternRDD, patternSchema) {
+
+//  override def toConcretePatternLogoRDD: ConcreteLogoRDD = this
+
+  //  override def toFilteringPatternLogoRDD(f: FilteringCondition): FilteringLogoRDD = {
+  //    val toFilteringTransformer = new ToFilteringTransformer
+  //    toFilteringTransformer.setFilteringCondition(FilteringCondition(f.f,true))
+  //    val filteringData = toFilteringTransformer.transform(patternRDD)
+  //    val filteringSchema = patternSchema match {
+  //      case c:CompositeLogoSchema => c.schema
+  //      case _ => patternSchema
+  //    }
+  //
+  //    new FilteringLogoRDD(filteringData, filteringSchema,true)
+  //  }
+
+
+}
+
 class SubPatternLogoRDDReference(patternLogoRDDReference: PatternLogoRDD, keyMapping: KeyMapping) {
 
   //  def generate() = ???

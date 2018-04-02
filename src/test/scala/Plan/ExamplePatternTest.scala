@@ -13,6 +13,7 @@ import scala.util.Random
 class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
 
   val data = "./wikiV.txt"
+//val data = "./debugData.txt"
 //  val data = "./email-Eu-core.txt"
 //  val queries = List("houseF", "threeTriangleF", "trianglePlusOneEdge")
 //  val queries = List("triangleAgg","squareAgg","chordalSquareAgg","houseAgg","threeTriangleAgg","near5CliqueAgg")

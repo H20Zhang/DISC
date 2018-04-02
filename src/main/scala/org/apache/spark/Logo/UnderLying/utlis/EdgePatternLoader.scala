@@ -1,8 +1,8 @@
 package org.apache.spark.Logo.UnderLying.utlis
 
-import org.apache.spark.Logo.Plan.LogoEdgePatternPhysicalPlan
-import org.apache.spark.Logo.UnderLying.Maker.SimpleRowLogoRDDMaker
-import org.apache.spark.Logo.UnderLying.dataStructure.{ConcreteLogoRDD, EdgePatternLogoBlock, LogoBlockRef, PatternInstance}
+import org.apache.spark.Logo.Plan.{LogoCompactPatternPhysicalPlan, LogoEdgePatternPhysicalPlan}
+import org.apache.spark.Logo.UnderLying.Maker.{CompactRowLogoRDDMaker, SimpleRowLogoRDDMaker}
+import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.util.Utils
@@ -112,25 +112,39 @@ class EdgeLoader(data: String, sizes: Int = 64) {
 
 class EdgePatternLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
 
-  lazy val edgeLogoRDDReference = new LogoEdgePatternPhysicalPlan(EdgePatternLogoRDD) toLogoRDDReference()
+  lazy val edgeLogoRDDReference = new LogoCompactPatternPhysicalPlan(EdgePatternLogoRDD) toLogoRDDReference()
   lazy val (_, sc) = SparkSingle.getSpark()
 
 
   def EdgePatternLogoRDD = {
     val (edgeRDD, schema) = EdgeRowLogoRDD
 
-    val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema, f.metaData, f.rawData.map(t => PatternInstance(t._1))))
-//    edgePatternLogoRDD.persist(StorageLevel.DISK_ONLY)
-//    edgePatternLogoRDD.cache()
-//    edgePatternLogoRDD.persist(StorageLevel.MEMORY_ONLY_2)
-    edgePatternLogoRDD.persist(StorageLevel.MEMORY_ONLY)
 
-    new ConcreteLogoRDD(edgePatternLogoRDD.asInstanceOf[RDD[LogoBlockRef]], schema)
+
+
+    val edgePatternLogoRDD = edgeRDD.map{f =>
+      val w = f.asInstanceOf[RowLogoBlock[(Array[Int],Int)]]
+      val res = new EdgePatternLogoBlock(w.schema, w.metaData, w.rawData.map(t => PatternInstance(t._1)))
+      res.asInstanceOf[LogoBlockRef]
+    }
+
+//    val edgePatternLogoRDD = edgeRDD.map(f => new EdgePatternLogoBlock(f.schema, f.metaData, f.rawData.map(t => PatternInstance(t._1))))
+////    edgePatternLogoRDD.persist(StorageLevel.DISK_ONLY)
+////    edgePatternLogoRDD.cache()
+////    edgePatternLogoRDD.persist(StorageLevel.MEMORY_ONLY_2)
+//    edgePatternLogoRDD.persist(StorageLevel.MEMORY_ONLY)
+//
+
+    edgeRDD.persist(StorageLevel.MEMORY_ONLY_SER_2)
+    edgeRDD.count()
+    new ConcreteLogoRDD(edgePatternLogoRDD,schema)
+//    new CompactLogoRDD(edgeRDD, schema)
   }
 
 
   def EdgeRowLogoRDD = {
     RowLogoRDDMaker(rawRDD)
+//    CompactRowLogoRDDMaker(rawRDD)
   }
 
 
@@ -144,6 +158,24 @@ class EdgePatternLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
     val keySizeMap = Map((0, sizes(0)), (1, sizes(1)))
 
     val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD, 1).setEdges(edges).setKeySizeMap(keySizeMap)
+
+    val logoRDD = logoRDDMaker.build()
+    val schema = logoRDDMaker.getSchema
+
+    (logoRDD, schema)
+  }
+
+  /**
+    *
+    * @return a edgeLogoRDD, whose content is specified by dataSource in TestLogoRDDData
+    */
+  def CompactRowLogoRDDMaker(rawRDD: RDD[(Array[Int], Int)]) = {
+
+    val edges = List((0, 1))
+    val keySizeMap = Map((0, sizes(0)), (1, sizes(1)))
+
+
+    val logoRDDMaker = new CompactRowLogoRDDMaker(rawRDD,1).setEdges(edges).setKeySizeMap(keySizeMap)
 
     val logoRDD = logoRDDMaker.build()
     val schema = logoRDDMaker.getSchema

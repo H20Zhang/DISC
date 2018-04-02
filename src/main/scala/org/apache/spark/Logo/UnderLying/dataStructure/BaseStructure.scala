@@ -545,6 +545,8 @@ class CompactTwoPatternList(var rawData: Array[Int]) extends CompactPatternList 
 
     override def hasNext: Boolean = cur < end
 
+
+    //TODO this place has strange effect when used in CompactLogoBlock
     override def next(): ValuePatternInstance = {
       currentPattern.node1 = rawData(cur)
       currentPattern.node2 = rawData(cur + 1)

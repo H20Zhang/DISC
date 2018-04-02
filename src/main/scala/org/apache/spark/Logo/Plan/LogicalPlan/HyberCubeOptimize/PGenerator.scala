@@ -1,4 +1,4 @@
-package org.apache.spark.Logo.Plan.LogicalPlan
+package org.apache.spark.Logo.Plan.LogicalPlan.HyberCubeOptimize
 
 import scala.collection.mutable.ArrayBuffer
 

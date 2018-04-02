@@ -15,7 +15,7 @@ class rowBlockGenerator[A: ClassTag](schema: LogoSchema,
                                      data: Iterator[(Array[Int], A)]) extends LogoBlockGenerator[(Array[Int], A), RowLogoBlock[(Array[Int], A)]](schema, index, data) {
   lazy val baseList = schema.slotSize
   lazy val numList = schema.IndexToKey(index)
-  var filteredData = data.filter(_._2 != null).toBuffer
+  var filteredData = data.filter(_._2 != null).toArray
   lazy val numParts = filteredData.length
   lazy val metaData = LogoMetaData(numList, numParts)
 
@@ -26,9 +26,9 @@ class rowBlockGenerator[A: ClassTag](schema: LogoSchema,
   }
 }
 
-class CompactRowGenerator(schema: LogoSchema,
+class CompactRowGenerator[A: ClassTag](schema: LogoSchema,
                           index: Int,
-                          data: Iterator[((Int, Int), Int)]) extends LogoBlockGenerator[((Int, Int), Int), CompactConcretePatternLogoBlock](schema, index, data) {
+                          data: Iterator[(Array[Int], A)]) extends LogoBlockGenerator[(Array[Int], A), CompactConcretePatternLogoBlock](schema, index, data) {
 
   lazy val baseList = schema.slotSize
   lazy val numList = schema.IndexToKey(index)
@@ -39,12 +39,24 @@ class CompactRowGenerator(schema: LogoSchema,
 
   override def generate(): CompactConcretePatternLogoBlock = {
 
-    val rawData = new CompactListAppendBuilder(schema.keyCol.size)
-    data.foreach {
+    val rawData = new CompactListAppendBuilder(2)
+    var count = 0
+
+    //TODO this place is very strange, this place should be understand why left and right should be reversed
+    filteredData.foreach {
       f =>
-        rawData.append(f._1._1)
-        rawData.append(f._1._2)
+        count += 1
+        rawData.append(f._1(1))
+        rawData.append(f._1(0))
     }
+
+    println(s"the count is $count")
+//    rawData.toCompactList().iterator().foreach{f =>
+//      println()
+//      print(f(0))
+//      print(f(1))
+//
+//    }
 
     val compactBlock = new CompactConcretePatternLogoBlock(schema, metaData, rawData.toCompactList())
 

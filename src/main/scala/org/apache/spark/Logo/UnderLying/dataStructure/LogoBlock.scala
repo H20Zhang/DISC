@@ -135,7 +135,7 @@ class CompactConcretePatternLogoBlock(schema: LogoSchema, metaData: LogoMetaData
   }
 
   override def iterator(): Iterator[PatternInstance] = rawData.iterator()
-  override def enumerateIterator(): Iterator[PatternInstance] = iterator()
+  override def enumerateIterator(): Iterator[PatternInstance] = rawData.iterator()
 }
 
 /**
@@ -1039,6 +1039,7 @@ final class CompositeThreePatternLogoBlock(schema: PlannedThreeCompositeLogoSche
           if (lValue < rValue) uCur += 1
           else if (lValue > rValue) vCur += 1
           else {
+
             buffer += lValue
             uCur += 1
             vCur += 1

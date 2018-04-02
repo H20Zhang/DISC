@@ -115,7 +115,10 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
   }
 
   def toKeyValue(key:Set[Int],isSorted:Boolean=true):PatternLogoRDDReference = {
-    val newBuildScript = new LogoKeyValuePatternPhysicalPlan(buildScript.generateNewPatternJState().toKeyValuePatternLogoRDD(key,isSorted))
+
+
+
+    val newBuildScript = new LogoKeyValuePatternPhysicalPlan(buildScript.generateNewPatternFState().toKeyValuePatternLogoRDD(key,isSorted))
     new PatternLogoRDDReference(patternSchema, newBuildScript)
   }
 
