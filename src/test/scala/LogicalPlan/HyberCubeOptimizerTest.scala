@@ -1,4 +1,4 @@
-package Plan
+package LogicalPlan
 
 import org.apache.spark.Logo.Plan.LogicalPlan.HyberCubeOptimize.{HyberCubeOptimizer, PGenerator}
 import org.scalatest.FunSuite
@@ -29,26 +29,28 @@ class HyberCubeOptimizerTest extends FunSuite{
     )
 
     val threeTriangle = Array(
-      (Array(0,1,3),32),
-      (Array(1,2,4),32),
-      (Array(0,1),1),
+      (Array(0,1,3),1),
+      (Array(1,2,4),3),
+      (Array(0,1),2),
       (Array(1,2),1),
       (Array(0,2),1)
     )
 
 
-    val hyberCubeOptimizer = new HyberCubeOptimizer(threeTriangle,224,729,5)
+    val hyberCubeOptimizer = new HyberCubeOptimizer(house,224*2,224*6,5)
     val possiblePlans = hyberCubeOptimizer.allPlans()
 
     val minCostPlan = possiblePlans.minBy(_._3)
     val minCost = minCostPlan._3
 
-    possiblePlans.filter(f => f._3 < 1.5*minCost).foreach{
+    possiblePlans.filter(f => f._3 < 2*minCost).sortBy(_._3).foreach{
       f =>
 
         println()
         print(" P assignment:")
         f._1.foreach(h => print(s"$h "))
+
+        print(" subtasks:"+f._1.product)
 
         print(s" Total Cost: ${f._3}")
 
@@ -72,6 +74,8 @@ class HyberCubeOptimizerTest extends FunSuite{
     println()
     print(" P assignment:")
     minCostPlan._1.foreach(h => print(s"$h "))
+
+    print(" subtasks:"+minCostPlan._1.product)
 
     print(s" Total Cost: ${minCostPlan._3}")
 
