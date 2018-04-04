@@ -25,12 +25,24 @@ class RelationSchema {
   def getRelation(k:Int) = relations(k)
 
   //we assume that relation with the same attributes will be the same relation
-  def getRelation(attributes:Seq[String]):Option[Relation] = {
-    for (r <- relations){
-      if (r.attributes.zip(attributes).forall(p => p._1 == p._2)){
-        Some(r)
+  def getRelation(attributes:Seq[String]):Option[Int] = {
+
+    for (i <- 0 until relations.size){
+      val r = relations(i)
+
+//      attributes.foreach(s => {
+//
+//        println(s"$s ${r.attributes.exists(s => s.equalsIgnoreCase(s))}")
+//
+//      })
+//
+//      println(s"${r.name} ${attributes.forall(p => r.attributes.exists(s => s.equalsIgnoreCase(p)))}")
+
+      if (attributes.forall(p => r.attributes.exists(s => s.equalsIgnoreCase(p)))){
+        return Some(i)
       }
     }
+
     None
   }
 

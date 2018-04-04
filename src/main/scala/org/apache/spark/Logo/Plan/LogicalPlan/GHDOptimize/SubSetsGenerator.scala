@@ -1,5 +1,6 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize
 
+import com.joptimizer.optimizers.LPPrimalDualMethod
 import org.apache.spark.Logo.Plan.LogicalPlan.Structure.RelationSchema
 import org.apache.spark.Logo.UnderLying.utlis.PointToNumConverter
 
@@ -9,14 +10,44 @@ import scala.collection.mutable.ArrayBuffer
 class SubSetsGenerator(relation:ArrayBuffer[Int]) {
 
 
+  //enumerate possible GHDs
   def enumerateSet():ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]] = {
     val res = _enumerateSet(ArrayBuffer[ArrayBuffer[Int]](),ArrayBuffer[Int](),relation)
     res
   }
 
+  //find all the possible relaxedGHD(with possible one edge added in original GHD) with AGMWidth
+  def relaxedGHDSet() = {
+    val res = enumerateSet()
+    val relaxedGHDs = _relaxGHD(res)
+    relaxedGHDs.sortBy(_._2)
+  }
+
+
+  //find the min cost relaxedGHD
+  def optimalGHDSet() = {
+    relaxedGHDSet().minBy(_._2)
+  }
+
+  def printAllRelaxedGHDPlans() = {
+    val GHDs = relaxedGHDSet()
+    val relationSchema = RelationSchema.getRelationSchema()
+
+    GHDs.foreach{f =>
+      println()
+      f._1.foreach{w =>
+        print("|")
+        w._1.foreach(u => print(s"${relationSchema.getRelation(u).name} "))
+        w._3.foreach(u => print(s"$u "))
+      }
+
+      print(s"|cost ${f._2}")
+    }
+  }
+
   //--------------------------------------------------------------------------
   //using ordering to eliminate redundant subsets
-  def _arrayOrder(lhs:ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
+  private def _arrayOrder(lhs:ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
 
     assert(lhs.size == rhs.size, "size of the two array must be the same")
 
@@ -38,7 +69,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
   }
 
   //using ordering to eliminate redundant subsets
-  def _subsetOrder(lhs: ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
+  private def _subsetOrder(lhs: ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
     if (lhs.size < rhs.size){
       return true
     } else if(rhs.size < lhs.size) {
@@ -54,7 +85,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
   //--------------------------------------------------------------------------
 
   //test if the newly added GHD node will form a cycle with the previous added nodes.
-  def _isTree(prevNodes:ArrayBuffer[ArrayBuffer[Int]], curNode:ArrayBuffer[Int]):Boolean = {
+  private def _isTree(prevNodes:ArrayBuffer[ArrayBuffer[Int]], curNode:ArrayBuffer[Int]):Boolean = {
 
     val graph = _constructGraph(prevNodes)
 
@@ -79,7 +110,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
     false
   }
 
-  def _constructGraph(prevNodes:ArrayBuffer[ArrayBuffer[Int]]):Map[Int,ArrayBuffer[Int]] = {
+  private def _constructGraph(prevNodes:ArrayBuffer[ArrayBuffer[Int]]):Map[Int,ArrayBuffer[Int]] = {
 
     val listGraph = new ArrayBuffer[(Int,Int)]()
 
@@ -117,13 +148,13 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
 
   }
 
-  def _dfs(graph:Map[Int,ArrayBuffer[Int]], vStart:Int, vEnd:Int):Boolean = {
+  private def _dfs(graph:Map[Int,ArrayBuffer[Int]], vStart:Int, vEnd:Int):Boolean = {
 
     __dfs(graph,vStart,vEnd,Set[Int]())
   }
 
   // we assume that in GHD prevNodes, there is no cycle.
-  def __dfs(graph:Map[Int,ArrayBuffer[Int]], vStart:Int, vEnd:Int, visited:Set[Int]):Boolean = {
+  private def __dfs(graph:Map[Int,ArrayBuffer[Int]], vStart:Int, vEnd:Int, visited:Set[Int]):Boolean = {
     for (v <- graph(vStart)){
       if (! visited.contains(v)){
         if (v == vEnd) {
@@ -139,7 +170,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
   }
 
   // test if two nodes in the GHD are connected by an edge
-  def _hasEdge(lhs:ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
+  private def _hasEdge(lhs:ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
 
     val relationSchema = RelationSchema.getRelationSchema()
     val lRelations = lhs.map(relationSchema.getRelation)
@@ -154,7 +185,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
 
   // optimize GHD
   // test if the relations in a single GHD is connected, just to filter out some GHD possibility
-  def _isDisconnected(node:ArrayBuffer[Int]):Boolean = {
+  private def _isDisconnected(node:ArrayBuffer[Int]):Boolean = {
     val relationSchema = RelationSchema.getRelationSchema()
     val relations = node.map(relationSchema.getRelation)
 
@@ -180,21 +211,56 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
   }
 
 
+  private def _optimizeGHDNode(agmSolver:AGMSolver,node:ArrayBuffer[Int]):(ArrayBuffer[Int],Double, Array[Double]) = {
+    val relationSchema = RelationSchema.getRelationSchema()
+    val relations = node.map(relationSchema.getRelation)
+
+    var agmResult = agmSolver.solveAGMBound(node)
+    var fractioalCover = agmSolver.AGMOptimalFractionEdgeCover((node))
+
+
+    val attributes = relations.flatMap(_.attributes).distinct
+    val possibleEdges = attributes.combinations(2).map(f => relationSchema.getRelation(f)).filter(_.isDefined).map(_.get).toArray
+    val possibleAddedEdges = possibleEdges.toArray.diff(node)
+
+    var optimalAgmResult = agmResult
+    var optimalNode = node
+    var optimalFractionalCover = fractioalCover
+
+    for (i <- possibleAddedEdges){
+      val tempAgmResult = agmSolver.solveAGMBound(node :+ i)
+      if (tempAgmResult < agmResult){
+        optimalAgmResult = tempAgmResult
+        optimalFractionalCover = agmSolver.AGMOptimalFractionEdgeCover(node :+ i)
+        optimalNode = node :+ i
+      }
+    }
+
+    (optimalNode,optimalAgmResult, optimalFractionalCover)
+  }
+
+
   //relax the GHD to allow more an edge be used more than once, this is a specific optimization for subgraph matching
-  def _relaxGHD(GHDs:ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]]):ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]] = {
+  private def _relaxGHD(GHDs:ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]]):ArrayBuffer[(ArrayBuffer[(ArrayBuffer[Int],Double, Array[Double])],Double)] = {
 
+    val agmSolver = new AGMSolver()
 
-    val newGHDs = ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]]()
-    val schema = RelationSchema.getRelationSchema()
+    val agmGHDs = GHDs
+//      .toParArray
+      .map{
+      f =>
+        f.map{
+          w => _optimizeGHDNode(agmSolver,w)
+        }
+    }.map{f =>
+      (f, f.map(_._2).max)
+    }
 
-
-
-
-    GHDs
+    agmGHDs.to[ArrayBuffer]
   }
   //--------------------------------------------------------------------------
 
-  def _enumerateSet(prevNodes:ArrayBuffer[ArrayBuffer[Int]],prevSelected:ArrayBuffer[Int], relation:ArrayBuffer[Int]):ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]] = {
+  private def _enumerateSet(prevNodes:ArrayBuffer[ArrayBuffer[Int]],prevSelected:ArrayBuffer[Int], relation:ArrayBuffer[Int]):ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]] = {
 
     val res = ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]]()
 

@@ -62,19 +62,20 @@ class LPTest extends FunSuite{
     val opt = new LPPrimalDualMethod
     val relationSchema = RelationSchema.getRelationSchema()
 
-    relationSchema.addRelation(Relation("R1",Seq("A","B"),10))
-    relationSchema.addRelation(Relation("R2",Seq("B","C"),10))
-    relationSchema.addRelation(Relation("R3",Seq("C","D"),10))
-    relationSchema.addRelation(Relation("R4",Seq("A","D"),10))
-    relationSchema.addRelation(Relation("R5",Seq("A","E"),10))
-    relationSchema.addRelation(Relation("R6",Seq("D","E"),10))
+    relationSchema.addRelation(Relation("R1",Seq("A","B"),1000000))
+    relationSchema.addRelation(Relation("R2",Seq("B","C"),1000000))
+    relationSchema.addRelation(Relation("R3",Seq("C","D"),1000000))
+    relationSchema.addRelation(Relation("R4",Seq("A","D"),500000))
+    relationSchema.addRelation(Relation("R5",Seq("A","E"),1000000))
+    relationSchema.addRelation(Relation("R6",Seq("D","E"),1000000))
 
-    val solver = new AGMSolver(opt)
+    val solver = new AGMSolver()
 
     for (i <- 0 until 1){
-      val problem = ArrayBuffer(0,2)
+      val problem = ArrayBuffer(0,1,2,3)
       val sol = solver.AGMOptimalFractionEdgeCover(problem)
       val AGMBound = solver.solveAGMBound(problem)
+      solver.linearProgramm(problem)
       sol.foreach(f => print(s"$f "))
       println()
       println(AGMBound)

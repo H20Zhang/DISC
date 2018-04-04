@@ -4,6 +4,8 @@ import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{Relation, RelationSchem
 import org.apache.spark.Logo.UnderLying.utlis.TestUtil
 import org.scalatest.FunSuite
 
+import scala.collection.mutable.ArrayBuffer
+
 class StructureTest extends FunSuite{
 
 
@@ -22,6 +24,10 @@ class StructureTest extends FunSuite{
 
     assert(TestUtil.listEqual(relationSchema1.attributes, Seq("A","B","C","D","E")))
     assert(TestUtil.listEqual(relationSchema1.relations.map(_.name),Seq("R1","R2","R3","R4","R5")))
+
+
+    val test = relationSchema.getRelation(ArrayBuffer("A","B"))
+    println(s"${test.get}")
 
   }
 }

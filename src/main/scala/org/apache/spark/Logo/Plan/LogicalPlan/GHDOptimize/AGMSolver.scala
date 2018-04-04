@@ -1,11 +1,14 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize
 
+import cern.colt.matrix.tdouble.DoubleMatrix2D
+import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D
 import com.joptimizer.optimizers.{LPOptimizationRequest, LPPrimalDualMethod}
 import org.apache.spark.Logo.Plan.LogicalPlan.Structure.RelationSchema
 
 import scala.collection.mutable.ArrayBuffer
+import scala.math.BigDecimal.RoundingMode
 
-class AGMSolver(opt:LPPrimalDualMethod) {
+class AGMSolver() {
 
   def linearProgramm(relationIDs:ArrayBuffer[Int]) = {
     val schema = RelationSchema.getRelationSchema()
@@ -64,37 +67,47 @@ class AGMSolver(opt:LPPrimalDualMethod) {
     val cardinalities = relations.map(_.cardinality)
     val attributes = relations.flatMap(_.attributes).distinct
 
-
     val c = cardinalities.map(f => Math.log(f)).toArray
-    val G = new Array[Array[Double]](attributes.size)
 
-    for (i <- 0 until G.size){
-      val temp = Array.fill(c.size)(0.0)
-      G(i) = temp
+//    val G = new Array[Array[Double]](attributes.size)
 
+    val G = new DenseDoubleMatrix2D(attributes.size,c.size)
+
+
+    for (i <- 0 until attributes.size){
       for(j <- 0 until relations.size){
         if (relations(j).attributes.contains(attributes(i))){
-          temp(j) = -1.0
+
+          G.set(i,j,-1.0)
+//          temp(j) = -1.0
+        } else{
+          G.set(i,j,0.0)
         }
       }
     }
 
-    val h = Array.fill(G.size)(-1.0)
+    val h = Array.fill(attributes.size)(-1.0)
     val lb = Array.fill(c.size)(0.0)
     val ub = Array.fill(c.size)(1.01)
 
     val or = new LPOptimizationRequest
+
+    val opt= new LPPrimalDualMethod
     or.setC(c)
     or.setG(G)
     or.setH(h)
     or.setLb(lb)
     or.setUb(ub)
-    or.setDumpProblem(true)
+    or.setDumpProblem(false)
     opt.setLPOptimizationRequest(or)
     opt.optimize()
 
+
+
     val sol = opt.getOptimizationResponse.getSolution
-    sol
+//    Math.ulp()
+
+    sol.map(f => BigDecimal.valueOf(f).setScale(3,RoundingMode.HALF_EVEN).doubleValue())
   }
 
   def solveAGMBound(relationIDs:ArrayBuffer[Int]):Double = {
@@ -103,6 +116,6 @@ class AGMSolver(opt:LPPrimalDualMethod) {
     val cardinalities = relations.map(_.cardinality)
 
     val sol = AGMOptimalFractionEdgeCover(relationIDs)
-    cardinalities.zip(sol).map(f => Math.pow(f._1,f._2)).sum
+    cardinalities.zip(sol).map(f => Math.pow(f._1,f._2)).product
   }
 }
