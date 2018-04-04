@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: com.github.rwl:JKLU:1.0.0:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.github.rwl/JKLU/jars/JKLU-1.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.github.rwl/JKLU/srcs/JKLU-1.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

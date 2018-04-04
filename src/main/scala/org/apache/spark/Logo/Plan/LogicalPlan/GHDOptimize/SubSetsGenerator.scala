@@ -3,12 +3,10 @@ package org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize
 import org.apache.spark.Logo.Plan.LogicalPlan.Structure.RelationSchema
 import org.apache.spark.Logo.UnderLying.utlis.PointToNumConverter
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 class SubSetsGenerator(relation:ArrayBuffer[Int]) {
-
-
-
 
 
   def enumerateSet():ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]] = {
@@ -16,7 +14,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
     res
   }
 
-
+  //--------------------------------------------------------------------------
   //using ordering to eliminate redundant subsets
   def _arrayOrder(lhs:ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
 
@@ -53,21 +51,27 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
 
 
 
+  //--------------------------------------------------------------------------
+
   //test if the newly added GHD node will form a cycle with the previous added nodes.
   def _isTree(prevNodes:ArrayBuffer[ArrayBuffer[Int]], curNode:ArrayBuffer[Int]):Boolean = {
-    val connectedNodes = ArrayBuffer[ArrayBuffer[Int]]()
 
-    for (s <- prevNodes){
-      if (_isConnected(s,curNode)){
+    val graph = _constructGraph(prevNodes)
+
+    val connectedNodes = ArrayBuffer[(ArrayBuffer[Int],Int)]()
+
+    for (s <- prevNodes.zipWithIndex){
+      if (_hasEdge(s._1,curNode)){
         connectedNodes += s
       }
     }
 
+    //using dfs to test if two node in graph is connected for all the nodes that curNode connect
     connectedNodes.combinations(2).foreach{
       p =>
         val lhs = p(0)
         val rhs = p(1)
-        if (_isConnected(lhs,rhs)){
+        if (_dfs(graph,lhs._2,rhs._2)){
           return true
         }
 
@@ -75,12 +79,67 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
     false
   }
 
+  def _constructGraph(prevNodes:ArrayBuffer[ArrayBuffer[Int]]):Map[Int,ArrayBuffer[Int]] = {
 
-  //TODO:need to implement connected component algorithm and isTree algorihtm in graph
+    val listGraph = new ArrayBuffer[(Int,Int)]()
 
+    prevNodes.zipWithIndex.combinations(2).foreach{
+      p =>
+        val lhs = p(0)._2
+        val rhs = p(1)._2
+        listGraph += ((lhs,rhs))
+    }
 
-  // test if two nodes in the GHD are connected using the definition of the GHD (Two nodes will have an edge, if they share common attributes)
-  def _isConnected(lhs:ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
+    val graph = new mutable.HashMap[Int,ArrayBuffer[Int]]()
+
+    for ((u,v) <- listGraph){
+
+      //add v according to u
+      if (graph.contains(u)){
+        graph(u) += v
+      } else {
+        val temp = new ArrayBuffer[Int]()
+        temp += v
+        graph.put(u,temp)
+      }
+
+      //add u according to v
+      if (graph.contains(v)){
+        graph(v) += u
+      } else {
+        val temp = new ArrayBuffer[Int]()
+        temp += u
+        graph.put(v,temp)
+      }
+    }
+
+    graph.toMap
+
+  }
+
+  def _dfs(graph:Map[Int,ArrayBuffer[Int]], vStart:Int, vEnd:Int):Boolean = {
+
+    __dfs(graph,vStart,vEnd,Set[Int]())
+  }
+
+  // we assume that in GHD prevNodes, there is no cycle.
+  def __dfs(graph:Map[Int,ArrayBuffer[Int]], vStart:Int, vEnd:Int, visited:Set[Int]):Boolean = {
+    for (v <- graph(vStart)){
+      if (! visited.contains(v)){
+        if (v == vEnd) {
+          return true
+        } else {
+          return __dfs(graph,v,vEnd, visited + v)
+        }
+      }
+
+    }
+
+    return false
+  }
+
+  // test if two nodes in the GHD are connected by an edge
+  def _hasEdge(lhs:ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
 
     val relationSchema = RelationSchema.getRelationSchema()
     val lRelations = lhs.map(relationSchema.getRelation)
@@ -91,7 +150,10 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
     ! lAttributes.intersect(rAttributes).isEmpty
   }
 
-  // test if the relations in a single GHD is connected
+  //--------------------------------------------------------------------------
+
+  // optimize GHD
+  // test if the relations in a single GHD is connected, just to filter out some GHD possibility
   def _isDisconnected(node:ArrayBuffer[Int]):Boolean = {
     val relationSchema = RelationSchema.getRelationSchema()
     val relations = node.map(relationSchema.getRelation)
@@ -116,6 +178,21 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
 
     false
   }
+
+
+  //relax the GHD to allow more an edge be used more than once, this is a specific optimization for subgraph matching
+  def _relaxGHD(GHDs:ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]]):ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]] = {
+
+
+    val newGHDs = ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]]()
+    val schema = RelationSchema.getRelationSchema()
+
+
+
+
+    GHDs
+  }
+  //--------------------------------------------------------------------------
 
   def _enumerateSet(prevNodes:ArrayBuffer[ArrayBuffer[Int]],prevSelected:ArrayBuffer[Int], relation:ArrayBuffer[Int]):ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]] = {
 

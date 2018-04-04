@@ -11,7 +11,6 @@ class GHDOptimizerTest extends FunSuite{
 
   test("subsetGenerator"){
 
-
     val relationSchema = RelationSchema.getRelationSchema()
 
     relationSchema.addRelation(Relation("R1",Seq("A","B"),1))
@@ -35,8 +34,6 @@ class GHDOptimizerTest extends FunSuite{
     println(subsets.size)
 
     val x = 1
-
-
   }
 
 

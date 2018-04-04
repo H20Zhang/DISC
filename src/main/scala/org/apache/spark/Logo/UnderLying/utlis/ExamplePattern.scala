@@ -1260,7 +1260,12 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
         while (f.hasNext){
           val p = f.next()
           val key = (p(1).toLong << 32) | (p(2) & 0xffffffffL)
-          longMap.adjustOrPutValue(key,1,1)
+
+          if (longMap.containsKey(key)){
+            longMap.adjustValue(key,1)
+          } else{
+            longMap.put(key,1)
+          }
 
         }
 

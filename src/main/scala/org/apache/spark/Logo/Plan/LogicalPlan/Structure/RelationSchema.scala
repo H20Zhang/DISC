@@ -23,6 +23,17 @@ class RelationSchema {
   }
 
   def getRelation(k:Int) = relations(k)
+
+  //we assume that relation with the same attributes will be the same relation
+  def getRelation(attributes:Seq[String]):Option[Relation] = {
+    for (r <- relations){
+      if (r.attributes.zip(attributes).forall(p => p._1 == p._2)){
+        Some(r)
+      }
+    }
+    None
+  }
+
   def getAttribute(k:Int) = attributes(k)
 
 }
