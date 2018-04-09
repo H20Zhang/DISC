@@ -3,6 +3,9 @@ package org.apache.spark.Logo.UnderLying.Joiner
 import org.apache.spark.Logo.UnderLying.dataStructure.{CompositeLogoSchema, LogoBlockRef}
 import org.apache.spark._
 import org.apache.spark.rdd.RDD
+import org.apache.spark.util.CompletionIterator
+
+import scala.util.Random
 
 
 /**
@@ -26,6 +29,8 @@ class FetchJoinRDD(sc: SparkContext,
   override def getPartitions: Array[Partition] = {
     val subTaskParitions = subTasks.map(f => f.generateSubTaskPartition).sortBy(_.index).toArray
 
+//    Random.shuffle(subTaskParitions.zipWithIndex)
+
     subTaskParitions.asInstanceOf[Array[Partition]]
   }
 
@@ -41,13 +46,24 @@ class FetchJoinRDD(sc: SparkContext,
 
   override def compute(split: Partition, context: TaskContext) = {
     val subTaskPartition = split.asInstanceOf[SubTaskPartition]
-    val blockList = subTaskPartition.partitionValues.map {
+    val blockList = subTaskPartition.partitionValues.par.map {
       f =>
         val iterator1 = rdds(f._1).iterator(f._2, context)
+//        if (iterator1.isInstanceOf[InterruptibleIterator[_]]){
+//          val it2 = iterator1.asInstanceOf[InterruptibleIterator[_]].delegate
+//          if (it2.isInstanceOf[CompletionIterator[Any, Iterator[Any]]]){
+//            it2.asInstanceOf[CompletionIterator[Any, Iterator[Any]]].completion()
+//          }
+//        }
+
+
         val block = iterator1.next()
         iterator1.hasNext
+
+
+//        iterator1.hasNext
         block
-    }
+    }.toList
 
     Iterator(f(blockList, schema, subTaskPartition.index))
   }

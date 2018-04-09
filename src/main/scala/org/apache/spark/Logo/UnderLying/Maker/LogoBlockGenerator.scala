@@ -33,8 +33,8 @@ class CompactRowGenerator[A: ClassTag](schema: LogoSchema,
   lazy val baseList = schema.slotSize
   lazy val numList = schema.IndexToKey(index)
   var filteredData = data.filter(_._2 != null)
-  lazy val numParts = filteredData.length
-  lazy val metaData = LogoMetaData(numList, numParts)
+//  lazy val numParts = filteredData.length
+  lazy val metaData = LogoMetaData(numList, 1)
 
 
   override def generate(): CompactConcretePatternLogoBlock = {

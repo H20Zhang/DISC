@@ -21,29 +21,45 @@ class HyberCubeOptimizerTest extends FunSuite{
 
     //house
     val house = Array(
-      (Array(0,1,2),32),
+      (Array(0,1),2),
+      (Array(0,2),2),
       (Array(1,2),1),
-      (Array(1,3),1),
-      (Array(2,4),1),
-      (Array(3,4),1)
+      (Array(1,3),2),
+      (Array(2,4),2),
+      (Array(3,4),2)
     )
 
     val threeTriangle = Array(
-      (Array(0,1,3),1),
-      (Array(1,2,4),3),
-      (Array(0,1),2),
-      (Array(1,2),1),
-      (Array(0,2),1)
+      (Array(1,3),100),
+      (Array(0,3),100),
+      (Array(1,4),100),
+      (Array(2,4),100),
+      (Array(0,1),100),
+      (Array(1,2),100),
+      (Array(0,2),50)
+    )
+
+    val near5Clique = Array(
+      (Array(1,4),8),
+      (Array(2,4),8),
+      (Array(1,3),8),
+      (Array(0,3),4),
+      (Array(2,3),8),
+      (Array(0,1),8),
+      (Array(1,2),4),
+      (Array(0,2),8)
     )
 
 
-    val hyberCubeOptimizer = new HyberCubeOptimizer(house,224*2,224*6,5)
+    val hyberCubeOptimizer = new HyberCubeOptimizer(near5Clique,200,224,5)
     val possiblePlans = hyberCubeOptimizer.allPlans()
 
-    val minCostPlan = possiblePlans.minBy(_._3)
+    val minCostPlan = possiblePlans.minBy(f => f._3.toDouble/f._1.product)
     val minCost = minCostPlan._3
 
-    possiblePlans.filter(f => f._3 < 2*minCost).sortBy(_._3).foreach{
+    possiblePlans
+      .filter(f => f._3 < 1.5*minCost)
+      .sortBy(f => f._3.toDouble/f._1.product).reverse.foreach{
       f =>
 
         println()

@@ -73,6 +73,7 @@ class SubTaskPartition(
       val blockManagerMaster = sparkEnv.blockManager.master
       prefs = subPartitions.zipWithIndex.map(_.swap).map { f =>
         val blockId = RDDBlockId(rdds(f._1).id, rdds(f._1).partitions(f._2).index)
+
         blockManagerMaster.getLocations(blockId).map(f => TaskLocation(f.host, f.executorId).toString)
 
 

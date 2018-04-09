@@ -34,10 +34,10 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
       f =>
         println(s"execute $f")
 
-              pattern.houseAgg.count()
-//        if (pattern.pattern(f) != null){
-//          assert(pattern.pattern(f).size() == sizeReference(f))
-//        }
+//              pattern.houseAgg.count()
+        if (pattern.pattern(f) != null){
+          assert(pattern.pattern(f).size() == sizeReference(f))
+        }
     }
 
 

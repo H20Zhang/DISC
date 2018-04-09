@@ -25,8 +25,10 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
 
 
   //find the min cost relaxedGHD
-  def optimalGHDSet() = {
-    relaxedGHDSet().minBy(_._2)
+  def optimalGHDSets() = {
+    val GHDs = relaxedGHDSet()
+    val min = GHDs.minBy(_._2)._2
+    GHDs.filter(p => p._2 == min)
   }
 
   def printAllRelaxedGHDPlans() = {
@@ -92,7 +94,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
     val connectedNodes = ArrayBuffer[(ArrayBuffer[Int],Int)]()
 
     for (s <- prevNodes.zipWithIndex){
-      if (_hasEdge(s._1,curNode)){
+      if (hasEdgeBetweenGHDNode(s._1,curNode)){
         connectedNodes += s
       }
     }
@@ -102,7 +104,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
       p =>
         val lhs = p(0)
         val rhs = p(1)
-        if (_dfs(graph,lhs._2,rhs._2)){
+        if (_isGHDNodePairReachable(graph,lhs._2,rhs._2)){
           return true
         }
 
@@ -116,9 +118,12 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
 
     prevNodes.zipWithIndex.combinations(2).foreach{
       p =>
-        val lhs = p(0)._2
-        val rhs = p(1)._2
-        listGraph += ((lhs,rhs))
+
+        if (hasEdgeBetweenGHDNode(p(0)._1,p(1)._1)){
+          val lhs = p(0)._2
+          val rhs = p(1)._2
+          listGraph += ((lhs,rhs))
+        }
     }
 
     val graph = new mutable.HashMap[Int,ArrayBuffer[Int]]()
@@ -148,29 +153,33 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
 
   }
 
-  private def _dfs(graph:Map[Int,ArrayBuffer[Int]], vStart:Int, vEnd:Int):Boolean = {
+  private def _isGHDNodePairReachable(graph:Map[Int,ArrayBuffer[Int]], vStart:Int, vEnd:Int):Boolean = {
 
-    __dfs(graph,vStart,vEnd,Set[Int]())
+    __isGHDNodePairReachable(graph,vStart,vEnd,Set[Int]())
   }
 
   // we assume that in GHD prevNodes, there is no cycle.
-  private def __dfs(graph:Map[Int,ArrayBuffer[Int]], vStart:Int, vEnd:Int, visited:Set[Int]):Boolean = {
+  private def __isGHDNodePairReachable(graph:Map[Int,ArrayBuffer[Int]], vStart:Int, vEnd:Int, visited:Set[Int]):Boolean = {
+
+    if (graph.contains(vStart)){
+
     for (v <- graph(vStart)){
       if (! visited.contains(v)){
         if (v == vEnd) {
           return true
         } else {
-          return __dfs(graph,v,vEnd, visited + v)
+          return __isGHDNodePairReachable(graph,v,vEnd, visited + vStart)
         }
       }
 
+    }
     }
 
     return false
   }
 
   // test if two nodes in the GHD are connected by an edge
-  private def _hasEdge(lhs:ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
+  def hasEdgeBetweenGHDNode(lhs:ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
 
     val relationSchema = RelationSchema.getRelationSchema()
     val lRelations = lhs.map(relationSchema.getRelation)
@@ -185,7 +194,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
 
   // optimize GHD
   // test if the relations in a single GHD is connected, just to filter out some GHD possibility
-  private def _isDisconnected(node:ArrayBuffer[Int]):Boolean = {
+  private def _isGHDNodeDisconnected(node:ArrayBuffer[Int]):Boolean = {
     val relationSchema = RelationSchema.getRelationSchema()
     val relations = node.map(relationSchema.getRelation)
 
@@ -273,7 +282,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
 
 
           //test if curNode will form cycle with previous nodes
-          if (!_isDisconnected(j) && !_isTree(prevNodes,j)){
+          if (!_isGHDNodeDisconnected(j) && !_isTree(prevNodes,j)){
             val remainRelations = relation.diff(j)
             val subsets = _enumerateSet(prevNodes :+ j,j, remainRelations)
 
