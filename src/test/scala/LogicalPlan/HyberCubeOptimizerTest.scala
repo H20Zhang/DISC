@@ -51,15 +51,15 @@ class HyberCubeOptimizerTest extends FunSuite{
     )
 
 
-    val hyberCubeOptimizer = new HyberCubeOptimizer(near5Clique,200,224,5)
-    val possiblePlans = hyberCubeOptimizer.allPlans()
+    val hyberCubeOptimizer = new HyberCubeOptimizer(threeTriangle,224*1,224*3,5)
+    val possiblePlans = hyberCubeOptimizer.detailAllPlans()
 
-    val minCostPlan = possiblePlans.minBy(f => f._3.toDouble/f._1.product)
+    val minCostPlan = possiblePlans.minBy(f => f._3.toDouble)
     val minCost = minCostPlan._3
 
     possiblePlans
-      .filter(f => f._3 < 1.5*minCost)
-      .sortBy(f => f._3.toDouble/f._1.product).reverse.foreach{
+      .filter(f => f._3 < 2*minCost)
+      .sortBy(f => f._3.toDouble).reverse.foreach{
       f =>
 
         println()

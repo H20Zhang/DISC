@@ -8,9 +8,9 @@ import org.apache.spark.Logo.Plan.LogicalPlan.Structure.RelationSchema
 import scala.collection.mutable.ArrayBuffer
 import scala.math.BigDecimal.RoundingMode
 
-class AGMSolver() {
+object AGMSolver {
 
-  def linearProgramm(relationIDs:ArrayBuffer[Int]) = {
+  def linearProgramm(relationIDs:Seq[Int]) = {
     val schema = RelationSchema.getRelationSchema()
     val relations = relationIDs.map(schema.getRelation)
     val cardinalities = relations.map(_.cardinality)
@@ -60,7 +60,7 @@ class AGMSolver() {
   }
 
 
-  def AGMOptimalFractionEdgeCover(relationIDs:ArrayBuffer[Int]): Array[Double] ={
+  def AGMOptimalFractionEdgeCover(relationIDs:Seq[Int]): Array[Double] ={
 
     val schema = RelationSchema.getRelationSchema()
     val relations = relationIDs.map(schema.getRelation)
@@ -110,7 +110,7 @@ class AGMSolver() {
     sol.map(f => BigDecimal.valueOf(f).setScale(3,RoundingMode.HALF_EVEN).doubleValue())
   }
 
-  def solveAGMBound(relationIDs:ArrayBuffer[Int]):Double = {
+  def solveAGMBound(relationIDs:Seq[Int]):Double = {
     val schema = RelationSchema.getRelationSchema()
     val relations = relationIDs.map(schema.getRelation)
     val cardinalities = relations.map(_.cardinality)

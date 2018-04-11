@@ -38,6 +38,8 @@ abstract class LogoRDDReference(schema: LogoSchema, buildScriptStep: LogoBuildSc
 
   def size(): Long
 
+  def approximateSize(): Long
+
   def blockCount(): Long
 
   def rdd():RDD[PatternInstance]
@@ -187,6 +189,32 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
     }.sum().toLong
   }
 
+  override def approximateSize(): Long = {
+    generateF().logoRDD.map {
+      f =>
+        var size = 0L
+        val block = f.asInstanceOf[PatternLogoBlock[_]]
+
+        val iterator = block.enumerateIterator()
+
+        val time = System.nanoTime()
+
+        if (iterator.isInstanceOf[enumerateIterator]){
+          size += iterator.asInstanceOf[enumerateIterator].approximateLongSize()
+        } else{
+          while (iterator.hasNext) {
+            size += 1
+          }
+        }
+
+        val time2 = System.nanoTime()
+
+        //        println(s"computation time is: ${(time2-time).toDouble/1000000000}")
+
+        size
+    }.sum().toLong
+  }
+
   override def blockCount(): Long = {
     generateF().logoRDD.map {
       f =>
@@ -219,6 +247,10 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
 
   override def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
     this.toIdentitySubPattern().build(subPattern1,subPattern2)
+  }
+
+  def gSyncbuild(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+    this.toIdentitySubPattern().gSyncbuild(subPattern1,subPattern2)
   }
 
   override def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference, subPattern3: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
@@ -297,6 +329,15 @@ class SubPatternLogoRDDReference(val patternLogoRDDReference: PatternLogoRDDRefe
     val logoRDDReference = newLogoBuildScriptStep.toLogoRDDReference()
 
     new ComposingPatternLogoRDDReference(Seq(patternLogoRDDReference, subPattern1.patternLogoRDDReference, subPattern2.patternLogoRDDReference, subPattern3.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
+  }
+
+  def gSyncbuild(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+    val logoBuildScriptSteps = Seq(patternLogoRDDReference.buildScript, subPattern1.patternLogoRDDReference.buildScript, subPattern2.patternLogoRDDReference.buildScript)
+    val keyMappings = Seq(keyMapping, subPattern1.keyMapping, subPattern2.keyMapping)
+    val newLogoBuildScriptStep = new LogoComposite3IntersectionPatternPhysicalPlan(logoBuildScriptSteps, keyMappings, true)
+    val logoRDDReference = newLogoBuildScriptStep.toLogoRDDReference()
+
+    new ComposingPatternLogoRDDReference(Seq(patternLogoRDDReference, subPattern1.patternLogoRDDReference, subPattern2.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
   }
 }
 

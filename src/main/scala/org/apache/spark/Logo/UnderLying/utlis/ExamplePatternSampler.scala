@@ -43,8 +43,6 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 10) {
     }
   }
 
-
-
   lazy val wedgeSampleSize = {
     val sampledFilteredEdge = sampledEdge
     val filteredEdge = keyValueEdge

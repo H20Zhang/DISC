@@ -15,8 +15,10 @@ class HyberCubeOptimizer(PatternSize:Array[(Array[Int],Int)], minP:Int, maxP:Int
   val pGenerator = new PGenerator(maxP,length, p = { f => f.product > minP})
 
 
+  def allPlans() = detailAllPlans().map(f => PPlan(f._1, f._1.product, f._3))
+
   //output Array(attributes of pattern, size of pattern, totalSize, number of repitition)
-  def allPlans() = {
+  def detailAllPlans() = {
     val Ps = pGenerator.generateAllP()
     val complementryPatternSize = PatternSize.map{f =>
       val tempArray = new ArrayBuffer[Int]()
@@ -45,3 +47,5 @@ class HyberCubeOptimizer(PatternSize:Array[(Array[Int],Int)], minP:Int, maxP:Int
 
 
 }
+
+case class PPlan(P:Seq[Int], subTasks:Int, totalCost:Int)

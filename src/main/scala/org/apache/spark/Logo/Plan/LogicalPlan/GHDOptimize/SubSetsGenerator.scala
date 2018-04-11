@@ -159,7 +159,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
   }
 
   // we assume that in GHD prevNodes, there is no cycle.
-  private def __isGHDNodePairReachable(graph:Map[Int,ArrayBuffer[Int]], vStart:Int, vEnd:Int, visited:Set[Int]):Boolean = {
+  private def __isGHDNodePairReachable(graph:Map[Int,Seq[Int]], vStart:Int, vEnd:Int, visited:Set[Int]):Boolean = {
 
     if (graph.contains(vStart)){
 
@@ -179,7 +179,7 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
   }
 
   // test if two nodes in the GHD are connected by an edge
-  def hasEdgeBetweenGHDNode(lhs:ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
+  def hasEdgeBetweenGHDNode(lhs:Seq[Int], rhs:Seq[Int]):Boolean = {
 
     val relationSchema = RelationSchema.getRelationSchema()
     val lRelations = lhs.map(relationSchema.getRelation)
@@ -220,30 +220,28 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
   }
 
 
-  private def _optimizeGHDNode(agmSolver:AGMSolver,node:ArrayBuffer[Int]):(ArrayBuffer[Int],Double, Array[Double]) = {
+  private def _optimizeGHDNode(node:ArrayBuffer[Int]):(ArrayBuffer[Int],Double, Array[Double]) = {
     val relationSchema = RelationSchema.getRelationSchema()
     val relations = node.map(relationSchema.getRelation)
-
-    var agmResult = agmSolver.solveAGMBound(node)
-    var fractioalCover = agmSolver.AGMOptimalFractionEdgeCover((node))
-
-
     val attributes = relations.flatMap(_.attributes).distinct
-    val possibleEdges = attributes.combinations(2).map(f => relationSchema.getRelation(f)).filter(_.isDefined).map(_.get).toArray
-    val possibleAddedEdges = possibleEdges.toArray.diff(node)
+    val inducedEdges = relationSchema.getInducedRelation(attributes)
+
+    var agmResult = AGMSolver.solveAGMBound(inducedEdges)
+    var fractioalCover = AGMSolver.AGMOptimalFractionEdgeCover(inducedEdges)
+
 
     var optimalAgmResult = agmResult
-    var optimalNode = node
+    var optimalNode = inducedEdges.to[ArrayBuffer]
     var optimalFractionalCover = fractioalCover
 
-    for (i <- possibleAddedEdges){
-      val tempAgmResult = agmSolver.solveAGMBound(node :+ i)
-      if (tempAgmResult < agmResult){
-        optimalAgmResult = tempAgmResult
-        optimalFractionalCover = agmSolver.AGMOptimalFractionEdgeCover(node :+ i)
-        optimalNode = node :+ i
-      }
-    }
+//    for (i <- possibleAddedEdges){
+//      val tempAgmResult = AGMSolver.solveAGMBound(node :+ i)
+//      if (tempAgmResult < agmResult){
+//        optimalAgmResult = tempAgmResult
+//        optimalFractionalCover = AGMSolver.AGMOptimalFractionEdgeCover(node :+ i)
+//        optimalNode = node :+ i
+//      }
+//    }
 
     (optimalNode,optimalAgmResult, optimalFractionalCover)
   }
@@ -252,14 +250,11 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
   //relax the GHD to allow more an edge be used more than once, this is a specific optimization for subgraph matching
   private def _relaxGHD(GHDs:ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]]):ArrayBuffer[(ArrayBuffer[(ArrayBuffer[Int],Double, Array[Double])],Double)] = {
 
-    val agmSolver = new AGMSolver()
-
-    val agmGHDs = GHDs
-//      .toParArray
+    val agmGHDs = GHDs.par
       .map{
       f =>
         f.map{
-          w => _optimizeGHDNode(agmSolver,w)
+          w => _optimizeGHDNode(w)
         }
     }.map{f =>
       (f, f.map(_._2).max)

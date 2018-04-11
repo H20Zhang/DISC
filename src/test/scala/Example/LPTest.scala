@@ -69,13 +69,12 @@ class LPTest extends FunSuite{
     relationSchema.addRelation(Relation("R5",Seq("A","E"),1000000))
     relationSchema.addRelation(Relation("R6",Seq("D","E"),1000000))
 
-    val solver = new AGMSolver()
 
     for (i <- 0 until 1){
       val problem = ArrayBuffer(0,1,2,3)
-      val sol = solver.AGMOptimalFractionEdgeCover(problem)
-      val AGMBound = solver.solveAGMBound(problem)
-      solver.linearProgramm(problem)
+      val sol = AGMSolver.AGMOptimalFractionEdgeCover(problem)
+      val AGMBound = AGMSolver.solveAGMBound(problem)
+      AGMSolver.linearProgramm(problem)
       sol.foreach(f => print(s"$f "))
       println()
       println(AGMBound)

@@ -77,11 +77,11 @@ class Planned2HandlerGenerator(coreId: Int) extends Serializable {
 }
 
 // the generator for generating the handler for converting blocks into a planned3CompositeBlock.
-class Planned3HandlerGenerator(coreId: Int) extends Serializable {
+class Planned3HandlerGenerator(coreId: Int, gSync:Boolean) extends Serializable {
   def generate(): (Seq[LogoBlockRef], CompositeLogoSchema, Int) => LogoBlockRef = {
     (blocks, schema, index) =>
 
-      val planned3CompositeSchema = schema.toPlan3CompositeSchema(coreId)
+      val planned3CompositeSchema = schema.toPlan3CompositeSchema(coreId,gSync)
       val subBlocks = blocks.asInstanceOf[Seq[PatternLogoBlock[_]]]
 
       //TODO this place needs to implement later, although currently it has no use.
@@ -246,7 +246,7 @@ class LogoComposite4IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
   * @param logoRDDRefs logical logoRDD used to build this LogoRDD
   * @param keyMapping  the keyMapping between the old Logo and new Logo
   */
-class LogoComposite3IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[LogoPatternPhysicalPlan], @transient keyMapping: Seq[KeyMapping]) extends LogoPatternPhysicalPlan(logoRDDRefs, keyMapping) {
+class LogoComposite3IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[LogoPatternPhysicalPlan], @transient keyMapping: Seq[KeyMapping], gSync:Boolean = false) extends LogoPatternPhysicalPlan(logoRDDRefs, keyMapping) {
 
   lazy val schema = getSchema()
   lazy val coreLogoRef = logoRDDRefs(coreId)
@@ -263,7 +263,7 @@ class LogoComposite3IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
 
 
   lazy val handler = {
-    new Planned3HandlerGenerator(coreId) generate()
+    new Planned3HandlerGenerator(coreId, gSync) generate()
   }
 
   lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs, compositeSchema, handler)
@@ -303,7 +303,7 @@ class LogoComposite3IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
     fStatePatternLogoRDD
   }
 
-  override def getSchema(): PlannedThreeCompositeLogoSchema = compositeSchema.toPlan3CompositeSchema(coreId)
+  override def getSchema(): PlannedThreeCompositeLogoSchema = compositeSchema.toPlan3CompositeSchema(coreId, gSync)
 
   override def generateNewPatternJState(): ConcreteLogoRDD = {
     generateNewPatternFState().toConcretePatternLogoRDD

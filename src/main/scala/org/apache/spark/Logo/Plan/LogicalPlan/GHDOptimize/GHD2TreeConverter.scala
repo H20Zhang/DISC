@@ -57,20 +57,3 @@ class GHD2TreeConverter() {
   }
 }
 
-class GJJoinNode(val relations:ArrayBuffer[Int]) extends LeafNode{
-
-  lazy val schema = RelationSchema.getRelationSchema()
-  override def cost(): Double = ???
-  override def name: String = "GenericJoin"
-
-  override def toString: String = s"$name ${relations.map(schema.getRelation).map(_.name)}"
-
-}
-
-class HashJoinNode(lNode:LogicalTreeNode, rNode:LogicalTreeNode) extends BinaryNode(lNode,rNode){
-  override def cost(): Double = ???
-
-  override def name: String = "HashJoin"
-
-  override def toString: String = s"$name L:${lNode.name} R:${rNode.name}"
-}

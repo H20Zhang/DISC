@@ -47,7 +47,7 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
       case "near5Clique" => near5Clique
 
       case "edge" => edge
-      case "debug" => house
+      case "debug" => threeTriangleGSync
       case "houseGJ" => houseIntersectionGJ
       case "houseGHD" => houseIntersectionGHD
       case "houseF" => houseIntersectionF
@@ -141,7 +141,7 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
     house
   }
 
-  lazy val threeTriangle = {
+  lazy val threeTriangleOld = {
     val edge4_1 = getEdge(h1, 1)
     val edge4_4 = getEdge(h1, h2)
 
@@ -150,6 +150,37 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
     val indexTriangle = edge4_4.build(edge4_1.to(0,2), edge4_1.to(1,2))
 
     val chordalSquareTemp = triangle.build(indexTriangle.to(0,1,3))
+
+    val threeTriangle = chordalSquareTemp.build(indexTriangle.to(0,2,4))
+      .filter(p => p(3) != p(2) && p(4) != p(1) && p(3) != p(4))
+
+    threeTriangle
+  }
+
+  lazy val threeTriangleGSync = {
+    val edge4_1 = getEdge(h1, 1)
+    val edge4_4 = getEdge(h1, h2)
+
+    val triangle = edge4_4.build(edge4_4.to(0,2), edge4_4.to(1,2)).filter(p => p(1) < p(2))
+
+
+    val chordalSquareTemp = triangle.build(edge4_1.to(0,3),edge4_1.to(2,3))
+
+    val threeTriangle = chordalSquareTemp.gSyncbuild(edge4_1.to(0,4),edge4_1.to(1,4))
+      .filter(p => p(3) != p(1) && p(4) != p(2) && p(3) != p(4))
+
+    threeTriangle
+  }
+
+  lazy val threeTriangle = {
+    val edge4_1 = getEdge(h1, 1)
+    val edge4_4 = getEdge(h1, h2)
+
+    val triangle = edge4_4.build(edge4_4.to(0,2), edge4_4.to(1,2)).filter(p => p(1) < p(2))
+
+    val indexTriangle = edge4_4.build(edge4_1.to(0,2), edge4_1.to(1,2))
+
+    val chordalSquareTemp = triangle.build(edge4_1.to(0,3),edge4_1.to(1,3))
 
     val threeTriangle = chordalSquareTemp.build(indexTriangle.to(0,2,4))
       .filter(p => p(3) != p(2) && p(4) != p(1) && p(3) != p(4))

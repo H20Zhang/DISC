@@ -24,19 +24,13 @@ class RelationSchema {
 
   def getRelation(k:Int) = relations(k)
 
+  def getRelation(relation: Relation) = relations.indexOf(relation)
+
   //we assume that relation with the same attributes will be the same relation
   def getRelation(attributes:Seq[String]):Option[Int] = {
 
     for (i <- 0 until relations.size){
       val r = relations(i)
-
-//      attributes.foreach(s => {
-//
-//        println(s"$s ${r.attributes.exists(s => s.equalsIgnoreCase(s))}")
-//
-//      })
-//
-//      println(s"${r.name} ${attributes.forall(p => r.attributes.exists(s => s.equalsIgnoreCase(p)))}")
 
       if (attributes.forall(p => r.attributes.exists(s => s.equalsIgnoreCase(p)))){
         return Some(i)
@@ -46,7 +40,12 @@ class RelationSchema {
     None
   }
 
+  def getInducedRelation(attributes:Seq[String]):Seq[Int] = {
+    relations.filter(p => p.attributes.forall(p1 => attributes.contains(p1))).map(getRelation)
+  }
+
   def getAttribute(k:Int) = attributes(k)
+  def getAttribute(attributeName:String) = attributes.indexOf(attributeName)
 
 }
 

@@ -14,7 +14,7 @@ object LegoSampleMainEntry {
     val pattern = new ExamplePattern(data)
 
     val kList = List(1)
-    val query = List("wedge","triangle","chordalSquare","square").toParArray
+    val query = List("wedge","triangle","chordalSquare","square", "fourClique")
 //val query = List("triangle").toParArray
 //    val realSizes = query.map{f =>
 //      pattern.pattern(f).size()
@@ -36,8 +36,10 @@ object LegoSampleMainEntry {
             val sampledSize = sampledPattern.pattern(f)
 //            val realSize = f._2
 //            println(s"sampledSize:${sampledSize} realSize:${realSize} Ratio:${sampledSize / realSize}")
-            println(s"$f:sampledSize:${(sampledSize.size() / ratio).toLong}")
-        }
+            (f,(sampledSize.size() / ratio).toLong)
+//            println(s"$f:sampledSize:${(sampledSize.size() / ratio).toLong}")
+        }.foreach(f => println(s"${f._1}:sampledSize:${f._2}"))
+
       }
     }
 

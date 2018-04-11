@@ -151,8 +151,8 @@ class CompositeLogoSchema(val schema: LogoSchema,
   }
 
   //TODO testing required
-  def toPlan3CompositeSchema(coreId: Int) = {
-    PlannedThreeCompositeLogoSchema(coreId, schema, oldSchemas, keyMappings)
+  def toPlan3CompositeSchema(coreId: Int, gSync:Boolean = false) = {
+    PlannedThreeCompositeLogoSchema(coreId, schema, oldSchemas, keyMappings, gSync)
   }
 
   def toPlan4CompositeSchema(coreId: Int) = {
@@ -254,7 +254,8 @@ case class PlannedTwoCompositeLogoSchema(coreId: Int,
 case class PlannedThreeCompositeLogoSchema(coreId: Int,
                                            _schema: LogoSchema,
                                            oldSchemas: Seq[LogoSchema],
-                                           _keyMappings: Seq[KeyMapping]) extends CompositeLogoSchema(_schema, oldSchemas, _keyMappings) {
+                                           _keyMappings: Seq[KeyMapping],
+                                           gSync:Boolean = false) extends CompositeLogoSchema(_schema, oldSchemas, _keyMappings) {
 
 
   //TODO this class should be further fine tuned but at now we assume coreBlockId = 0

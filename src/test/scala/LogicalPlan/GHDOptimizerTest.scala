@@ -14,22 +14,22 @@ class GHDOptimizerTest extends FunSuite{
   val relationSchema = RelationSchema.getRelationSchema()
 
   //house
-  relationSchema.addRelation(Relation("R1",Seq("A","B"),1000000))
-  relationSchema.addRelation(Relation("R2",Seq("B","C"),1000000))
-  relationSchema.addRelation(Relation("R3",Seq("C","D"),1000000))
-  relationSchema.addRelation(Relation("R4",Seq("D","E"),1000000))
-  relationSchema.addRelation(Relation("R5",Seq("E","A"),1000000))
-  relationSchema.addRelation(Relation("R6",Seq("B","E"),500000))
+//  relationSchema.addRelation(Relation("R1",Seq("A","B"),1000000))
+//  relationSchema.addRelation(Relation("R2",Seq("B","C"),1000000))
+//  relationSchema.addRelation(Relation("R3",Seq("C","D"),1000000))
+//  relationSchema.addRelation(Relation("R4",Seq("D","E"),1000000))
+//  relationSchema.addRelation(Relation("R5",Seq("E","A"),1000000))
+//  relationSchema.addRelation(Relation("R6",Seq("B","E"),500000))
 
 
   //threeTriangle
-  //    relationSchema.addRelation(Relation("R1",Seq("A","B"),50000))
-  //    relationSchema.addRelation(Relation("R2",Seq("B","C"),10000))
-  //    relationSchema.addRelation(Relation("R3",Seq("C","D"),600000))
-  //    relationSchema.addRelation(Relation("R4",Seq("D","E"),8000))
-  //    relationSchema.addRelation(Relation("R5",Seq("E","A"),100000))
-  //    relationSchema.addRelation(Relation("R6",Seq("A","C"),5000000))
-  //    relationSchema.addRelation(Relation("R7",Seq("A","D"),1000000))
+      relationSchema.addRelation(Relation("R1",Seq("A","B"),50000))
+      relationSchema.addRelation(Relation("R2",Seq("B","C"),10000))
+      relationSchema.addRelation(Relation("R3",Seq("C","D"),600000))
+      relationSchema.addRelation(Relation("R4",Seq("D","E"),8000))
+      relationSchema.addRelation(Relation("R5",Seq("E","A"),100000))
+      relationSchema.addRelation(Relation("R6",Seq("A","C"),5000000))
+      relationSchema.addRelation(Relation("R7",Seq("A","D"),1000000))
 
   //near5Clique
   //        relationSchema.addRelation(Relation("R1",Seq("A","B"),50000))

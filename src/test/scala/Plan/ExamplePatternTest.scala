@@ -41,14 +41,14 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
     }
 
 
-    queries.foreach{
-      f =>
-        println(s"execute $f")
-
-        if (pattern.aggregatePattern(f) != null){
-          pattern.aggregatePattern(f).count()
-        }
-    }
+//    queries.foreach{
+//      f =>
+//        println(s"execute $f")
+//
+//        if (pattern.aggregatePattern(f) != null){
+//          pattern.aggregatePattern(f).count()
+//        }
+//    }
 
   }
 
