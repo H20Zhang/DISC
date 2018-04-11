@@ -39,6 +39,18 @@ class HyberCubeOptimizerTest extends FunSuite{
       (Array(0,2),50)
     )
 
+    val fourTriangle = Array(
+      (Array(1,3),100),
+      (Array(0,3),100),
+      (Array(1,4),100),
+      (Array(2,4),100),
+      (Array(0,1),100),
+      (Array(1,2),100),
+      (Array(0,2),100),
+      (Array(1,5),100),
+      (Array(3,5),100)
+    )
+
     val near5Clique = Array(
       (Array(1,4),8),
       (Array(2,4),8),
@@ -51,10 +63,12 @@ class HyberCubeOptimizerTest extends FunSuite{
     )
 
 
-    val hyberCubeOptimizer = new HyberCubeOptimizer(threeTriangle,224*1,224*3,5)
+
+
+    val hyberCubeOptimizer = new HyberCubeOptimizer(threeTriangle,180,224*1,5)
     val possiblePlans = hyberCubeOptimizer.detailAllPlans()
 
-    val minCostPlan = possiblePlans.minBy(f => f._3.toDouble)
+    val minCostPlan = possiblePlans.minBy(f => f._3.toDouble/f._1.product)
     val minCost = minCostPlan._3
 
     possiblePlans
