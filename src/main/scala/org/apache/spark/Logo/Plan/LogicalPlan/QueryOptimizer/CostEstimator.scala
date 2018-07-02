@@ -12,18 +12,19 @@ class CostEstimator(gHDOptimizer: GHDOptimizer, hyberCubeOptimizer: HyberCubeOpt
   lazy val Ps = hyberCubeOptimizer.allPlans()
 
 
-  def getLeftDeepTreeWithCost() = {
-    leftDeepTrees.map{
-      f =>
-        Ps.map(_.P).map{h =>
-          f.setP(h)
-          f.
-
-        }
-
-
-    }
-  }
+//  def getLeftDeepTreeWithCost() = {
+//    leftDeepTrees.map{
+//      f =>
+//        Ps.map(_.P).map{h =>
+//          f.setP(h)
+////          f.
+//
+//        }
+//
+//
+//
+  // }
+//  }
 
 
 }

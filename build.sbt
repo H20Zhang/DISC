@@ -13,6 +13,9 @@ resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/mave
 libraryDependencies += "org.apache.spark" % "spark-sql_2.11" % "2.2.0" % "provided"
 libraryDependencies +=  "org.apache.spark" % "spark-core_2.11" % "2.2.0" % "provided"
 libraryDependencies +=  "org.apache.spark" % "spark-graphx_2.11" % "2.2.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-mllib" % "2.2.0" % "provided"
+
+
 // https://mvnrepository.com/artifact/com.joptimizer/joptimizer
 libraryDependencies += "com.joptimizer" % "joptimizer" % "4.0.0"
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.3" % "test"

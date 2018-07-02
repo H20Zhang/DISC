@@ -54,9 +54,9 @@ object SparkSingle {
       case true => SparkSession
         .builder()
         .master("yarn")
-        .appName(appName)
         .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
         .config(getConf())
+        .appName(appName)
         //        .config("spark.yarn.executor.memoryOverhead","600")
         //        .config("spark.externalBlockStore.blockManager", "org.apache.spark.storage.GigaSpacesBlockManager")
         //        .config("spark.memory.offHeap.enabled","true")
@@ -69,9 +69,9 @@ object SparkSingle {
       case false => SparkSession
         .builder()
         .master("local[1]")
-        .appName(appName)
         .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
         .config(getConf())
+        .appName(appName)
         //        .config("spark.yarn.executor.memoryOverhead","600")
         //        .config("spark.externalBlockStore.blockManager", "org.apache.spark.storage.GigaSpacesBlockManager")
         //          .config("spark.memory.offHeap.enabled","true")
@@ -94,7 +94,8 @@ object SparkSingle {
   def getSpark() = {
     spark = getSparkInternal()
     sc = spark.sparkContext
-//    sc.setLogLevel("ERROR")
+    sc.setLogLevel("ERROR")
+
     (spark, sc)
   }
 

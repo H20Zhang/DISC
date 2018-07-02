@@ -33,8 +33,8 @@ abstract class LogicalTreeNode extends TreeNode{
   def setP(AllP:Seq[Int]):Unit
   def getP():Seq[(Int,Int)]
 
-  def setEstimatorFunc(estimator:EstimatorFunc):LogicalTreeNode
-  def getEstimatorFunc():EstimatorFunc
+  def setEstimatorFunc(estimator:EstimatorFunc):LogicalTreeNode = ???
+  def getEstimatorFunc():EstimatorFunc = ???
 
   def attributes:Seq[Int]
   def relations:Seq[Int]
@@ -58,9 +58,21 @@ abstract class LeafNode extends LogicalTreeNode{
 
 abstract class BinaryNode(val lChild:LogicalTreeNode, val rChild:LogicalTreeNode) extends LogicalTreeNode{
   override def children(): Seq[TreeNode] = Seq(lChild,rChild)
-
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class GJJoinNode(_relations:ArrayBuffer[Int]) extends LeafNode{

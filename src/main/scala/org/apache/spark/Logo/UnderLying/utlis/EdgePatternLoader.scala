@@ -1,5 +1,6 @@
 package org.apache.spark.Logo.UnderLying.utlis
 
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.Logo.Plan.{LogoCompactPatternPhysicalPlan, LogoEdgePatternPhysicalPlan}
 import org.apache.spark.Logo.UnderLying.Maker.{CompactRowLogoRDDMaker, SimpleRowLogoRDDMaker}
 import org.apache.spark.Logo.UnderLying.dataStructure._
@@ -95,16 +96,27 @@ class EdgeLoader(data: String, sizes: Int = 64) {
           res = (splittedString(0).toInt, splittedString(1).toInt)
         }
         res
-    }.filter(f => f != null).mapPartitions{f =>
+    }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).filter(f => f._1 != f._2)
+      .distinct()
+
+
+    val base = k
+    val count = rawRDD.count()
+    val ratio = base/count.toDouble
+
+    if (ratio > 1){
+      println("ratio should less than 1")
+    }
+
+
+    val sampledRDD = rawRDD.mapPartitions{f =>
       val random = Random
       random.setSeed(System.nanoTime())
-      f.filter(p => random.nextInt(1000) < k)
-    }.flatMap(f => Iterable(f, f.swap)).filter(f => f._1 != f._2)
-      .distinct()
-      .map(f => (Array(f._1, f._2), 1))
+      f.filter(p => random.nextInt(base) < base*ratio)
+    }.map(f => (Array(f._1, f._2), 1))
       .repartition(sizes)
 
-    val resRDD = rawRDD.rdd
+    val resRDD = sampledRDD.rdd
     resRDD
   }
 
@@ -112,12 +124,17 @@ class EdgeLoader(data: String, sizes: Int = 64) {
 
 class EdgePatternLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
 
+  var tempAddress = ""
+
   lazy val edgeLogoRDDReference = new LogoCompactPatternPhysicalPlan(EdgePatternLogoRDD) toLogoRDDReference()
   lazy val (_, sc) = SparkSingle.getSpark()
 
 
   def EdgePatternLogoRDD = {
     val (edgeRDD, schema) = EdgeRowLogoRDD
+
+
+
 
 
 

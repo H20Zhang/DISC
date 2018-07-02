@@ -112,18 +112,18 @@ class HyberCubeGJPattern(data: String, h1:Int=6, h2:Int=6)  {
   }
 
   lazy val fourClique = {
-    val filteredEdge = getEdge(4, 4).filter(p => p(0) < p(1))
+    val filteredEdge = getEdge(h1, h2).filter(p => p(0) < p(1))
     val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2))
 
-    val filteredEdge4_1 = getEdge(4, 4).filter(p => p(0) < p(1))
+    val filteredEdge4_1 = getEdge(h1, h2).filter(p => p(0) < p(1))
 
     val fourClique = triangle.build(filteredEdge4_1.to(0,3),filteredEdge4_1.to(1,3),filteredEdge4_1.to(2,3))
     fourClique
   }
 
   lazy val house = {
-    val edge4_1 = getEdge(3, 3)
-    val edge4_4 = getEdge(3, 3)
+    val edge4_1 = getEdge(h1, h2)
+    val edge4_4 = getEdge(h1, h2)
 
     val leftEdge = edge4_4.filter(p => p(0) < p(1))
     val wedge = leftEdge.build(edge4_4.to(1,2))
@@ -171,8 +171,8 @@ class HyberCubeGJPattern(data: String, h1:Int=6, h2:Int=6)  {
   }
 
   lazy val threeTriangle = {
-    val edge4_1 = getEdge(3, 3)
-    val edge4_4 = getEdge(3, 3)
+    val edge4_1 = getEdge(h1, h2)
+    val edge4_4 = getEdge(h1, h2)
 
     val triangle = edge4_4.build(edge4_4.to(0,2), edge4_4.to(1,2)).filter(p => p(1) < p(2))
 
@@ -187,10 +187,10 @@ class HyberCubeGJPattern(data: String, h1:Int=6, h2:Int=6)  {
   }
 
   lazy val near5Clique = {
-    val filteredEdge = getEdge(3, 3)
+    val filteredEdge = getEdge(h1, h2)
     val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2)).filter(p => p(0) < p(1))
 
-    val filteredEdge4_1 = getEdge(3, 3)
+    val filteredEdge4_1 = getEdge(h1, h2)
 
     val fourClique = triangle.build(filteredEdge4_1.to(0,3),filteredEdge4_1.to(1,3),filteredEdge4_1.filter(p => p(0) < p(1)).to(2,3))
 

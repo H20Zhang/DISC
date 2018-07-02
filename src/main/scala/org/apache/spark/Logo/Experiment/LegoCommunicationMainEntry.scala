@@ -1,6 +1,6 @@
 package org.apache.spark.Logo.Experiment
 
-import org.apache.spark.Logo.UnderLying.utlis.{EdgeLoader, ExamplePattern, SparkSingle}
+import org.apache.spark.Logo.UnderLying.utlis.{EdgeLoader, ExamplePattern, PushHyberCube, SparkSingle}
 
 object LegoCommunicationMainEntry {
 
@@ -21,6 +21,14 @@ object LegoCommunicationMainEntry {
       val loader = new EdgeLoader(data)
       val edge = loader.EdgeDataset
       edge.count()
+    } else if(patternName == "hyberCubeTriangle"){
+      val pattern = new PushHyberCube(data,h,h)
+      println(pattern.TriangleHyberCube)
+    } else if(patternName == "hyberCubeFourClique"){
+      val pattern = new PushHyberCube(data,h,h)
+      println(pattern.FourCliqueHyberCube)
     }
+
+
   }
 }
