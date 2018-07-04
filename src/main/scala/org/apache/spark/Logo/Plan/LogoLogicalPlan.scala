@@ -137,6 +137,10 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
     new SubPatternLogoRDDReference(this, KeyMapping(keyMapping.zipWithIndex.map(f => (f._2,f._1)).toMap))
   }
 
+  def toWithSeqKeyMapping(keyMapping: Seq[Int]): SubPatternLogoRDDReference = {
+    new SubPatternLogoRDDReference(this, KeyMapping(keyMapping.zipWithIndex.map(f => (f._2,f._1)).toMap))
+  }
+
 
   //generate the F-state Logo
   override def generateF() = {

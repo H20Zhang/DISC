@@ -1,6 +1,8 @@
 package org.apache.spark.Logo.Experiment
 
-import org.apache.spark.Logo.UnderLying.utlis.{EdgeLoader, ExamplePattern, PushHyberCube, SparkSingle}
+import org.apache.spark.Logo.UnderLying.Loader.EdgeLoader
+import org.apache.spark.Logo.UnderLying.utlis.Experiment.ExamplePattern
+import org.apache.spark.Logo.UnderLying.utlis.{PushHyberCube, SparkSingle}
 
 object LegoCommunicationMainEntry {
 
@@ -12,7 +14,7 @@ object LegoCommunicationMainEntry {
 
 
     SparkSingle.isCluster = true
-    SparkSingle.appName = s"Logo-${data}-${patternName}"
+    SparkSingle.appName = s"LogoCommunication-${data}-${patternName}"
     val pattern = new ExamplePattern(data,h,h)
 
     if (pattern.pattern(patternName) != null){

@@ -1,9 +1,6 @@
-package org.apache.spark.Logo.UnderLying.utlis
+package org.apache.spark.Logo.UnderLying.Loader
 
-import org.apache.spark.Logo.Plan.LogoEdgePatternPhysicalPlan
-import org.apache.spark.Logo.UnderLying.dataStructure.{ConcreteLogoRDD, LogoBlockRef}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.Dataset
+import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 
 class CompactEdgeLoader(data: String, sizes: Int = 64) {
 

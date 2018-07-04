@@ -4,9 +4,11 @@ import org.apache.spark.Logo.Plan.LogicalPlan.Structure.LogicalTreeNode
 
 import scala.collection.mutable.ArrayBuffer
 
+
+@deprecated
 class GHDOptimizer(relation:ArrayBuffer[Int]) {
 
-  lazy val subSetsGenerator = new SubSetsGenerator(relation)
+  lazy val subSetsGenerator = new subSetGenerator(relation)
   lazy val gHD2TreeConverter = new GHD2TreeConverter
 
   def allLeftDeepTrees():Seq[LogicalTreeNode] = {

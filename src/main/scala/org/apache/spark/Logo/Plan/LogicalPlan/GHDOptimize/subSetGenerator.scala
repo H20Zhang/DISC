@@ -1,13 +1,15 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize
 
 import com.joptimizer.optimizers.LPPrimalDualMethod
-import org.apache.spark.Logo.Plan.LogicalPlan.Structure.RelationSchema
+import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{GHDNode, GHDTree, RelationSchema}
 import org.apache.spark.Logo.UnderLying.utlis.PointToNumConverter
+import org.apache.spark.mllib.tree
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class SubSetsGenerator(relation:ArrayBuffer[Int]) {
+@deprecated
+class subSetGenerator(relation:ArrayBuffer[Int]) {
 
 
   //enumerate possible GHDs
@@ -72,7 +74,12 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
 
   //using ordering to eliminate redundant subsets
   private def _subsetOrder(lhs: ArrayBuffer[Int], rhs:ArrayBuffer[Int]):Boolean = {
-    if (lhs.size < rhs.size){
+
+    if (lhs == null){
+      return true
+    } else if (rhs == null){
+      return false
+    } else if (lhs.size < rhs.size){
       return true
     } else if(rhs.size < lhs.size) {
       return false
@@ -306,6 +313,43 @@ class SubSetsGenerator(relation:ArrayBuffer[Int]) {
       res
     }
 
+  }
+
+
+
+  private def GHDSet(relations:ArrayBuffer[Int]):ArrayBuffer[GHDTree] = {
+    var res = ArrayBuffer[GHDTree]()
+    _GHDSet(res, GHDTree(), GHDNode(), relations)
+    res
+  }
+
+  private def _GHDSet(GHDTrees:ArrayBuffer[GHDTree],tree:GHDTree, prevSelected:GHDNode, relation:ArrayBuffer[Int]):Unit = {
+
+    if (relation.size > 0){
+      for (i <- 1 to relation.size){
+
+        val subArrays = relation.combinations(i).filter(p => _subsetOrder(prevSelected.relationIDs, p))
+
+        for (j <- subArrays){
+
+          val tempNode = GHDNode(j)
+
+          //test if curNode will form cycle with previous nodes
+          if (tempNode.isConnected()){
+            val newGHDs = tree.addNode(tempNode)
+            val remainRelations = relation.diff(j)
+
+            for (newTree <- newGHDs){
+              if (newTree.isValid())
+              _GHDSet(GHDTrees,newTree,tempNode, remainRelations)
+            }
+          }
+        }
+      }
+    }
+    else {
+      GHDTrees += tree
+    }
   }
 
   def selectIelementes(k:Int, relations:ArrayBuffer[Int]) ={

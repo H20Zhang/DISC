@@ -5,9 +5,11 @@ import org.apache.spark.Logo.Plan.LogicalPlan.Structure._
 
 import scala.collection.mutable.ArrayBuffer
 
+
+@deprecated
 class GHD2TreeConverter() {
 
-  val subSetsGenerator = new SubSetsGenerator(ArrayBuffer(1))
+  val subSetsGenerator = new subSetGenerator(ArrayBuffer(1))
 
   //generate a leftDeep Tree from GHD tree
   def GHD2LeftDeepTree(GHD:ArrayBuffer[ArrayBuffer[Int]]):Seq[LogicalTreeNode] = {

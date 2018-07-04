@@ -1,6 +1,6 @@
 package Underlying
 
-import org.apache.spark.Logo.UnderLying.utlis.EdgeLoader
+import org.apache.spark.Logo.UnderLying.Loader.EdgeLoader
 import org.scalatest.FunSuite
 
 class EdgePatternLoaderTest extends FunSuite{

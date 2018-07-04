@@ -1,6 +1,6 @@
 package LogicalPlan
 
-import org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize.{GHDOptimizer, SubSetsGenerator}
+import org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize.{GHDOptimizer, subSetGenerator}
 import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{Relation, RelationSchema}
 import org.scalatest.FunSuite
 
@@ -46,7 +46,7 @@ class GHDOptimizerTest extends FunSuite{
 
 
   test("subsetGenerator"){
-    val generator = new SubSetsGenerator((0 until relationSchema.relations.size).to[ArrayBuffer])
+    val generator = new subSetGenerator((0 until relationSchema.relations.size).to[ArrayBuffer])
 //
 //    val subsets = generator.enumerateSet()
 //

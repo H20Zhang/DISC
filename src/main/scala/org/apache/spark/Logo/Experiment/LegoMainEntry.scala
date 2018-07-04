@@ -1,6 +1,7 @@
 package org.apache.spark.Logo.Experiment
 
-import org.apache.spark.Logo.UnderLying.utlis.{ExamplePattern, SparkSingle}
+import org.apache.spark.Logo.UnderLying.utlis.Experiment.ExamplePattern
+import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 
 object LegoMainEntry {
 

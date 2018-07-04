@@ -1,6 +1,7 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.CostBasedOptimizer
 
-import org.apache.spark.Logo.UnderLying.utlis.{ExamplePatternSampler, ListGenerator}
+import org.apache.spark.Logo.UnderLying.utlis.Experiment.ExamplePatternSampler
+import org.apache.spark.Logo.UnderLying.utlis.ListGenerator
 
 
 //Below optimizer only work for cases where there are only two sub-patterns, for more sub-patterns, some of

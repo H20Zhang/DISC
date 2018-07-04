@@ -1,6 +1,6 @@
 package Underlying
 
-import org.apache.spark.Logo.UnderLying.TestData.TestPatternBlockData
+import org.apache.spark.Logo.UnderLying.utlis.TestData.TestPatternBlockData
 import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.Logo.UnderLying.utlis.TestUtil
 import org.scalatest.FunSuite

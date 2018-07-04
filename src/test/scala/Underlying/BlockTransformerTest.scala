@@ -1,6 +1,6 @@
 package Underlying
 
-import org.apache.spark.Logo.UnderLying.TestData.TestLogoRDDReferenceData
+import org.apache.spark.Logo.UnderLying.utlis.TestData.TestLogoRDDReferenceData
 import org.apache.spark.Logo.UnderLying.dataStructure.{ConcretePatternLogoBlock, KeyValuePatternLogoBlock}
 import org.scalatest.FunSuite
 

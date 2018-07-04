@@ -1,7 +1,8 @@
 package Example
 
 import org.apache.spark.Logo.Plan.FilteringCondition
-import org.apache.spark.Logo.UnderLying.utlis.{EdgeLoader, EdgePatternLoader}
+import org.apache.spark.Logo.UnderLying.Loader.{EdgeLoader, EdgePatternLoader}
+import org.apache.spark.Logo.UnderLying.utlis.EdgeLoader
 import org.scalatest.FunSuite
 
 import scala.util.Random

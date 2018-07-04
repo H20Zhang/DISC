@@ -1,12 +1,11 @@
-package org.apache.spark.Logo.UnderLying.utlis
+package org.apache.spark.Logo.UnderLying.Loader
 
-import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.Logo.Plan.{LogoCompactPatternPhysicalPlan, LogoEdgePatternPhysicalPlan}
+import org.apache.spark.Logo.Plan.LogoCompactPatternPhysicalPlan
 import org.apache.spark.Logo.UnderLying.Maker.{CompactRowLogoRDDMaker, SimpleRowLogoRDDMaker}
 import org.apache.spark.Logo.UnderLying.dataStructure._
+import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
-import org.apache.spark.util.Utils
 
 import scala.util.Random
 

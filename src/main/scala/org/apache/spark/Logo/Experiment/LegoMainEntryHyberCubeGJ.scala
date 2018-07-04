@@ -1,6 +1,7 @@
 package org.apache.spark.Logo.Experiment
 
-import org.apache.spark.Logo.UnderLying.utlis.{HyberCubeGJPattern, SparkSingle}
+import org.apache.spark.Logo.UnderLying.utlis.Experiment.HyberCubeGJPattern
+import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 
 object LegoMainEntryHyberCubeGJ {
 

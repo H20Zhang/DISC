@@ -26,7 +26,7 @@ class StructureTest extends FunSuite{
     assert(TestUtil.listEqual(relationSchema1.attributes, Seq("A","B","C","D","E")))
     assert(TestUtil.listEqual(relationSchema1.relations.map(_.name),Seq("R1","R2","R3","R4","R5")))
 
-    val test = relationSchema.getRelation(ArrayBuffer("A","B"))
+    val test = relationSchema.getRelationId(ArrayBuffer("A","B"))
     println(s"${test.get}")
   }
 

@@ -2,7 +2,8 @@ package Plan
 
 import gnu.trove.map.hash.TLongIntHashMap
 import org.apache.spark.Logo.UnderLying.dataStructure.ValuePatternInstance
-import org.apache.spark.Logo.UnderLying.utlis.{ExamplePattern, PointToNumConverter, SparkSingle}
+import org.apache.spark.Logo.UnderLying.utlis.Experiment.ExamplePattern
+import org.apache.spark.Logo.UnderLying.utlis.{PointToNumConverter, SparkSingle}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 import scala.collection.mutable

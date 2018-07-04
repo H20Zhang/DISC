@@ -1,18 +1,13 @@
-package org.apache.spark.Logo.UnderLying.utlis
-
-import java.util
+package org.apache.spark.Logo.UnderLying.utlis.Experiment
 
 import gnu.trove.map.hash.{TIntIntHashMap, TLongIntHashMap}
 import org.apache.spark.Logo.Plan.FilteringCondition
-import org.apache.spark.Logo.UnderLying.dataStructure.{CompositeTwoPatternLogoBlock, EnumeratePatternInstance, PatternLogoBlock, TwoKeyPatternInstance}
-import org.apache.spark.rdd.RDD
-import sun.misc.Unsafe
+import org.apache.spark.Logo.UnderLying.Loader.{EdgeLoader, EdgePatternLoader}
+import org.apache.spark.Logo.UnderLying.dataStructure.{CompositeTwoPatternLogoBlock, TwoKeyPatternInstance}
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
-import scala.runtime.BoxesRunTime
 
-class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
+class HyberCubeGJPattern(data: String, h1:Int=6, h2:Int=6)  {
 
 //  var h1 = 13
 //  var h2 = 13
@@ -46,9 +41,6 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
       case "threeTriangle" => threeTriangle
       case "near5Clique" => near5Clique
 
-
-      case "houseMul" => houseMul
-      case "near5CliqueMul" => near5CliqueMul
 
       case "triangleCom" => triangleCom
       case "fourCliqueCom" => fourCliqueCom
@@ -91,14 +83,14 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
 
 
   lazy val triangle = {
-    val filteredEdge = getEdge(h1,h2).filter(p => p(0) < p(1))
+    val filteredEdge = getEdge(6,6).filter(p => p(0) < p(1))
     val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2))
     triangle
   }
 
   lazy val square = {
-    val edge4_1 = getEdge(h1, h2)
-    val edge4_4 = getEdge(h1, h2)
+    val edge4_1 = getEdge(4, 4)
+    val edge4_4 = getEdge(4, 4)
 
     val wedge = edge4_4.filter(p=> p(0) < p(1))
       .build(edge4_4.filter(p => p(0) < p(1)).to(0,2))
@@ -110,12 +102,12 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
 
   lazy val chordalSquare = {
 
-    val edge3_1 = getEdge(h1, 1)
-    val edge3_3 = getEdge(h1, h2)
+    val edge3_1 = getEdge(4, 4)
+    val edge3_3 = getEdge(4, 4)
 
     val triangle = edge3_3.filter(p => p(0) < p(1)).build(edge3_1.to(1,2), edge3_1.to(0,2))
 
-    val chordalSquare = triangle.build(triangle.to(0,1,3)).filter(p => p(2) < p(3))
+    val chordalSquare = triangle.build(edge3_1.to(1,3), edge3_1.to(0,3)).filter(p => p(2) < p(3))
 
     chordalSquare
   }
@@ -124,14 +116,14 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
     val filteredEdge = getEdge(h1, h2).filter(p => p(0) < p(1))
     val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2))
 
-    val filteredEdge4_1 = getEdge(h1,1).filter(p => p(0) < p(1))
+    val filteredEdge4_1 = getEdge(h1, h2).filter(p => p(0) < p(1))
 
     val fourClique = triangle.build(filteredEdge4_1.to(0,3),filteredEdge4_1.to(1,3),filteredEdge4_1.to(2,3))
     fourClique
   }
 
   lazy val house = {
-    val edge4_1 = getEdge(h1, 1)
+    val edge4_1 = getEdge(h1, h2)
     val edge4_4 = getEdge(h1, h2)
 
     val leftEdge = edge4_4.filter(p => p(0) < p(1))
@@ -142,26 +134,7 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
 
     val indexTriangle = leftEdge.build(edge4_1.to(1,2), edge4_1.to(0,2))
 
-    val house = squareTemp.build(indexTriangle.to(0,1,4))
-      .filter(p => p(3) != p(4) && p(2) != p(4))
-
-    house
-  }
-
-  lazy val houseMul = {
-    val edge4_1 = getEdge(11, 1)
-    val edge4_4 = getEdge(11, 11)
-    val edge4_m = getEdge(11, h1)
-
-    val leftEdge = edge4_4.filter(p => p(0) < p(1))
-    val wedge = leftEdge.build(edge4_4.to(1,2))
-
-    val squareTemp = wedge.build(edge4_1.to(2,3), edge4_1.to(0,3))
-      .filter(p => p(0) != p(2) && p(1) != p(3))
-
-    val indexTriangle = leftEdge.build(edge4_m.to(1,2), edge4_m.to(0,2))
-
-    val house = squareTemp.build(indexTriangle.to(0,1,4))
+    val house = squareTemp.build(edge4_1.to(1,4), edge4_1.to(0,4))
       .filter(p => p(3) != p(4) && p(2) != p(4))
 
     house
@@ -199,7 +172,7 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
   }
 
   lazy val threeTriangle = {
-    val edge4_1 = getEdge(h1, 1)
+    val edge4_1 = getEdge(h1, h2)
     val edge4_4 = getEdge(h1, h2)
 
     val triangle = edge4_4.build(edge4_4.to(0,2), edge4_4.to(1,2)).filter(p => p(1) < p(2))
@@ -208,42 +181,23 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
 
     val chordalSquareTemp = triangle.build(edge4_1.to(0,3),edge4_1.to(1,3))
 
-    val threeTriangle = chordalSquareTemp.build(indexTriangle.to(0,2,4))
+    val threeTriangle = chordalSquareTemp.build(edge4_1.to(0,4),edge4_1.to(2,4))
       .filter(p => p(3) != p(2) && p(4) != p(1) && p(3) != p(4))
 
     threeTriangle
   }
 
   lazy val near5Clique = {
-    val filteredEdge = edge
+    val filteredEdge = getEdge(h1, h2)
     val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2)).filter(p => p(0) < p(1))
 
-    val filteredEdge4_1 = getEdge(h1,1)
+    val filteredEdge4_1 = getEdge(h1, h2)
 
     val fourClique = triangle.build(filteredEdge4_1.to(0,3),filteredEdge4_1.to(1,3),filteredEdge4_1.filter(p => p(0) < p(1)).to(2,3))
 
     val indexTriangle = filteredEdge.build(filteredEdge4_1.to(1,2),filteredEdge4_1.to(0,2)).filter(p => p(0) < p(1))
 
-    val near5Clique = fourClique.build(indexTriangle.to(0,1,4)).filter(p => p(4) != p(2) && p(4) != p(3))
-
-
-    near5Clique
-  }
-
-  lazy val near5CliqueMul = {
-    val filteredEdge = getEdge(11,11)
-    val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2)).filter(p => p(0) < p(1))
-
-    val filteredEdge4_1 = getEdge(11,1)
-    val filteredEdge4_m = getEdge(11,h1)
-
-
-
-    val fourClique = triangle.build(filteredEdge4_1.to(0,3),filteredEdge4_1.to(1,3),filteredEdge4_1.filter(p => p(0) < p(1)).to(2,3))
-
-    val indexTriangle = filteredEdge.build(filteredEdge4_m.to(1,2),filteredEdge4_m.to(0,2)).filter(p => p(0) < p(1))
-
-    val near5Clique = fourClique.build(indexTriangle.to(0,1,4)).filter(p => p(4) != p(2) && p(4) != p(3))
+    val near5Clique = fourClique.build(filteredEdge4_1.to(1,4),filteredEdge4_1.to(0,4)).filter(p => p(4) != p(2) && p(4) != p(3))
 
 
     near5Clique
@@ -1133,50 +1087,46 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
     chordalRoof
   }
 
-//  lazy val solarSquareGSync = {
-//    val edge4_1 = getEdge(h1, 1)
-//    val edge4_4 = getEdge(h1, h2)
-//
-//
-//    val wedge = edge4_4.build(edge4_4.to(0,2))
-//
-//    val chordalSquare = wedge.build(edge4_1.to(0,3), edge4_1.to(1,3), edge4_1.to(2,3))
-//
-//
-//    val solarSquare = chordalSquare.gSyncbuild(edge4_1.to(0,4),edge4_1.to(1,4),edge4_1.to(2,4))
-//      .filter(p => p(3) != p(1) && p(4) != p(2) && p(3) != p(4))
-//
-//    threeTriangle
-//  }
-
   lazy val twoSquare = {
 
     val filterC = this.filterCoefficient
 
     val edge4_1 = getEdge(h1, 1)
     val edge4_4 = getEdge(h1, h2)
-
+    val filterCondition = FilteringCondition({
+      pattern =>
+        pattern.pattern(0) < pattern.pattern(1)
+    }, true)
 
     val leftEdge = edge4_4
-
-
-
-
-    val wedge = leftEdge.build(edge4_4
-
-      .toSubPattern((0, 0), (1, 2)))
-
+      .filter(filterCondition)
       .toIdentitySubPattern()
 
+    val filterCondition1 = FilteringCondition({
+      pattern =>
+        pattern.pattern(1) < pattern.pattern(2)
+    }, false)
+
+    val wedge = leftEdge.build(edge4_4
+      .filter(filterCondition)
+      .toSubPattern((0, 0), (1, 2)))
+      .filter(filterCondition1)
+      .toIdentitySubPattern()
+
+
+    val filterCondition2 = FilteringCondition({
+      pattern =>
+        pattern.pattern(0) < pattern.pattern(3)
+    }, false)
 
     val filterCondition3 = FilteringCondition({
       pattern =>
         val p = pattern.pattern
-        (((p(0)*31+p(1))*31+p(2))*31+p(3)) % 1000 < 1
+        (((p(0)*31+p(1))*31+p(2))*31+p(3)) % 10 < filterC
     },false)
 
     val square = wedge.build(edge4_1.toSubPattern((0, 1), (1, 3)), edge4_1.toSubPattern((0, 2), (1, 3)))
-      .filter(filterCondition3)
+      .filter(filterCondition2).filter(filterCondition3)
 
     val twoSquare = square.toIdentitySubPattern().build(square.toSubPattern((0, 0),(1, 1),(2,4),(3,5)))
 

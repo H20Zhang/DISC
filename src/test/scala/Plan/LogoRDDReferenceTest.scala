@@ -1,7 +1,7 @@
 package Plan
 
 import org.apache.spark.Logo.Plan.{FilteringCondition, LogoEdgePatternPhysicalPlan, LogoFilterPatternPhysicalPlan, PatternLogoRDDReference}
-import org.apache.spark.Logo.UnderLying.TestData.TestLogoRDDReferenceData
+import org.apache.spark.Logo.UnderLying.utlis.TestData.TestLogoRDDReferenceData
 import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 import org.scalatest.FunSuite
