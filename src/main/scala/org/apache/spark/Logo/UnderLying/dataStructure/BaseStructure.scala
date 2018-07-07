@@ -3,8 +3,7 @@ package org.apache.spark.Logo.UnderLying.dataStructure
 import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.{Kryo, KryoSerializable}
 import gnu.trove.list.array.TIntArrayList
-import org.apache.spark.Logo.UnderLying.utlis.{ListGenerator, ListSelector}
-import sun.misc.Unsafe
+import org.apache.spark.Logo.UnderLying.utlis.ListGenerator
 
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag

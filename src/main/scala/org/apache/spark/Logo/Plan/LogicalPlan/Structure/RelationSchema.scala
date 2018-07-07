@@ -5,38 +5,61 @@ import scala.collection.mutable
 
 
 
-class Relation(val name:String, val attributes:Seq[String], var cardinality:Long){
+class Relation(val name:String, val attributes:Seq[String], var cardinality:Long, var address:String){
+
+  lazy val relationSchema = RelationSchema.getRelationSchema()
+
   def toRelationWithP(p:Seq[Int]) = RelationWithP(this, p)
+  def toRelationWithP(p:Map[Int,Int]) = RelationWithP(this,attributes.map(relationSchema.getAttributeId).map(p))
 
 
   override def toString = s"Relation(name=$name, attributes=$attributes, cardinality=$cardinality)"
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[Relation]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: Relation =>
+      (that canEqual this) &&
+        name == that.name &&
+        attributes == that.attributes
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(name, attributes)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
 }
 
 object Relation{
-  def apply(name:String, attributes:Seq[String], cardinality:Long) = new Relation(name, attributes, cardinality)
 
-  def apply(name:String, attributes:Seq[String]) = new Relation(name, attributes, 0l)
+  def apply(name:String, attributes:Seq[String], address:String) = new Relation(name, attributes, 0, address)
+
+  def apply(name:String, attributes:Seq[String], cardinality:Long, address:String) = new Relation(name, attributes, cardinality, address)
+
+  def apply(name:String, attributes:Seq[String], cardinality:Long) = new Relation(name, attributes, cardinality, "")
+
+  def apply(name:String, attributes:Seq[String]) = new Relation(name, attributes, 10l, "")
+
 
 }
 
-class RelationWithP(name:String, attributes:Seq[String], cardinality:Long, val p:Seq[Int]) extends Relation(name, attributes, cardinality){
+class RelationWithP(val originalRelation:Relation, val p:Seq[Int]) extends Relation(originalRelation.name, originalRelation.attributes, originalRelation.cardinality, originalRelation.address){
 
 
-
-  def canEqual(other: Any): Boolean = other.isInstanceOf[RelationWithP]
+  override def canEqual(other: Any): Boolean = other.isInstanceOf[RelationWithP]
 
   override def equals(other: Any): Boolean = other match {
     case that: RelationWithP =>
       (that canEqual this) &&
         name == that.name &&
         attributes == that.attributes &&
-        cardinality == that.cardinality &&
         p == that.p
     case _ => false
   }
 
   override def hashCode(): Int = {
-    val state = Seq(name, attributes, cardinality, p)
+    val state = Seq(name, attributes, p)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 
@@ -44,7 +67,7 @@ class RelationWithP(name:String, attributes:Seq[String], cardinality:Long, val p
 }
 
 object RelationWithP{
-  def apply(relation: Relation, p:Seq[Int]) =  new RelationWithP(relation.name, relation.attributes, relation.cardinality, p)
+  def apply(relation: Relation, p:Seq[Int]) =  new RelationWithP(relation, p)
 
 }
 

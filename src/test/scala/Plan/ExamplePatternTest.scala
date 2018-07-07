@@ -1,14 +1,8 @@
 package Plan
 
-import gnu.trove.map.hash.TLongIntHashMap
-import org.apache.spark.Logo.UnderLying.dataStructure.ValuePatternInstance
 import org.apache.spark.Logo.UnderLying.utlis.Experiment.ExamplePattern
-import org.apache.spark.Logo.UnderLying.utlis.{PointToNumConverter, SparkSingle}
+import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
-import scala.util.Random
 
 
 class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{

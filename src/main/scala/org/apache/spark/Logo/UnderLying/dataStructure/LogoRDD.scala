@@ -1,6 +1,6 @@
 package org.apache.spark.Logo.UnderLying.dataStructure
 
-import org.apache.spark.Logo.Plan.FilteringCondition
+import org.apache.spark.Logo.Plan.PhysicalPlan.FilteringCondition
 import org.apache.spark.Logo.UnderLying.Maker.{ToConcreteTransformer, ToFilteringTransformer, ToKeyValueTransformer}
 import org.apache.spark.rdd.RDD
 

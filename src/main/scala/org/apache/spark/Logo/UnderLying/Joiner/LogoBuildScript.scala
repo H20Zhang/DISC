@@ -10,9 +10,9 @@ import org.apache.spark.SparkContext
   *
   * @param logoSteps steps used to construct an "LOGO"
   */
-class LogoBuildScript(logoSteps: List[LogoBuildScriptStep]) {}
+class LogoBuildScript(logoSteps: List[LogoPhysicalPlan]) {}
 
-trait LogoBuildScriptStep
+trait LogoPhysicalPlan
 
 /**
   *
@@ -42,7 +42,7 @@ case class BlockBlockJoints(coreBlockID: Int, leafBlockID: Int, coreJoints: Set[
   * @param logoRDDRefs logoRDDs used to build the new logo
   * @param handler     how to handle the LogoBlock after the LogoBlocks are already snapped together by FetchJoin
   */
-case class LogoBuildPhyiscalStep(logoRDDRefs: Seq[LogoRDD], schema: CompositeLogoSchema, handler: (Seq[LogoBlockRef], CompositeLogoSchema, Int) => LogoBlockRef, name: String = "") extends LogoBuildScriptStep {
+case class LogoBuildPhyiscalStep(logoRDDRefs: Seq[LogoRDD], schema: CompositeLogoSchema, handler: (Seq[LogoBlockRef], CompositeLogoSchema, Int) => LogoBlockRef, name: String = "") extends LogoPhysicalPlan {
 
   lazy val schemas = logoRDDRefs.map(_.schema)
   lazy val rdds = logoRDDRefs.map(_.logoRDD)

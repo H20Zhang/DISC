@@ -1,6 +1,6 @@
 package LogicalPlan
 
-import org.apache.spark.Logo.Plan.LogicalPlan.HyberCubeOptimize.{HyberCubeOptimizer, PGenerator}
+import org.apache.spark.Logo.Plan.LogicalPlan.Decrapted.HyberCubeOptimize.{HyberCubeOptimizer, PGenerator}
 import org.scalatest.FunSuite
 
 class HyberCubeOptimizerTest extends FunSuite{

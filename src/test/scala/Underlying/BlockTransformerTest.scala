@@ -1,7 +1,5 @@
 package Underlying
 
-import org.apache.spark.Logo.UnderLying.utlis.TestData.TestLogoRDDReferenceData
-import org.apache.spark.Logo.UnderLying.dataStructure.{ConcretePatternLogoBlock, KeyValuePatternLogoBlock}
 import org.scalatest.FunSuite
 
 class BlockTransformerTest extends FunSuite{

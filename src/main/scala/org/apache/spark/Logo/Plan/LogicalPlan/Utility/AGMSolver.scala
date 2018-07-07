@@ -1,11 +1,9 @@
-package org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize
+package org.apache.spark.Logo.Plan.LogicalPlan.Utility
 
-import cern.colt.matrix.tdouble.DoubleMatrix2D
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D
 import com.joptimizer.optimizers.{LPOptimizationRequest, LPPrimalDualMethod}
 import org.apache.spark.Logo.Plan.LogicalPlan.Structure.RelationSchema
 
-import scala.collection.mutable.ArrayBuffer
 import scala.math.BigDecimal.RoundingMode
 
 object AGMSolver {

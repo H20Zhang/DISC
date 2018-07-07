@@ -1,7 +1,6 @@
 package org.apache.spark.Logo.UnderLying.utlis.TestData
 
 import org.apache.spark.Logo.UnderLying.Maker.SimpleRowLogoRDDMaker
-import org.apache.spark.Logo.UnderLying.dataStructure.{ConcreteLogoRDD, EdgePatternLogoBlock, LogoBlockRef, PatternInstance}
 import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 import org.apache.spark.rdd.RDD
 

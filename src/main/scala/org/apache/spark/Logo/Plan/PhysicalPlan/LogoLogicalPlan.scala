@@ -1,7 +1,6 @@
-package org.apache.spark.Logo.Plan
+package org.apache.spark.Logo.Plan.PhysicalPlan
 
-
-import org.apache.spark.Logo.UnderLying.Joiner.LogoBuildScriptStep
+import org.apache.spark.Logo.UnderLying.Joiner.LogoPhysicalPlan
 import org.apache.spark.Logo.UnderLying.dataStructure.{PatternInstance, _}
 import org.apache.spark.rdd.{MapPartitionsRDD, RDD}
 
@@ -29,7 +28,7 @@ object FilteringCondition{
   * @param schema          the schema of the logo
   * @param buildScriptStep the buildScript used to build the new Logo
   */
-abstract class LogoRDDReference(schema: LogoSchema, buildScriptStep: LogoBuildScriptStep) {
+abstract class AbstractLogo(schema: LogoSchema, buildScriptStep: LogoPhysicalPlan) {
   def generateF(): PatternLogoRDD
 
   def generateJ(): ConcreteLogoRDD
@@ -49,23 +48,23 @@ abstract class LogoRDDReference(schema: LogoSchema, buildScriptStep: LogoBuildSc
 //  def join(pattern1:PatternLogoRDDReference, joinAttr:String):ComposingPatternLogoRDDReference
 
   //filter patterns using a f function, and specify what state the filtered function should be in.
-  def filter(f: PatternInstance => Boolean, isStrict:Boolean = false): PatternLogoRDDReference
+  def filter(f: PatternInstance => Boolean, isStrict:Boolean = false): Logo
 
   //filter a pattern using a Filtering Condition.
-  def filter(f: FilteringCondition): PatternLogoRDDReference
+  def filter(f: FilteringCondition): Logo
 
   //manual assign a pattern to be in J mode, the default mode of pattern is F mode.
   //(J equals to eager mode(pattern materialized), J equals to lazy mode(local join is delayed))
-  def toConcrete():PatternLogoRDDReference
+  def toConcrete():Logo
 
   //build a larger pattern using two sub-pattern, this works like a Binary Join.
-  def build(subPattern: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference
+  def build(subPattern: PartialLogo): ComposedLogo
 
   //build a larger pattern using three sub-pattern, this works like a GJ Join.
-  def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference
+  def build(subPattern1: PartialLogo, subPattern2: PartialLogo): ComposedLogo
 
   //build a larger pattern using four sub-pattern, this works like a GJ Join.
-  def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference, subPattern3: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference
+  def build(subPattern1: PartialLogo, subPattern2: PartialLogo, subPattern3: PartialLogo): ComposedLogo
 }
 
 /**
@@ -74,71 +73,58 @@ abstract class LogoRDDReference(schema: LogoSchema, buildScriptStep: LogoBuildSc
   * @param patternSchema the schema of the patternLogo
   * @param buildScript   the buildScript used to build the new Logo
   */
-class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: LogoPatternPhysicalPlan) extends LogoRDDReference(patternSchema, buildScript) {
+class Logo(val patternSchema: LogoSchema, var buildScript: AbstractLogoPhysicalPlan) extends AbstractLogo(patternSchema, buildScript) {
 
 
   var filteringCondition: FilteringCondition = null
 
-  //  def unsetFilterCondition:PatternLogoRDDReference = {
-  //    filteringCondition = null
-  //    this
-  //  }
-  //
-  //  //TODO: finish filtering
-  //  def setFilteringCondition(f:FilteringCondition):PatternLogoRDDReference = {
-  //    this.filteringCondition = f
-  //    this
-  //  }
-  //
-
-
-  def executeFiltering(f: FilteringCondition): PatternLogoRDDReference = {
+  def executeFiltering(f: FilteringCondition): Logo = {
     val filteredBuildScript = new LogoFilterPatternPhysicalPlan(f, buildScript)
     val newData = filteredBuildScript.generateNewPatternJState()
-    val newBuildScript = new LogoEdgePatternPhysicalPlan(newData)
-    new PatternLogoRDDReference(patternSchema, newBuildScript)
+    val newBuildScript = new LogoEdgePhysicalPlan(newData)
+    new Logo(patternSchema, newBuildScript)
   }
 
-  def filter(f: FilteringCondition): PatternLogoRDDReference = {
+  def filter(f: FilteringCondition): Logo = {
     val filteredBuildScript = new LogoFilterPatternPhysicalPlan(f, buildScript)
     if (f.isStrictCondition) {
 
 
-      val newBuildScript = new LogoEdgePatternPhysicalPlan(filteredBuildScript.generateNewPatternJState())
-      new PatternLogoRDDReference(patternSchema, newBuildScript)
+      val newBuildScript = new LogoEdgePhysicalPlan(filteredBuildScript.generateNewPatternJState())
+      new Logo(patternSchema, newBuildScript)
     } else {
-      new PatternLogoRDDReference(patternSchema, filteredBuildScript)
+      new Logo(patternSchema, filteredBuildScript)
     }
   }
 
-  override def toConcrete():PatternLogoRDDReference = {
-    val newBuildScript = new LogoEdgePatternPhysicalPlan(buildScript.generateNewPatternJState())
-    new PatternLogoRDDReference(patternSchema, newBuildScript)
+  override def toConcrete():Logo = {
+    val newBuildScript = new LogoEdgePhysicalPlan(buildScript.generateNewPatternJState())
+    new Logo(patternSchema, newBuildScript)
   }
 
-  def toKeyValue(key:Set[Int],isSorted:Boolean=true):PatternLogoRDDReference = {
+  def toKeyValue(key:Set[Int],isSorted:Boolean=true):Logo = {
 
 
 
-    val newBuildScript = new LogoKeyValuePatternPhysicalPlan(buildScript.generateNewPatternFState().toKeyValuePatternLogoRDD(key,isSorted))
-    new PatternLogoRDDReference(patternSchema, newBuildScript)
+    val newBuildScript = new LogoKeyValuePhysicalPlan(buildScript.generateNewPatternFState().toKeyValuePatternLogoRDD(key,isSorted))
+    new Logo(patternSchema, newBuildScript)
   }
 
-  def toIdentitySubPattern(): SubPatternLogoRDDReference = new SubPatternLogoRDDReference(this, KeyMapping(List.range(0, patternSchema.nodeSize)))
+  def toIdentitySubPattern(): PartialLogo = new PartialLogo(this, KeyMapping(List.range(0, patternSchema.nodeSize)))
 
   //prepare for build operation.
-  def toSubPattern(keyMapping: KeyMapping): SubPatternLogoRDDReference = new SubPatternLogoRDDReference(this, keyMapping)
+  def toSubPattern(keyMapping: KeyMapping): PartialLogo = new PartialLogo(this, keyMapping)
 
-  def toSubPattern(keyMapping: (Int, Int)*): SubPatternLogoRDDReference = {
-    new SubPatternLogoRDDReference(this, KeyMapping(keyMapping.toMap))
+  def toSubPattern(keyMapping: (Int, Int)*): PartialLogo = {
+    new PartialLogo(this, KeyMapping(keyMapping.toMap))
   }
 
-  def to(keyMapping: Int*): SubPatternLogoRDDReference = {
-    new SubPatternLogoRDDReference(this, KeyMapping(keyMapping.zipWithIndex.map(f => (f._2,f._1)).toMap))
+  def to(keyMapping: Int*): PartialLogo = {
+    new PartialLogo(this, KeyMapping(keyMapping.zipWithIndex.map(f => (f._2,f._1)).toMap))
   }
 
-  def toWithSeqKeyMapping(keyMapping: Seq[Int]): SubPatternLogoRDDReference = {
-    new SubPatternLogoRDDReference(this, KeyMapping(keyMapping.zipWithIndex.map(f => (f._2,f._1)).toMap))
+  def toWithSeqKeyMapping(keyMapping: Seq[Int]): PartialLogo = {
+    new PartialLogo(this, KeyMapping(keyMapping.zipWithIndex.map(f => (f._2,f._1)).toMap))
   }
 
 
@@ -273,15 +259,15 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
     }.count()
   }
 
-  override def build(subPattern: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+  override def build(subPattern: PartialLogo): ComposedLogo = {
     this.toIdentitySubPattern().build(subPattern)
   }
 
-  override def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+  override def build(subPattern1: PartialLogo, subPattern2: PartialLogo): ComposedLogo = {
     this.toIdentitySubPattern().build(subPattern1,subPattern2)
   }
 
-  def gSyncbuild(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+  def gSyncbuild(subPattern1: PartialLogo, subPattern2: PartialLogo): ComposedLogo = {
     this.toIdentitySubPattern().gSyncbuild(subPattern1,subPattern2)
   }
 
@@ -289,14 +275,14 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
 //    this.toIdentitySubPattern().gSyncbuild(subPattern1,subPattern2,subPattern3)
 //  }
 
-  override def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference, subPattern3: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+  override def build(subPattern1: PartialLogo, subPattern2: PartialLogo, subPattern3: PartialLogo): ComposedLogo = {
     this.toIdentitySubPattern().build(subPattern1,subPattern2,subPattern3)
   }
 
 
 
 
-  override def filter(f: PatternInstance => Boolean, isStrict:Boolean = false): PatternLogoRDDReference = {
+  override def filter(f: PatternInstance => Boolean, isStrict:Boolean = false): Logo = {
 
     val filteringCondition = FilteringCondition(f, isStrict)
 
@@ -325,7 +311,7 @@ class PatternLogoRDDReference(val patternSchema: LogoSchema, var buildScript: Lo
   * @param patternSchema      the schema of the patternLogo
   * @param composebuildScript the buildScript used to build the new Logo
   */
-class ComposingPatternLogoRDDReference(val children: Seq[PatternLogoRDDReference], override val patternSchema: LogoSchema, var composebuildScript: LogoPatternPhysicalPlan) extends PatternLogoRDDReference(patternSchema, composebuildScript) {
+class ComposedLogo(val children: Seq[Logo], override val patternSchema: LogoSchema, var composebuildScript: AbstractLogoPhysicalPlan) extends Logo(patternSchema, composebuildScript) {
 
 }
 
@@ -336,44 +322,44 @@ class ComposingPatternLogoRDDReference(val children: Seq[PatternLogoRDDReference
   * @param patternLogoRDDReference the old LogoReference
   * @param keyMapping              the keyMapping that map the old Logo to new Logo
   */
-class SubPatternLogoRDDReference(val patternLogoRDDReference: PatternLogoRDDReference, val keyMapping: KeyMapping) {
+class PartialLogo(val patternLogoRDDReference: Logo, val keyMapping: KeyMapping) {
 
-  def build(subPattern: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+  def build(subPattern: PartialLogo): ComposedLogo = {
     val logoBuildScriptSteps = Seq(patternLogoRDDReference.buildScript, subPattern.patternLogoRDDReference.buildScript)
     val keyMappings = Seq(keyMapping, subPattern.keyMapping)
-    val newLogoBuildScriptStep = new LogoComposite2PatternPhysicalPlan(logoBuildScriptSteps, keyMappings)
+    val newLogoBuildScriptStep = new LogoComposite2PhysicalPlan(logoBuildScriptSteps, keyMappings)
     val logoRDDReference = newLogoBuildScriptStep.toLogoRDDReference()
 
-    new ComposingPatternLogoRDDReference(Seq(patternLogoRDDReference, subPattern.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
+    new ComposedLogo(Seq(patternLogoRDDReference, subPattern.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
   }
 
   //TODO this only intended for pattern like square, more cases need to be further implemented
-  def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+  def build(subPattern1: PartialLogo, subPattern2: PartialLogo): ComposedLogo = {
     val logoBuildScriptSteps = Seq(patternLogoRDDReference.buildScript, subPattern1.patternLogoRDDReference.buildScript, subPattern2.patternLogoRDDReference.buildScript)
     val keyMappings = Seq(keyMapping, subPattern1.keyMapping, subPattern2.keyMapping)
-    val newLogoBuildScriptStep = new LogoComposite3IntersectionPatternPhysicalPlan(logoBuildScriptSteps, keyMappings)
+    val newLogoBuildScriptStep = new LogoComposite3PhysicalPlan(logoBuildScriptSteps, keyMappings)
     val logoRDDReference = newLogoBuildScriptStep.toLogoRDDReference()
 
-    new ComposingPatternLogoRDDReference(Seq(patternLogoRDDReference, subPattern1.patternLogoRDDReference, subPattern2.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
+    new ComposedLogo(Seq(patternLogoRDDReference, subPattern1.patternLogoRDDReference, subPattern2.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
   }
 
   //TODO this only intended for pattern like fourClique, more cases need to be further implemented
-  def build(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference, subPattern3: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+  def build(subPattern1: PartialLogo, subPattern2: PartialLogo, subPattern3: PartialLogo): ComposedLogo = {
     val logoBuildScriptSteps = Seq(patternLogoRDDReference.buildScript, subPattern1.patternLogoRDDReference.buildScript, subPattern2.patternLogoRDDReference.buildScript, subPattern3.patternLogoRDDReference.buildScript)
     val keyMappings = Seq(keyMapping, subPattern1.keyMapping, subPattern2.keyMapping, subPattern3.keyMapping)
-    val newLogoBuildScriptStep = new LogoComposite4IntersectionPatternPhysicalPlan(logoBuildScriptSteps, keyMappings)
+    val newLogoBuildScriptStep = new LogoComposite4PhysicalPlan(logoBuildScriptSteps, keyMappings)
     val logoRDDReference = newLogoBuildScriptStep.toLogoRDDReference()
 
-    new ComposingPatternLogoRDDReference(Seq(patternLogoRDDReference, subPattern1.patternLogoRDDReference, subPattern2.patternLogoRDDReference, subPattern3.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
+    new ComposedLogo(Seq(patternLogoRDDReference, subPattern1.patternLogoRDDReference, subPattern2.patternLogoRDDReference, subPattern3.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
   }
 
-  def gSyncbuild(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {
+  def gSyncbuild(subPattern1: PartialLogo, subPattern2: PartialLogo): ComposedLogo = {
     val logoBuildScriptSteps = Seq(patternLogoRDDReference.buildScript, subPattern1.patternLogoRDDReference.buildScript, subPattern2.patternLogoRDDReference.buildScript)
     val keyMappings = Seq(keyMapping, subPattern1.keyMapping, subPattern2.keyMapping)
-    val newLogoBuildScriptStep = new LogoComposite3IntersectionPatternPhysicalPlan(logoBuildScriptSteps, keyMappings, true)
+    val newLogoBuildScriptStep = new LogoComposite3PhysicalPlan(logoBuildScriptSteps, keyMappings, true)
     val logoRDDReference = newLogoBuildScriptStep.toLogoRDDReference()
 
-    new ComposingPatternLogoRDDReference(Seq(patternLogoRDDReference, subPattern1.patternLogoRDDReference, subPattern2.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
+    new ComposedLogo(Seq(patternLogoRDDReference, subPattern1.patternLogoRDDReference, subPattern2.patternLogoRDDReference), logoRDDReference.patternSchema, logoRDDReference.buildScript)
   }
 
 //  def gSyncbuild(subPattern1: SubPatternLogoRDDReference, subPattern2: SubPatternLogoRDDReference, subPattern3: SubPatternLogoRDDReference): ComposingPatternLogoRDDReference = {

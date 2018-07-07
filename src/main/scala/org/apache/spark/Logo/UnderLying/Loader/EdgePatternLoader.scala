@@ -1,6 +1,6 @@
 package org.apache.spark.Logo.UnderLying.Loader
 
-import org.apache.spark.Logo.Plan.LogoCompactPatternPhysicalPlan
+import org.apache.spark.Logo.Plan.PhysicalPlan.LogoCompactEdgePhysicalPlan
 import org.apache.spark.Logo.UnderLying.Maker.{CompactRowLogoRDDMaker, SimpleRowLogoRDDMaker}
 import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
@@ -125,7 +125,7 @@ class EdgePatternLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
 
   var tempAddress = ""
 
-  lazy val edgeLogoRDDReference = new LogoCompactPatternPhysicalPlan(EdgePatternLogoRDD) toLogoRDDReference()
+  lazy val edgeLogoRDDReference = new LogoCompactEdgePhysicalPlan(EdgePatternLogoRDD) toLogoRDDReference()
   lazy val (_, sc) = SparkSingle.getSpark()
 
 

@@ -1,12 +1,10 @@
 package org.apache.spark.Logo.Novel
 
 import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
-import org.apache.spark.ml.Model
 import org.apache.spark.ml.classification._
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.LabeledPoint
 import org.apache.spark.ml.linalg.{Matrices, Matrix, Vector, Vectors}
-import org.apache.spark.sql.functions.max
 
 
 
@@ -75,8 +73,6 @@ class SparkMLUsage {
   }
 
   def testLogisticalRegression(): Unit ={
-
-    import spark.implicits._
 
     val lr = new LogisticRegression()
       .setMaxIter(10)

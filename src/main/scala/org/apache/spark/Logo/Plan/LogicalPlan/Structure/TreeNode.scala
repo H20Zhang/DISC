@@ -1,8 +1,5 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.Structure
 
-import org.apache.spark.Logo.Plan.LogicalPlan.Decrapted.AttributesMap
-import org.apache.spark.Logo.Plan.LogicalPlan.QueryOptimizer.EstimatorFunc
-import org.glassfish.hk2.api.Self
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -33,18 +30,12 @@ abstract class LogicalTreeNode extends TreeNode{
   def setP(AllP:Seq[Int]):Unit
   def getP():Seq[(Int,Int)]
 
-  def setEstimatorFunc(estimator:EstimatorFunc):LogicalTreeNode = ???
-  def getEstimatorFunc():EstimatorFunc = ???
+
 
   def attributes:Seq[Int]
   def relations:Seq[Int]
 
-  def cost():Double = {
-    getEstimatorFunc().costFunc(this)
-  }
-  def size():Double = {
-    getEstimatorFunc().sizeFunc(this)
-  }
+
 
 }
 

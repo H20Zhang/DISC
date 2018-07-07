@@ -1,7 +1,7 @@
 package org.apache.spark.Logo.UnderLying.utlis.Experiment
 
 import gnu.trove.map.hash.{TIntIntHashMap, TLongIntHashMap}
-import org.apache.spark.Logo.Plan.FilteringCondition
+import org.apache.spark.Logo.Plan.PhysicalPlan.FilteringCondition
 import org.apache.spark.Logo.UnderLying.Loader.{EdgeLoader, EdgePatternLoader}
 import org.apache.spark.Logo.UnderLying.dataStructure.{CompositeTwoPatternLogoBlock, TwoKeyPatternInstance}
 

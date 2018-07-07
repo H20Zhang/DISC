@@ -1,9 +1,7 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize
 
-import com.joptimizer.optimizers.LPPrimalDualMethod
 import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{GHDNode, GHDTree, RelationSchema}
-import org.apache.spark.Logo.UnderLying.utlis.PointToNumConverter
-import org.apache.spark.mllib.tree
+import org.apache.spark.Logo.Plan.LogicalPlan.Utility.AGMSolver
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer

@@ -2,7 +2,7 @@ package org.apache.spark.Logo.UnderLying.dataStructure
 
 import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.{Kryo, Serializer}
-import org.apache.spark.Logo.Plan.FilteringCondition
+import org.apache.spark.Logo.Plan.PhysicalPlan.FilteringCondition
 import org.apache.spark.serializer.KryoRegistrator
 
 import scala.collection.mutable

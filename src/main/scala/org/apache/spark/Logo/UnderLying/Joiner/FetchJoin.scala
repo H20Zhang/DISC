@@ -3,9 +3,6 @@ package org.apache.spark.Logo.UnderLying.Joiner
 import org.apache.spark.Logo.UnderLying.dataStructure.{CompositeLogoSchema, LogoBlockRef}
 import org.apache.spark._
 import org.apache.spark.rdd.RDD
-import org.apache.spark.util.CompletionIterator
-
-import scala.util.Random
 
 
 /**

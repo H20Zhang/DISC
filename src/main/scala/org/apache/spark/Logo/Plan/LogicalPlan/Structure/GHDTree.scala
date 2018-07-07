@@ -42,12 +42,13 @@ class GHDTree(val id:Int, var nodes:Map[Int,GHDNode], var graph:ImmutableGraph, 
 
   //optimize node of GHD to contain all the edges of attribute induced
   def attributeInducedVersion():GHDTree = {
+
     nodes.values.foreach(_.toCompleteAttributeNode())
     this
   }
 
   def fhw() = {
-    val fractionalCovers = nodes.values.map(_.estimatedCardinality()._2)
+    val fractionalCovers = nodes.values.map(_.estimatedAGMCardinality()._2)
     (fractionalCovers.max, fractionalCovers.sum)
   }
 
@@ -97,9 +98,6 @@ class GHDTree(val id:Int, var nodes:Map[Int,GHDNode], var graph:ImmutableGraph, 
     }
   }
 
-  def toOrderedGHDTree(order:Seq[Int]) = {
-    OrderedGHDTree(this,order)
-  }
 }
 
 object GHDTree{
@@ -119,47 +117,5 @@ object GHDTree{
     treeCount += 1
     val curID = treeCount - 1
     new GHDTree(curID, Map(), ImmutableGraph(), ArrayBuffer(), ArrayBuffer())
-  }
-}
-
-class OrderedGHDTree(val order:Seq[Int], id:Int, var orderedNodes:Map[Int,OrderedGHDNode], graph:ImmutableGraph, relations:ArrayBuffer[Int], attributes:ArrayBuffer[Int]) extends GHDTree(id,orderedNodes,graph,relations,attributes){
-
-  def SampleBasedInformationGathering = ???
-
-  override def toString: String = {
-    if (nodes.isEmpty){
-      s"${this.getClass.getSimpleName} id:${id} order:${order}"
-    } else{
-      s"${this.getClass.getSimpleName} id:${id} nodes:${nodes.map(_.toString()).reduce(_ + _)} graph:${graph} order:${order}"
-    }
-  }
-}
-
-object OrderedGHDTree{
-  def apply(tree:GHDTree, order:Seq[Int]):OrderedGHDTree = {
-
-    //set orders
-    val orderMap = order.zipWithIndex.toMap
-    val orderedNodes = tree.nodes.map{case (key, value) => (key,value.toOrderedGHDNode(orderMap(value.id)))}
-    val reverseOrderMap = orderMap.toSeq.map(_.swap).toMap
-    orderedNodes.values.foreach{f =>
-      f.order == 0 match {
-        case true => f.setPrev(null)
-        case false => f.setPrev(orderedNodes(reverseOrderMap(f.order-1)))
-      }
-    }
-
-    //set prevs
-      val graph = tree.graph
-      orderedNodes.values.foreach{f =>
-        val neighborsID = graph.getNeighbors(f.id)
-        val prevOption = neighborsID.map(g => orderedNodes(g)).filter(p => p.order < f.order).headOption
-        prevOption match {
-          case Some(prev) => f.setPrev(prev)
-          case None =>
-        }
-      }
-
-    new OrderedGHDTree(order, tree.id, orderedNodes, tree.graph, tree.relations, tree.attributes)
   }
 }

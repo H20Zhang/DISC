@@ -1,8 +1,8 @@
 package Underlying
 
-import org.apache.spark.Logo.UnderLying.Maker.{PartitionerMaker, SimpleRowLogoRDDMaker, rowBlockGenerator}
+import org.apache.spark.Logo.UnderLying.Maker.{PartitionerMaker, rowBlockGenerator}
 import org.apache.spark.Logo.UnderLying.dataStructure.{KeyMapping, LogoSchema}
-import org.apache.spark.Logo.UnderLying.utlis.{SparkSingle, TestUtil}
+import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class BlockMakerTest extends FunSuite with BeforeAndAfterAll{

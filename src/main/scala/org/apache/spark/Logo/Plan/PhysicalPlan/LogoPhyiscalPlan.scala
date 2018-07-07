@@ -1,14 +1,11 @@
-package org.apache.spark.Logo.Plan
+package org.apache.spark.Logo.Plan.PhysicalPlan
 
-
-import org.apache.spark.Logo.UnderLying.Joiner.{LogoBuildPhyiscalStep, LogoBuildScriptStep}
+import org.apache.spark.Logo.UnderLying.Joiner.{LogoBuildPhyiscalStep, LogoPhysicalPlan}
 import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.SparkContext
 import org.apache.spark.storage.StorageLevel
 
-class LogoLogicalBuildScript {
 
-}
 
 
 /**
@@ -18,7 +15,7 @@ class LogoLogicalBuildScript {
   * @param keyMapping  the keyMapping between the old Logo and new Logo
   * @param name
   */
-abstract class LogoPatternPhysicalPlan(@transient val logoRDDRefs: Seq[LogoPatternPhysicalPlan], @transient val keyMapping: Seq[KeyMapping], val name: String = "") extends LogoBuildScriptStep {
+abstract class AbstractLogoPhysicalPlan(@transient val logoRDDRefs: Seq[AbstractLogoPhysicalPlan], @transient val keyMapping: Seq[KeyMapping], val name: String = "") extends LogoPhysicalPlan {
 
   lazy val compositeSchema = new subKeyMappingCompositeLogoSchemaBuilder(logoRDDRefs.map(_.getSchema()), keyMapping) generate()
 
@@ -54,7 +51,7 @@ abstract class LogoPatternPhysicalPlan(@transient val logoRDDRefs: Seq[LogoPatte
   def getSchema(): LogoSchema
 
   def toLogoRDDReference() = {
-    new PatternLogoRDDReference(getSchema(), this)
+    new Logo(getSchema(), this)
   }
 
 }
@@ -111,7 +108,7 @@ class Planned4HandlerGenerator(coreId: Int) extends Serializable {
 }
 
 
-class LogoFilterPatternPhysicalPlan(@transient f: FilteringCondition, @transient buildLogicalStep: LogoPatternPhysicalPlan) extends LogoPatternPhysicalPlan(buildLogicalStep.logoRDDRefs, buildLogicalStep.keyMapping) {
+class LogoFilterPatternPhysicalPlan(@transient f: FilteringCondition, @transient buildLogicalStep: AbstractLogoPhysicalPlan) extends AbstractLogoPhysicalPlan(buildLogicalStep.logoRDDRefs, buildLogicalStep.keyMapping) {
 
 
   @transient var cachedFState: PatternLogoRDD = null
@@ -159,7 +156,7 @@ class LogoFilterPatternPhysicalPlan(@transient f: FilteringCondition, @transient
   * @param logoRDDRefs logical logoRDD used to build this LogoRDD
   * @param keyMapping  the keyMapping between the old Logo and new Logo
   */
-class LogoComposite4IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[LogoPatternPhysicalPlan], @transient keyMapping: Seq[KeyMapping]) extends LogoPatternPhysicalPlan(logoRDDRefs, keyMapping) {
+class LogoComposite4PhysicalPlan(@transient logoRDDRefs: Seq[AbstractLogoPhysicalPlan], @transient keyMapping: Seq[KeyMapping]) extends AbstractLogoPhysicalPlan(logoRDDRefs, keyMapping) {
 
   lazy val schema = getSchema()
   lazy val coreLogoRef = logoRDDRefs(coreId)
@@ -186,8 +183,8 @@ class LogoComposite4IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
 
   def generateLeftLeafPhyiscal(): PatternLogoRDD = {
     //warning should only work for sampling mode, doesn't use it for normal enumeration
-    if (leftLeafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
-      return leftLeafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    if (leftLeafLogoRef.isInstanceOf[LogoKeyValuePhysicalPlan]){
+      return leftLeafLogoRef.asInstanceOf[LogoKeyValuePhysicalPlan].generateNewPatternFState()
     }
     leftLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreLeftLeafJoins().leafJoints,true)
   }
@@ -195,8 +192,8 @@ class LogoComposite4IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
   def generateRightLeafPhysical(): PatternLogoRDD = {
 
     //warning should only work for sampling mode, doesn't use it for normal enumeration
-    if (rightLeafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
-      return rightLeafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    if (rightLeafLogoRef.isInstanceOf[LogoKeyValuePhysicalPlan]){
+      return rightLeafLogoRef.asInstanceOf[LogoKeyValuePhysicalPlan].generateNewPatternFState()
     }
     rightLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreRightLeafJoins().leafJoints,true)
   }
@@ -204,8 +201,8 @@ class LogoComposite4IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
   def generateMidLeafPhysical(): PatternLogoRDD = {
 
     //warning should only work for sampling mode, doesn't use it for normal enumeration
-    if (midLeafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
-      return midLeafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    if (midLeafLogoRef.isInstanceOf[LogoKeyValuePhysicalPlan]){
+      return midLeafLogoRef.asInstanceOf[LogoKeyValuePhysicalPlan].generateNewPatternFState()
     }
     midLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreMidLeafJoins().leafJoints,true)
   }
@@ -246,7 +243,7 @@ class LogoComposite4IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
   * @param logoRDDRefs logical logoRDD used to build this LogoRDD
   * @param keyMapping  the keyMapping between the old Logo and new Logo
   */
-class LogoComposite3IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[LogoPatternPhysicalPlan], @transient keyMapping: Seq[KeyMapping], gSync:Boolean = false) extends LogoPatternPhysicalPlan(logoRDDRefs, keyMapping) {
+class LogoComposite3PhysicalPlan(@transient logoRDDRefs: Seq[AbstractLogoPhysicalPlan], @transient keyMapping: Seq[KeyMapping], gSync:Boolean = false) extends AbstractLogoPhysicalPlan(logoRDDRefs, keyMapping) {
 
   lazy val schema = getSchema()
   lazy val coreLogoRef = logoRDDRefs(coreId)
@@ -270,8 +267,8 @@ class LogoComposite3IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
 
   def generateLeftLeafPhyiscal(): PatternLogoRDD = {
     //warning should only work for sampling mode, doesn't use it for normal enumeration
-    if (leftLeafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
-      return leftLeafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    if (leftLeafLogoRef.isInstanceOf[LogoKeyValuePhysicalPlan]){
+      return leftLeafLogoRef.asInstanceOf[LogoKeyValuePhysicalPlan].generateNewPatternFState()
     }
     leftLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreLeftLeafJoins().leafJoints,true)
   }
@@ -279,8 +276,8 @@ class LogoComposite3IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
   def generateRightLeafPhysical(): PatternLogoRDD = {
 
     //warning should only work for sampling mode, doesn't use it for normal enumeration
-    if (rightLeafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
-      return rightLeafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    if (rightLeafLogoRef.isInstanceOf[LogoKeyValuePhysicalPlan]){
+      return rightLeafLogoRef.asInstanceOf[LogoKeyValuePhysicalPlan].generateNewPatternFState()
     }
     rightLeafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreRightLeafJoins().leafJoints,true)
   }
@@ -320,7 +317,7 @@ class LogoComposite3IntersectionPatternPhysicalPlan(@transient logoRDDRefs: Seq[
   * @param logoRDDRefs logical logoRDD used to build this LogoRDD
   * @param keyMapping  the keyMapping between the old Logo and new Logo
   */
-class LogoComposite2PatternPhysicalPlan(@transient logoRDDRefs: Seq[LogoPatternPhysicalPlan], @transient keyMapping: Seq[KeyMapping]) extends LogoPatternPhysicalPlan(logoRDDRefs, keyMapping) {
+class LogoComposite2PhysicalPlan(@transient logoRDDRefs: Seq[AbstractLogoPhysicalPlan], @transient keyMapping: Seq[KeyMapping]) extends AbstractLogoPhysicalPlan(logoRDDRefs, keyMapping) {
 
   lazy val schema = getSchema()
   lazy val coreLogoRef = logoRDDRefs(coreId)
@@ -342,8 +339,8 @@ class LogoComposite2PatternPhysicalPlan(@transient logoRDDRefs: Seq[LogoPatternP
   lazy val logoStep = LogoBuildPhyiscalStep(logoRDDs, compositeSchema, handler)
 
   override def generateLeafPhyiscal(): PatternLogoRDD = {
-    if (leafLogoRef.isInstanceOf[LogoKeyValuePatternPhysicalPlan]){
-      return leafLogoRef.asInstanceOf[LogoKeyValuePatternPhysicalPlan].generateNewPatternFState()
+    if (leafLogoRef.isInstanceOf[LogoKeyValuePhysicalPlan]){
+      return leafLogoRef.asInstanceOf[LogoKeyValuePhysicalPlan].generateNewPatternFState()
     }
     leafLogoRef.generateNewPatternFState().toKeyValuePatternLogoRDD(schema.getCoreLeafJoins().leafJoints)
   }
@@ -384,7 +381,7 @@ class LogoComposite2PatternPhysicalPlan(@transient logoRDDRefs: Seq[LogoPatternP
   *
   * @param edgeLogoRDD the actually data of the edge
   */
-class LogoEdgePatternPhysicalPlan(@transient edgeLogoRDD: ConcreteLogoRDD) extends LogoPatternPhysicalPlan(List(), List()) {
+class LogoEdgePhysicalPlan(@transient edgeLogoRDD: ConcreteLogoRDD) extends AbstractLogoPhysicalPlan(List(), List()) {
 
   override def generateNewPatternFState(): PatternLogoRDD = {
     edgeLogoRDD
@@ -410,7 +407,7 @@ class LogoEdgePatternPhysicalPlan(@transient edgeLogoRDD: ConcreteLogoRDD) exten
   *
   * @param edgeLogoRDD the actually data of the edge
   */
-class LogoKeyValuePatternPhysicalPlan(@transient edgeLogoRDD: KeyValueLogoRDD) extends LogoPatternPhysicalPlan(List(), List()) {
+class LogoKeyValuePhysicalPlan(@transient edgeLogoRDD: KeyValueLogoRDD) extends AbstractLogoPhysicalPlan(List(), List()) {
 
   override def generateNewPatternFState(): PatternLogoRDD = {
     edgeLogoRDD
@@ -436,7 +433,7 @@ class LogoKeyValuePatternPhysicalPlan(@transient edgeLogoRDD: KeyValueLogoRDD) e
   *
   * @param edgeLogoRDD the actually data of the edge
   */
-class LogoCompactPatternPhysicalPlan(@transient edgeLogoRDD: PatternLogoRDD) extends LogoPatternPhysicalPlan(List(), List()) {
+class LogoCompactEdgePhysicalPlan(@transient edgeLogoRDD: PatternLogoRDD) extends AbstractLogoPhysicalPlan(List(), List()) {
 
   override def generateNewPatternFState(): PatternLogoRDD = {
     edgeLogoRDD
@@ -456,17 +453,5 @@ class LogoCompactPatternPhysicalPlan(@transient edgeLogoRDD: PatternLogoRDD) ext
     edgeLogoRDD.toConcretePatternLogoRDD
   }
 }
-
-//class LogoKeyValuePatternPhysicalPlan(@transient keyValueLogoRDD: KeyValueLogoRDD) extends LogoPatternPhysicalPlan(List(),List()){
-//  override def generateLeafPhyiscal(): PatternLogoRDD = ???
-//
-//  override def generateCorePhyiscal(): PatternLogoRDD = ???
-//
-//  override def generateNewPatternFState(): PatternLogoRDD = ???
-//
-//  override def generateNewPatternJState(): ConcreteLogoRDD = ???
-//
-//  override def getSchema(): LogoSchema = ???
-//}
 
 

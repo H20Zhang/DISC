@@ -1,7 +1,7 @@
 package Plan
 
 import org.apache.spark.Logo.UnderLying.utlis.Experiment.{ExamplePattern, ExamplePatternSampler}
-import org.apache.spark.Logo.UnderLying.utlis.{ExamplePatternSampler, SparkSingle}
+import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class SampledExamplePatternTest extends FunSuite with BeforeAndAfterAll{

@@ -50,7 +50,7 @@ class CompactRowGenerator[A: ClassTag](schema: LogoSchema,
         rawData.append(f._1(0))
     }
 
-    println(s"the count is $count")
+//    println(s"the count is $count")
 //    rawData.toCompactList().iterator().foreach{f =>
 //      println()
 //      print(f(0))

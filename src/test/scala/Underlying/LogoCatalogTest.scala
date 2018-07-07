@@ -10,10 +10,10 @@ class LogoCatalogTest extends FunSuite{
     val catalog = LogoCatalog.getCatalog()
     val data = "./wikiV.txt"
 
-    val relationR1 = Relation("R1",Seq("A","B"))
+    val relationR1 = Relation("R1",Seq("A","B"),data)
     val relationR1WithP = relationR1.toRelationWithP(Seq(6,6))
     relationSchema.addRelation(relationR1)
-    val edge = catalog.registorRelationFromAdress(relationR1WithP, data)
+    val edge = catalog.registorRelationWithP(relationR1WithP)
 
     val edge1 = catalog.retrieveLogo(relationR1.toRelationWithP(Seq(6,6))).get
     println(edge1 == edge)

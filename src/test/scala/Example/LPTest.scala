@@ -1,19 +1,16 @@
 package Example
 
 import com.joptimizer.optimizers.LPPrimalDualMethod
-import org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize.AGMSolver
 import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{Relation, RelationSchema}
+import org.apache.spark.Logo.Plan.LogicalPlan.Utility.AGMSolver
 import org.scalatest.FunSuite
-import scpsolver.lpsolver.SolverFactory
-import scpsolver.problems.LPWizard
 
 import scala.collection.mutable.ArrayBuffer
 
 class LPTest extends FunSuite{
 
   test("JOptimizer"){
-    import com.joptimizer.optimizers.LPOptimizationRequest
-    import com.joptimizer.optimizers.LPPrimalDualMethod
+    import com.joptimizer.optimizers.{LPOptimizationRequest, LPPrimalDualMethod}
     //Objective function//Objective function
 
     //optimization

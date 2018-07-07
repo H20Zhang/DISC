@@ -31,7 +31,7 @@ class GHDGeneratorTest extends FunSuite{
     //functionality test
     assert(nodeV3.isConnected())
     assert(nodeV3.intersect(nodeV2).toString() == "(ArrayBuffer(0, 1),ArrayBuffer(0))")
-    assert(nodeV3.estimatedCardinality()._2 == 1.5)
+    assert(nodeV3.estimatedAGMCardinality()._2 == 1.5)
     assert(nodeV3.contains(nodeV2) == true)
     assert(nodeV3.contains(nodeV4) == false)
     assert(nodeV4.contains(nodeV3) == false)

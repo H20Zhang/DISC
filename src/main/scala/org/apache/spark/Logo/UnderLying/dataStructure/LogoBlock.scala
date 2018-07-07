@@ -2,13 +2,11 @@ package org.apache.spark.Logo.UnderLying.dataStructure
 
 import java.util
 
-import org.apache.spark.Logo.Plan.FilteringCondition
-
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.{AbstractIterator, Iterator, Searching, mutable}
+import org.apache.spark.Logo.Plan.PhysicalPlan.FilteringCondition
 import org.apache.spark.Logo.UnderLying.utlis.MapBuilder
 
-import scala.collection.Iterator.empty
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.{AbstractIterator, Iterator, mutable}
 import scala.reflect.ClassTag
 
 
