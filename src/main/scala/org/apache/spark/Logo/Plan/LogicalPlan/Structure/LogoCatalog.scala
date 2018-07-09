@@ -11,80 +11,73 @@ import scala.collection.mutable
   * LogoRDDReference records the RDD[LogoBlock] and its according schema
   */
 class LogoCatalog {
-  val rddMap: mutable.Map[RelationWithP, Logo] = mutable.Map()
-//  val sampledRDDMap: mutable.Map[RelationWithP, PatternLogoRDDReference] = mutable.Map()
-  val addressPMap: mutable.Map[(String,(Int,Int)), (Logo,Long)] = mutable.Map()
+  val relationIDPMap: mutable.Map[(Int,(Int,Int)), (Logo,Long)] = mutable.Map()
+  val relationIDMap:mutable.Map[Int, (RDD[(Array[Int],Int)],Long)] = mutable.Map()
   val addressMap: mutable.Map[String, (RDD[(Array[Int],Int)],Long)] = mutable.Map()
+//  val sampledRDDMap: mutable.Map[RelationWithP, PatternLogoRDDReference] = mutable.Map()
+
 
   val relationSchema = RelationSchema.getRelationSchema()
 
-  def addressPPairGen(relation:RelationWithP) = {
-    (relation.address, (relation.p(0), relation.p(1)))
+  def relationIDPPairGen(relation:RelationWithP) = {
+    (relationSchema.getRelationId(relation.originalRelation), (relation.p(0), relation.p(1)))
   }
 
   def registorRelationWithP(relation: RelationWithP):(Logo,Long) = {
 
-//    println(s"registor ${relation}")
+    val IDPpair = relationIDPPairGen(relation)
 
-    val addressPPair = addressPPairGen(relation)
+    val (rawEdge,resCount) = retrieveOrRegisterRelation(relation.originalRelation)
+    val edgeLoader = new EdgePatternLoader(rawEdge, Seq(relation.p(0), relation.p(1)))
+    val resEdge = edgeLoader.edgeLogoRDDReference
+    relationIDPMap(IDPpair) = (resEdge, resCount)
 
-    val res = addressPMap.get(addressPPair) match {
-      case Some(res) => res
-      case None => {
-//        println(s"init registor ${relation}")
-        val (rawEdge,resCount) = registorRelation(relation.originalRelation)
-        val edgeLoader = new EdgePatternLoader(rawEdge, Seq(relation.p(0), relation.p(1)))
-        val resEdge = edgeLoader.edgeLogoRDDReference
-
-        addressPMap(addressPPair) = (resEdge, resCount)
-
-        (resEdge, resCount)
-      }
-    }
-
-    linkRelationWithLogo(relation, res)
-    res
+    (resEdge, resCount)
   }
 
   def registorRelation(relation: Relation) = {
-    val rawEdge = new EdgeLoader(relation.address) rawEdgeRDD
+
+    val (rawEdge,count) = retrieveOrRegistorAddress(relation.address)
+
+    relationIDMap(relationSchema.getRelationId(relation)) = (rawEdge,count)
+    relation.cardinality = count
+    (rawEdge, count)
+  }
+
+  def registorAdress(address:String) = {
+    val rawEdge = new EdgeLoader(address) rawEdgeRDD
     val count = rawEdge.count()
 
-    addressMap(relation.address) = (rawEdge,count)
+    addressMap(address) = (rawEdge,count)
     (rawEdge, count)
   }
 
   def getSampledRelationWithP(relation: RelationWithP, k:Long):Logo = {
+
     val rawEdge = new EdgeLoader(relation.address) sampledRawEdgeRDD(k.toInt)
 
     val edgeLoader = new EdgePatternLoader(rawEdge, Seq(relation.p(0), relation.p(1)))
     val res = edgeLoader.edgeLogoRDDReference
 
-//    linkRelationWithSampledLogo(relation, res)
-
     res
   }
 
-  def updateRelationCardinality(relation:RelationWithP, cardinality:Long) = {
-    relation.originalRelation.cardinality = cardinality
-  }
-
-  def linkRelationWithLogo(relation:RelationWithP, logo:(Logo,Long)) = {
-    updateRelationCardinality(relation, logo._2)
-    rddMap.put(relation, logo._1)
-  }
-
-  def retrieveLogo(relation:RelationWithP) = rddMap.get(relation)
-
-  def retrieveOrRegisterLogo(relation:RelationWithP) = {
-    addressPMap.get(addressPPairGen(relation)) match {
+  def retrieveOrRegistorAddress(address:String) = {
+    addressMap.get(address) match {
       case Some(v) => v
+      case None => registorAdress(address)
+    }
+  }
+
+  def retrieveOrRegisterRelationWithP(relation:RelationWithP) = {
+    relationIDPMap.get(relationIDPPairGen(relation)) match {
+      case Some(v) => v._1
       case None => registorRelationWithP(relation)._1
     }
   }
 
   def retrieveOrRegisterRelation(relation: Relation) = {
-    addressMap.get(relation.address) match {
+    relationIDMap.get(relationSchema.getRelationId(relation)) match {
       case Some(v) => v
       case None => registorRelation(relation)
     }

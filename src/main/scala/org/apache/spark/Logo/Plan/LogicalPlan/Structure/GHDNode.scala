@@ -1,6 +1,7 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.Structure
 
-import org.apache.spark.Logo.Plan.LogicalPlan.Utility.{AGMSolver, LogoNodeConstructor, LogoGJOrderGenerator, SubPattern}
+import org.apache.log4j.LogManager
+import org.apache.spark.Logo.Plan.LogicalPlan.Utility.{AGMSolver, LogoGJOrderGenerator, LogoNodeConstructor, SubPattern}
 import org.apache.spark.Logo.UnderLying.utlis._
 
 import scala.collection.mutable.ArrayBuffer
@@ -8,6 +9,7 @@ import scala.collection.mutable.ArrayBuffer
 class GHDNode(val id:Int, var relationIDs:ArrayBuffer[Int], val attributeIDs:ArrayBuffer[Int], var nexts:Seq[TreeNode]) extends TreeNode{
   override def children(): Seq[TreeNode] = nexts
 
+  val log = LogManager.getLogger(this.getClass)
   lazy val relationSchema = RelationSchema.getRelationSchema()
 
   def toCompleteAttributeNode() = {
@@ -73,18 +75,24 @@ class GHDNode(val id:Int, var relationIDs:ArrayBuffer[Int], val attributeIDs:Arr
   }
 
   def sampledGJCardinality(k:Long, prev:GHDNode) = {
+    log.warn(s"start sampling cardinality for node ${id}")
     val orderGenerator = new LogoGJOrderGenerator(this)
+    val order = orderGenerator.GJOrder()
+    val stages = orderGenerator.GJStages()
     orderGenerator.setAdhensionPreference(prev)
 
-    val constructor = new LogoNodeConstructor(orderGenerator.GJOrder(), orderGenerator.GJStages(), 6)
+    val constructor = new LogoNodeConstructor(order, stages)
     val subPattern = constructor.constructSampleLogoWithEdgeLimit(k)
     val time_size_pair = subPattern.logo.time_size()
 
+    //TODO this place may need some change
+    val mul = relationSchema.getRelation((order(0),order(1))).get .toDouble/Configuration.getConfiguration().defaultK
     //size, time
-    time_size_pair
+    ((time_size_pair._1 * mul) toLong, (time_size_pair._2 * mul) toLong, time_size_pair._3)
   }
 
   def sampleOfEdgeTuple(sampleSize:Long, attrNodeIDs:(Int,Int), preference:Map[Int,Int]):SubPattern = {
+    log.warn(s"generating sampled edges from node ${id}")
     val orderGenerator = new LogoGJOrderGenerator( this)
     orderGenerator.setPreference(preference)
     val logoConstructor = new LogoNodeConstructor(orderGenerator.GJOrder(), orderGenerator.GJStages())
@@ -93,7 +101,7 @@ class GHDNode(val id:Int, var relationIDs:ArrayBuffer[Int], val attributeIDs:Arr
 
 
   def sampledQueryTime(k:Long, prev:GHDNode) = {
-
+    log.warn(s"start sampling process from sampled edge from node:${prev} for node:${id}")
     val orderGenerator = new LogoGJOrderGenerator(this)
     orderGenerator.setAdhensionPreference(prev)
     val logoConstructor = new LogoNodeConstructor(orderGenerator.GJOrder(), orderGenerator.GJStages())
@@ -115,7 +123,7 @@ class GHDNode(val id:Int, var relationIDs:ArrayBuffer[Int], val attributeIDs:Arr
       val orderGenerator = new LogoGJOrderGenerator(this)
       orderGenerator.setAdhensionPreference(prev)
 
-      val constructor = new LogoNodeConstructor(orderGenerator.GJOrder(), orderGenerator.GJStages(), 6)
+      val constructor = new LogoNodeConstructor(orderGenerator.GJOrder(), orderGenerator.GJStages())
       val subPattern = constructor.constructPattern(p)
 
       subPattern
@@ -125,6 +133,9 @@ class GHDNode(val id:Int, var relationIDs:ArrayBuffer[Int], val attributeIDs:Arr
     s"${this.getClass.getSimpleName} id:${id} relations:${relations}"
   }
 
+  def shortString: String = {
+    attributeIDs.map(relationSchema.getAttribute).toString()
+  }
 
 }
 

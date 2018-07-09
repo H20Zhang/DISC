@@ -1,5 +1,7 @@
 package org.apache.spark.Logo.UnderLying.utlis
 
+
+import org.apache.log4j.{LogManager, Logger}
 import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
@@ -94,7 +96,7 @@ object SparkSingle {
   def getSpark() = {
     spark = getSparkInternal()
     sc = spark.sparkContext
-    sc.setLogLevel("ERROR")
+    sc.setLogLevel("WARN")
 
     (spark, sc)
   }

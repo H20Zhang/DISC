@@ -1,16 +1,19 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.Utility
 
+import org.apache.log4j.LogManager
 import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{GHDNode, GHDTree, RelationSchema}
 
 import scala.collection.mutable
 
 class InformationSampler(tree:GHDTree, k:Long) {
 
+  val log = LogManager.getLogger(this.getClass)
   val relationSchema = RelationSchema.getRelationSchema()
   var sizeTimeMap:mutable.Map[Int, (Long,Long,Int)] = mutable.Map()
   val queryTimeMap:mutable.Map[(Int,Int), (Long,Long,Int)] = mutable.Map()
 
   def nodeInformation(nodeId:Int) = {
+    log.warn(s"obtaining node information of node ${nodeId}")
     val res = sizeTimeMap.get(nodeId) match {
       case Some(v) => v
       case None => tree.nodes(nodeId).sampledGJCardinality(k, GHDNode())
@@ -29,12 +32,13 @@ class InformationSampler(tree:GHDTree, k:Long) {
   }
 
   def queryInformation(prevNodeId:Int, nodeId:Int) = {
-    val res = sizeTimeMap.get(nodeId) match {
+    log.warn(s"obtaining query information between node :${prevNodeId} and ${nodeId}")
+    val res = queryTimeMap.get((prevNodeId,nodeId)) match {
       case Some(v) => v
       case None => tree.nodes(nodeId).sampledQueryTime(k, tree.nodes(prevNodeId))
     }
 
-    sizeTimeMap(nodeId) = res
+    queryTimeMap((prevNodeId,nodeId)) = res
     res
   }
 
@@ -46,4 +50,10 @@ class InformationSampler(tree:GHDTree, k:Long) {
     queryInformation(prevNodeId, nodeId)._1
   }
 
+  override def toString: String = {
+    s"""
+       |${sizeTimeMap.map(f => (tree.nodes(f._1).shortString,f._2))}
+       |${queryTimeMap.map(f => ((tree.nodes(f._1._1).shortString,tree.nodes(f._1._2).shortString),f._2))}
+     """.stripMargin
+  }
 }

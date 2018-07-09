@@ -4,7 +4,7 @@ import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{Configuration, GHDPlan,
 import org.apache.spark.Logo.Plan.LogicalPlan.Utility.InformationSampler
 import org.apache.spark.Logo.UnderLying.utlis.ListGenerator
 
-class GHDPlanOptimizer(tree:GHDTree) {
+class GHDPlanOptimizer(val tree:GHDTree) {
 
   val configuration = Configuration.getConfiguration()
   val defaultP:Int = configuration.defaultP
@@ -42,7 +42,8 @@ class GHDPlanOptimizer(tree:GHDTree) {
             case true => defaultP
             case false => 1
           }})
-      pList.map(f => tree.attributes.zip(f).toMap)
+      val res = pList.map(f => tree.attributes.zip(f).toMap).filter(p => p.values.product > configuration.minimumTasks)
+      res
     }
 
   def genPlans() = {

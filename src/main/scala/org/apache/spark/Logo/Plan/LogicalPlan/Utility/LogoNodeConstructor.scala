@@ -1,5 +1,6 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.Utility
 
+import org.apache.log4j.LogManager
 import org.apache.spark.Logo.Plan.LogicalPlan.Structure._
 import org.apache.spark.Logo.Plan.PhysicalPlan.Logo
 import org.apache.spark.Logo.UnderLying.Loader.EdgePatternLoader
@@ -9,6 +10,7 @@ import scala.util.Random
 
 class LogoNodeConstructor(attrOrder:Seq[Int], edges:Map[Int,Seq[Relation]]){
 
+  val log = LogManager.getLogger(this.getClass)
 
   val conf = Configuration.getConfiguration()
   val defaultSampleP = conf.defaultSampleP
@@ -25,23 +27,27 @@ class LogoNodeConstructor(attrOrder:Seq[Int], edges:Map[Int,Seq[Relation]]){
   def initEdge(p:Map[Int,Int]):SubPattern = {
     val baseRelation = edges(attrOrder(1))(0)
     val baseLogoRelation = baseRelation.toRelationWithP(p)
-    val baseLogo = catalog.retrieveLogo(baseLogoRelation).get
+    val baseLogo = catalog.retrieveOrRegisterRelationWithP(baseLogoRelation)
     new SubPattern(EmptySubPattern(), baseLogo, baseLogoRelation.attributes.zipWithIndex.toMap)
   }
 
   def initSampledEdge(k:Long):SubPattern = {
-    val baseLogoRelation = edges(attrOrder(1))(0).toRelationWithP(Seq(defaultSampleP, defaultSampleP))
+
+    val baseLogoRelation = edges(attrOrder(1))(0)
+    val baseSamplingLogoRelation = baseLogoRelation.toRelationWithP(Seq(defaultSampleP, defaultSampleP))
+
+    log.warn(s"start generating sampled relations:${baseSamplingLogoRelation}")
+
+    val baseSampleLogo = catalog.getSampledRelationWithP(baseSamplingLogoRelation,k)
     val ratio = k.toDouble / baseLogoRelation.cardinality
 
-    val baseLogo = catalog.getSampledRelationWithP(baseLogoRelation,k)
-
-    val pattern = new SubPattern(EmptySubPattern(), baseLogo, baseLogoRelation.attributes.zipWithIndex.toMap)
+    val pattern = new SubPattern(EmptySubPattern(), baseSampleLogo, baseSamplingLogoRelation.attributes.zipWithIndex.toMap)
     val sampledPattern = SampledSubPattern(pattern, ratio)
     sampledPattern
   }
 
   def initSampledPatternFromAttrTuple(k:Long, attrIDTuples:(Int,Int)):SubPattern = {
-    val pattern = constructSampleLogoWithEdgeLimit((k*0.2).toLong)
+    val pattern = constructSampleLogoWithEdgeLimit((k).toLong)
     val patternLogo = pattern.logo
     val globalToLocalMap = pattern.globalAttributeToLocalMapping
     val localIDTuples = (globalToLocalMap(relationSchema.getAttribute(attrIDTuples._1)),globalToLocalMap(relationSchema.getAttribute(attrIDTuples._2)))
@@ -75,7 +81,7 @@ class LogoNodeConstructor(attrOrder:Seq[Int], edges:Map[Int,Seq[Relation]]){
             .getAttributeId(attr))
             .map(_.toRelationWithP(p))))
 
-    print(res)
+//    print(res)
     res
   }
 
@@ -86,13 +92,18 @@ class LogoNodeConstructor(attrOrder:Seq[Int], edges:Map[Int,Seq[Relation]]){
   }
 
   def constructSampleLogoWithEdgeLimit(k:Long):SubPattern = {
+
+    log.warn(s"start generating sampled pattern:${edges.values.flatten} with order:${attrOrder.map(relationSchema.getAttribute)}")
     val sampledEdge = initSampledEdge(k)
     val remainAttrOrder = attrOrder.diff(sampledEdge.allAttributeIDs)
-    constructWithInitPattern(remainAttrOrder, sampledEdge, remainAttrOrder.map((_,defaultSampleP)).toMap)
+    val p = attrOrder.map((_,defaultSampleP)).toMap
+    constructWithInitPattern(remainAttrOrder, sampledEdge, p)
   }
 
   def constructSampleLogoWithInitPattern(remainAttrOrder:Seq[Int], pattern:SubPattern):SubPattern = {
-    constructWithInitPattern(remainAttrOrder, pattern, remainAttrOrder.map((_,defaultSampleP)).toMap)
+    log.warn(s"start generating sampled pattern:${edges.values.flatten} with order:${attrOrder.map(relationSchema.getAttribute)} with initPattern:${pattern}")
+    val p = attrOrder.map((_,defaultSampleP)).toMap
+    constructWithInitPattern(remainAttrOrder, pattern, p)
   }
 
 
@@ -147,13 +158,13 @@ class SubPattern(val prevPattern:SubPattern, @transient val logo:Logo, val globa
     val newLocalID = generateIDForNewAttr(newAttr)
     val newGlobalAttributeToLocalMapping = globalAttributeToLocalMapping + ((newAttr, newLocalID))
 
-    println(newRelations)
-    println(catalog.rddMap)
+//    println(newRelations)
+//    println(catalog.rddMap)
 
-    val newLogos = newRelations.map(catalog.retrieveLogo)
+    val newLogos = newRelations.map(catalog.retrieveOrRegisterRelationWithP)
 
     def build1() = {
-      val newSubLogo1 = newLogos(0).get
+      val newSubLogo1 = newLogos(0)
       val relation1 = newRelations(0)
 
       stringCommand = s"logo.build(${relation1.name}.toWithSeqKeyMapping(${relation1.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get)})"
@@ -163,10 +174,10 @@ class SubPattern(val prevPattern:SubPattern, @transient val logo:Logo, val globa
     }
 
     def build2() = {
-      val newSubLogo1 = newLogos(0).get
+      val newSubLogo1 = newLogos(0)
       val relation1 = newRelations(0)
 
-      val newSubLogo2 = newLogos(1).get
+      val newSubLogo2 = newLogos(1)
       val relation2 = newRelations(1)
 
       stringCommand =
@@ -186,13 +197,13 @@ class SubPattern(val prevPattern:SubPattern, @transient val logo:Logo, val globa
     }
 
     def build3() = {
-      val newSubLogo1 = newLogos(0).get
+      val newSubLogo1 = newLogos(0)
       val relation1 = newRelations(0)
 
-      val newSubLogo2 = newLogos(1).get
+      val newSubLogo2 = newLogos(1)
       val relation2 = newRelations(1)
 
-      val newSubLogo3 = newLogos(2).get
+      val newSubLogo3 = newLogos(2)
       val relation3 = newRelations(2)
 
       stringCommand =

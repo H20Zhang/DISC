@@ -1,6 +1,8 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.Structure
 
 
+import org.apache.log4j.LogManager
+
 import scala.collection.mutable
 
 
@@ -33,7 +35,7 @@ class Relation(val name:String, val attributes:Seq[String], var cardinality:Long
 
 object Relation{
 
-  def apply(name:String, attributes:Seq[String], address:String) = new Relation(name, attributes, 0, address)
+  def apply(name:String, attributes:Seq[String], address:String) = new Relation(name, attributes, 1000l, address)
 
   def apply(name:String, attributes:Seq[String], cardinality:Long, address:String) = new Relation(name, attributes, cardinality, address)
 
@@ -73,21 +75,32 @@ object RelationWithP{
 
 class RelationSchema {
 
+  val log = LogManager.getLogger(this.getClass)
   var attributes:mutable.Buffer[String] = mutable.Buffer[String]()
   var relations:mutable.Buffer[Relation] = mutable.Buffer[Relation]()
 
+  def logoCatalog = LogoCatalog.getCatalog()
 
   def addRelation(relation:Relation) = {
+
+    log.warn(s"add Relation:${relation}")
     relations += relation
+    logoCatalog.retrieveOrRegisterRelation(relation)
 
     for (i <- relation.attributes){
       if (!attributes.contains(i)){
         attributes += i
       }
     }
+
+
   }
 
   def getRelation(k:Int) = relations(k)
+
+  def getRelation(attributeIds:(Int,Int)) = {
+    getRelation(getRelationId(attributeIds).get)
+  }
 
   def getRelationId(relation: Relation) = relations.indexOf(relation)
 

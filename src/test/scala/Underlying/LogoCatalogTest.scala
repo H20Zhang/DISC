@@ -15,10 +15,10 @@ class LogoCatalogTest extends FunSuite{
     relationSchema.addRelation(relationR1)
     val edge = catalog.registorRelationWithP(relationR1WithP)
 
-    val edge1 = catalog.retrieveLogo(relationR1.toRelationWithP(Seq(6,6))).get
+    val edge1 = catalog.retrieveOrRegisterRelationWithP(relationR1.toRelationWithP(Seq(6,6)))
     println(edge1 == edge)
 
-    println(catalog.retrieveLogo(relationR1.toRelationWithP(Seq(7,7))).isDefined)
+//    println(catalog.retrieveOrRegisterLogo(relationR1.toRelationWithP(Seq(7,7))))
 
 
 

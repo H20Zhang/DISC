@@ -1,12 +1,18 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.Structure
 
+import org.apache.log4j.LogManager
 import org.apache.spark.Logo.Plan.LogicalPlan.Utility.{InformationSampler, LogoAssembler, LogoJoinCostEstimator, SubPattern}
 
 class GHDPlan(val tree:GHDTree, val nodeIdOrder:Seq[Int], val p:Map[Int, Int], val lazyMapping:Map[Int, Boolean], val informationSampler: InformationSampler) {
 
 
+  val relationSchema = RelationSchema.getRelationSchema()
+  val log = LogManager.getLogger(this.getClass)
+
+
   def genNodeIdPrevOrder() = {
 
+    log.warn(s"generating nodeIdPrevOrders")
     val orderNodeIdMapping = nodeIdOrder.zipWithIndex.toMap
     val orderedNodeIds = tree.nodes.map(f => (f._1,orderNodeIdMapping(f._1))).toSeq.sortBy(_._2)
 
@@ -23,16 +29,20 @@ class GHDPlan(val tree:GHDTree, val nodeIdOrder:Seq[Int], val p:Map[Int, Int], v
   }
 
   def costEstimation():Long = {
+
+    log.warn(s"cost estimation for plan ${this}")
     val nodePrevOrders = genNodeIdPrevOrder()
     val costEstimator = LogoJoinCostEstimator(tree, nodePrevOrders, p, lazyMapping, informationSampler)
     costEstimator.costEstimate()
   }
 
   override def toString: String = {
+
+
     s"""
-       |${nodeIdOrder}
-       |${p}
-       |${lazyMapping}
+       |${nodeIdOrder.map(tree.nodes).map(f => f.shortString)}
+       |${p.map(f => (relationSchema.getAttribute(f._1),f._2))}
+       |${lazyMapping.map(f => (tree.nodes(f._1).shortString, f._2))}
      """.stripMargin
   }
 
