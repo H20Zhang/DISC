@@ -13,7 +13,7 @@ class InformationSampler(tree:GHDTree, k:Long) {
   val queryTimeMap:mutable.Map[(Int,Int), (Long,Long,Int)] = mutable.Map()
 
   def nodeInformation(nodeId:Int) = {
-    log.warn(s"obtaining node information of node ${nodeId}")
+    log.info(s"obtaining node information of node ${nodeId}")
     val res = sizeTimeMap.get(nodeId) match {
       case Some(v) => v
       case None => tree.nodes(nodeId).sampledGJCardinality(k, GHDNode())
@@ -32,7 +32,7 @@ class InformationSampler(tree:GHDTree, k:Long) {
   }
 
   def queryInformation(prevNodeId:Int, nodeId:Int) = {
-    log.warn(s"obtaining query information between node :${prevNodeId} and ${nodeId}")
+    log.info(s"obtaining query information between node :${prevNodeId} and ${nodeId}")
     val res = queryTimeMap.get((prevNodeId,nodeId)) match {
       case Some(v) => v
       case None => tree.nodes(nodeId).sampledQueryTime(k, tree.nodes(prevNodeId))

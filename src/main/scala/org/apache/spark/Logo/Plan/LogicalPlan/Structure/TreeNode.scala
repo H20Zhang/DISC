@@ -85,7 +85,7 @@ class GJJoinNode(_relations:ArrayBuffer[Int]) extends LeafNode{
     case _ => assert(true, "P must be set before calling getP"); null
   }
 
-  override def attributes: Seq[Int] = _relations.map(schema.getRelation).flatMap(_.attributes.map(schema.getAttributeId)).distinct
+  override def attributes: Seq[Int] = _relations.map(schema.getRelation).flatMap(_.attr.map(schema.getAttributeId)).distinct
 
   override def relations: Seq[Int] = _relations
 

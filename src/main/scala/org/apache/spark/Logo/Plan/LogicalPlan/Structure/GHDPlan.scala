@@ -1,5 +1,6 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.Structure
 
+import breeze.linalg.Axis._1
 import org.apache.log4j.LogManager
 import org.apache.spark.Logo.Plan.LogicalPlan.Utility.{InformationSampler, LogoAssembler, LogoJoinCostEstimator, SubPattern}
 
@@ -8,11 +9,12 @@ class GHDPlan(val tree:GHDTree, val nodeIdOrder:Seq[Int], val p:Map[Int, Int], v
 
   val relationSchema = RelationSchema.getRelationSchema()
   val log = LogManager.getLogger(this.getClass)
-
+  val configuration = Configuration.getConfiguration()
+  var cost = (0.0, 0.0)
 
   def genNodeIdPrevOrder() = {
 
-    log.warn(s"generating nodeIdPrevOrders")
+    log.info(s"generating nodeIdPrevOrders")
     val orderNodeIdMapping = nodeIdOrder.zipWithIndex.toMap
     val orderedNodeIds = tree.nodes.map(f => (f._1,orderNodeIdMapping(f._1))).toSeq.sortBy(_._2)
 
@@ -28,12 +30,15 @@ class GHDPlan(val tree:GHDTree, val nodeIdOrder:Seq[Int], val p:Map[Int, Int], v
     }
   }
 
-  def costEstimation():Long = {
+  def costEstimation():(Double,Double) = {
 
-    log.warn(s"cost estimation for plan ${this}")
+    log.info(s"cost estimation for plan ${this}")
     val nodePrevOrders = genNodeIdPrevOrder()
     val costEstimator = LogoJoinCostEstimator(tree, nodePrevOrders, p, lazyMapping, informationSampler)
-    costEstimator.costEstimate()
+    val cost = costEstimator.costEstimate()
+    this.cost = (cost._1, cost._2 / configuration.defaultMachines)
+
+    (Math.max(cost._1, cost._2), Math.min(cost._1, cost._2))
   }
 
   override def toString: String = {
@@ -43,6 +48,7 @@ class GHDPlan(val tree:GHDTree, val nodeIdOrder:Seq[Int], val p:Map[Int, Int], v
        |${nodeIdOrder.map(tree.nodes).map(f => f.shortString)}
        |${p.map(f => (relationSchema.getAttribute(f._1),f._2))}
        |${lazyMapping.map(f => (tree.nodes(f._1).shortString, f._2))}
+       |${cost}
      """.stripMargin
   }
 

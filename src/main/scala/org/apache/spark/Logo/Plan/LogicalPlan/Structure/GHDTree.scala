@@ -4,7 +4,8 @@ import org.apache.spark.Logo.UnderLying.utlis.ImmutableGraph
 
 import scala.collection.mutable.ArrayBuffer
 
-class GHDTree(val id:Int, var nodes:Map[Int,GHDNode], var graph:ImmutableGraph, val relations:ArrayBuffer[Int], val attributes:ArrayBuffer[Int]){
+class GHDTree(val id:Int, var nodes:Map[Int,GHDNode], var graph:ImmutableGraph, val relationIDs:ArrayBuffer[Int], val attributeIDs:ArrayBuffer[Int]){
+
 
   //trim the redundant GHDNodes
   def trimTree(): Unit ={
@@ -64,7 +65,7 @@ class GHDTree(val id:Int, var nodes:Map[Int,GHDNode], var graph:ImmutableGraph, 
 
 //    println(attributes.forall(p => isAttributesInducedGraphConnected(p)))
 //    println(!containsCycle())
-    attributes.forall(p => isAttributesInducedGraphConnected(p)) && !containsCycle()
+    attributeIDs.forall(p => isAttributesInducedGraphConnected(p)) && !containsCycle()
   }
 
 
@@ -107,8 +108,8 @@ object GHDTree{
     val curID = treeCount - 1
     val newNodes = oldTree.nodes + ((newNode.id, newNode))
     val newGraph = oldTree.graph.addEdges(newEdges)
-    val newRelations = (oldTree.relations ++ newNode.relationIDs).distinct
-    val newAttributes = (oldTree.attributes ++ newNode.attributeIDs).distinct
+    val newRelations = (oldTree.relationIDs ++ newNode.relationIDs).distinct
+    val newAttributes = (oldTree.attributeIDs ++ newNode.attributeIDs).distinct
 
     new GHDTree(curID, newNodes, newGraph, newRelations, newAttributes)
   }

@@ -10,22 +10,22 @@ class GHDPlanTest extends FunSuite{
   val data = "./wikiV.txt"
   val relationSchema = RelationSchema.getRelationSchema()
 
-  val relationR1 = Relation("R1",Seq("A","B"),10, data)
+  val relationR1 = Relation("R1",Seq("A","B"), data,10)
   val relationR1WithP = relationR1.toRelationWithP(Seq(6,6))
 
-  val relationR2 = Relation("R2",Seq("B","C"),10, data)
+  val relationR2 = Relation("R2",Seq("B","C"), data,10)
   val relationR2WithP = relationR2.toRelationWithP(Seq(6,6))
 
-  val relationR3 = Relation("R3",Seq("C","D"),10, data)
+  val relationR3 = Relation("R3",Seq("C","D"), data,10)
   val relationR3WithP = relationR3.toRelationWithP(Seq(6,6))
 
-  val relationR4 = Relation("R4",Seq("D","E"),10, data)
+  val relationR4 = Relation("R4",Seq("D","E"), data,10)
   val relationR4WithP = relationR4.toRelationWithP(Seq(6,6))
 
-  val relationR5 = Relation("R5",Seq("E","A"),10, data)
+  val relationR5 = Relation("R5",Seq("E","A"), data,10)
   val relationR5WithP = relationR5.toRelationWithP(Seq(6,6))
 
-  val relationR6 = Relation("R6",Seq("B","E"),10, data)
+  val relationR6 = Relation("R6",Seq("B","E"), data,10)
   val relationR6WithP = relationR6.toRelationWithP(Seq(6,6))
 
 

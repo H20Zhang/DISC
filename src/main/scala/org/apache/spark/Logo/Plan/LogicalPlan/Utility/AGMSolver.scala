@@ -12,7 +12,7 @@ object AGMSolver {
     val schema = RelationSchema.getRelationSchema()
     val relations = relationIDs.map(schema.getRelation)
     val cardinalities = relations.map(_.cardinality)
-    val attributes = relations.flatMap(_.attributes).distinct
+    val attributes = relations.flatMap(_.attr).distinct
 
 
     val c = cardinalities.map(f => Math.log(f))
@@ -23,7 +23,7 @@ object AGMSolver {
       G(i) = temp
 
       for(j <- 0 until relations.size){
-        if (relations(j).attributes.contains(attributes(i))){
+        if (relations(j).attr.contains(attributes(i))){
           temp(j) = -1.0
         }
       }
@@ -63,7 +63,7 @@ object AGMSolver {
     val schema = RelationSchema.getRelationSchema()
     val relations = relationIDs.map(schema.getRelation)
     val cardinalities = relations.map(_.cardinality)
-    val attributes = relations.flatMap(_.attributes).distinct
+    val attributes = relations.flatMap(_.attr).distinct
 
     val c = cardinalities.map(f => Math.log(f)).toArray
 
@@ -74,7 +74,7 @@ object AGMSolver {
 
     for (i <- 0 until attributes.size){
       for(j <- 0 until relations.size){
-        if (relations(j).attributes.contains(attributes(i))){
+        if (relations(j).attr.contains(attributes(i))){
 
           G.set(i,j,-1.0)
 //          temp(j) = -1.0

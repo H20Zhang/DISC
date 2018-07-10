@@ -189,8 +189,8 @@ class subSetGenerator(relation:ArrayBuffer[Int]) {
     val relationSchema = RelationSchema.getRelationSchema()
     val lRelations = lhs.map(relationSchema.getRelation)
     val rRelations = rhs.map(relationSchema.getRelation)
-    val lAttributes = lRelations.flatMap(_.attributes).distinct
-    val rAttributes = rRelations.flatMap(_.attributes).distinct
+    val lAttributes = lRelations.flatMap(_.attr).distinct
+    val rAttributes = rRelations.flatMap(_.attr).distinct
 
     ! lAttributes.intersect(rAttributes).isEmpty
   }
@@ -211,7 +211,7 @@ class subSetGenerator(relation:ArrayBuffer[Int]) {
         if (filteredRelations.size != 0){
           val res = filteredRelations.forall{
             t =>
-              f.attributes.intersect(t.attributes).isEmpty
+              f.attr.intersect(t.attr).isEmpty
           }
 
           if (res){
@@ -228,7 +228,7 @@ class subSetGenerator(relation:ArrayBuffer[Int]) {
   private def _optimizeGHDNode(node:ArrayBuffer[Int]):(ArrayBuffer[Int],Double, Array[Double]) = {
     val relationSchema = RelationSchema.getRelationSchema()
     val relations = node.map(relationSchema.getRelation)
-    val attributes = relations.flatMap(_.attributes).distinct
+    val attributes = relations.flatMap(_.attr).distinct
     val inducedEdges = relationSchema.getInducedRelation(attributes)
 
     var agmResult = AGMSolver.solveAGMBound(inducedEdges)

@@ -28,7 +28,7 @@ class LogoNodeConstructor(attrOrder:Seq[Int], edges:Map[Int,Seq[Relation]]){
     val baseRelation = edges(attrOrder(1))(0)
     val baseLogoRelation = baseRelation.toRelationWithP(p)
     val baseLogo = catalog.retrieveOrRegisterRelationWithP(baseLogoRelation)
-    new SubPattern(EmptySubPattern(), baseLogo, baseLogoRelation.attributes.zipWithIndex.toMap)
+    new SubPattern(EmptySubPattern(), baseLogo, baseLogoRelation.attr.zipWithIndex.toMap)
   }
 
   def initSampledEdge(k:Long):SubPattern = {
@@ -36,12 +36,12 @@ class LogoNodeConstructor(attrOrder:Seq[Int], edges:Map[Int,Seq[Relation]]){
     val baseLogoRelation = edges(attrOrder(1))(0)
     val baseSamplingLogoRelation = baseLogoRelation.toRelationWithP(Seq(defaultSampleP, defaultSampleP))
 
-    log.warn(s"start generating sampled relations:${baseSamplingLogoRelation}")
+    log.info(s"start generating sampled relations:${baseSamplingLogoRelation}")
 
     val baseSampleLogo = catalog.getSampledRelationWithP(baseSamplingLogoRelation,k)
     val ratio = k.toDouble / baseLogoRelation.cardinality
 
-    val pattern = new SubPattern(EmptySubPattern(), baseSampleLogo, baseSamplingLogoRelation.attributes.zipWithIndex.toMap)
+    val pattern = new SubPattern(EmptySubPattern(), baseSampleLogo, baseSamplingLogoRelation.attr.zipWithIndex.toMap)
     val sampledPattern = SampledSubPattern(pattern, ratio)
     sampledPattern
   }
@@ -93,7 +93,7 @@ class LogoNodeConstructor(attrOrder:Seq[Int], edges:Map[Int,Seq[Relation]]){
 
   def constructSampleLogoWithEdgeLimit(k:Long):SubPattern = {
 
-    log.warn(s"start generating sampled pattern:${edges.values.flatten} with order:${attrOrder.map(relationSchema.getAttribute)}")
+    log.info(s"start generating sampled pattern:${edges.values.flatten} with order:${attrOrder.map(relationSchema.getAttribute)}")
     val sampledEdge = initSampledEdge(k)
     val remainAttrOrder = attrOrder.diff(sampledEdge.allAttributeIDs)
     val p = attrOrder.map((_,defaultSampleP)).toMap
@@ -101,7 +101,7 @@ class LogoNodeConstructor(attrOrder:Seq[Int], edges:Map[Int,Seq[Relation]]){
   }
 
   def constructSampleLogoWithInitPattern(remainAttrOrder:Seq[Int], pattern:SubPattern):SubPattern = {
-    log.warn(s"start generating sampled pattern:${edges.values.flatten} with order:${attrOrder.map(relationSchema.getAttribute)} with initPattern:${pattern}")
+    log.info(s"start generating sampled pattern:${edges.values.flatten} with order:${attrOrder.map(relationSchema.getAttribute)} with initPattern:${pattern}")
     val p = attrOrder.map((_,defaultSampleP)).toMap
     constructWithInitPattern(remainAttrOrder, pattern, p)
   }
@@ -167,9 +167,9 @@ class SubPattern(val prevPattern:SubPattern, @transient val logo:Logo, val globa
       val newSubLogo1 = newLogos(0)
       val relation1 = newRelations(0)
 
-      stringCommand = s"logo.build(${relation1.name}.toWithSeqKeyMapping(${relation1.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get)})"
+      stringCommand = s"logo.build(${relation1.name}.toWithSeqKeyMapping(${relation1.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get)})"
 
-      val newLogo = logo.build(newSubLogo1.toWithSeqKeyMapping(relation1.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get)))
+      val newLogo = logo.build(newSubLogo1.toWithSeqKeyMapping(relation1.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get)))
         new SubPattern(this, newLogo, newGlobalAttributeToLocalMapping)
     }
 
@@ -183,14 +183,14 @@ class SubPattern(val prevPattern:SubPattern, @transient val logo:Logo, val globa
       stringCommand =
         s"""
            |logo.build(
-           |        ${relation1.name}.toWithSeqKeyMapping(${relation1.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get)}),
-           |        ${relation2.name}.toWithSeqKeyMapping(${relation2.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get)})
+           |        ${relation1.name}.toWithSeqKeyMapping(${relation1.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get)}),
+           |        ${relation2.name}.toWithSeqKeyMapping(${relation2.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get)})
            |      )
          """.stripMargin
 
       val newLogo = logo.build(
-        newSubLogo1.toWithSeqKeyMapping(relation1.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get)),
-        newSubLogo2.toWithSeqKeyMapping(relation2.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get))
+        newSubLogo1.toWithSeqKeyMapping(relation1.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get)),
+        newSubLogo2.toWithSeqKeyMapping(relation2.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get))
       )
 
       new SubPattern(this, newLogo, newGlobalAttributeToLocalMapping)
@@ -209,16 +209,16 @@ class SubPattern(val prevPattern:SubPattern, @transient val logo:Logo, val globa
       stringCommand =
         s"""
            |logo.build(
-           |        ${relation1.name}.toWithSeqKeyMapping(${relation1.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get)}),
-           |        ${relation2.name}.toWithSeqKeyMapping(${relation2.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get)}),
-           |        ${relation3.name}.toWithSeqKeyMapping(${relation3.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get)}
+           |        ${relation1.name}.toWithSeqKeyMapping(${relation1.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get)}),
+           |        ${relation2.name}.toWithSeqKeyMapping(${relation2.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get)}),
+           |        ${relation3.name}.toWithSeqKeyMapping(${relation3.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get)}
            |      )
          """.stripMargin
 
       val newLogo = logo.build(
-        newSubLogo1.toWithSeqKeyMapping(relation1.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get)),
-        newSubLogo2.toWithSeqKeyMapping(relation2.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get)),
-        newSubLogo3.toWithSeqKeyMapping(relation3.attributes.map(newGlobalAttributeToLocalMapping.get).map(_.get))
+        newSubLogo1.toWithSeqKeyMapping(relation1.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get)),
+        newSubLogo2.toWithSeqKeyMapping(relation2.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get)),
+        newSubLogo3.toWithSeqKeyMapping(relation3.attr.map(newGlobalAttributeToLocalMapping.get).map(_.get))
       )
 
       new SubPattern(this, newLogo, newGlobalAttributeToLocalMapping)

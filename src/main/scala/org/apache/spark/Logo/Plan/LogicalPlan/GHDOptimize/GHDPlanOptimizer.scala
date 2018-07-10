@@ -1,16 +1,24 @@
 package org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize
 
-import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{Configuration, GHDPlan, GHDTree}
+import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{Configuration, GHDPlan, GHDTree, RelationSchema}
 import org.apache.spark.Logo.Plan.LogicalPlan.Utility.InformationSampler
 import org.apache.spark.Logo.UnderLying.utlis.ListGenerator
 
-class GHDPlanOptimizer(val tree:GHDTree) {
+class GHDPlanOptimizer(val tree:GHDTree, val informationSampler1: InformationSampler = null) {
 
+  val relationSchema = RelationSchema.getRelationSchema()
   val configuration = Configuration.getConfiguration()
   val defaultP:Int = configuration.defaultP
   val defaultSampleP:Int = configuration.defaultSampleP
   val defaultK = configuration.defaultK
-  val informationSampler = new InformationSampler(tree, defaultK)
+  var informationSampler = informationSampler1 == null match{
+    case true => new InformationSampler(tree, defaultK)
+    case false => informationSampler1
+  }
+
+  def setInformationSampler(informationSampler2: InformationSampler) = {
+    this.informationSampler = informationSampler2
+  }
 
   def genOrders():Seq[Seq[Int]] ={
 
@@ -35,15 +43,22 @@ class GHDPlanOptimizer(val tree:GHDTree) {
       val pList = ListGenerator
         .cartersianSizeList(
           ListGenerator
-            .fillList(2,tree.attributes.size))
+            .fillList(2,tree.attributeIDs.size))
         .map(g => g.map(h => h == 1))
         .map(f => f.map{g =>
           g match {
             case true => defaultP
             case false => 1
           }})
-      val res = pList.map(f => tree.attributes.zip(f).toMap).filter(p => p.values.product > configuration.minimumTasks)
+      val res = pList.map(f => tree.attributeIDs.zip(f).toMap)
+      val relationWithAttrs = tree.relationIDs
+        .map(relationSchema.getRelation)
+        .map(f => (f,f.attrIDs))
+
       res
+        .filter(p => p.values.product >= configuration.minimumTasks)
+        .filter(p => relationWithAttrs.forall(o => o._2.map(p).product >= configuration.defaultP))
+
     }
 
   def genPlans() = {
@@ -59,9 +74,11 @@ class GHDPlanOptimizer(val tree:GHDTree) {
     possiblePlans
   }
 
-  def genBestPlan():(GHDPlan,Long) = {
+  def genBestPlan():(GHDPlan,(Double,Double)) = {
     val plans = genPlans()
-    plans.map(f => (f,f.costEstimation())).minBy(_._2)
+    val minPrimaryCost = plans.map(f => (f,f.costEstimation())).minBy(_._2._1)
+    val filteredPlans = plans.filter(p => p.costEstimation()._1 == minPrimaryCost._2._1)
+    filteredPlans.map(f => (f,f.costEstimation())).minBy(_._2._2)
   }
 
 }
