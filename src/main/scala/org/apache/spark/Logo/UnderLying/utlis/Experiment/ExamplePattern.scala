@@ -2,12 +2,13 @@ package org.apache.spark.Logo.UnderLying.utlis.Experiment
 
 import gnu.trove.map.hash.{TIntIntHashMap, TLongIntHashMap}
 import org.apache.spark.Logo.Plan.PhysicalPlan.FilteringCondition
-import org.apache.spark.Logo.UnderLying.Loader.{EdgeLoader, EdgePatternLoader}
+import org.apache.spark.Logo.UnderLying.Loader.{Edge3PatternLoader, EdgeLoader, EdgePatternLoader}
 import org.apache.spark.Logo.UnderLying.dataStructure.{CompositeTwoPatternLogoBlock, TwoKeyPatternInstance}
+import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable
 
-class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
+class ExamplePattern(data: String,h1:Int=3,h2:Int=3)  {
 
 //  var h1 = 13
 //  var h2 = 13
@@ -48,6 +49,7 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
       case "triangleCom" => triangleCom
       case "fourCliqueCom" => fourCliqueCom
 
+      case "test" => threeAttributesRelation
       case "edge" => edge
       case "debug" => threeTriangleGSync
       case "houseGJ" => houseIntersectionGJ
@@ -89,6 +91,32 @@ class ExamplePattern(data: String,h1:Int=6,h2:Int=6)  {
     val filteredEdge = getEdge(h1,h2).filter(p => p(0) < p(1))
     val triangle =  filteredEdge.build(filteredEdge.to(1,2),filteredEdge.to(0,2))
     triangle
+  }
+
+  lazy val threeAttributesRelation = {
+    val edge3_1 = getEdge(h1, h1)
+    val edge3_3 = getEdge(h1, h2)
+
+    val triangle = edge3_3
+      .filter(p => p(0) < p(1))
+      .build(edge3_1.to(1,2), edge3_1.to(0,2))
+
+
+    val threeAttributesRelation = triangle.rdd().map(f => (f.pattern.clone(),1))
+
+//    println(threeAttributesRelation.map(f => (f._1(0),f._1(1),f._1(2))).distinct().count())
+
+    val sizes = Seq(3,3,1)
+
+    val patternLoader = new Edge3PatternLoader(threeAttributesRelation,sizes)
+    val logo = patternLoader.edgeLogoRDDReference
+
+
+    val out = logo.build(triangle.to(0,1,3))
+      .filter(p => p(2) < p(3))
+
+//    val out = logo.build(edge3_1.to(0,3),edge3_1.to(1,3))
+    out
   }
 
   lazy val square = {

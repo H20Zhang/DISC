@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ScalaCompilerConfiguration">
     <option name="compileOrder" value="JavaThenScala" />
-    <option name="incrementalityType" value="SBT" />
-    <profile name="SBT 1" modules="logo" />
+    <profile name="SBT 1" modules="logo,Logo" />
   </component>
 </project>

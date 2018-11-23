@@ -332,6 +332,8 @@ final class OneValuePatternInstance(var node1: Int) extends ValuePatternInstance
 }
 
 final class TwoValuePatternInstance(var node1: Int, var node2: Int) extends ValuePatternInstance(null) {
+
+  //TODO there is a bug to modify, should be "idx == 0"
   override def getValue(idx: Int): Int = {
     if (idx == 1) {
       node1
@@ -351,6 +353,33 @@ final class TwoValuePatternInstance(var node1: Int, var node2: Int) extends Valu
   }
 
   override def size(): Int = 2
+
+}
+
+final class ThreeValuePatternInstance(var node1: Int, var node2: Int, var node3:Int) extends ValuePatternInstance(null) {
+  override def getValue(idx: Int): Int = {
+    if (idx == 0) {
+      node1
+    } else if(idx == 1){
+      node2
+    } else {
+      node3
+    }
+  }
+
+  override def write(kryo: Kryo, output: Output): Unit = {
+    output.writeInt(node1, true)
+    output.writeInt(node2, true)
+    output.writeInt(node3, true)
+  }
+
+  override def read(kryo: Kryo, input: Input): Unit = {
+    node1 = input.readInt(true)
+    node2 = input.readInt(true)
+    node3 = input.readInt(true)
+  }
+
+  override def size(): Int = 3
 
 }
 
@@ -508,7 +537,10 @@ class CompactOnePatternList(var rawData: Array[Int]) extends CompactPatternList 
     val end = rawData.length
     val currentPattern: OneValuePatternInstance = new OneValuePatternInstance(0)
 
-    override def hasNext: Boolean = cur < end
+    override def hasNext: Boolean = {
+//      cur += 1
+      cur < end
+    }
 
     override def next(): ValuePatternInstance = {
       currentPattern.node1 = rawData(cur)
@@ -542,7 +574,10 @@ class CompactTwoPatternList(var rawData: Array[Int]) extends CompactPatternList 
     val currentPattern: TwoValuePatternInstance = new TwoValuePatternInstance(0, 0)
 
 
-    override def hasNext: Boolean = cur < end
+    override def hasNext: Boolean = {
+//      cur += 2
+      cur < end
+    }
 
 
     //TODO this place has strange effect when used in CompactLogoBlock
@@ -570,6 +605,57 @@ class CompactTwoPatternList(var rawData: Array[Int]) extends CompactPatternList 
 
 }
 
+class CompactThreePatternList(var rawData: Array[Int]) extends CompactPatternList {
+
+  final class Pattern3Iterator extends Iterator[ValuePatternInstance] {
+
+    private var cur1 = 0
+    private val end = rawData.length
+    val currentPattern: ThreeValuePatternInstance = new ThreeValuePatternInstance(0, 0, 0)
+
+
+    override def hasNext: Boolean = {
+//      cur1 = cur1 + 3
+      cur1 < end
+    }
+
+
+
+    //TODO this place has strange effect when used in CompactLogoBlock
+    override def next(): ValuePatternInstance = {
+
+      val index = cur1
+      val index2 = index + 1
+      val index3 = index + 2
+
+//      print(cur1)
+      currentPattern.node1 = rawData(index)
+//      print(cur1)
+      currentPattern.node2 = rawData(index2)
+//      print(cur1)
+      currentPattern.node3 = rawData(index3)
+//      println(cur1)
+      cur1 = cur1 + 3
+      currentPattern
+    }
+
+    override def toArray[B >: ValuePatternInstance](implicit evidence$1: ClassTag[B]): Array[B] = {
+      val buffer = new ArrayBuffer[ValuePatternInstance]()
+      while (hasNext){
+        next()
+        buffer.append(new ThreeValuePatternInstance(currentPattern.node1,currentPattern.node2, currentPattern.node3))
+      }
+      buffer.toArray
+    }
+  }
+
+  override def getRaw(): Array[Int] = rawData
+
+  def iterator(): Iterator[ValuePatternInstance] = new Pattern3Iterator
+
+
+}
+
 class CompactListAppendBuilder(patternWidth: Int) {
   var arrayBuffer = new ArrayBuffer[Int]()
 
@@ -584,7 +670,11 @@ class CompactListAppendBuilder(patternWidth: Int) {
       new CompactOnePatternList(arrayBuffer.toArray)
     } else if (patternWidth == 2) {
       new CompactTwoPatternList(arrayBuffer.toArray)
-    } else {
+    } else if (patternWidth == 3) {
+//      new CompactArrayPatternList(arrayBuffer.toArray, patternWidth)
+      new CompactThreePatternList(arrayBuffer.toArray)
+    }
+    else {
       new CompactArrayPatternList(arrayBuffer.toArray, patternWidth)
     }
   }

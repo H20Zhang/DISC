@@ -42,6 +42,39 @@ abstract class RowLogoRDDMaker[A: ClassTag, B: ClassTag](val rdd: RDD[(A, B)]) e
   def build(): RDD[LogoBlockRef]
 }
 
+abstract class Row3LogoRDDMaker[A: ClassTag, B: ClassTag](val rdd: RDD[(A, B)]) extends Serializable {
+
+  var _edges: Seq[(Int, Int,Int)] = _
+  var _keySizeMap: KeyMapping = _
+  var _name: String = ""
+
+
+  lazy val _schema = LogoSchema(_keySizeMap, _name)
+  lazy val _nodeSize = _schema.nodeSize
+  lazy val partitioner: CompositeParitioner = _schema.partitioner
+
+  def setEdges(edges: Seq[(Int, Int,Int)]) = {
+    this._edges = edges
+    this
+  }
+
+  def setKeySizeMap(keySizeMap: Map[Int, Int]) = {
+    _keySizeMap = KeyMapping(keySizeMap)
+    this
+  }
+
+  def setName(name: String) = {
+    _name = name
+    this
+  }
+
+
+  def getSchema = _schema
+
+
+  def build(): RDD[LogoBlockRef]
+}
+
 
 /**
   * @param rdd The RDD used to make a logoRDD
@@ -141,6 +174,57 @@ class CompactRowLogoRDDMaker[A: ClassTag](rdd: RDD[(Array[Int], A)], default: A)
     sentriedRDD.partitionBy(partitioner).mapPartitionsWithIndex({ case (index, f) =>
       val blockGenerator = new CompactRowGenerator(schema, index, f)
 //      val blockGenerator = new rowBlockGenerator(schema, index, f)
+      val block = blockGenerator.generate()
+      Iterator(block)
+    }, true)
+  }
+}
+
+/**
+  * @param rdd The RDD used to make a logoRDD
+  * @tparam A Attribute Type
+  *           List[Int] Key Type
+  */
+class CompactRow3LogoRDDMaker[A: ClassTag](rdd: RDD[(Array[Int], A)], default: A) extends Row3LogoRDDMaker(rdd) {
+
+  @transient val sc = rdd.sparkContext
+  lazy val keyCol = partitioner.partitioners.map(_.slotNum)
+
+
+  class X[A] {
+    var value: A = _
+  }
+
+  def generateSentry() = {
+
+    var sentryNode: Seq[Seq[Int]] = null
+    var sentry: Seq[(Seq[Int], A)] = null
+    var sentryRDD: RDD[(Seq[Int], A)] = null
+
+
+    val slotNums = partitioner.partitioners.map(_.slotNum)
+    val baseList = partitioner.partitioners.map(_.p1)
+    sentryNode = ListGenerator.fillListListIntoSlots(ListGenerator.cartersianSizeList(baseList), _nodeSize, slotNums)
+    sentry = sentryNode.map((_, null.asInstanceOf[A]))
+    sentryRDD = sc.parallelize(sentry)
+
+    sentryRDD.map(f => (f._1.toArray,f._2))
+  }
+
+  def build() = {
+
+    require(_edges != null, "edge must be designated before build")
+    require(_keySizeMap != null, "keySizeMap must be designated before build")
+
+    val sentryRDD = generateSentry
+    val baseList = partitioner.partitioners.map(_.p1)
+
+    val sentriedRDD = rdd.union(sentryRDD)
+
+    val schema = _schema.clone().asInstanceOf[LogoSchema]
+
+    sentriedRDD.partitionBy(partitioner).mapPartitionsWithIndex({ case (index, f) =>
+      val blockGenerator = new CompactRow3Generator(schema, index, f)
       val block = blockGenerator.generate()
       Iterator(block)
     }, true)

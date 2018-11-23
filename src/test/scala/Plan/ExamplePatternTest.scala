@@ -7,18 +7,18 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
 
-  val data = "./wikiV.txt"
+//  val data = "./wikiV.txt"
 //val data = "./debugData.txt"
-//  val data = "./email-Eu-core.txt"
+  val data = "./email-Eu-core.txt"
 //  val queries = List("houseF", "threeTriangleF", "trianglePlusOneEdge")
 //  val queries = List("triangleAgg","squareAgg","chordalSquareAgg","houseAgg","threeTriangleAgg","near5CliqueAgg")
 //  val queries = List("squarePlusOneEdgeF", "trianglePlusTwoEdgeF")
 //val queries = List("trianglePlusTwoEdgeF")
-  val queries = List("debug")
+  val queries = List("test")
 
 //  val queries = List("threeTriangleF")
 //val queries = List("square", "triangle", "chordalSquare", "house", "threeTriangle")
-  val sizeReference = List(("debug",1L),("fourClique",1L), ("near5Clique",1L), ("trianglePlusOneEdge",1L),("trianglePlusTwoEdgeF",1),("squarePlusOneEdgeF",1),("square",57654491L),("triangle",608389L),("chordalSquare",40544543L),("houseF",2365994715L),("house",9488779111L),("threeTriangle",4105908615L),("threeTriangleF",2106389L)).toMap
+  val sizeReference = List(("test", 1L), ("debug",1L),("fourClique",1L), ("near5Clique",1L), ("trianglePlusOneEdge",1L),("trianglePlusTwoEdgeF",1),("squarePlusOneEdgeF",1),("square",57654491L),("triangle",608389L),("chordalSquare",40544543L),("houseF",2365994715L),("house",9488779111L),("threeTriangle",4105908615L),("threeTriangleF",2106389L)).toMap
 
 
   test("Pattern"){
@@ -30,8 +30,9 @@ class ExamplePatternTest extends FunSuite with BeforeAndAfterAll{
         println(s"execute $f")
 
 //              pattern.houseAgg.count()
+        val size = pattern.pattern(f).size()
         if (pattern.pattern(f) != null){
-          assert(pattern.pattern(f).size() == sizeReference(f))
+          assert(size == sizeReference(f))
         }
     }
 

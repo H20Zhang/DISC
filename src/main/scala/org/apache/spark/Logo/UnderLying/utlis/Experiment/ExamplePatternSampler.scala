@@ -5,7 +5,7 @@ import org.apache.spark.rdd.RDD
 
 import scala.util.Random
 
-class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000, k2:Int = 100000) {
+class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Double = 0.1, k2:Int = 100000) {
 
 
 
@@ -51,6 +51,7 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000,
       case "fourCliqueTriangle" => fourCliqueTriangleSampleSize
       case "triangleSquare" => triangleSquareSampleSize
       case "triangleFourClique" => triangleFourCliqueSampleSize
+      case "triangleTriangle" => triangleTriangleSampleSize
       case _ => null
     }
   }
@@ -103,14 +104,16 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000,
     square
   }
 
-  lazy val triangleSquareSampleSize = {
+  lazy val triangleTriangleSampleSize = {
 
 
+//    val k2 = this.k2
     val triangle =  sampledEdge.build(keyValueEdge.to(1,2),keyValueEdge.to(0,2))
+    triangle.cache()
 
     val newEdge = triangle.rdd().map(f => (f(1),f(2)))
 
-    val base = k
+    val base = k2
     val count = triangle.size()
     val ratio = base/count.toDouble
 
@@ -121,10 +124,49 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000,
 
     val sampledNewEdge = newEdge.mapPartitions{f =>
 
+      val random = Random
+      random.setSeed(System.nanoTime())
+      f.filter(p => random.nextDouble() < ratio)
+//      f.filter(p => random.nextInt(base) < base*ratio)
+//      f.take(k2)
+    }.map(f => (Array(f._1, f._2), 1))
+
+    val edgeOfTriangle = makeEdge(sampledNewEdge,(h1,h2))
+
+    val sampledFilteredEdge = edgeOfTriangle
+    val edge = keyValueEdge
+
+    val triangle1 = sampledFilteredEdge.build(edge.to(0,2), edge.to(1,2))
+
+    triangle1
+  }
+
+  lazy val triangleSquareSampleSize = {
+
+
+    val triangle =  sampledEdge.build(keyValueEdge.to(1,2),keyValueEdge.to(0,2))
+    triangle.cache()
+
+    val newEdge = triangle.rdd().map(f => (f(1),f(2)))
+
+    val base = k2
+    val count = triangle.size()
+    val ratio = base/count.toDouble
+
+    if (ratio > 1){
+      println("ratio should less than 1")
+    }
+
+//    val k2 = this.k2
+
+    val sampledNewEdge = newEdge.mapPartitions{f =>
+
 
       val random = Random
       random.setSeed(System.nanoTime())
-      f.filter(p => random.nextInt(base) < base*ratio)
+      f.filter(p => random.nextDouble() < ratio)
+//      f.filter(p => random.nextInt(base) < base*ratio)
+//      f.take(k2)
     }.map(f => (Array(f._1, f._2), 1))
 
     val edgeOfTriangle = makeEdge(sampledNewEdge,(h1,h2))
@@ -141,8 +183,8 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000,
 
   lazy val squareTriangleSampleSize = {
 
-
-    val sampledRawEdge1 = new EdgeLoader(data) sampledRawEdgeRDD(k2)
+//    val k2 = this.k2
+    val sampledRawEdge1 = new EdgeLoader(data) sampledRawEdgeRDD(k*0.005)
     val sampledEdge1 = new EdgePatternLoader(sampledRawEdge1, Seq(h1, h2)) edgeLogoRDDReference
 
     val sampledFilteredEdge = sampledEdge1
@@ -151,14 +193,14 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000,
     val wedge = sampledFilteredEdge.build(edge.to(0,2))
 
     val square = wedge.build(edge.to(1,3), edge.to(2,3))
-
+    square.cache()
 
 
     val newEdge = square.rdd().map(f => (f(2),f(3)))
 
 
 
-    val base = k
+    val base = k2
     val count = square.size()
     val ratio = base/count.toDouble
 
@@ -170,7 +212,8 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000,
     val sampledNewEdge = newEdge.mapPartitions{f =>
       val random = Random
       random.setSeed(System.nanoTime())
-      f.filter(p => random.nextInt(base) < base*ratio)
+      f.filter(p => random.nextDouble() < ratio)
+//      f.take(k2)
     }.map(f => (Array(f._1, f._2), 1))
 
     val edgeOfSquare = makeEdge(sampledNewEdge,(h1,h2))
@@ -189,8 +232,8 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000,
 
   lazy val fourCliqueTriangleSampleSize = {
 
-
-    val sampledRawEdge1 = new EdgeLoader(data) sampledRawEdgeRDD(k2)
+//    val k2 = this.k2
+    val sampledRawEdge1 = new EdgeLoader(data) sampledRawEdgeRDD(k*0.005)
     val sampledEdge1 = new EdgePatternLoader(sampledRawEdge1, Seq(h1, h2)) edgeLogoRDDReference
 
     val sampledFilteredEdge = sampledEdge1
@@ -199,11 +242,12 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000,
 
     val fourClique = triangle.build(keyValueEdge.to(0,3),keyValueEdge.to(1,3),keyValueEdge.to(2,3))
 
+    fourClique.cache()
     val newEdge = fourClique.rdd().map(f => (f(2),f(3)))
 
 
 
-    val base = k
+    val base = k2
     val count = fourClique.size()
     val ratio = base/count.toDouble
 
@@ -217,7 +261,9 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000,
 
       val random = Random
       random.setSeed(System.nanoTime())
-      f.filter(p => random.nextInt(base) < base*ratio)
+      f.filter(p => random.nextDouble() < ratio)
+//      f.filter(p => random.nextInt(base) < base*ratio)
+//      f.take(k2)
     }.map(f => (Array(f._1, f._2), 1))
 
     val edgeOfFourClique = makeEdge(sampledNewEdge,(h1,h2))
@@ -230,12 +276,13 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000,
 
   lazy val triangleFourCliqueSampleSize = {
 
-
+//    val k2 = this.k2
     val triangle =  sampledEdge.build(keyValueEdge.to(1,2),keyValueEdge.to(0,2))
 
+    triangle.cache()
     val newEdge = triangle.rdd().map(f => (f(1),f(2)))
 
-    val base = k
+    val base = k2
     val count = triangle.size()
     val ratio = base/count.toDouble
 
@@ -249,7 +296,9 @@ class ExamplePatternSampler(data: String,h1:Int = 6 ,h2:Int = 6, k:Int = 100000,
 
       val random = Random
       random.setSeed(System.nanoTime())
-      f.filter(p => random.nextInt(base) < base*ratio)
+      f.filter(p => random.nextDouble() < ratio)
+//      f.filter(p => random.nextInt(base) < base*ratio)
+//      f.take(k2)
     }.map(f => (Array(f._1, f._2), 1))
 
     println(s"size of sampledNewEdge is ${sampledNewEdge.count()}")

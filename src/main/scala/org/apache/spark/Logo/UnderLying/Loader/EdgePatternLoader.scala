@@ -1,7 +1,7 @@
 package org.apache.spark.Logo.UnderLying.Loader
 
 import org.apache.spark.Logo.Plan.PhysicalPlan.LogoCompactEdgePhysicalPlan
-import org.apache.spark.Logo.UnderLying.Maker.{CompactRowLogoRDDMaker, SimpleRowLogoRDDMaker}
+import org.apache.spark.Logo.UnderLying.Maker.{CompactRow3LogoRDDMaker, CompactRowLogoRDDMaker, SimpleRowLogoRDDMaker}
 import org.apache.spark.Logo.UnderLying.dataStructure._
 import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
 import org.apache.spark.rdd.RDD
@@ -56,9 +56,12 @@ class EdgeLoader(data: String, sizes: Int = 64) {
   def rawEdgeRDD = {
 
     import spark.implicits._
-    val rawData = spark.read.textFile(data)
 
-    val rawRDD = rawData.map {
+//    val rawRDD = spark.read.parquet(data).as[(Array[Int], Int)]
+
+
+
+    val rawRDD = spark.read.textFile(data).map {
       f =>
         var res: (Int, Int) = null
         if (!f.startsWith("#") && !f.startsWith("%")) {
@@ -74,34 +77,36 @@ class EdgeLoader(data: String, sizes: Int = 64) {
       .map(f => (Array(f._1, f._2), 1))
       .repartition(sizes)
 
-//    rawRDD.persist(StorageLevel.DISK_ONLY)
     rawRDD.persist(StorageLevel.MEMORY_ONLY)
 
     val resRDD = rawRDD.rdd
+    resRDD.cache()
     resRDD
   }
 
-  def sampledRawEdgeRDD(k:Int) = {
+  def sampledRawEdgeRDD(k:Double) = {
 
     import spark.implicits._
-    val rawData = spark.read.textFile(data)
+    val rawRDD = spark.read.parquet(data).as[(Array[Int], Int)]
+    rawRDD.cache()
+
+//    val rawRDD = rawData.map {
+//      f =>
+//        var res: (Int, Int) = null
+//        if (!f.startsWith("#") && !f.startsWith("%")) {
+//          val splittedString = f.split("\\s")
+//          res = (splittedString(0).toInt, splittedString(1).toInt)
+//        }
+//        res
+//    }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).filter(f => f._1 != f._2)
+//      .distinct()
 
 
-    val rawRDD = rawData.map {
-      f =>
-        var res: (Int, Int) = null
-        if (!f.startsWith("#") && !f.startsWith("%")) {
-          val splittedString = f.split("\\s")
-          res = (splittedString(0).toInt, splittedString(1).toInt)
-        }
-        res
-    }.filter(f => f != null).flatMap(f => Iterable(f, f.swap)).filter(f => f._1 != f._2)
-      .distinct()
+//    val base = k
+//    val count = rawRDD.count()
+    val ratio = k
 
-
-    val base = k
-    val count = rawRDD.count()
-    val ratio = base/count.toDouble
+//base/count.toDouble
 
     if (ratio > 1){
       println("ratio should less than 1")
@@ -111,11 +116,11 @@ class EdgeLoader(data: String, sizes: Int = 64) {
     val sampledRDD = rawRDD.mapPartitions{f =>
       val random = Random
       random.setSeed(System.nanoTime())
-      f.filter(p => random.nextInt(base) < base*ratio)
-    }.map(f => (Array(f._1, f._2), 1))
-      .repartition(sizes)
+      f.filter(p => random.nextInt(100000) < 100000*ratio)
+    }.map(f => (Array(f._1(0), f._1(1)), 1))
 
     val resRDD = sampledRDD.rdd
+    resRDD.cache()
     resRDD
   }
 
@@ -151,10 +156,14 @@ class EdgePatternLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
 ////    edgePatternLogoRDD.persist(StorageLevel.MEMORY_ONLY)
 ////
 //
-    edgeRDD.persist(StorageLevel.MEMORY_ONLY_SER)
+
+    edgeRDD.persist(StorageLevel(false, true, false, false, 1))
     edgeRDD.count()
 //    new ConcreteLogoRDD(edgePatternLogoRDD,schema)
-    new CompactLogoRDD(edgeRDD, schema)
+    val compactRDD = new CompactLogoRDD(edgeRDD, schema)
+//    compactRDD.logoRDD.persist(StorageLevel(true, true, false, false, 4))
+//    compactRDD.logoRDD.persist(StorageLevel.MEMORY_ONLY_SER)
+    compactRDD
   }
 
 
@@ -198,4 +207,19 @@ class EdgePatternLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
 
     (logoRDD, schema)
   }
+
+  def compact3RowLogoRDDMaker(rawRDD: RDD[(Array[Int], Int)]) = {
+
+    val edges = List((0, 1, 2))
+    val keySizeMap = Map((0, sizes(0)), (1, sizes(1)), (2, sizes(2)))
+
+
+    val logoRDDMaker = new CompactRow3LogoRDDMaker(rawRDD,1).setEdges(edges).setKeySizeMap(keySizeMap)
+
+    val logoRDD = logoRDDMaker.build()
+    val schema = logoRDDMaker.getSchema
+
+    (logoRDD, schema)
+  }
+
 }

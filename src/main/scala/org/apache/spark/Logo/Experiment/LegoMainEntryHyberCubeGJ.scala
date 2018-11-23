@@ -9,7 +9,7 @@ object LegoMainEntryHyberCubeGJ {
   def main(args: Array[String]): Unit = {
     val data = args(0)
     val patternName = args(1)
-    val h = args(2).toInt
+    val h = 3
 
 
     SparkSingle.isCluster = true
@@ -17,7 +17,7 @@ object LegoMainEntryHyberCubeGJ {
     val pattern = new HyberCubeGJPattern(data,h,h)
 
     if (pattern.pattern(patternName) != null){
-      println(s"$patternName size is ${pattern.pattern(patternName).size()}")
+      println(s"$patternName size is ${pattern.pattern(patternName).count()}")
     } else{
       pattern.aggregatePattern(patternName).count()
     }

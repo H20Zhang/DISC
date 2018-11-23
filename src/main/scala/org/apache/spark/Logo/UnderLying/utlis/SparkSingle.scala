@@ -96,7 +96,7 @@ object SparkSingle {
   def getSpark() = {
     spark = getSparkInternal()
     sc = spark.sparkContext
-//    sc.setLogLevel("WARN")
+    sc.setLogLevel("ERROR")
 //    val logger = Logger.getLogger("org.apache.spark.Logo")
 //    logger.setLevel(Level.INFO)
 

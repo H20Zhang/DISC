@@ -4,6 +4,8 @@ import org.apache.spark.Logo.UnderLying.Joiner.LogoPhysicalPlan
 import org.apache.spark.Logo.UnderLying.dataStructure.{PatternInstance, _}
 import org.apache.spark.rdd.{MapPartitionsRDD, RDD}
 
+import scala.util.Random
+
 
 class FilteringCondition(var f: PatternInstance => Boolean, var isStrictCondition: Boolean, var nodesNotSameTuple:Array[(Int,Int)]) extends Serializable {
   override def clone(): AnyRef = {
@@ -144,8 +146,22 @@ class Logo(val patternSchema: LogoSchema, var buildScript: AbstractLogoPhysicalP
     //    buildScript.setFilteringCondition(filteringCondition)
   }
 
+  var cachedRDD:RDD[LogoBlockRef] = null
+
+  def cache(): Unit = {
+    cachedRDD =  generateF().logoRDD.cache()
+  }
+
+  private def logoRDD():RDD[LogoBlockRef] = {
+    if (cachedRDD != null){
+      cachedRDD
+    } else{
+      generateF().logoRDD
+    }
+  }
+
   override def rdd() = {
-    new MapPartitionsRDD[PatternInstance,LogoBlockRef](generateF().logoRDD,
+    new MapPartitionsRDD[PatternInstance,LogoBlockRef](logoRDD(),
       {(context, pid, iter) =>
         val block = iter.next().asInstanceOf[PatternLogoBlock[_]]
         block.enumerateIterator()
@@ -154,7 +170,7 @@ class Logo(val patternSchema: LogoSchema, var buildScript: AbstractLogoPhysicalP
   }
 
   override def size(): Long = {
-    generateF().logoRDD.map {
+    logoRDD().map {
       f =>
         var size = 0L
         val block = f.asInstanceOf[PatternLogoBlock[_]]
@@ -180,7 +196,7 @@ class Logo(val patternSchema: LogoSchema, var buildScript: AbstractLogoPhysicalP
   }
 
   def time_size() = {
-    val time_size_pair = generateF().logoRDD.map {
+    val time_size_pair = logoRDD().map {
       f =>
         var size = 0L
         val block = f.asInstanceOf[PatternLogoBlock[_]]

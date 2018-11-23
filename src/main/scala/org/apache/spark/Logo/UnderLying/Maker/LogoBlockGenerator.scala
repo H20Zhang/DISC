@@ -33,7 +33,6 @@ class CompactRowGenerator[A: ClassTag](schema: LogoSchema,
   lazy val baseList = schema.slotSize
   lazy val numList = schema.IndexToKey(index)
   var filteredData = data.filter(_._2 != null)
-//  lazy val numParts = filteredData.length
   lazy val metaData = LogoMetaData(numList, 1)
 
 
@@ -50,13 +49,38 @@ class CompactRowGenerator[A: ClassTag](schema: LogoSchema,
         rawData.append(f._1(0))
     }
 
-//    println(s"the count is $count")
-//    rawData.toCompactList().iterator().foreach{f =>
-//      println()
-//      print(f(0))
-//      print(f(1))
-//
-//    }
+
+    val compactBlock = new CompactConcretePatternLogoBlock(schema, metaData, rawData.toCompactList())
+
+    compactBlock
+
+  }
+}
+
+class CompactRow3Generator[A: ClassTag](schema: LogoSchema,
+                                       index: Int,
+                                       data: Iterator[(Array[Int], A)]) extends LogoBlockGenerator[(Array[Int], A), CompactConcretePatternLogoBlock](schema, index, data) {
+
+  lazy val baseList = schema.slotSize
+  lazy val numList = schema.IndexToKey(index)
+  var filteredData = data.filter(_._2 != null)
+  lazy val metaData = LogoMetaData(numList, 1)
+
+
+  override def generate(): CompactConcretePatternLogoBlock = {
+
+    val rawData = new CompactListAppendBuilder(3)
+//    var count = 0
+
+    //TODO this place is very strange, this place should be understand why left and right should be reversed
+    filteredData.foreach {
+      f =>
+//        count += 1
+        rawData.append(f._1(0))
+        rawData.append(f._1(1))
+        rawData.append(f._1(2))
+    }
+
 
     val compactBlock = new CompactConcretePatternLogoBlock(schema, metaData, rawData.toCompactList())
 

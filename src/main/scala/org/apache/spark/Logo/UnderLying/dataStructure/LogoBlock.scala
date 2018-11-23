@@ -716,6 +716,7 @@ final class CompositeTwoPatternLogoBlock(schema: PlannedTwoCompositeLogoSchema, 
 
     private def moveToNext: Option[Boolean] = {
       do {
+
         if (coreIterator.hasNext) {
 
           currentCore = coreIterator.next()

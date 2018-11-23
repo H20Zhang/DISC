@@ -45,7 +45,82 @@ case class CostBaseOptimizer(subPatterns:Seq[SubPattern], qCost:QueryCost, commS
 
 }
 
-class HouseCostEstimator(data:String, h:Int, k:Int, k2:Int){
+
+class ThreeTriangleCostEstimator(data:String, h:Int, k:Double, k2:Int){
+
+  val query = List("triangle", "triangle", "triangle", "triangleTriangle", "triangleTriangle", "triangleTriangle", "triangleTriangle")
+
+  lazy val informMaps = generateInformations()
+  var rawEdgeSize1 = 0L
+
+  def generateInformations() ={
+    val base = k
+    println(s"k is ${k}")
+    val sampledPatterns = new ExamplePatternSampler(data,h,h,k, k2)
+    val rawEdgeSize = sampledPatterns.rawEdgeSize
+    rawEdgeSize1 = rawEdgeSize
+    val sampledRawEdgeSize = sampledPatterns.sampledRawEdgeSize
+    val ratio = sampledRawEdgeSize.toDouble / rawEdgeSize
+
+
+    val informMaps = query.map(f => (f,f)).map{
+      f =>
+        val sampledPattern = sampledPatterns.pattern(f._2)
+        val time_size_pair = sampledPattern.time_size()
+
+        //amount of object sampled
+        val sampledSize = (time_size_pair._1 / ratio).toLong
+
+        //size, time
+        (f._1,(sampledSize,time_size_pair._2))
+    }.toMap
+
+    informMaps
+  }
+
+  def generatePlans() = {
+    informMaps
+  }
+}
+
+class ChordalSquareCostEstimator(data:String, h:Int, k:Double, k2:Int){
+
+  val query = List("triangle", "triangle", "triangleTriangle", "triangleTriangle")
+
+  lazy val informMaps = generateInformations()
+  var rawEdgeSize1 = 0L
+
+  def generateInformations() ={
+    val base = k
+    println(s"k is ${k}")
+    val sampledPatterns = new ExamplePatternSampler(data,h,h,k, k2)
+    val rawEdgeSize = sampledPatterns.rawEdgeSize
+    rawEdgeSize1 = rawEdgeSize
+    val sampledRawEdgeSize = sampledPatterns.sampledRawEdgeSize
+    val ratio = sampledRawEdgeSize.toDouble / rawEdgeSize
+
+
+    val informMaps = query.map(f => (f,f)).map{
+      f =>
+        val sampledPattern = sampledPatterns.pattern(f._2)
+        val time_size_pair = sampledPattern.time_size()
+
+        //amount of object sampled
+        val sampledSize = (time_size_pair._1 / ratio).toLong
+
+        //size, time
+        (f._1,(sampledSize,time_size_pair._2))
+    }.toMap
+
+    informMaps
+  }
+
+  def generatePlans() = {
+    informMaps
+  }
+}
+
+class HouseCostEstimator(data:String, h:Int, k:Double, k2:Int){
 
 
   val query = List("triangle", "square", "squareTriangle", "triangleSquare")
@@ -73,7 +148,7 @@ class HouseCostEstimator(data:String, h:Int, k:Int, k2:Int){
         val sampledSize = (time_size_pair._1 / ratio).toLong
 
         //size, time
-        (f._1,(sampledSize/base,time_size_pair._2))
+        (f._1,(sampledSize,time_size_pair._2))
     }.toMap
 
     informMaps
@@ -120,7 +195,7 @@ class HouseCostEstimator(data:String, h:Int, k:Int, k2:Int){
 
 }
 
-class near5CliqueCostEstimator(data:String, h:Int, k:Int, k2:Int){
+class near5CliqueCostEstimator(data:String, h:Int, k:Double, k2:Int){
 
 
   val query = List("triangle", "fourClique", "fourCliqueTriangle", "triangleFourClique")
@@ -137,17 +212,17 @@ class near5CliqueCostEstimator(data:String, h:Int, k:Int, k2:Int){
     val sampledRawEdgeSize = sampledPatterns.sampledRawEdgeSize
     val ratio = sampledRawEdgeSize.toDouble / rawEdgeSize
 
-    query.map{
-      f =>
-        val sampledPattern = sampledPatterns.pattern(f)
-        val start_time = System.currentTimeMillis()
-        val time_size_pair = sampledPattern.time_size()
-        val sampledSize = (time_size_pair._1 / ratio).toLong
-
-        val end_time = System.currentTimeMillis()
-
-        (f,sampledSize,time_size_pair._2,end_time-start_time, time_size_pair._1)
-    }.foreach(f => println(s"${f._1}:sampledSize:${f._5/base}:estimatedSize:${f._2/base}:sampleTime:${f._3} in one Block :timeUsed:${f._4}"))
+//    query.map{
+//      f =>
+//        val sampledPattern = sampledPatterns.pattern(f)
+//        val start_time = System.currentTimeMillis()
+//        val time_size_pair = sampledPattern.time_size()
+//        val sampledSize = (time_size_pair._1 / ratio).toLong
+//
+//        val end_time = System.currentTimeMillis()
+//
+//        (f,sampledSize,time_size_pair._2,end_time-start_time, time_size_pair._1)
+//    }.foreach(f => println(s"${f._1}:sampledSize:${f._5/base}:estimatedSize:${f._2/base}:sampleTime:${f._3} in one Block :timeUsed:${f._4}"))
 
     val informMaps = query.map(f => (f,f)).map{
       f =>

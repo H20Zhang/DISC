@@ -1,12 +1,12 @@
 
 name := "Logo"
 
-version := "1.0"
+version := "1.2.6"
 
 scalaVersion := "2.11.12"
 
 
-//scalacOptions += "–optimise"
+
 test in assembly := {}
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 
@@ -24,7 +24,8 @@ libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.3" % "test"
 //libraryDependencies += "com.koloboke" % "koloboke-impl-common-jdk8" % "1.0.0" % "runtime"
 
 // https://mvnrepository.com/artifact/net.sf.trove4j/trove4j
-libraryDependencies += "net.sf.trove4j" % "trove4j" % "3.0.3"
+libraryDependencies += "net.sf.trove4j" % "trove4j" % "3.0.3" % "provided"
+
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard

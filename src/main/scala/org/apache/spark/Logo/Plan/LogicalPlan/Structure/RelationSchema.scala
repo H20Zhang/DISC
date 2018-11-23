@@ -86,7 +86,7 @@ class RelationSchema {
 
     log.info(s"add Relation:${relation}")
     relations += relation
-    
+
     logoCatalog.retrieveOrRegisterRelation(relation)
 
     for (i <- relation.attr){
