@@ -1,6 +1,6 @@
 package Underlying
 
-import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{LogoCatalog, Relation, RelationSchema}
+import org.apache.spark.adj.plan.deprecated.LogicalPlan.Structure.{LogoCatalog, Relation, RelationSchema}
 import org.scalatest.FunSuite
 
 class LogoCatalogTest extends FunSuite{

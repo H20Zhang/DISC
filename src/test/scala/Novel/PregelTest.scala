@@ -1,6 +1,6 @@
 package Novel
 
-import org.apache.spark.Logo.Novel.Pregel
+import hzhang.framework.test.Novel.Pregel
 import org.scalatest.FunSuite
 
 class PregelTest extends FunSuite{

@@ -1,6 +1,6 @@
 package Plan
 
-import org.apache.spark.Logo.Plan.LogicalPlan.Decrapted.{HNumberDecider, LazyOptimizer, QTree, QTreeNode}
+import org.apache.spark.adj.plan.deprecated.LogicalPlan.Decrapted.{HNumberDecider, LazyOptimizer, QTree, QTreeNode}
 import org.scalatest.FunSuite
 
 class QTreeTest extends FunSuite{

@@ -1,7 +1,7 @@
 package LogicalPlan
 
-import org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize.GHDGenerator
-import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{GHDNode, GHDTree, Relation, RelationSchema}
+import org.apache.spark.adj.plan.deprecated.LogicalPlan.GHDOptimize.GHDGenerator
+import org.apache.spark.adj.plan.deprecated.LogicalPlan.Structure.{GHDNode, GHDTree, Relation, RelationSchema}
 import org.scalatest.FunSuite
 
 import scala.collection.mutable.ArrayBuffer

@@ -1,6 +1,6 @@
 package LogicalPlan
 
-import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{Relation, RelationSchema}
+import org.apache.spark.adj.plan.deprecated.LogicalPlan.Structure.{Relation, RelationSchema}
 import org.scalatest.FunSuite
 
 class GHDPlanTest extends FunSuite{

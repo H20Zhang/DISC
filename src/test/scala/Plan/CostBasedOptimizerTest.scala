@@ -1,6 +1,6 @@
 package Plan
 
-import org.apache.spark.Logo.Plan.LogicalPlan.Decrapted.CostBasedOptimizer._
+import org.apache.spark.adj.plan.deprecated.LogicalPlan.Decrapted.CostBasedOptimizer._
 import org.scalatest.FunSuite
 
 class CostBasedOptimizerTest extends FunSuite{

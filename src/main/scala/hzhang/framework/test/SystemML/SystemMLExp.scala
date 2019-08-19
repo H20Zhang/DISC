@@ -2,7 +2,7 @@ package hzhang.framework.test.SystemML
 
 import org.apache
 import org.apache.spark
-import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
+import org.apache.spark.adj.execution.utlis.SparkSingle
 import org.apache.sysml.api.mlcontext._
 import org.apache.sysml.api.mlcontext.ScriptFactory._
 import org.apache.sysml.api.mlcontext.{MLContext, MatrixMetadata}

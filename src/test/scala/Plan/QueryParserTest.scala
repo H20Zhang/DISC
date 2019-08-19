@@ -1,6 +1,6 @@
 package Plan
 
-import org.apache.spark.Logo.Plan.LogicalPlan.Decrapted.TestParser
+import org.apache.spark.adj.plan.deprecated.LogicalPlan.Decrapted.TestParser
 import org.scalatest.FunSuite
 
 class QueryParserTest extends FunSuite{

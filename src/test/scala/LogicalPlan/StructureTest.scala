@@ -1,7 +1,7 @@
 package LogicalPlan
 
-import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{Relation, RelationSchema}
-import org.apache.spark.Logo.UnderLying.utlis.TestUtil
+import org.apache.spark.adj.plan.deprecated.LogicalPlan.Structure.{Relation, RelationSchema}
+import org.apache.spark.adj.execution.utlis.TestUtil
 import org.scalatest.FunSuite
 
 import scala.collection.mutable.ArrayBuffer

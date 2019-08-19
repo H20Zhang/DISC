@@ -1,8 +1,8 @@
 package Experiment
 
-import org.apache.spark.Logo.UnderLying.Loader.EdgeLoader
-import org.apache.spark.Logo.UnderLying.UniformSampler.{SquareSampler, TriangleSampler}
-import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
+import org.apache.spark.adj.execution.rdd.loader.DataLoader
+import org.apache.spark.adj.execution.sampler.{SquareSampler, TriangleSampler}
+import org.apache.spark.adj.execution.utlis.SparkSingle
 import org.scalatest.FunSuite
 
 class UniformSampleTest extends FunSuite{

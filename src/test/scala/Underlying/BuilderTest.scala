@@ -1,10 +1,10 @@
 package Underlying
 
-import org.apache.spark.Logo.UnderLying.Catalog.Catalog
-import org.apache.spark.Logo.UnderLying.Joiner.{LogoBuildPhyiscalStep, SnapPoint}
-import org.apache.spark.Logo.UnderLying.dataStructure._
-import org.apache.spark.Logo.UnderLying.utlis.TestData.TestLogoRDDData
-import org.apache.spark.Logo.UnderLying.utlis.{SparkSingle, TestUtil}
+import org.apache.spark.adj.execution.catalog.Catalog
+import org.apache.spark.adj.execution.hypercube.{LogoBuildPhyiscalStep, SnapPoint}
+import org.apache.spark.adj.execution.rdd._
+import org.apache.spark.adj.exp.data.TestLogoRDDData
+import org.apache.spark.adj.execution.utlis.{SparkSingle, TestUtil}
 import org.apache.spark.rdd.RDD
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 

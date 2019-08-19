@@ -1,30 +1,28 @@
+import scala.sys.process._
 
-name := "Logo"
-
-version := "1.2.6"
-
+name := "ADJ"
+version := "0.1.1"
 scalaVersion := "2.11.12"
 
 
 
-test in assembly := {}
+/*Dependency*/
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
-
-libraryDependencies += "org.apache.spark" % "spark-sql_2.11" % "2.2.0" % "provided"
-libraryDependencies +=  "org.apache.spark" % "spark-core_2.11" % "2.2.0" % "provided"
-libraryDependencies +=  "org.apache.spark" % "spark-graphx_2.11" % "2.2.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.2.0" % "provided"
+libraryDependencies +=  "org.apache.spark" %% "spark-core" % "2.2.0" % "provided"
+libraryDependencies +=  "org.apache.spark" %% "spark-graphx" % "2.2.0" % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-mllib" % "2.2.0" % "provided"
-
-
-// https://mvnrepository.com/artifact/com.joptimizer/joptimizer
-libraryDependencies += "com.joptimizer" % "joptimizer" % "4.0.0"
+libraryDependencies += "com.joptimizer" % "joptimizer" % "4.0.0" % "provided"
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.3" % "test"
-//libraryDependencies += "graphframes" % "graphframes" % "0.5.0-spark2.1-s_2.11"
-//libraryDependencies += "com.koloboke" % "koloboke-compile" % "0.5.1" % "provided"
-//libraryDependencies += "com.koloboke" % "koloboke-impl-common-jdk8" % "1.0.0" % "runtime"
-
-// https://mvnrepository.com/artifact/net.sf.trove4j/trove4j
 libraryDependencies += "net.sf.trove4j" % "trove4j" % "3.0.3" % "provided"
+
+
+
+watchSources += baseDirectory.value / "script/"
+
+//assemblyOption in assembly := (assemblyOption in assembly).value.copy(appendContentHash = true)
+//assemblyOption in assembly := (assemblyOption in assembly).value.copy(cacheOutput = false)
+//assemblyOption in assembly := (assemblyOption in assembly).value.copy(cacheUnzip = false)
 
 
 assemblyMergeStrategy in assembly := {
@@ -32,6 +30,27 @@ assemblyMergeStrategy in assembly := {
   case x => MergeStrategy.first
 }
 
+assemblyExcludedJars in assembly := {
+  val cp = (fullClasspath in assembly).value
+  cp.filter { f=>
+    f.data.getName == "systemml-1.1.0.jar" ||
+      f.data.getName == "SCPSolver.jar" ||
+      f.data.getName == "LPSOLVESolverPack.jar" ||
+      f.data.getName == "GLPKSolverPack.jar"
+  }
+}
+
+test in assembly := {}
 
 
+/*Custom tasks*/
+lazy val upload = taskKey[Unit]("Upload the files")
+upload := {
+  "./script/upload.sh" !
+}
 
+lazy val assembleThenUpload = taskKey[Unit]("Upload the jar after assembly")
+assembleThenUpload := {
+    assembly.value
+  "./script/upload.sh" !
+}

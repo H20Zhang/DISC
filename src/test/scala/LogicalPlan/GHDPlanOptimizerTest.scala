@@ -1,10 +1,10 @@
 package LogicalPlan
 
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.Logo.Plan.LogicalPlan.GHDOptimize.{GHDGenerator, GHDPlanOptimizer}
-import org.apache.spark.Logo.Plan.LogicalPlan.Structure.{Configuration, Relation, RelationSchema}
-import org.apache.spark.Logo.Plan.LogicalPlan.Utility.InformationSampler
-import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
+import org.apache.spark.adj.plan.deprecated.LogicalPlan.GHDOptimize.{GHDGenerator, GHDPlanOptimizer}
+import org.apache.spark.adj.plan.deprecated.LogicalPlan.Structure.{Configuration, Relation, RelationSchema}
+import org.apache.spark.adj.plan.deprecated.LogicalPlan.Utility.InformationSampler
+import org.apache.spark.adj.execution.utlis.SparkSingle
 import org.scalatest.FunSuite
 
 import scala.collection.mutable.ArrayBuffer

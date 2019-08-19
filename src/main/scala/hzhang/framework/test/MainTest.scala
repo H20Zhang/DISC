@@ -1,6 +1,6 @@
 package hzhang.framework.test
 
-import org.apache.spark.Logo.UnderLying.utlis.SparkSingle
+import org.apache.spark.adj.execution.utlis.SparkSingle
 import org.apache.sysml.api.mlcontext._
 import org.apache.sysml.api.mlcontext.ScriptFactory._
 

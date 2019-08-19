@@ -1,6 +1,6 @@
 package Example
 
-import org.apache.spark.Logo.UnderLying.Loader.{EdgeLoader, EdgePatternLoader}
+import org.apache.spark.adj.execution.rdd.loader.{DataLoader, EdgeLoader}
 //import org.apache.spark.Logo.UnderLying.utlis.EdgeLoader
 import org.scalatest.FunSuite
 
@@ -15,7 +15,7 @@ class BasicExample extends FunSuite{
 
   //loading the edge into the systems.
   lazy val rawEdge = {
-    new EdgeLoader(data) rawEdgeRDD
+    new DataLoader(data) rawEdgeRDD
 
   }
 
@@ -25,7 +25,7 @@ class BasicExample extends FunSuite{
   // for simplicity we write edgeh1_h2
   def getEdge(hNumber: (Int, Int)) = {
     //partitioning the loaded edge using given number of partitions.
-    new EdgePatternLoader(rawEdge, Seq(hNumber._1, hNumber._2)) edgeLogoRDDReference
+    new EdgeLoader(rawEdge, Seq(hNumber._1, hNumber._2)) edgeLogoRDDReference
   }
 
   //GJ Join Example

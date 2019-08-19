@@ -1,6 +1,6 @@
 package Novel
 
-import org.apache.spark.Logo.Novel.SparkMLUsage
+import hzhang.framework.test.Novel.SparkMLUsage
 import org.scalatest.FunSuite
 
 class MLTest extends FunSuite{

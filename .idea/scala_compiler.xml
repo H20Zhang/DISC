@@ -2,6 +2,6 @@
 <project version="4">
   <component name="ScalaCompilerConfiguration">
     <option name="compileOrder" value="JavaThenScala" />
-    <profile name="SBT 1" modules="logo,Logo" />
+    <profile name="SBT 1" modules="ADJ,ADJ1,Logo,logo" />
   </component>
 </project>
