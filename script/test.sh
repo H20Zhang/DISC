@@ -5,6 +5,95 @@ JAR="./ADJ-assembly-1.2.6.jar"
 ks=(32)
 
 
+Test_HCUBEGJ() {
+JAR="./ADJ-assembly-0.1.1.jar"
+mainClass=hzhang.framework.test.exp.entry.HyperCubeExp
+#input=(as lj webB wikiT  enwiki-2013 orkut)
+ input=(lj)
+for i in ${input[@]}; do
+		data=$i
+		file="${prefix}/${data}_undir"
+
+
+		#3 p
+		# querys=(triangle house threeTriangle near5Clique)
+		# querys=(threeTriangle)
+		# querys=(threeCenterTriangle twoHeadTriangle)
+
+
+#		test communication only time
+#		querys=(house1)
+#		# querys=(lazyNear5Clique)
+#		for query in ${querys[@]}; do
+#				echo "----------------------------------"
+#				echo executing $i $query $k
+#
+#				SECONDS=0
+#				runSpark-logo.sh  --num-executors 32  --class $mainClass $JAR $file $query 11 true
+#
+#				duration=$SECONDS
+#				echo "executing $i $duration seconds elapsed."
+#		done
+
+#		test communication only under optimal share
+		querys=(house3)
+		for query in ${querys[@]}; do
+				echo "----------------------------------"
+				echo executing $i $query $k
+
+				SECONDS=0
+				runSpark-logo.sh  --num-executors 32  --class $mainClass $JAR $file $query 11 true
+
+				duration=$SECONDS
+				echo "executing $i $duration seconds elapsed."
+		done
+
+#		test total cost under optimal share
+		querys=(house3)
+		for query in ${querys[@]}; do
+				echo "----------------------------------"
+				echo executing $i $query $k
+
+				SECONDS=0
+				runSpark-logo.sh  --num-executors 32  --class $mainClass $JAR $file $query 11 false
+
+				duration=$SECONDS
+				echo "executing $i $duration seconds elapsed."
+		done
+
+
+
+		querys=()
+
+		#4 p
+		# querys=(square fourClique)
+		for query in ${querys[@]}; do
+				echo "----------------------------------"
+				echo executing $i $query $k
+
+				SECONDS=0
+				runSpark-logo.sh  --num-executors 32  --class $mainClass $JAR $file $query 6 false
+
+				duration=$SECONDS
+				echo "executing $i $duration seconds elapsed."
+		done
+		querys=()
+
+		#2 p
+		# querys=(chordalSquare)
+		for query in ${querys[@]}; do
+				echo "----------------------------------"
+				echo executing $i $query $k
+
+				SECONDS=0
+				runSpark-logo.sh  --num-executors 32  --class $mainClass $JAR $file $query 36 false
+
+				duration=$SECONDS
+				echo "executing $i $duration seconds elapsed."
+		done
+done
+}
+
 Test_Speed(){
 mainClass=org.apache.spark.Logo.Experiment.LegoMainEntry
 input=(as lj webB wikiT  enwiki-2013 orkut)
@@ -61,7 +150,7 @@ done
 }
 
 Test_PatternStatistic(){
-mainClass=org.apache.spark.adj.exp.entry.StatisticExp
+mainClass=hzhang.framework.test.exp.entry.StatisticExp
 input=(orkut)
 
 for i in ${input[@]}; do
@@ -258,7 +347,7 @@ TestCommScalability(){
 
 echo "test communication scalability"
 
-mainClass=org.apache.spark.adj.exp.entry.CommExp
+mainClass=hzhang.framework.test.exp.entry.CommExp
 JAR="./Logo-assembly-1.2.6.jar"
 
 input=(gen5 gen10 gen20 gen40 gen80 gen160 gen320)
@@ -290,7 +379,7 @@ done
 TestWorkloadBalance(){
 echo "test workload balance"
 
-mainClass=org.apache.spark.adj.exp.entry.ADJExp
+mainClass=hzhang.framework.test.exp.entry.ADJExp
 JAR="./Logo-assembly-1.2.6.jar"
 
 
@@ -321,12 +410,13 @@ done
 gen_edge(){
 echo "generate relations"
 
-mainClass=org.apache.spark.adj.exp.entry.ADJExp
+mainClass=hzhang.framework.test.exp.entry.ADJExp
 JAR="./Logo-assembly-1.2.6.jar"
 }
 
 
-Test_PatternStatistic
+Test_HCUBEGJ
+#Test_PatternStatistic
 #TestCommScalability
 #TestWorkloadBalance
 # Test_Speed

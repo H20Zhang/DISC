@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="GraphFrameTest">
+    <output-path>$USER_HOME$/SEPC/GraphFrameTest</output-path>
+    <root id="archive" name="GraphFrameTest.jar">
+      <element id="module-output" name="Logo" />
+    </root>
+  </artifact>
+</component>
