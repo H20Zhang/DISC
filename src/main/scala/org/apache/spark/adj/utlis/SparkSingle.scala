@@ -40,7 +40,7 @@ object SparkSingle {
         , classOf[KeyMapping]
         , classOf[mutable.LongMap[ValuePatternInstance]]
       )
-      ).set("spark.kryo.registrator", "org.apache.spark.Logo.UnderLying.dataStructure.KryoRegistor")
+      ).set("spark.kryo.registrator", "org.apache.spark.adj.utlis.KryoRegistor")
 
   }
 
@@ -70,7 +70,7 @@ object SparkSingle {
         .getOrCreate()
       case false => SparkSession
         .builder()
-        .master("local[1]")
+        .master("local[4]")
         .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
         .config(getConf())
         .appName(appName)

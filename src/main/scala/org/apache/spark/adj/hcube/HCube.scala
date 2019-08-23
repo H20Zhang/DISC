@@ -6,32 +6,38 @@ import org.apache.spark.adj.plan.{TaskInfo}
 import org.apache.spark.adj.utlis.SparkSingle
 
 
-case class HCubePlan(relations:Seq[Relation], val share:Map[AttributeID, Int]){
-
-  private val idToRelation:Map[RelationID, Relation] = relations.map(f => (f.schema.id.get, f)).toMap
-
-  def idForRelation(id:RelationID):Relation = {
-    idToRelation.get(id).get
-  }
-}
-
-
 class HCube(query:HCubePlan, info:TaskInfo) {
 
-  private val hcubeHelper = new HCubeHelper(query)
+  private val helper = new HCubeHelper(query)
   private val relations = query.relations
   private val sc = SparkSingle.getSparkContext()
 
-  private lazy val partitionedRelations = relations.map{
-    R =>
-      val relationPartitioner = new RelationPartitioner(R, hcubeHelper)
-      relationPartitioner.partitionRelation()
+  def genParititionedRelation() = {
+    relations.map{
+      R =>
+        val relationPartitioner = new RelationPartitioner(R, helper)
+        relationPartitioner.partitionRelation()
+    }
+  }
+
+  //to be modified to accelerate the computation and communication
+  def preprocessPartitionedRelation(partitionedRelations: Seq[PartitionedRelation]) = {
+    partitionedRelations
   }
 
   def genHCubeRDD() = {
-    val subTaskPartitions = hcubeHelper.genSubTaskPartitions(info)
-    val hcubeRDD = new HCubeRDD(sc,subTaskPartitions, partitionedRelations.map(_.partitionedRDD))
+    val partitionedRelations = genParititionedRelation()
+    val preprocessedPartitionedRelation = preprocessPartitionedRelation(partitionedRelations)
+    val subTaskPartitions = helper.genSubTaskPartitions(info, preprocessedPartitionedRelation.map(_.partitionedRDD))
+    val hcubeRDD = new HCubeRDD(sc,subTaskPartitions, helper.taskPartitioner, preprocessedPartitionedRelation.map(_.partitionedRDD))
     hcubeRDD
   }
 
+}
+
+case class HCubePlan(relations:Seq[Relation], val share:Map[AttributeID, Int]){
+  private val idToRelation:Map[RelationID, Relation] = relations.map(f => (f.schema.id.get, f)).toMap
+  def idForRelation(id:RelationID):Relation = {
+    idToRelation.get(id).get
+  }
 }

@@ -1,11 +1,11 @@
 package org.apache.spark.adj.optimization
 
 import org.apache.spark.adj.database.Database.Attribute
-import org.apache.spark.adj.plan.LogicalPlan
+import org.apache.spark.adj.plan.{LogicalPlan, OptimizedLogicalPlan}
 
 import scala.collection.mutable.ArrayBuffer
 
-class ShareOptimizer(query:LogicalPlan, tasks:Int) {
+class ShareOptimizer(query:OptimizedLogicalPlan, tasks:Int) {
 
   val attributes = query.getAttributes()
   val cardinalities = query.getCardinalities()

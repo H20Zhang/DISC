@@ -10,6 +10,8 @@ import org.apache.spark.scheduler.TaskLocation
 import org.apache.spark.storage.RDDBlockId
 import org.apache.spark.util.Utils
 
+import scala.reflect.ClassTag
+
 
 
 class SubTaskPartition(
@@ -69,11 +71,11 @@ class SubTaskPartition(
 
 
 
-class HCubeRDD (sc: SparkContext,
-                subTasks: Array[SubTaskPartition],
-//                _partitioner:Partitioner,
-                var rdds: Seq[RDD[TupleHCubeBlock]]) extends RDD[SubTask](sc, rdds.map(x => new OneToOneDependency(x))) {
-//  override val partitioner = Some(partitioner)
+class HCubeRDD[A <: HCubeBlock : Manifest](sc: SparkContext,
+                                              subTasks: Array[SubTaskPartition],
+                                              _partitioner:Partitioner,
+                                              var rdds: Seq[RDD[A]]) extends RDD[SubTask](sc, rdds.map(x => new OneToOneDependency(x))) {
+  override val partitioner = Some(_partitioner)
 
   //reorder the subTaskPartitions according to their idx
   override def getPartitions: Array[Partition] = {
@@ -101,7 +103,8 @@ class HCubeRDD (sc: SparkContext,
         block
     }.toArray
 
-    val subJoin = new SubTask(blockList, subTaskPartition.info)
+    val shareVector = partitioner.get.asInstanceOf[HCubePartitioner].getShare(split.index)
+    val subJoin = new SubTask(shareVector, blockList, subTaskPartition.info)
     Iterator(subJoin)
   }
 

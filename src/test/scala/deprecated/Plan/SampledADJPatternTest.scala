@@ -1,6 +1,6 @@
 package deprecated.Plan
 
-import hzhang.framework.test.exp.utils.ADJPattern
+
 import hzhang.test.exp.utils.{ADJPattern, ExamplePatternSampler}
 import org.apache.spark.adj.utlis.SparkSingle
 import org.scalatest.{BeforeAndAfterAll, FunSuite}

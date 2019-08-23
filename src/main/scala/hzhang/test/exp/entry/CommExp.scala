@@ -1,6 +1,6 @@
 package hzhang.test.exp.entry
 
-import hzhang.framework.test.exp.utils.ADJPattern
+import hzhang.test.exp.utils.ADJPattern
 import hzhang.test.exp.utils.{ADJPattern, HyperCubeCommPattern}
 import org.apache.spark.adj.utlis.SparkSingle
 

@@ -1,6 +1,6 @@
 package hzhang.test.exp.entry
 
-import hzhang.framework.test.exp.utils.{ADJPattern, RunForLoop}
+
 import hzhang.test.exp.utils.ADJPatternStatistic
 import org.apache.spark.adj.deprecated.execution.rdd.loader.DataLoader
 import org.apache.spark.adj.utlis.SparkSingle

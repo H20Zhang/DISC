@@ -5,6 +5,8 @@ import org.apache.spark.adj.database.{Relation, RelationSchema}
 import org.apache.spark.adj.utlis.SparkSingle
 import org.apache.spark.rdd.RDD
 
+import scala.collection.mutable.ArrayBuffer
+
 
 class RelationPartitioner(relation:Relation, helper: HCubeHelper) {
 
@@ -17,8 +19,8 @@ class RelationPartitioner(relation:Relation, helper: HCubeHelper) {
     val sentryRDD = sc.parallelize(sentry)
     val relationRDD = relation.content.map(f => (f, false))
 
-    println(s"relationRDD:${relationRDD.collect().toSeq.map(f => (f._1.toSeq, f._2))}")
-    println(s"sentryRDD:${sentryRDD.collect().toSeq.map(f => (f._1.toSeq, f._2))}")
+//    println(s"relationRDD:${relationRDD.collect().toSeq.map(f => (f._1.toSeq, f._2))}")
+//    println(s"sentryRDD:${sentryRDD.collect().toSeq.map(f => (f._1.toSeq, f._2))}")
 
     val partitionedRDD = relationRDD.union(sentryRDD).partitionBy(partitioner)
 
@@ -27,16 +29,21 @@ class RelationPartitioner(relation:Relation, helper: HCubeHelper) {
     val hcubeBlockRDD = partitionedRDD.mapPartitions{
       it =>
         var shareVector:Array[DataType] = null
+        val content = it.toArray
+        val array = new Array[Array[DataType]](content.size)
 
-        val content = it.toArray.filter{
+        var i = 0
+        content.foreach{
           case (tuple, isSentry) =>
             if (isSentry){
               shareVector = tuple
+            } else {
+              array(i) = tuple
+              i += 1
             }
-            !isSentry
-        }.map(_._1).toArray
+        }
 
-        Iterator(TupleHCubeBlock(schema, shareVector, content))
+        Iterator(TupleHCubeBlock(schema, shareVector, array))
     }
 
     //cache the hcubeBlockRDD in memory

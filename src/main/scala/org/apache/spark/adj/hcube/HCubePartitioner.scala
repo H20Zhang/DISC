@@ -7,10 +7,10 @@ import org.apache.spark.util.Utils
 /*partition the relation according to the space defined by share,
   the i-th share decide how much "share" the domain of relation on i-th local attribute will be splited
  */
-class HCubePartitioner(shareSpace:Array[Int]) extends Partitioner{
-  val artiy = shareSpace.size
-  val productFactor = 1 +: Range(1, artiy).map(i => shareSpace.dropRight(artiy - i).product).toArray
-  val _numPartitions = shareSpace.product
+class HCubePartitioner(shareSpaceVector:Array[Int]) extends Partitioner{
+  val artiy = shareSpaceVector.size
+  val productFactor = 1 +: Range(1, artiy).map(i => shareSpaceVector.dropRight(artiy - i).product).toArray
+  val _numPartitions = shareSpaceVector.product
 
   override def numPartitions: Int = _numPartitions
 
@@ -19,7 +19,7 @@ class HCubePartitioner(shareSpace:Array[Int]) extends Partitioner{
       var i = 0
       var hashValue = 0
       while(i < artiy){
-        val ithHashValue = Utils.nonNegativeMod(array(i), shareSpace(i))
+        val ithHashValue = Utils.nonNegativeMod(array(i), shareSpaceVector(i))
         hashValue += (ithHashValue * productFactor(i))
         i += 1
       }
