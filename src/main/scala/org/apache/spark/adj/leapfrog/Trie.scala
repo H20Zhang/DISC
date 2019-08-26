@@ -20,17 +20,11 @@ class ArrayTrie(neighbors:Array[Int], values:Array[Int], neighborBegins:Array[In
     var start = neighborBegins(id)
     var end = neighborEnds(id)
 
-//    println(s"binding:${binding}")
-//    println(s"value:${values.toSeq}")
-//    println(s"start:${start}, end:${end}")
-
     val level = binding.size
     var i = 0
 
     while(i < level){
 
-//      println(s"${i}-th binding:${binding(i)}")
-//      println(s"start:${start}, end:${end}")
       val pos = Alg.binarySearch(values, binding(i), start, end)
 
       if (pos == -1){
@@ -38,12 +32,6 @@ class ArrayTrie(neighbors:Array[Int], values:Array[Int], neighborBegins:Array[In
       }
 
       id = neighbors(pos)
-
-//      println(s"level:${i}")
-//      println(s"start:${start}, end:${end}")
-//      println(s"pos:${pos}")
-//      println(s"id:${id}")
-
       start = neighborBegins(id)
       end = neighborEnds(id)
       i += 1
@@ -65,7 +53,6 @@ class ArrayTrie(neighbors:Array[Int], values:Array[Int], neighborBegins:Array[In
           nextLevelValues.toArray().map(value => f:+value)
       }
 
-//      println(s"table of ${i}-th level is: ${tables.toSeq.map(_.toSeq)}")
       i += 1
     }
 
@@ -86,7 +73,6 @@ class ArrayTrie(neighbors:Array[Int], values:Array[Int], neighborBegins:Array[In
 
 class HashMapTrie extends Trie {
   override def nextLevel(binding: ArraySegment): ArraySegment = ???
-
   override def toRelation(): Array[Array[DataType]] = ???
 }
 
@@ -101,7 +87,7 @@ object ArrayTrie {
     var idCounter = 0
     var leafIDCounter = -1
     val prevIDs = new Array[Int](arity)
-    var prevValue = new Array[Int](arity)
+    var prevTuple = new Array[Int](arity)
     val edgeBuffer = ArrayBuffer[(Int, Int, DataType)]()
     val nodeBuffer = ArrayBuffer[(Int, Int)]()
     val tableSize = table.size
@@ -109,10 +95,12 @@ object ArrayTrie {
     var i = 0
     while(i < arity){
       prevIDs(i) = 0
-      prevValue(i) = Int.MaxValue
+      prevTuple(i) = Int.MaxValue
       i += 1
     }
 
+
+//    println(table.toSeq.map(_.toSeq))
 
     //construct edge for ArrayTrie
     val rootID = idCounter
@@ -122,34 +110,38 @@ object ArrayTrie {
     while(i < tableSize){
       val curTuple = table(i)
 
-      //find the j-th position where value of curTuple diverage from prevValue
-      var j = -1
-      var isJContinue = true
-      while(isJContinue){
-        j += 1
-        if (j >= arity){
-          isJContinue = false
-        } else {
-          if (curTuple(j) != prevValue(j)){
-            isJContinue = false
-          }
+      //find the j-th position where value of curTuple diverage from prevTuple
+      var diffPos = -1
+      var isConsecutive = true
+      var j = 0
+      while (j < arity){
+        if (curTuple(j) != prevTuple(j) && isConsecutive == true){
+          diffPos = j
+          isConsecutive = false
         }
+        j += 1
       }
 
-      j = j-1
+      //deal with the case, where curTuple is the as prevTuple
+      if (isConsecutive){
+        diffPos = arity - 2
+      } else {
+        diffPos = diffPos-1
+      }
 
-      while (j < arity-1){
+      while (diffPos < arity-1){
+        val nextPos = diffPos + 1
         var prevID = 0
 
-        if (j == -1){
+        if (diffPos == -1){
           prevID = rootID
         } else {
-          prevID = prevIDs(j)
+          prevID = prevIDs(diffPos)
         }
 
         var newID = 0
 
-        if(j < arity - 2){
+        if(diffPos < arity - 2){
           newID = idCounter
           idCounter += 1
         } else {
@@ -157,14 +149,13 @@ object ArrayTrie {
           leafIDCounter -= 1
         }
 
+        edgeBuffer += ((prevID, newID, curTuple(nextPos)))
+        prevIDs(nextPos) = newID
 
-        edgeBuffer += ((prevID, newID, curTuple(j+1)))
-        prevIDs(j+1) = newID
-
-        j += 1
+        diffPos += 1
       }
 
-      prevValue = curTuple
+      prevTuple = curTuple
       i += 1
     }
 

@@ -7,7 +7,21 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 class AlgTest extends FunSuite{
-  test("leapfrog intersection"){
+
+  test("leapfrog intersection -- boundary case"){
+    val num = 100
+    val array1 = Range(0,num).map(_ => Math.abs(Random.nextInt() % (100*num))).sorted.distinct.toArray
+    val array2 = Range(0,10*num).map(_ => Math.abs(Random.nextInt() % (100*num))).sorted.distinct.toArray
+    val array3 = Range(0,5*num).map(_ => Math.abs(Random.nextInt() % (100*num))).sorted.distinct.toArray
+
+    val arrays1 = Array(array1, array2, Array[Int]())
+    val arrays2 = Array(array1)
+
+    assert(Alg.leapfrogIntersection(arrays1).isEmpty)
+    assert(Alg.leapfrogIntersection(arrays2).toSeq.diff(arrays2(0).toSeq).isEmpty)
+  }
+
+  test("leapfrog intersection -- speed and correctness"){
 
     var mergelikeTimes = ArrayBuffer[Long]()
     var leapfrogTimes = ArrayBuffer[Long]()

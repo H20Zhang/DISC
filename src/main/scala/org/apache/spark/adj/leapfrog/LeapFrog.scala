@@ -1,25 +1,68 @@
 package org.apache.spark.adj.leapfrog
 
 import org.apache.spark.adj.database.Database.{AttributeID, DataType}
+import org.apache.spark.adj.leapfrog.Intersection.seek
 import org.apache.spark.adj.plan.SubJoin
 
-class LeapFrog(subJoins: SubJoin) extends Iterator[ArraySegment]{
+import scala.collection.mutable.ArrayBuffer
+
+class LeapFrog(subJoins: SubJoin) extends Iterator[Array[DataType]]{
 
   private val contents = subJoins.blocks.map(_.content)
   private val schemas = subJoins.blocks.map(_.schema)
   private val numRelations = schemas.size
   private val attrOrders = subJoins.attrOrders
   private val attrSize = attrOrders.size
-  private val bindings = ArraySegment(new Array[DataType](attrSize))
+
+  private val binding = new Array[DataType](attrSize)
+//  private val partialBindings = ArraySegment(binding)
+//  private val binding = ArraySegment(binding)
+
   private var hasEnd = false
 
-  private val tries = new Array[Trie](numRelations)
-  private val unaryIterators = new Array[LeapFrogUnaryIterator](attrSize)
+  val tries = new Array[Trie](numRelations)
+  private val unaryIterators = new Array[Iterator[DataType]](attrSize)
 
+  lazy val relevantRelationForAttrMap = {
+    Range(0, attrSize).toArray.map{
+      idx =>
+        val curAttr = attrOrders(idx)
+        val relevantRelation = schemas.zipWithIndex.filter{
+          case (schema, schemaPos) =>
+            schema.containAttribute(curAttr)
+        }
+
+        val prefixPosForEachRelation = relevantRelation.map{
+          case (schema, schemaPos) =>
+
+            val relativeOrder = attrOrders.filter(schema.containAttribute)
+            val attrPos = relativeOrder.indexOf(curAttr)
+            val partialBindingPos = new Array[DataType](attrPos)
+            val partialBinding = ArraySegment(new Array[DataType](attrPos))
+
+            var i = 0
+            while(i < attrPos){
+              partialBindingPos(i) = attrOrders.indexOf(relativeOrder(i))
+              //              println(s"attrOrders:${attrOrders.toSeq}, relativeOrder(${i}):${relativeOrder(i)}")
+              i += 1
+            }
+
+            //            println(s"schema:${schema}, schemaPos:${schemaPos}, relativeOrder:${relativeOrder.toSeq}, attrPos:${attrPos}, partialBindingPos:${partialBindingPos.toSeq}")
+            (schema, schemaPos, partialBindingPos, partialBinding)
+        }
+
+        prefixPosForEachRelation
+    }
+  }
+
+  //init
+  init()
+
+
+  val lastIdx = attrSize - 1
   override def hasNext: Boolean = {
-    val lastIdx = attrSize - 1
     val lastIterator = unaryIterators(lastIdx)
-    while (!hasEnd){
+    if (!hasEnd){
       if (!lastIterator.hasNext){
         fixIterators(lastIdx)
       }
@@ -28,13 +71,11 @@ class LeapFrog(subJoins: SubJoin) extends Iterator[ArraySegment]{
   }
 
 
-  override def next(): ArraySegment = {
-    val lastIdx = attrSize - 1
-    var lastIterator = unaryIterators(lastIdx)
-    bindings(lastIdx) = lastIterator.next()
-    bindings
+  override def next():Array[DataType] = {
+    val lastIterator = unaryIterators(lastIdx)
+    binding(lastIdx) = lastIterator.next()
+    binding
   }
-
 
   private def reorderRelations(idx:Int):Unit = {
     val content = contents(idx)
@@ -75,14 +116,13 @@ class LeapFrog(subJoins: SubJoin) extends Iterator[ArraySegment]{
 
   private def fixIterators(idx:Int):Unit = {
 
-    // fix the iterator for first attribute, this will be fixed only once
     if (hasEnd != true){
+      // fix the iterator for first attribute, this will be fixed only once
       if (idx == 0){
         val it = constructIthIterator(idx)
 
         if (it.hasNext){
           unaryIterators(idx) = it
-          //        bindings(idx) = unaryIterators(idx).next()
           return
         } else {
           hasEnd = true
@@ -90,16 +130,13 @@ class LeapFrog(subJoins: SubJoin) extends Iterator[ArraySegment]{
         }
       }
 
-
       //fix the iterator for the rest of the attributes
       val prevIdx = idx - 1
-
-      println(s"unaryIterators(${prevIdx}).content:${unaryIterators(prevIdx).content}")
+//      println(s"unaryIterators(${prevIdx}).content:${unaryIterators(prevIdx).content}")
 
       while (unaryIterators(prevIdx).hasNext){
-        bindings(prevIdx) = unaryIterators(prevIdx).next()
-        println(s"bindings:${bindings.array.toSeq}")
-
+        binding(prevIdx) = unaryIterators(prevIdx).next()
+//        println(s"partialBindings:${partialBindings.array.toSeq}")
 
         val it = constructIthIterator(idx)
 
@@ -139,44 +176,30 @@ class LeapFrog(subJoins: SubJoin) extends Iterator[ArraySegment]{
     initIterators()
   }
 
-  lazy val relevantRelationForAttrMap = {
-    Range(0, attrSize).toArray.map{
-      idx =>
-        val curAttr = attrOrders(idx)
-        val relevantRelation = schemas.zipWithIndex.filter{
-          case (schema, schemaPos) =>
-            schema.containAttribute(curAttr)
-        }
-
-        val prefixPosForEachRelation = relevantRelation.map{
-          case (schema, schemaPos) =>
-            val relativeOrder = attrOrders.filter(schema.containAttribute)
-            val attrPos = relativeOrder.indexOf(curAttr)
-            (schema, schemaPos, attrPos)
-        }
-
-        prefixPosForEachRelation
-    }
-  }
-
   private def constructIthIterator(idx:Int) = {
     val prefixPosForEachRelation = relevantRelationForAttrMap(idx)
     val segmentArrays = new Array[ArraySegment](prefixPosForEachRelation.size)
 
-    println(s"relevant relations:${prefixPosForEachRelation} of attribute:${attrOrders(idx)}")
-//    println(s"relevant relations map:${relevantRelationForAttrMap.toSeq}")
-
-
     var i = 0
     val sizeOfSegmentArrays = segmentArrays.size
     while(i < sizeOfSegmentArrays){
-      val curBinding = bindings.adjust(0, prefixPosForEachRelation(i)._3)
+
+      val partialBindingPos = prefixPosForEachRelation(i)._3
+      val curBinding = prefixPosForEachRelation(i)._4
+      var j = 0
+      while (j < partialBindingPos.size){
+        curBinding(j) = binding(partialBindingPos(j))
+        j += 1
+      }
+
+//        partialBindings.adjust(0, prefixPosForEachRelation(i)._3)
       val trie = tries(prefixPosForEachRelation(i)._2)
       segmentArrays(i) = trie.nextLevel(curBinding)
       i += 1
     }
 
-    new LeapFrogUnaryIterator(segmentArrays)
+    IntersectionIterator.listIt(segmentArrays)
+//    new IntersectedListIterator(segmentArrays)
   }
 
   def debugInternal() = {
@@ -230,7 +253,7 @@ class LeapFrog(subJoins: SubJoin) extends Iterator[ArraySegment]{
     }
 //    val iterator1 =
     unaryIterators(0) = constructIthIterator(0)
-    println(s"content of the first level iterator:${unaryIterators(0).content}")
+//    println(s"content of the first level iterator:${unaryIterators(0).content}")
     println(seperatorLine)
     println()
 
@@ -249,7 +272,7 @@ class LeapFrog(subJoins: SubJoin) extends Iterator[ArraySegment]{
     i = 0
     while(i < attrSize){
       if (unaryIterators(i) != null){
-        println(s"${i}-th iterators content:${unaryIterators(i).content}")
+//        println(s"${i}-th iterators content:${unaryIterators(i).content}")
       }
       i += 1
     }
@@ -257,22 +280,8 @@ class LeapFrog(subJoins: SubJoin) extends Iterator[ArraySegment]{
     println()
     //test leapfrog iterator
   }
-
-
 }
 
-class LeapFrogUnaryIterator(arrays:Array[ArraySegment]) extends Iterator[DataType]{
 
-  val content = Alg.leapfrogIntersection(arrays)
-  var idx = -1
-  var end = content.size
 
-  override def hasNext: Boolean = {
-    (idx+1) < end
-  }
 
-  override def next(): DataType = {
-    idx += 1
-    content(idx)
-  }
-}

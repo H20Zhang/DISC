@@ -4,11 +4,11 @@ import org.apache.spark.adj.hcube.{HCube, HCubeHelper, RelationPartitioner, Tupl
 import org.apache.spark.adj.plan.AttributeOrderInfo
 import org.apache.spark.adj.utlis.SparkSingle
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FunSuite}
-import utils.TestingData
+import utils.TestingSubJoins
 
 class HCubeTest extends FunSuite with BeforeAndAfterAll{
 
-  val hcubePlan = TestingData.testing_query1_hcubePlan
+  val hcubePlan = TestingSubJoins.testing_query1_hcubePlan
   val helper = new HCubeHelper(hcubePlan)
   val testingRelationID = 1
 

@@ -1,5 +1,7 @@
 package org.apache.spark.adj.leapfrog
 
+import org.apache.spark.adj.database.Database.DataType
+
 import scala.collection.mutable.ArrayBuffer
 
 object Alg {
@@ -68,10 +70,123 @@ object BSearch {
   }
 }
 
+
+object IntersectionIterator{
+  def leapfrogIt(arrays:Array[ArraySegment]):Iterator[DataType] =  {
+    //    check some preliminary conditions
+    if (arrays.size == 1){
+      return arrays(0).toIterator
+    }
+
+    var i = 0
+    while(i < arrays.size){
+      if (arrays(i).size == 0){
+        return Iterator.empty
+      }
+      i = i+1
+    }
+
+    new LeapFrogUnaryIterator(arrays)
+  }
+
+  def listIt(arrays:Array[ArraySegment]):Iterator[DataType] = new IntersectedListIterator(arrays)
+}
+
+class IntersectedListIterator(arrays:Array[ArraySegment]) extends Iterator[DataType]{
+
+  val content = Alg.leapfrogIntersection(arrays)
+  var idx = -1
+  var end = content.size
+
+  override def hasNext: Boolean = {
+    (idx+1) < end
+  }
+
+  override def next(): DataType = {
+    idx += 1
+    content(idx)
+  }
+}
+
+//TODO: debug
+class LeapFrogUnaryIterator(arrays:Array[ArraySegment]) extends Iterator[DataType]{
+
+  var value = Int.MaxValue
+  val numOfArrays = arrays.size
+  var maximalElement = Int.MinValue
+  var isEnd = false
+  var currentPosOfArrays = new Array[Int](numOfArrays)
+  var count = 0
+  var p = 0
+
+  init()
+
+  private def init() = {
+
+    //    find maximum element at the first position
+    var i = 0
+
+    while (i < numOfArrays){
+      val curVal = arrays(i)(0)
+      if (curVal > maximalElement){
+        maximalElement = curVal
+        p = (i + 1) % numOfArrays
+      }
+      i = i + 1
+    }
+    count = 1
+
+    //  init current position
+    while(i < numOfArrays){
+      currentPosOfArrays(i) = 0
+      i = i + 1
+    }
+  }
+
+  override def hasNext: Boolean = {
+
+    //    intersect the arrays
+    while(!isEnd){
+      val curArray = arrays(p)
+      val pos = Intersection.seek(curArray, maximalElement, currentPosOfArrays(p))
+      var curPos = pos
+
+      if (curPos < curArray.size) {
+        val curVal = curArray(curPos)
+
+        if (curVal == maximalElement) {
+
+          count += 1
+          if (count == numOfArrays) {
+            count = 1
+            value = maximalElement
+            return isEnd
+          }
+        } else {
+          count = 1
+          maximalElement = curVal
+        }
+      } else {
+        isEnd = true
+      }
+
+      currentPosOfArrays(p) = curPos
+      p = (p + 1) % numOfArrays
+    }
+
+
+    !isEnd
+  }
+
+  override def next(): DataType = {
+    value
+  }
+}
+
 object Intersection {
   //  find the position i where array(i) >= value and i is the minimal value
   //  noted: the input array should be sorted
-  private def seek(array: ArraySegment, value: Int, _left:Int): Int = {
+  def seek(array: ArraySegment, value: Int, _left:Int): Int = {
     var left: Int = _left;
     var right: Int = array.size;
 
@@ -152,8 +267,6 @@ object Intersection {
 
         if (curVal == maximalElement) {
 
-//          println(s"curVal:${curVal}, maximalElement:${curVal}, pos:${pos}, array:${p}, count:${count}")
-
           count += 1
           if (count == numOfArrays) {
             count = 1
@@ -180,6 +293,8 @@ object Intersection {
 
     ArraySegment(buffer.toArray)
   }
+
+
 
   def binaryMergeLikeIntersection(leftArray:ArraySegment, rightArray:ArraySegment):ArraySegment ={
 
@@ -211,7 +326,11 @@ object Intersection {
   }
 
   def mergeLikeIntersection(arrays:Array[ArraySegment]):ArraySegment ={
-    assert(arrays.size > 1)
+
+    if (arrays.size == 1){
+      return arrays(0)
+    }
+//    assert(arrays.size > 1)
 
     val sortedArray = arrays.map(f => (f,f.size)).sortBy(_._2).map(_._1)
 

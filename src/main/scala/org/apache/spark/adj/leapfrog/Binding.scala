@@ -25,17 +25,8 @@ class Binding {
 
 case class ArraySegment(array:Array[DataType], var begin:Int, var end:Int, var size:Int){
 
-//  private var _begin =  begin
-//  private var _end = end
-//  private var _size = _end - _begin
-
-//  def size = _size
 
   def apply(i:Int) = {
-
-//    assert((begin+i) < end)
-
-
     array(begin + i)
   }
 
@@ -45,7 +36,6 @@ case class ArraySegment(array:Array[DataType], var begin:Int, var end:Int, var s
 
   def slice(newBegin:Int, newEnd:Int): ArraySegment ={
     assert((newEnd + begin) < end)
-
 
     begin = begin + newBegin
     end = begin + newEnd
@@ -75,6 +65,14 @@ case class ArraySegment(array:Array[DataType], var begin:Int, var end:Int, var s
 
       buffer.toArray
     }
+  }
+
+  def toIterator = new Iterator[DataType] {
+    var pos = begin
+
+    override def hasNext: Boolean = pos < end
+
+    override def next(): DataType = array(pos)
   }
 
 
