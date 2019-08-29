@@ -6,35 +6,37 @@ import scala.collection.mutable.ArrayBuffer
 
 class Binding {
 
-  val array:Array[DataType] = null
-  var end:Int = 0
+  val array: Array[DataType] = null
+  var end: Int = 0
 
-  def partialBinding(i:Int) ={
+  def partialBinding(i: Int) = {
     end = 0
     this
   }
 
-  def setPos(i:Int, value:DataType) = {
+  def setPos(i: Int, value: DataType) = {
     array(i) = value
   }
 
-  def getPos(i:Int) = {
+  def getPos(i: Int) = {
     array(i)
   }
 }
 
-case class ArraySegment(array:Array[DataType], var begin:Int, var end:Int, var size:Int){
+case class ArraySegment(array: Array[DataType],
+                        var begin: Int,
+                        var end: Int,
+                        var size: Int) {
 
-
-  def apply(i:Int) = {
+  def apply(i: Int) = {
     array(begin + i)
   }
 
-  def update(i:Int, value:DataType) = {
+  def update(i: Int, value: DataType) = {
     array(begin + i) = value
   }
 
-  def slice(newBegin:Int, newEnd:Int): ArraySegment ={
+  def slice(newBegin: Int, newEnd: Int): ArraySegment = {
     assert((newEnd + begin) < end)
 
     begin = begin + newBegin
@@ -44,7 +46,7 @@ case class ArraySegment(array:Array[DataType], var begin:Int, var end:Int, var s
     this
   }
 
-  def adjust(newBegin:Int, newEnd:Int):ArraySegment = {
+  def adjust(newBegin: Int, newEnd: Int): ArraySegment = {
     begin = newBegin
     end = newEnd
     size = end - begin
@@ -53,12 +55,12 @@ case class ArraySegment(array:Array[DataType], var begin:Int, var end:Int, var s
   }
 
   def toArray() = {
-    if (begin == 0 && size == array.size){
+    if (begin == 0 && size == array.size) {
       array
     } else {
       val buffer = ArrayBuffer[Int]()
       var i = begin
-      while (i < end){
+      while (i < end) {
         buffer += array(i)
         i += 1
       }
@@ -72,14 +74,17 @@ case class ArraySegment(array:Array[DataType], var begin:Int, var end:Int, var s
 
     override def hasNext: Boolean = pos < end
 
-    override def next(): DataType = array(pos)
+    override def next(): DataType = {
+      val curPos = pos
+      pos += 1
+      array(curPos)
+    }
   }
-
 
   override def toString: String = {
     val stringBuilder = new StringBuilder()
     var i = begin
-    while (i < end){
+    while (i < end) {
       stringBuilder.append(s"${array(i)}, ")
       i += 1
     }
@@ -87,13 +92,11 @@ case class ArraySegment(array:Array[DataType], var begin:Int, var end:Int, var s
     stringBuilder.dropRight(2).toString()
   }
 
-
 }
-
 
 object ArraySegment {
   def emptyArray() = ArraySegment(Array.emptyIntArray, 0, 0, 0)
-  def apply(array:Array[DataType]):ArraySegment = {
+  def apply(array: Array[DataType]): ArraySegment = {
     ArraySegment(array, 0, array.size, array.size)
   }
 }

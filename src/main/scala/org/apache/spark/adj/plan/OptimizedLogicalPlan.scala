@@ -16,12 +16,13 @@ import org.apache.spark.adj.optimization.utils.Statistic
 //  def optimize() = ???
 //}
 
-case class UnOptimizedHCubeJoin(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
+case class UnOptimizedHCubeJoin(childrenOps: Seq[LogicalPlan])
+    extends LogicalPlan {
   val schemas = childrenOps.map(_.info())
   val attrIDs = schemas.flatMap(_.attrIDs).distinct
 
-  var share:Map[AttributeID, Int] = attrIDs.map(id => (id, 2)).toMap
-  var attrOrder:Array[AttributeID] = attrIDs.toArray
+  var share: Map[AttributeID, Int] = attrIDs.map(id => (id, defaultShare)).toMap
+  var attrOrder: Array[AttributeID] = attrIDs.toArray
 
   override def phyiscalPlan(): PhysicalPlan = {
     HCubeLeapJoinExec(getChildren().map(_.phyiscalPlan()), share, attrOrder)
@@ -38,27 +39,29 @@ case class UnOptimizedHCubeJoin(childrenOps: Seq[LogicalPlan]) extends LogicalPl
   override def getChildren(): Seq[LogicalPlan] = childrenOps
 }
 
-
 //TODO: debug this class and all the class involved in this class
-case class OptimizedHCubeJoin(childrenOps: Seq[LogicalPlan], task:Int = 4) extends LogicalPlan {
+case class OptimizedHCubeJoin(childrenOps: Seq[LogicalPlan], task: Int = 4)
+    extends LogicalPlan {
 
   val schemas = childrenOps.map(_.info())
   val attrIDs = schemas.flatMap(_.attrIDs).distinct
 
-  var share:Map[AttributeID, Int] = Map()
-  var attrOrder:Array[AttributeID] = Array()
+  var share: Map[AttributeID, Int] = Map()
+  var attrOrder: Array[AttributeID] = Array()
   val statistic = Statistic.defaultStatistic()
 
   init()
 
   def init() = {
     val inputSchema = childrenOps.map(_.info()).zipWithIndex
-    val statisticNotCollectedSchema = inputSchema.filter{
+    val statisticNotCollectedSchema = inputSchema.filter {
       case (schema, index) =>
         statistic.get(schema).isEmpty
     }
 
-    val relations = statisticNotCollectedSchema.map(f => childrenOps(f._2)).map(_.phyiscalPlan().execute())
+    val relations = statisticNotCollectedSchema
+      .map(f => childrenOps(f._2))
+      .map(_.phyiscalPlan().execute())
     relations.foreach(statistic.add)
 
     val orderComputer = new OrderComputer(schemas)
@@ -83,12 +86,12 @@ case class OptimizedHCubeJoin(childrenOps: Seq[LogicalPlan], task:Int = 4) exten
   override def getChildren(): Seq[LogicalPlan] = childrenOps
 }
 
-case class DiskScan(name:String) extends LogicalPlan {
+case class DiskScan(schema: RelationSchema) extends LogicalPlan {
   override def phyiscalPlan(): PhysicalPlan = {
-    val id = db.getRelationID(name)
+    val id = schema.id.get
     val diskData = db.getDiskStore(id)
 
-    DiskScanExec(name, diskData.get)
+    DiskScanExec(schema, diskData.get)
   }
 
   override def optimizedPlan(): LogicalPlan = {
@@ -96,19 +99,19 @@ case class DiskScan(name:String) extends LogicalPlan {
   }
 
   override def info(): RelationSchema = {
-    db.getSchema(name)
+    schema
   }
 
   override def getChildren(): Seq[LogicalPlan] = Seq()
 }
 
-case class InMemoryScan(name:String) extends LogicalPlan {
+case class InMemoryScan(schema: RelationSchema) extends LogicalPlan {
 
   override def phyiscalPlan(): PhysicalPlan = {
-    val id = db.getRelationID(name)
+    val id = schema.id.get
     val memoryData = db.getMemoryStore(id)
 
-    InMemoryScanExec(name, memoryData.get)
+    InMemoryScanExec(schema, memoryData.get)
   }
 
   override def optimizedPlan(): LogicalPlan = {
@@ -116,8 +119,58 @@ case class InMemoryScan(name:String) extends LogicalPlan {
   }
 
   override def info(): RelationSchema = {
-    db.getSchema(name)
+    schema
   }
 
   override def getChildren(): Seq[LogicalPlan] = Seq()
+}
+
+//TODO: finish this
+case class OptimizedHCubeFactorizedJoin(childrenOps: Seq[LogicalPlan],
+                                        task: Int = 4)
+    extends LogicalPlan {
+  override def optimizedPlan(): LogicalPlan = ???
+
+  override def phyiscalPlan(): PhysicalPlan = ???
+
+  override def info(): RelationSchema = ???
+
+  override def getChildren(): Seq[LogicalPlan] = ???
+}
+
+//TODO: finish this
+case class OptimizedHCubeCachedJoin(childrenOps: Seq[LogicalPlan],
+                                    task: Int = 4)
+    extends LogicalPlan {
+  override def optimizedPlan(): LogicalPlan = ???
+
+  override def phyiscalPlan(): PhysicalPlan = ???
+
+  override def info(): RelationSchema = ???
+
+  override def getChildren(): Seq[LogicalPlan] = ???
+}
+
+//TODO: finish this
+case class OptimizedHCubeGHDJoin(childrenOps: Seq[LogicalPlan], task: Int = 4)
+    extends LogicalPlan {
+  override def optimizedPlan(): LogicalPlan = ???
+
+  override def phyiscalPlan(): PhysicalPlan = ???
+
+  override def info(): RelationSchema = ???
+
+  override def getChildren(): Seq[LogicalPlan] = ???
+}
+
+//TODO: finish this
+case class OptimizedAdaptiveJoin(childrenOps: Seq[LogicalPlan], task: Int = 4)
+    extends LogicalPlan {
+  override def optimizedPlan(): LogicalPlan = ???
+
+  override def phyiscalPlan(): PhysicalPlan = ???
+
+  override def info(): RelationSchema = ???
+
+  override def getChildren(): Seq[LogicalPlan] = ???
 }

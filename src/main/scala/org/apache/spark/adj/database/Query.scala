@@ -5,12 +5,12 @@ import org.apache.spark.adj.plan.Join
 
 object Query {
 
-  def simpleDml(dml:String) = {
+  def simpleDml(dml: String) = {
     val parser = new SimpleParser()
     parser.parseDml(dml)
   }
 
-  def countQuery(dml:String) = {
+  def countQuery(dml: String) = {
     val parser = new SimpleParser()
     parser.parseDml(dml)
 
@@ -28,9 +28,8 @@ object Query {
     //execute physical plan
     val outputSize = phyiscalPlan.count()
     println(s"output relation size:${outputSize}")
+
+    outputSize
   }
 
-
-
 }
-

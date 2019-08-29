@@ -4,8 +4,7 @@ import org.apache.spark.adj.database.{Relation, RelationSchema}
 import org.apache.spark.adj.hcube.{HCubePlan, TupleHCubeBlock}
 import org.apache.spark.adj.plan.{AttributeOrderInfo, SubJoin}
 import org.apache.spark.adj.utils.SparkSingle
-
-
+@deprecated
 object TestingSubJoins {
 
   lazy val sc = SparkSingle.getSparkContext()
@@ -34,8 +33,10 @@ object TestingSubJoins {
 
     val cardinality = 1000
     val query_schema = testing_query1_schema
-    val contents =  query_schema.map(r => ContentGenerator.genIdentityContent(cardinality, r.attrs.size))
-    val blocks = contents.zip(query_schema).map{
+    val contents = query_schema.map(
+      r => ContentGenerator.genIdentityContent(cardinality, r.attrs.size)
+    )
+    val blocks = contents.zip(query_schema).map {
       case (content, r) =>
         TupleHCubeBlock(r, null, content)
     }
@@ -53,8 +54,9 @@ object TestingSubJoins {
 //    genGraphContent()
     val query_schema = testing_query2_schema
     val dataName = "wikiV"
-    val contents =  query_schema.map(r => ContentGenerator.loadGraphContent(dataName))
-    val blocks = contents.zip(query_schema).map{
+    val contents =
+      query_schema.map(r => ContentGenerator.loadGraphContent(dataName))
+    val blocks = contents.zip(query_schema).map {
       case (content, r) =>
         TupleHCubeBlock(r, null, content)
     }
@@ -62,25 +64,26 @@ object TestingSubJoins {
     val attrOrder = query_schema.flatMap(_.attrIDs).distinct.toArray
     val notImportantShare = Array(1, 2, 3, 4, 5)
 
-
     new SubJoin(notImportantShare, blocks, AttributeOrderInfo(attrOrder))
   }
-
 
   lazy val testing_query1_hcubePlan = {
     val cardinality = 100
     val query_schema = testing_query1_schema
-    val share = Map(
-      (0, 1),
-      (1, 2),
-      (2, 3),
-      (3, 4),
-      (4, 5)
-    )
+    val share = Map((0, 1), (1, 2), (2, 3), (3, 4), (4, 5))
 
-    val R0_content =  sc.parallelize(ContentGenerator.genRandomContent(cardinality, query_schema(0).attrIDs.size))
-    val R1_content =  sc.parallelize(ContentGenerator.genRandomContent(cardinality, query_schema(1).attrIDs.size))
-    val R2_content =  sc.parallelize(ContentGenerator.genRandomContent(cardinality, query_schema(2).attrIDs.size))
+    val R0_content = sc.parallelize(
+      ContentGenerator
+        .genRandomContent(cardinality, query_schema(0).attrIDs.size)
+    )
+    val R1_content = sc.parallelize(
+      ContentGenerator
+        .genRandomContent(cardinality, query_schema(1).attrIDs.size)
+    )
+    val R2_content = sc.parallelize(
+      ContentGenerator
+        .genRandomContent(cardinality, query_schema(2).attrIDs.size)
+    )
 
     val R0 = Relation(query_schema(0), R0_content)
     val R1 = Relation(query_schema(1), R1_content)
@@ -91,6 +94,4 @@ object TestingSubJoins {
     HCubePlan(relations, share)
   }
 
-
 }
-

@@ -1,5 +1,4 @@
 package org.apache.spark.adj.leapfrog
 
-class FactorizedLeapFrog {
-
-}
+//TODO: finish this
+class GHDJoin {}

@@ -1,45 +1,47 @@
 package org.apache.spark.adj.plan
 
-import org.apache.spark.adj.database.Catalog.{Attribute, AttributeID}
+import org.apache.spark.adj.database.Catalog.{
+  Attribute,
+  AttributeID,
+  RelationID
+}
 import org.apache.spark.adj.database.{Catalog, Relation, RelationSchema}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.DataType
 
 trait LogicalPlan extends Serializable {
   var defaultTasks = 224
+  val defaultShare = 2
 
   val db = Catalog.defaultCatalog()
 
-  def optimizedPlan():LogicalPlan
-  def phyiscalPlan():PhysicalPlan
-  def info():RelationSchema
-  def getChildren():Seq[LogicalPlan]
+  def optimizedPlan(): LogicalPlan
+  def phyiscalPlan(): PhysicalPlan
+  def info(): RelationSchema
+  def getChildren(): Seq[LogicalPlan]
 }
 
-
-
-case class Scan(name: String) extends LogicalPlan {
+case class Scan(schema: RelationSchema) extends LogicalPlan {
   override def getChildren(): Seq[LogicalPlan] = {
     Seq[LogicalPlan]()
   }
 
   override def optimizedPlan(): LogicalPlan = {
-    val id = db.getRelationID(name)
-    val memoryData = db.getMemoryStore(id)
-    val diskData = db.getDiskStore(id)
+    val memoryData = db.getMemoryStore(schema.id.get)
+    val diskData = db.getDiskStore(schema.id.get)
 
-    if (memoryData.isDefined){
-      return new InMemoryScan(name)
+    if (memoryData.isDefined) {
+      return InMemoryScan(schema)
     }
 
-    if (diskData.isDefined){
-      return new DiskScan(name)
+    if (diskData.isDefined) {
+      return DiskScan(schema)
     }
 
-    throw new Exception(s"no data found for Relation:${name}")
+    throw new Exception(s"no data found for Relation:$schema")
   }
 
-  override def info(): RelationSchema = db.getSchema(name)
+  override def info(): RelationSchema = schema
 
   override def phyiscalPlan(): PhysicalPlan = {
     throw new Exception("not supported")
@@ -52,14 +54,14 @@ case class Join(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
   val attrIDs = schemas.flatMap(_.attrIDs).distinct
 
   def optimizedPlan(): LogicalPlan = {
-    new UnOptimizedHCubeJoin(childrenOps.map(_.optimizedPlan()))
+    UnOptimizedHCubeJoin(childrenOps.map(_.optimizedPlan()))
   }
 
-  def getSchema():Seq[RelationSchema] = {
+  def getSchema(): Seq[RelationSchema] = {
     schemas
   }
 
-  def getAttributes():Seq[Attribute] = {
+  def getAttributes(): Seq[Attribute] = {
     getSchema().flatMap(_.attrs).distinct
   }
 
@@ -73,10 +75,3 @@ case class Join(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
     throw new Exception("not supported")
   }
 }
-
-
-
-
-
-
-
