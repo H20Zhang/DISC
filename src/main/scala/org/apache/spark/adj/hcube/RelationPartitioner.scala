@@ -1,8 +1,8 @@
 package org.apache.spark.adj.hcube
 
-import org.apache.spark.adj.database.Database.DataType
+import org.apache.spark.adj.database.Catalog.DataType
 import org.apache.spark.adj.database.{Relation, RelationSchema}
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable.ArrayBuffer
@@ -30,7 +30,9 @@ class RelationPartitioner(relation:Relation, helper: HCubeHelper) {
       it =>
         var shareVector:Array[DataType] = null
         val content = it.toArray
-        val array = new Array[Array[DataType]](content.size)
+        val array = new Array[Array[DataType]](content.size - 1)
+
+
 
         var i = 0
         content.foreach{
@@ -42,6 +44,8 @@ class RelationPartitioner(relation:Relation, helper: HCubeHelper) {
               i += 1
             }
         }
+
+//        println(s"schema:${schema}, share:${shareVector.toSeq}, content:${array.toSeq}")
 
         Iterator(TupleHCubeBlock(schema, shareVector, array))
     }

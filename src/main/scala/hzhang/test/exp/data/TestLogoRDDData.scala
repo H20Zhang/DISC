@@ -1,7 +1,7 @@
 package hzhang.test.exp.data
 
 import org.apache.spark.adj.deprecated.execution.rdd.maker.SimpleRowLogoRDDMaker
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 import org.apache.spark.rdd.RDD
 
 

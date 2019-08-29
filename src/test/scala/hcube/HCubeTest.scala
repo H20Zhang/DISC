@@ -2,9 +2,9 @@ package hcube
 
 import org.apache.spark.adj.hcube.{HCube, HCubeHelper, RelationPartitioner, TupleHCubeBlock}
 import org.apache.spark.adj.plan.AttributeOrderInfo
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.utils.testing.TestingSubJoins
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FunSuite}
-import utils.TestingSubJoins
 
 class HCubeTest extends FunSuite with BeforeAndAfterAll{
 

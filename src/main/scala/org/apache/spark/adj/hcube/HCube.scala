@@ -1,11 +1,11 @@
 package org.apache.spark.adj.hcube
 
-import org.apache.spark.adj.database.Database.{AttributeID, RelationID}
+import org.apache.spark.adj.database.Catalog.{AttributeID, RelationID}
 import org.apache.spark.adj.database.Relation
-import org.apache.spark.adj.plan.{TaskInfo}
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.plan.TaskInfo
+import org.apache.spark.adj.utils.SparkSingle
 
-
+//TODO:debug
 class HCube(query:HCubePlan, info:TaskInfo) {
 
   private val helper = new HCubeHelper(query)

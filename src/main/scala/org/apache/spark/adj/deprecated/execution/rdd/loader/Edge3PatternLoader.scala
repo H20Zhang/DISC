@@ -2,8 +2,8 @@ package org.apache.spark.adj.deprecated.execution.rdd.loader
 
 import org.apache.spark.adj.deprecated.execution.rdd._
 import org.apache.spark.adj.deprecated.execution.rdd.maker.CompactRow3LogoRDDMaker
-import org.apache.spark.adj.utlis.SparkSingle
 import org.apache.spark.adj.deprecated.plan.deprecated.PhysicalPlan.LogoCompactEdgePhysicalPlan
+import org.apache.spark.adj.utils.SparkSingle
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
 

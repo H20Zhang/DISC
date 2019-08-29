@@ -15,6 +15,10 @@ libraryDependencies += "org.apache.spark" %% "spark-mllib" % "2.2.0" % "provided
 libraryDependencies += "com.joptimizer" % "joptimizer" % "4.0.0" % "provided"
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.3" % "test"
 libraryDependencies += "net.sf.trove4j" % "trove4j" % "3.0.3" % "provided"
+// https://mvnrepository.com/artifact/com.h2database/h2
+libraryDependencies += "com.h2database" % "h2" % "1.4.199" % Test
+
+libraryDependencies += "com.typesafe" % "config" % "1.3.4"
 
 
 

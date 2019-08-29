@@ -1,6 +1,6 @@
 package deprecated.Underlying
 
-import org.apache.spark.adj.utlis._
+import org.apache.spark.adj.deprecated.utlis._
 import org.scalatest.FunSuite
 
 class UtilsTest extends FunSuite{

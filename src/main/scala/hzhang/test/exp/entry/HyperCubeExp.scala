@@ -1,7 +1,7 @@
 package hzhang.test.exp.entry
 
 import hzhang.test.exp.utils.HyberCubeGJPattern
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 
 object HyperCubeExp {
 

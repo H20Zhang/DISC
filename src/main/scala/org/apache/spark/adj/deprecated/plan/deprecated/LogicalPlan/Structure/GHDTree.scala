@@ -1,6 +1,6 @@
 package org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Structure
 
-import org.apache.spark.adj.utlis.ImmutableGraph
+import org.apache.spark.adj.deprecated.utlis.ImmutableGraph
 
 import scala.collection.mutable.ArrayBuffer
 

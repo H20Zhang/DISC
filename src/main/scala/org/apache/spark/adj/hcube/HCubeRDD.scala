@@ -2,7 +2,7 @@ package org.apache.spark.adj.hcube
 
 import java.io.{IOException, ObjectOutputStream}
 
-import org.apache.spark.adj.database.Database.AttributeID
+import org.apache.spark.adj.database.Catalog.AttributeID
 import org.apache.spark.{OneToOneDependency, Partition, Partitioner, SparkContext, SparkEnv, TaskContext}
 import org.apache.spark.adj.plan.{SubJoin, SubTask, TaskInfo}
 import org.apache.spark.rdd.RDD

@@ -1,7 +1,7 @@
 package org.apache.spark.adj.hcube
 
-import org.apache.spark.adj.database.Database.{Attribute, AttributeID, DataType, RelationID}
-import org.apache.spark.adj.plan.{NaturalJoin, TaskInfo}
+import org.apache.spark.adj.database.Catalog.{Attribute, AttributeID, DataType, RelationID}
+import org.apache.spark.adj.plan.{Join, TaskInfo}
 import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable.ArrayBuffer

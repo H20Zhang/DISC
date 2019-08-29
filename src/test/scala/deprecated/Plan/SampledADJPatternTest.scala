@@ -2,7 +2,7 @@ package deprecated.Plan
 
 
 import hzhang.test.exp.utils.{ADJPattern, ExamplePatternSampler}
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class SampledADJPatternTest extends FunSuite with BeforeAndAfterAll{

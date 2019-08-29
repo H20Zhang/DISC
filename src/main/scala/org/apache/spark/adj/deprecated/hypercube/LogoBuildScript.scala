@@ -1,7 +1,7 @@
 package org.apache.spark.adj.deprecated.hypercube
 
 import org.apache.spark.adj.deprecated.execution.rdd.{LogoBlockRef, _}
-import org.apache.spark.adj.utlis.ListGenerator
+import org.apache.spark.adj.deprecated.utlis.ListGenerator
 import org.apache.spark.SparkContext
 
 

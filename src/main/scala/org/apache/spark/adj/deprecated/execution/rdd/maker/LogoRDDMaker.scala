@@ -1,7 +1,7 @@
 package org.apache.spark.adj.deprecated.execution.rdd.maker
 
 import org.apache.spark.adj.deprecated.execution.rdd._
-import org.apache.spark.adj.utlis.{CompositeParitioner, ListGenerator}
+import org.apache.spark.adj.deprecated.utlis.{CompositeParitioner, ListGenerator}
 import org.apache.spark.rdd.RDD
 
 import scala.reflect.ClassTag

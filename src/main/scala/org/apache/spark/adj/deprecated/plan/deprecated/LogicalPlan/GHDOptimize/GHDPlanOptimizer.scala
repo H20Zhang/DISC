@@ -2,7 +2,7 @@ package org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.GHDOptimize
 
 import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Structure.{Configuration, GHDPlan, GHDTree, RelationSchema}
 import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Utility.InformationSampler
-import org.apache.spark.adj.utlis.ListGenerator
+import org.apache.spark.adj.deprecated.utlis.ListGenerator
 
 class GHDPlanOptimizer(val tree:GHDTree, val informationSampler1: InformationSampler = null) {
 

@@ -2,7 +2,7 @@ package hzhang.test.exp.entry
 
 import hzhang.test.exp.utils.ADJPattern
 import hzhang.test.exp.utils.{ADJPattern, RunForLoop}
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 
 object ADJExp {
 

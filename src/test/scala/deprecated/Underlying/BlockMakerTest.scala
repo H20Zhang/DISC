@@ -2,7 +2,7 @@ package deprecated.Underlying
 
 import org.apache.spark.adj.deprecated.execution.rdd.maker.{PartitionerMaker, rowBlockGenerator}
 import org.apache.spark.adj.deprecated.execution.rdd.{KeyMapping, LogoSchema}
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class BlockMakerTest extends FunSuite with BeforeAndAfterAll{

@@ -1,6 +1,6 @@
 package deprecated.Underlying
 
-import org.apache.spark.adj.utlis.ImmutableGraph
+import org.apache.spark.adj.deprecated.utlis.ImmutableGraph
 import org.scalatest.FunSuite
 
 class ImmutableGraphTest extends FunSuite{

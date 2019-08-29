@@ -1,7 +1,7 @@
 package deprecated.Underlying
 
 import org.apache.spark.adj.deprecated.execution.rdd._
-import org.apache.spark.adj.utlis.TestUtil
+import org.apache.spark.adj.deprecated.utlis.TestUtil
 import org.scalatest.FunSuite
 
 class BaseStructureTest extends FunSuite{

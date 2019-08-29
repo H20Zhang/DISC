@@ -4,7 +4,8 @@ import hzhang.test.exp.data.TestLogoRDDData
 import org.apache.spark.adj.deprecated.execution.catalog.Catalog
 import org.apache.spark.adj.deprecated.hypercube.{LogoBuildPhyiscalStep, SnapPoint}
 import org.apache.spark.adj.deprecated.execution.rdd._
-import org.apache.spark.adj.utlis.{SparkSingle, TestUtil}
+import org.apache.spark.adj.deprecated.utlis.TestUtil
+import org.apache.spark.adj.utils.SparkSingle
 import org.apache.spark.rdd.RDD
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 

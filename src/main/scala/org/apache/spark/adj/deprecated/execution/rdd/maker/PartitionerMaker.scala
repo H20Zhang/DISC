@@ -1,7 +1,7 @@
 package org.apache.spark.adj.deprecated.execution.rdd.maker
 
 import org.apache.spark.adj.deprecated.execution.rdd.KeyMapping
-import org.apache.spark.adj.utlis.{CompositeParitioner, SlotPartitioner}
+import org.apache.spark.adj.deprecated.utlis.{CompositeParitioner, SlotPartitioner}
 
 
 //Generate the CompositePartitioner

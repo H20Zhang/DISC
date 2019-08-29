@@ -3,7 +3,7 @@ package org.apache.spark.adj.deprecated.execution.rdd
 import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.{Kryo, KryoSerializable}
 import gnu.trove.list.array.TIntArrayList
-import org.apache.spark.adj.utlis.ListGenerator
+import org.apache.spark.adj.deprecated.utlis.ListGenerator
 
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag

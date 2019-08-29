@@ -1,22 +1,25 @@
 package database
 
-import org.apache.spark.adj.database.RelationSchema
-import org.apache.spark.adj.utlis.SparkSingle
-import org.scalatest.FunSuite
+import org.apache.spark.adj.database.{DataLoader, Relation, RelationSchema}
+import org.apache.spark.adj.utils.SparkSingle
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class RelationTest extends FunSuite{
+class RelationTest extends FunSuite with BeforeAndAfterAll{
 
-  test("basic operation"){
-    val dataAdress = "./examples/wikiV.txt"
-    val name = "test"
-    val attrs = Seq("a", "b")
+  val dataAdress = "./examples/wikiV.txt"
+  var relations = Seq[Relation]()
 
-    val relation1 = RelationSchema(name, attrs)
+  test("loading"){
+    val name2 = "R2"
+    val attrs2 = Seq("b", "c")
+    val loader = new DataLoader()
+    val relation2 = Relation(RelationSchema(name2, attrs2), loader.csv(dataAdress))
 
-
-    println(s"element of relation-${name} is ${relation1.load(dataAdress).content.count()}")
-
-    SparkSingle.close()
+    relations = Seq(relation2, relation2)
   }
 
+
+  override protected def afterAll(): Unit = {
+    SparkSingle.close()
+  }
 }

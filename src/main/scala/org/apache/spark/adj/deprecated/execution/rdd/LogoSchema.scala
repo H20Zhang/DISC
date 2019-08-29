@@ -3,7 +3,7 @@ package org.apache.spark.adj.deprecated.execution.rdd
 
 import org.apache.spark.adj.deprecated.hypercube.{BlockBlockJoints, SnapPoint}
 import org.apache.spark.adj.deprecated.execution.rdd.maker.PartitionerMaker
-import org.apache.spark.adj.utlis._
+import org.apache.spark.adj.deprecated.utlis._
 
 sealed trait LogoColType
 

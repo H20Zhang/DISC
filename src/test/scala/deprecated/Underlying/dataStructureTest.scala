@@ -1,7 +1,7 @@
 package deprecated.Underlying
 
 import org.apache.spark.adj.deprecated.execution.rdd._
-import org.apache.spark.adj.utlis.{CompositeParitioner, SlotPartitioner, TestUtil}
+import org.apache.spark.adj.deprecated.utlis.{CompositeParitioner, SlotPartitioner, TestUtil}
 import org.scalatest.FunSuite
 
 class dataStructureTest extends FunSuite {

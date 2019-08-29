@@ -1,6 +1,6 @@
 package deprecated
 
-import org.apache.spark.adj.utlis.TestUtil
+import org.apache.spark.adj.deprecated.utlis.TestUtil
 import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Structure.{Relation, RelationSchema}
 import org.scalatest.FunSuite
 

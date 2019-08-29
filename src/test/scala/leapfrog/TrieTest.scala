@@ -1,8 +1,8 @@
 package leapfrog
 
 import org.apache.spark.adj.leapfrog.{ArraySegment, ArrayTrie}
+import org.apache.spark.adj.utils.testing.TestingHelper
 import org.scalatest.FunSuite
-import utils.{TestingSubJoins, TestingHelper}
 
 import scala.util.Random
 

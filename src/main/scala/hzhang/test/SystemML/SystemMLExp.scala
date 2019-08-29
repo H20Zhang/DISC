@@ -2,7 +2,7 @@ package hzhang.test.SystemML
 
 import org.apache
 import org.apache.spark
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 import org.apache.sysml.api.mlcontext._
 import org.apache.sysml.api.mlcontext.ScriptFactory._
 import org.apache.sysml.api.mlcontext.{MLContext, MatrixMetadata}
@@ -213,7 +213,7 @@ if (s1 > s2) {
   message = "s1 and s2 are equal"
 }
 """
-    scala.tools.nsc.io.File("sums.dml").writeAll(sums)
+//    scala.tools.nsc.io.File("sums.dml").writeAll(sums)
     val sumScript = dmlFromFile("sums.dml").in(Map("m1"-> rdd1, "m2"-> rdd2)).out("s1", "s2", "message")
     val sumResults = ml.execute(sumScript)
     val s1 = sumResults.getDouble("s1")

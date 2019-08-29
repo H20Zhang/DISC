@@ -1,73 +1,80 @@
 package org.apache.spark.adj.plan
 
-import org.apache.spark.adj.database.Database.{Attribute, AttributeID}
-import org.apache.spark.adj.database.{Relation, RelationSchema, Statistic}
-import org.apache.spark.adj.optimization.ShareOptimizer
+import org.apache.spark.adj.database.Catalog.{Attribute, AttributeID}
+import org.apache.spark.adj.database.{Catalog, Relation, RelationSchema}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.DataType
 
 trait LogicalPlan extends Serializable {
-
   var defaultTasks = 224
 
-  def getRelations():Seq[Relation]
+  val db = Catalog.defaultCatalog()
+
+  def optimizedPlan():LogicalPlan
+  def phyiscalPlan():PhysicalPlan
+  def info():RelationSchema
+  def getChildren():Seq[LogicalPlan]
+}
+
+
+
+case class Scan(name: String) extends LogicalPlan {
+  override def getChildren(): Seq[LogicalPlan] = {
+    Seq[LogicalPlan]()
+  }
+
+  override def optimizedPlan(): LogicalPlan = {
+    val id = db.getRelationID(name)
+    val memoryData = db.getMemoryStore(id)
+    val diskData = db.getDiskStore(id)
+
+    if (memoryData.isDefined){
+      return new InMemoryScan(name)
+    }
+
+    if (diskData.isDefined){
+      return new DiskScan(name)
+    }
+
+    throw new Exception(s"no data found for Relation:${name}")
+  }
+
+  override def info(): RelationSchema = db.getSchema(name)
+
+  override def phyiscalPlan(): PhysicalPlan = {
+    throw new Exception("not supported")
+  }
+}
+
+case class Join(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
+
+  val schemas = childrenOps.map(_.info())
+  val attrIDs = schemas.flatMap(_.attrIDs).distinct
+
+  def optimizedPlan(): LogicalPlan = {
+    new UnOptimizedHCubeJoin(childrenOps.map(_.optimizedPlan()))
+  }
 
   def getSchema():Seq[RelationSchema] = {
-    getRelations().map(_.schema)
+    schemas
   }
 
   def getAttributes():Seq[Attribute] = {
     getSchema().flatMap(_.attrs).distinct
   }
 
-  def physicalPlan():PhysicalPlan
-  def optimizedLogicalPlan():OptimizedLogicalPlan
-  def execute():RDD[Array[DataType]]
-}
+  override def getChildren(): Seq[LogicalPlan] = childrenOps
 
-trait OptimizedLogicalPlan extends LogicalPlan {
-  val statistic = new Statistic
-
-  def getCardinalities():Map[RelationSchema, Long] = ???
-  def getDegrees() = ???
-  def optimize() = ???
-}
-
-class NaturalJoin(_relations:Seq[Relation]) extends LogicalPlan {
-
-  val relations = _relations
-  val schema = _relations.map(_.schema)
-  val attrIDs = schema.flatMap(_.attrIDs).distinct
-
-  def execute() = ???
-
-  def physicalPlan() = {
-    new LeapFrogPlan(this, defaultTasks)
+  override def info(): RelationSchema = {
+    RelationSchema("joinResult", attrIDs.map(db.getAttribute))
   }
 
-  def optimizedLogicalPlan() = ???
-
-  override def getRelations(): Seq[Relation] = {
-    relations
+  override def phyiscalPlan(): PhysicalPlan = {
+    throw new Exception("not supported")
   }
 }
 
-object NaturalJoin {
 
-  def apply(relations:Seq[Relation]) = {
-    new NaturalJoin(relations)
-  }
-}
-
-class OptimizedNaturalJoin(_relations:Seq[Relation]) extends NaturalJoin(_relations) with OptimizedLogicalPlan {
-  var share:Map[AttributeID, Int] = _
-  var attrOrder:Array[AttributeID] = _
-
-  def optimizeOrder() = ???
-  def optimizeShare() = ???
-
-  override def optimize()= ???
-}
 
 
 

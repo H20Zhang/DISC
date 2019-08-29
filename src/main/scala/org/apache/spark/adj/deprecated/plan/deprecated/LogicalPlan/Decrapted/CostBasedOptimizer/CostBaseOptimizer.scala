@@ -1,7 +1,7 @@
 package org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Decrapted.CostBasedOptimizer
 
 import hzhang.test.exp.utils.ExamplePatternSampler
-import org.apache.spark.adj.utlis.ListGenerator
+import org.apache.spark.adj.deprecated.utlis.ListGenerator
 
 
 //Below optimizer only work for cases where there are only two sub-patterns, for more sub-patterns, some of

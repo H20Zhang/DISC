@@ -4,7 +4,7 @@ import java.util
 
 import org.apache.spark.adj.leapfrog.Alg
 import org.apache.spark.adj.deprecated.plan.deprecated.PhysicalPlan.FilteringCondition
-import org.apache.spark.adj.utlis.MapBuilder
+import org.apache.spark.adj.deprecated.utlis.MapBuilder
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.{AbstractIterator, Iterator, mutable}

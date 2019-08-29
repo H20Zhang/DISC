@@ -1,7 +1,7 @@
 package hzhang.test.exp.entry
 
 import org.apache.spark.adj.deprecated.execution.sampler.{SquareSampler, TriangleSampler}
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 
 object UniformSampleExp {
   def main(args: Array[String]): Unit = {

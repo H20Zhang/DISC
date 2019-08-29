@@ -1,7 +1,7 @@
 package hzhang.test.exp.utils
 
 import org.apache.spark.adj.deprecated.execution.rdd.loader.DataLoader
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 
 object DataGenerator {
 

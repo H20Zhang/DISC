@@ -1,6 +1,6 @@
 package org.apache.spark.adj.leapfrog
 
-import org.apache.spark.adj.database.Database.DataType
+import org.apache.spark.adj.database.Catalog.DataType
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -25,6 +25,9 @@ object Alg {
     val segmentArrays = arrays.map(arr => ArraySegment(arr))
     Intersection.leapfrogIntersection(segmentArrays).toArray()
   }
+
+  def leapfrogIt(arrays:Array[ArraySegment]):Iterator[DataType] = IntersectionIterator.leapfrogIt(arrays)
+  def listIt(arrays:Array[ArraySegment]):Iterator[DataType] = IntersectionIterator.listIt(arrays)
 }
 
 object BSearch {
@@ -108,7 +111,7 @@ class IntersectedListIterator(arrays:Array[ArraySegment]) extends Iterator[DataT
   }
 }
 
-//TODO: debug
+//TODO:debug, strange behavior
 class LeapFrogUnaryIterator(arrays:Array[ArraySegment]) extends Iterator[DataType]{
 
   var value = Int.MaxValue
@@ -118,6 +121,8 @@ class LeapFrogUnaryIterator(arrays:Array[ArraySegment]) extends Iterator[DataTyp
   var currentPosOfArrays = new Array[Int](numOfArrays)
   var count = 0
   var p = 0
+//  var nextConsumed:Boolean = true
+
 
   init()
 
@@ -141,45 +146,67 @@ class LeapFrogUnaryIterator(arrays:Array[ArraySegment]) extends Iterator[DataTyp
       currentPosOfArrays(i) = 0
       i = i + 1
     }
+//    nextConsumed = true
   }
+
 
   override def hasNext: Boolean = {
 
-    //    intersect the arrays
-    while(!isEnd){
-      val curArray = arrays(p)
-      val pos = Intersection.seek(curArray, maximalElement, currentPosOfArrays(p))
-      var curPos = pos
+    // if the value has not been consumed by next(), hasNext will always return true.
+//    if (nextConsumed){
+      var nextFinded = false
+      //    intersect the arrays
+      while(!isEnd && !nextFinded){
+        val curArray = arrays(p)
+        val pos = Intersection.seek(curArray, maximalElement, currentPosOfArrays(p))
+        var curPos = pos
 
-      if (curPos < curArray.size) {
-        val curVal = curArray(curPos)
+        if (curPos < curArray.size) {
+          val curVal = curArray(curPos)
 
-        if (curVal == maximalElement) {
+          if (curVal == maximalElement) {
 
-          count += 1
-          if (count == numOfArrays) {
+            count += 1
+            if (count == numOfArrays) {
+              count = 1
+              value = maximalElement
+              nextFinded = true
+            }
+          } else {
             count = 1
-            value = maximalElement
-            return isEnd
+            maximalElement = curVal
           }
         } else {
-          count = 1
-          maximalElement = curVal
+          isEnd = true
         }
-      } else {
-        isEnd = true
+
+        currentPosOfArrays(p) = curPos
+        p = (p + 1) % numOfArrays
       }
 
-      currentPosOfArrays(p) = curPos
-      p = (p + 1) % numOfArrays
-    }
+//      nextConsumed = false
 
+      nextFinded
+//    } else {
+//      true
+//    }
 
-    !isEnd
   }
 
   override def next(): DataType = {
-    value
+//    nextConsumed = true
+    var curPos = currentPosOfArrays(p)
+    val curArray = arrays(p)
+    curPos += 1
+    if (curPos < curArray.size) {
+      maximalElement = curArray(curPos)
+    } else {
+      isEnd = true
+    }
+    currentPosOfArrays(p) = curPos
+    p = (p + 1) % numOfArrays
+
+    return value
   }
 }
 
@@ -344,7 +371,6 @@ object Intersection {
         tmpArray = binaryMergeLikeIntersection(tmpArray, sortedArray(i))
         i = i+1
       }
-
 
       return tmpArray
       }

@@ -1,6 +1,6 @@
 package hzhang.test.exp.utils
 
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 
 import scala.collection.mutable
 

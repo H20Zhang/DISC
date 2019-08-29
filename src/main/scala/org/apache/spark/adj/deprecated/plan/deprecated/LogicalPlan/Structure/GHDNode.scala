@@ -2,7 +2,7 @@ package org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Structure
 
 import org.apache.log4j.{Level, LogManager}
 import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Utility.{AGMSolver, LogoGJOrderGenerator, LogoNodeConstructor, SubPattern}
-import org.apache.spark.adj.utlis._
+import org.apache.spark.adj.deprecated.utlis._
 
 import scala.collection.mutable.ArrayBuffer
 

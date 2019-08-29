@@ -3,7 +3,7 @@ package org.apache.spark.adj.deprecated.execution.sampler
 import breeze.linalg.sum
 import org.apache.spark.{HashPartitioner, Partitioner}
 import org.apache.spark.adj.deprecated.execution.rdd.loader.DataLoader
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 import org.apache.spark.util.Utils
 
 import scala.collection.mutable.ArrayBuffer

@@ -1,9 +1,9 @@
 package deprecated
 
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.adj.utlis.SparkSingle
 import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.GHDOptimize.{GHDGenerator, GHDPlanOptimizer}
 import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Structure.{Configuration, Relation, RelationSchema}
+import org.apache.spark.adj.utils.SparkSingle
 import org.scalatest.FunSuite
 
 import scala.collection.mutable.ArrayBuffer

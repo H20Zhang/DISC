@@ -1,6 +1,6 @@
 package org.apache.spark.adj.deprecated.execution.rdd.loader
 
-import org.apache.spark.adj.utlis.SparkSingle
+import org.apache.spark.adj.utils.SparkSingle
 import org.apache.spark.storage.StorageLevel
 
 import scala.util.Random

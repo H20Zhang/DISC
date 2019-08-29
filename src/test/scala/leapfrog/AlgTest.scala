@@ -1,6 +1,6 @@
 package leapfrog
 
-import org.apache.spark.adj.leapfrog.{Alg, Intersection}
+import org.apache.spark.adj.leapfrog.{Alg, ArraySegment, Intersection}
 import org.scalatest.FunSuite
 
 import scala.collection.mutable.ArrayBuffer
@@ -62,6 +62,52 @@ class AlgTest extends FunSuite{
 
     println(s"mergeLike time:${mergelikeTimes.sum} ms, leapfrog time:${leapfrogTimes.sum} ms, winner is leapfrog? ${leapfrogTimes.sum < mergelikeTimes.sum}")
 //    out2.foreach(x => print(s"${x};"))
-
   }
+
+  test("leapfrog iterator"){
+    var listItTimes = ArrayBuffer[Long]()
+    var leapfrogItTimes = ArrayBuffer[Long]()
+
+    def testFunc() = {
+      val num = 10000
+      val array1 = ArraySegment(Range(0,num).map(_ => Math.abs(Random.nextInt() % (2*num))).sorted.distinct.toArray)
+      val array2 = ArraySegment(Range(0,num).map(_ => Math.abs(Random.nextInt() % (2*num))).sorted.distinct.toArray)
+      val array3 = ArraySegment(Range(0,num).map(_ => Math.abs(Random.nextInt() % (2*num))).sorted.distinct.toArray)
+      val array4 = ArraySegment(Range(0,num).map(_ => Math.abs(Random.nextInt() % (2*num))).sorted.distinct.toArray)
+
+      val arrays = Array(array1, array2, array3, array4)
+
+      val startTime = System.nanoTime()
+
+      val out1 = Alg.listIt(arrays)
+      val out1Array = out1.toArray.toSeq
+      val endTime1 = System.nanoTime()
+
+      val out2 = Alg.leapfrogIt(arrays)
+      val out2Array = out2.toArray.toSeq
+      val endTime2 = System.nanoTime()
+
+      listItTimes += (endTime1 - startTime) / 1000000
+      leapfrogItTimes += (endTime2 - endTime1) / 1000000
+
+      assert(out1Array.size == out2Array.size)
+
+      if (out1Array.zip(out2Array).forall(x => x._1 == x._2) == false){
+        println()
+        println(s"mergelike results:")
+        out1.foreach(x => print(s"${x};"))
+
+        println(s"\nleapfrog results:")
+        out2.foreach(x => print(s"${x};"))
+        println()
+      }
+      assert(out1Array.zip(out2Array).forall(x => x._1 == x._2))
+    }
+
+
+    Range(0,1000).toParArray.foreach(_ => testFunc())
+
+    println(s"listIt time:${listItTimes.sum} ms, leapfrogIt time:${leapfrogItTimes.sum} ms, winner is leapfrog? ${leapfrogItTimes.sum < listItTimes.sum}")
+  }
+
 }

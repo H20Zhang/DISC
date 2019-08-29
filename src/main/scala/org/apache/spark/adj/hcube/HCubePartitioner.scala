@@ -1,7 +1,7 @@
 package org.apache.spark.adj.hcube
 
 import org.apache.spark.Partitioner
-import org.apache.spark.adj.database.Database.AttributeID
+import org.apache.spark.adj.database.Catalog.AttributeID
 import org.apache.spark.util.Utils
 
 /*partition the relation according to the space defined by share,

@@ -1,6 +1,6 @@
 package org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Decrapted
 
-import org.apache.spark.adj.utlis.ListGenerator
+import org.apache.spark.adj.deprecated.utlis.ListGenerator
 
 class LazyOptimizer(val patternMap:Map[String,Int], val tree:QTree) {
 

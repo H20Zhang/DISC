@@ -1,6 +1,6 @@
 package org.apache.spark.adj.leapfrog
 
-import org.apache.spark.adj.database.Database.DataType
+import org.apache.spark.adj.database.Catalog.DataType
 
 import scala.collection.mutable.ArrayBuffer
 

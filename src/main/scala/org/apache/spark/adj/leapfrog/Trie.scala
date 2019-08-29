@@ -2,7 +2,7 @@ package org.apache.spark.adj.leapfrog
 
 import java.util.Comparator
 
-import org.apache.spark.adj.database.Database.DataType
+import org.apache.spark.adj.database.Catalog.DataType
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -75,7 +75,8 @@ class HashMapTrie extends Trie {
   override def nextLevel(binding: ArraySegment): ArraySegment = ???
   override def toRelation(): Array[Array[DataType]] = ???
 }
-
+// Scan the tuples of the relation sequentially, for each tuple,
+// locate the bit where it firstly diverge from the previous tuple and then create a new trie node.
 object ArrayTrie {
   def apply(table:Array[Array[DataType]], arity:Int): ArrayTrie = {
 
@@ -99,9 +100,6 @@ object ArrayTrie {
       i += 1
     }
 
-
-//    println(table.toSeq.map(_.toSeq))
-
     //construct edge for ArrayTrie
     val rootID = idCounter
     idCounter += 1
@@ -110,7 +108,7 @@ object ArrayTrie {
     while(i < tableSize){
       val curTuple = table(i)
 
-      //find the j-th position where value of curTuple diverage from prevTuple
+      //find the j-th position where value of curTuple diverge from prevTuple
       var diffPos = -1
       var isConsecutive = true
       var j = 0
@@ -129,6 +127,8 @@ object ArrayTrie {
         diffPos = diffPos-1
       }
 
+      //for each value of curTuple diverge from preTuple, create a new NodeID
+      //create edge between NodeIDs
       while (diffPos < arity-1){
         val nextPos = diffPos + 1
         var prevID = 0
@@ -149,6 +149,7 @@ object ArrayTrie {
           leafIDCounter -= 1
         }
 
+        //create edge between NodeIDs
         edgeBuffer += ((prevID, newID, curTuple(nextPos)))
         prevIDs(nextPos) = newID
 
@@ -161,14 +162,14 @@ object ArrayTrie {
 
     //add a tuple to mark the end of the edge
     edgeBuffer += ((Int.MaxValue, Int.MaxValue, Int.MaxValue))
+
     //sort edge first by "id" then "value"
     val edge = edgeBuffer.toArray
     val edgeComparator = new EdgeComparator
     java.util.Arrays.sort(edge, edgeComparator)
 
-
-//    println(s"sorted edges:${edge.toSeq}, size:${edge.size}")
     //construct node for ArrayTrie
+    //  scan the sorted edge
     i = 0
     var start = 0
     var end = 0
