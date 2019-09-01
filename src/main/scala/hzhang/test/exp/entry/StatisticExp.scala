@@ -1,9 +1,8 @@
 package hzhang.test.exp.entry
 
-
 import hzhang.test.exp.utils.ADJPatternStatistic
 import org.apache.spark.adj.deprecated.execution.rdd.loader.DataLoader
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.utils.misc.SparkSingle
 
 object StatisticExp {
 
@@ -16,7 +15,7 @@ object StatisticExp {
 
     println(s"number of edge is ${edges.count()}")
 
-    val degrees = edges.groupByKey().map(f => (f._1,f._2.size))
+    val degrees = edges.groupByKey().map(f => (f._1, f._2.size))
 
     println(s"number of nodes is ${degrees.count()}")
 
@@ -24,8 +23,15 @@ object StatisticExp {
 
     println(s"average degree is ${avgDegree}")
 
-    val upper = edges.map(f => Math.pow((f._2-avgDegree),3)).sum() /  degrees.count()
-    val lower = Math.pow(Math.sqrt(edges.map(f => Math.pow((f._2-avgDegree),2)).sum() /  (degrees.count() -1)),3)
+    val upper = edges.map(f => Math.pow((f._2 - avgDegree), 3)).sum() / degrees
+      .count()
+    val lower = Math.pow(
+      Math.sqrt(
+        edges.map(f => Math.pow((f._2 - avgDegree), 2)).sum() / (degrees
+          .count() - 1)
+      ),
+      3
+    )
 
     val skewness = upper / lower
 
@@ -40,10 +46,10 @@ object StatisticExp {
     SparkSingle.isCluster = true
     SparkSingle.appName = s"Logo-${data}-${patternName}"
 
-    val pattern = new ADJPatternStatistic(data,h,h)
+    val pattern = new ADJPatternStatistic(data, h, h)
 
-    if (pattern.get(patternName) != null){
-        println(s"$patternName size is ${pattern.get(patternName)}")
+    if (pattern.get(patternName) != null) {
+      println(s"$patternName size is ${pattern.get(patternName)}")
     }
   }
 

@@ -1,7 +1,10 @@
 package hzhang.test.exp.entry
 
-import org.apache.spark.adj.deprecated.execution.sampler.{SquareSampler, TriangleSampler}
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.deprecated.execution.sampler.{
+  SquareSampler,
+  TriangleSampler
+}
+import org.apache.spark.adj.utils.misc.SparkSingle
 
 object UniformSampleExp {
   def main(args: Array[String]): Unit = {
@@ -18,7 +21,7 @@ object UniformSampleExp {
       case "Triangle" => {
         print(s"samples retrieved: ${sampler.triangleSamplesCount(k)}")
       }
-      case "Points" =>{
+      case "Points" => {
         println(sampler.selectPoints(k).count())
       }
       case "Wedges" => {

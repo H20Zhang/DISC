@@ -2,9 +2,9 @@ package org.apache.spark.adj.utils.testing
 
 import org.apache.spark.adj.database.Catalog.DataType
 import org.apache.spark.adj.database.RelationSchema
-import org.apache.spark.adj.hcube.TupleHCubeBlock
-import org.apache.spark.adj.plan.{AttributeOrderInfo, SubJoin}
-import org.apache.spark.adj.utils.SeqHelper
+import org.apache.spark.adj.execution.hcube.TupleHCubeBlock
+import org.apache.spark.adj.plan.{AttributeOrderInfo, LeapFrogJoinSubTask}
+import org.apache.spark.adj.utils.extension.SeqUtil
 
 import scala.util.Random
 
@@ -195,7 +195,7 @@ object QueryGenerator {
     val domainSize =
       Math.pow(cardinality.toDouble, 1 / arity.toDouble).ceil.toInt
     val attributes = Range(0, arity).map(_.toString)
-    val subsets = Random.shuffle(SeqHelper.subset(attributes))
+    val subsets = Random.shuffle(SeqUtil.subset(attributes))
 
     val schemas = Range(0, numRelation).map { i =>
       val schema = RelationSchema(s"R${i}", subsets(i))

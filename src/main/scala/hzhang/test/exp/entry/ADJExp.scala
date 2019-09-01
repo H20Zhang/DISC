@@ -2,10 +2,9 @@ package hzhang.test.exp.entry
 
 import hzhang.test.exp.utils.ADJPattern
 import hzhang.test.exp.utils.{ADJPattern, RunForLoop}
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.utils.misc.SparkSingle
 
 object ADJExp {
-
 
   def main(args: Array[String]): Unit = {
     val data = args(0)
@@ -15,11 +14,11 @@ object ADJExp {
 
     SparkSingle.isCluster = true
     SparkSingle.appName = s"Logo-${data}-${patternName}"
-    val pattern = new ADJPattern(data,h,h)
+    val pattern = new ADJPattern(data, h, h)
 
-    if (pattern.get(patternName) != null){
+    if (pattern.get(patternName) != null) {
 
-      if (isForLoop){
+      if (isForLoop) {
         val count = 5007311619323l
         val Loops = new RunForLoop(count)
         println(Loops.run())
@@ -29,8 +28,6 @@ object ADJExp {
       }
 
 //      pattern.pattern(patternName).rdd().map(f => f).map(f => f).count()
-    } else{
-
-    }
+    } else {}
   }
 }

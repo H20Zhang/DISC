@@ -1,17 +1,12 @@
 package hzhang.test.Novel
 
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.ml.classification._
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.LabeledPoint
 import org.apache.spark.ml.linalg.{Matrices, Matrix, Vector, Vectors}
 
-
-
-
-class MLTriangleEstimator {
-
-}
+class MLTriangleEstimator {}
 
 class SparkMLUsage {
 
@@ -21,10 +16,10 @@ class SparkMLUsage {
   val data = spark.read.format("libsvm").load("sample_libsvm_data.txt")
 
   // Split the data into training and test sets (30% held out for testing)
-  val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3), seed = 1234L)
+  val Array(trainingData, testData) =
+    data.randomSplit(Array(0.7, 0.3), seed = 1234L)
 
-
-  def testDataStructure(): Unit ={
+  def testDataStructure(): Unit = {
     // Create a dense vector (1.0, 0.0, 3.0).
     val dv: Vector = Vectors.dense(1.0, 0.0, 3.0)
     // Create a sparse vector (1.0, 0.0, 3.0) by specifying its indices and values corresponding to nonzero entries.
@@ -42,7 +37,8 @@ class SparkMLUsage {
     val dm: Matrix = Matrices.dense(3, 2, Array(1.0, 3.0, 5.0, 2.0, 4.0, 6.0))
 
     // Create a sparse matrix ((9.0, 0.0), (0.0, 8.0), (0.0, 6.0))
-    val sm: Matrix = Matrices.sparse(3, 2, Array(0, 1, 3), Array(0, 2, 1), Array(9, 6, 8))
+    val sm: Matrix =
+      Matrices.sparse(3, 2, Array(0, 1, 3), Array(0, 2, 1), Array(9, 6, 8))
 
 //    println(dv)
 //    println(sv1)
@@ -52,12 +48,9 @@ class SparkMLUsage {
     println(sm)
   }
 
-  def testDistributedDataStructure: Unit ={
+  def testDistributedDataStructure: Unit = {}
 
-  }
-
-
-  def testModel(model:ProbabilisticClassificationModel[_,_]): Unit ={
+  def testModel(model: ProbabilisticClassificationModel[_, _]): Unit = {
 
     // Select example rows to display.
     val predictions = model.transform(testData)
@@ -72,7 +65,7 @@ class SparkMLUsage {
     println("Test set accuracy = " + accuracy)
   }
 
-  def testLogisticalRegression(): Unit ={
+  def testLogisticalRegression(): Unit = {
 
     val lr = new LogisticRegression()
       .setMaxIter(10)
@@ -86,8 +79,7 @@ class SparkMLUsage {
 
   }
 
-  def testBayes(): Unit ={
-
+  def testBayes(): Unit = {
 
     // Train a NaiveBayes model.
     val model = new NaiveBayes()
@@ -96,7 +88,4 @@ class SparkMLUsage {
     testModel(model)
   }
 
-
 }
-
-

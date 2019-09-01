@@ -1,11 +1,10 @@
 package deprecated.Plan
 
 import hzhang.test.exp.utils.ADJPattern
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.utils.misc.SparkSingle
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-
-class ADJPatternTest extends FunSuite with BeforeAndAfterAll{
+class ADJPatternTest extends FunSuite with BeforeAndAfterAll {
 
 //  val data = "./wikiV.txt"
 //val data = "./debugData.txt"
@@ -18,25 +17,36 @@ class ADJPatternTest extends FunSuite with BeforeAndAfterAll{
 
 //  val queries = List("threeTriangleF")
 //val queries = List("square", "triangle", "chordalSquare", "house", "threeTriangle")
-  val sizeReference = List(("test", 1L), ("debug",1L),("fourClique",1L), ("near5Clique",1L), ("trianglePlusOneEdge",1L),("trianglePlusTwoEdgeF",1),("squarePlusOneEdgeF",1),("square",57654491L),("triangle",608389L),("chordalSquare",40544543L),("houseF",2365994715L),("house",9488779111L),("threeTriangle",4105908615L),("threeTriangleF",2106389L)).toMap
+  val sizeReference = List(
+    ("test", 1L),
+    ("debug", 1L),
+    ("fourClique", 1L),
+    ("near5Clique", 1L),
+    ("trianglePlusOneEdge", 1L),
+    ("trianglePlusTwoEdgeF", 1),
+    ("squarePlusOneEdgeF", 1),
+    ("square", 57654491L),
+    ("triangle", 608389L),
+    ("chordalSquare", 40544543L),
+    ("houseF", 2365994715L),
+    ("house", 9488779111L),
+    ("threeTriangle", 4105908615L),
+    ("threeTriangleF", 2106389L)
+  ).toMap
 
-
-  test("Pattern"){
+  test("Pattern") {
     SparkSingle.appName = s"Logo-${data}"
     val pattern = new ADJPattern(data)
 
-    queries.foreach{
-      f =>
-        println(s"execute $f")
+    queries.foreach { f =>
+      println(s"execute $f")
 
 //              pattern.houseAgg.count()
-        val size = pattern.get(f).size()
-        if (pattern.get(f) != null){
-          assert(size == sizeReference(f))
-        }
+      val size = pattern.get(f).size()
+      if (pattern.get(f) != null) {
+        assert(size == sizeReference(f))
+      }
     }
-
-
 //    queries.foreach{
 //      f =>
 //        println(s"execute $f")
@@ -47,7 +57,6 @@ class ADJPatternTest extends FunSuite with BeforeAndAfterAll{
 //    }
 
   }
-
 
 //  test("Trove"){
 //    val longMap = new TLongIntHashMap()
@@ -124,7 +133,6 @@ class ADJPatternTest extends FunSuite with BeforeAndAfterAll{
 //      assert(house.size() == 9488779111L)
 //    }
 
-
 //  test("threeTriangleFast"){
 //    val threeTriangle = new ExamplePattern(data).threeTriangleFast
 //    assert(threeTriangle.size() == 4105908615L)
@@ -166,13 +174,10 @@ class ADJPatternTest extends FunSuite with BeforeAndAfterAll{
 //    }
 //
 
-
-
   //  test("Pattern"){
 //    val threeTriangle = ExamplePattern.threeTriangle
 //    assert(threeTriangle.size() == 4105908615L)
 //  }
-
 
   override protected def afterAll(): Unit = {
     SparkSingle.close()

@@ -1,11 +1,11 @@
 import org.apache.spark.adj.database.{Catalog, Query, RelationSchema}
 import org.apache.spark.adj.parser.simpleDml.SimpleParser
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.adj.utils.testing.{
   HCubeJoinValidator,
+  HCubeTester,
   LeapFrogJoinValidator,
-  QueryGenerator,
-  HCubeTester
+  QueryGenerator
 }
 import org.apache.spark.sql.AnalysisException
 import org.scalatest.exceptions.TestFailedException
@@ -57,7 +57,7 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
     val schemaR0 = RelationSchema("R2", Seq("C", "A"))
 
     //implicit class
-    import org.apache.spark.adj.utils.SeqHelper._
+    import org.apache.spark.adj.utils.extension.SeqUtil._
     println(seq subset ())
   }
 

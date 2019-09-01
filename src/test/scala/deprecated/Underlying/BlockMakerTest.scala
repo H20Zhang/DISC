@@ -1,27 +1,30 @@
 package deprecated.Underlying
 
-import org.apache.spark.adj.deprecated.execution.rdd.maker.{PartitionerMaker, rowBlockGenerator}
+import org.apache.spark.adj.deprecated.execution.rdd.maker.{
+  PartitionerMaker,
+  rowBlockGenerator
+}
 import org.apache.spark.adj.deprecated.execution.rdd.{KeyMapping, LogoSchema}
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.utils.misc.SparkSingle
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class BlockMakerTest extends FunSuite with BeforeAndAfterAll{
+class BlockMakerTest extends FunSuite with BeforeAndAfterAll {
 
-  val (spark,sc) = SparkSingle.getSpark()
+  val (spark, sc) = SparkSingle.getSpark()
 
-  test("LogoBlockGenerator"){
+  test("LogoBlockGenerator") {
 
-    val edges = List((0,1),(0,2),(1,2))
-    val keySizeMap = Map((0,3),(1,3),(2,3))
+    val edges = List((0, 1), (0, 2), (1, 2))
+    val keySizeMap = Map((0, 3), (1, 3), (2, 3))
     val schema = LogoSchema(keySizeMap)
 
-    val index = schema.partitioner.getPartition(List(0,1,2))
+    val index = schema.partitioner.getPartition(List(0, 1, 2))
 
     val data = List(
-      (Array(0,1,2),1),
-      (Array(0,1,2),1),
-      (Array(0,1,2),1),
-      (Array(0,1,2),1)
+      (Array(0, 1, 2), 1),
+      (Array(0, 1, 2), 1),
+      (Array(0, 1, 2), 1),
+      (Array(0, 1, 2), 1)
     ).toIterator
 
     val blockGenerator = new rowBlockGenerator(schema, index, data)
@@ -55,11 +58,11 @@ class BlockMakerTest extends FunSuite with BeforeAndAfterAll{
 //    assert(TestUtil.listEqual(indexList,indexList1),"each block's index must appear")
 //  }
 
-  test("PartitionerMaker"){
-    val compositeParitioner = PartitionerMaker().setSlotSizeMapping(KeyMapping(List(3,3))).build()
+  test("PartitionerMaker") {
+    val compositeParitioner =
+      PartitionerMaker().setSlotSizeMapping(KeyMapping(List(3, 3))).build()
     assert(compositeParitioner.numPartitions == 9)
   }
-
 
   override def afterAll(): Unit = {
     SparkSingle.close()

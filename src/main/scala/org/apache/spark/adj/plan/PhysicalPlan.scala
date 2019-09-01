@@ -1,22 +1,24 @@
 package org.apache.spark.adj.plan
 
-import org.apache.spark.adj.hcube.{HCube, HCubePlan, TupleHCubeBlock}
+import org.apache.spark.adj.execution.hcube.{HCube, HCubePlan, TupleHCubeBlock}
 import org.apache.spark.adj.database.Catalog.{
   Attribute,
   AttributeID,
   DataType,
   RelationID
 }
-import org.apache.spark.adj.database.{
-  Catalog,
-  DataLoader,
-  Relation,
-  RelationSchema
-}
+import org.apache.spark.adj.database.{Catalog, Relation, RelationSchema}
+import org.apache.spark.adj.execution.misc.DataLoader
 import org.apache.spark.adj.optimization.ShareComputer
 import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable
+import scala.collection.parallel.{
+  ForkJoinTaskSupport,
+  ParSeq,
+  ThreadPoolTaskSupport
+}
+import scala.concurrent.forkjoin.ForkJoinPool
 
 //physical plan is the plan that describe the distributed execution process
 trait PhysicalPlan {
@@ -39,7 +41,13 @@ case class HCubeLeapJoinExec(children: Seq[PhysicalPlan],
   override def getChildren(): Seq[PhysicalPlan] = children
 
   override def count(): Long = {
-    val relations = getChildren().map(_.execute())
+
+    //TODO: test parallel support
+    val forkJoinPool = new ForkJoinPool(4)
+    val tasks = getChildren().par
+    tasks.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
+
+    val relations = getChildren().map(_.execute()).toArray
     val hcubePlan = HCubePlan(relations, share)
     val attrOrderInfo = AttributeOrderInfo(attrOrder)
     val hcube = new HCube(hcubePlan, attrOrderInfo)
@@ -47,7 +55,7 @@ case class HCubeLeapJoinExec(children: Seq[PhysicalPlan],
       .genHCubeRDD()
       .map { task =>
         val orderInfo = task.info.asInstanceOf[AttributeOrderInfo]
-        val subJoinTask = new SubJoin(
+        val subJoinTask = new LeapFrogJoinSubTask(
           task.shareVector,
           task.blocks.map(_.asInstanceOf[TupleHCubeBlock]),
           orderInfo

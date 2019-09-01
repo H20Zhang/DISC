@@ -1,13 +1,16 @@
 package hzhang.test.Novel
 
-import org.apache.spark.adj.deprecated.execution.rdd.loader.{DataLoader, EdgeLoader}
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.deprecated.execution.rdd.loader.{
+  DataLoader,
+  EdgeLoader
+}
+import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.graphx.{Edge, Graph, GraphLoader}
 import org.apache.spark.rdd.RDD
 
 import scala.util.Random
 
-class Pregel(data: String,h1:Int=6,h2:Int=6) {
+class Pregel(data: String, h1: Int = 6, h2: Int = 6) {
 
   //  var h1 = 13
   //  var h2 = 13
@@ -29,24 +32,34 @@ class Pregel(data: String,h1:Int=6,h2:Int=6) {
     new EdgeLoader(rawEdge, Seq(hNumber._1, hNumber._2)) edgeLogoRDDReference
   }
 
-  def makeEdge(inputEdge:RDD[(Array[Int],Int)],hNumber: (Int, Int)) = {
+  def makeEdge(inputEdge: RDD[(Array[Int], Int)], hNumber: (Int, Int)) = {
     new EdgeLoader(inputEdge, Seq(hNumber._1, hNumber._2)) edgeLogoRDDReference
   }
 
-  def pageRank(k:Int) = {
+  def pageRank(k: Int) = {
     val edge = getEdge(h1, h2)
-    var node = makeEdge(edge.rdd().map(f => f(0)).distinct().map(f => (Array(f,1),1)), (h1,1))
+    var node = makeEdge(
+      edge.rdd().map(f => f(0)).distinct().map(f => (Array(f, 1), 1)),
+      (h1, 1)
+    )
 
-    for (i <- 0 to k){
-      var newEdge = edge.build(node.to(0,2))
-      var newNode = makeEdge(newEdge.rdd().map(f => (f(1),f(2))).reduceByKey(_ + _).map(f => (Array(f._1,f._2),1)), (h1,1))
+    for (i <- 0 to k) {
+      var newEdge = edge.build(node.to(0, 2))
+      var newNode = makeEdge(
+        newEdge
+          .rdd()
+          .map(f => (f(1), f(2)))
+          .reduceByKey(_ + _)
+          .map(f => (Array(f._1, f._2), 1)),
+        (h1, 1)
+      )
 
       node = newNode
     }
   }
 
-  def graphXPageRank(k:Int) = {
-    val edge = rawEdge.map(f => Edge(f._1(0),f._1(1), 1))
+  def graphXPageRank(k: Int) = {
+    val edge = rawEdge.map(f => Edge(f._1(0), f._1(1), 1))
 
     val graph = Graph.fromEdges(edge, 1)
     graph.staticPageRank(20)

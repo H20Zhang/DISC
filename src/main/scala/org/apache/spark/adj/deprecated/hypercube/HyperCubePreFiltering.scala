@@ -1,32 +1,26 @@
 package org.apache.spark.adj.deprecated.hypercube
 
 import org.apache.spark.adj.deprecated.execution.rdd.loader.DataLoader
-import org.apache.spark.adj.utils.SparkSingle
-
+import org.apache.spark.adj.utils.misc.SparkSingle
 
 //still testing
 class HyperCubePreFiltering {
 
-
   val spark = SparkSingle.getSparkSession()
 
-
-  def testFiltering(): Unit ={
-
+  def testFiltering(): Unit = {
 
     //    //    Edge1(src1,dst1), Edge2(src1,dst2), Edge3(dst1, dst2), Edge4(dst2, dst3)
 //    how the filteredNode will affect triangle query
-    val prefix="/user/hzhang/subgraph/Dataset/"
+    val prefix = "/user/hzhang/subgraph/Dataset/"
     val input = "enwiki-2013"
-    val loader = new DataLoader(prefix+input)
+    val loader = new DataLoader(prefix + input)
     val rawGraph = loader.EdgeDataset
 
-
-    val graph = rawGraph.select(rawGraph("_1").as("src")
-      , rawGraph("_2").as("dst"))
+    val graph =
+      rawGraph.select(rawGraph("_1").as("src"), rawGraph("_2").as("dst"))
 
     graph.createOrReplaceTempView("Graph")
-
 
 //   select SNode from src1
     val sql0 =
@@ -39,7 +33,6 @@ class HyperCubePreFiltering {
     val src1 = spark.sql(sql0)
 
     src1.createOrReplaceTempView("SRC1")
-
 
 // how SNode affect the dst of Edge1 and Edge 2
     val sql1 =
@@ -77,7 +70,6 @@ class HyperCubePreFiltering {
 //
 //    val edge3 = spark.sql(sql2_2)
 
-
 //    how Edge4 are affected
     val sql3 =
       """
@@ -88,27 +80,16 @@ class HyperCubePreFiltering {
 
     val edge4 = spark.sql(sql3)
 
-
     println(
       s"graph: ${graph.count()} " +
-      s"src1: ${src1.count()} " +
-      s"dst1:${dst1.count()} " +
-      s"edge3:${edge3.count()} " +
+        s"src1: ${src1.count()} " +
+        s"dst1:${dst1.count()} " +
+        s"edge3:${edge3.count()} " +
         s"edge4:${edge4.count()} " +
-      s"ratio3:${edge3.count().toDouble/graph.count()} " +
-      s"ratio4:${edge4.count().toDouble/graph.count()} "
+        s"ratio3:${edge3.count().toDouble / graph.count()} " +
+        s"ratio4:${edge4.count().toDouble / graph.count()} "
     )
 
-
-
-
-
-
-
-
-
   }
-
-
 
 }

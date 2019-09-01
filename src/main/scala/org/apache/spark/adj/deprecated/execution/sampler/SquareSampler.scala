@@ -3,11 +3,11 @@ package org.apache.spark.adj.deprecated.execution.sampler
 import breeze.linalg.sum
 import org.apache.spark.HashPartitioner
 import org.apache.spark.adj.deprecated.execution.rdd.loader.DataLoader
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.utils.misc.SparkSingle
 
 import scala.collection.mutable.ArrayBuffer
 
-class SquareSampler(data:String) {
+class SquareSampler(data: String) {
 
   lazy val edgeDataset = {
     val dataset = new DataLoader(data).EdgeDataset.cache()
@@ -21,10 +21,9 @@ class SquareSampler(data:String) {
     temp
   }
 
-
-  lazy val degree ={
-    val seqOp = (d:Int, id:Int) => d + 1
-    val combineOp = (d1:Int, d2:Int) => d1 + d2
+  lazy val degree = {
+    val seqOp = (d: Int, id: Int) => d + 1
+    val combineOp = (d1: Int, d2: Int) => d1 + d2
     val degree = edge.aggregateByKey(0)(seqOp, combineOp).collectAsMap()
     val sc = SparkSingle.getSparkContext()
     val broadcastDegree = sc.broadcast(degree)
@@ -34,30 +33,37 @@ class SquareSampler(data:String) {
 //  lazy val point = degree.map(_._1)
   lazy val weightedEdge = {
     val localDegree = degree
-    val temp = edge.mapPartitions{g =>
-      val paritionDegree = localDegree.value
-      g.map{f => (f,(paritionDegree(f._2) - 1).toLong* (paritionDegree(f._2)-1))}
-    }.repartition(400).cache()
+    val temp = edge
+      .mapPartitions { g =>
+        val paritionDegree = localDegree.value
+        g.map { f =>
+          (f, (paritionDegree(f._2) - 1).toLong * (paritionDegree(f._2) - 1))
+        }
+      }
+      .repartition(400)
+      .cache()
     temp.count()
     temp
   }
 
-  def selectEdges(k:Int) = {
+  def selectEdges(k: Int) = {
 
     edge.count()
 
     val parts = weightedEdge.getNumPartitions
 
-
     //    Collect Total Degree
-    val pointPartitionInfo = weightedEdge.mapPartitionsWithIndex{
-      case(id, it) =>
-        val aggOp = (temp: Long, f:((Int,Int), Long)) => temp + f._2
-        val partitionTotalDegree = it.foldLeft(0L)(aggOp)
-        Iterator((id,partitionTotalDegree))
-    }.collect().sortBy(_._1)
+    val pointPartitionInfo = weightedEdge
+      .mapPartitionsWithIndex {
+        case (id, it) =>
+          val aggOp = (temp: Long, f: ((Int, Int), Long)) => temp + f._2
+          val partitionTotalDegree = it.foldLeft(0L)(aggOp)
+          Iterator((id, partitionTotalDegree))
+      }
+      .collect()
+      .sortBy(_._1)
 
-    val aggOp = (temp: Long, f:(Int, Long)) => temp + f._2
+    val aggOp = (temp: Long, f: (Int, Long)) => temp + f._2
     val totalDegree = pointPartitionInfo.foldLeft(0L)(aggOp)
 
     //    Generate k sample according to round robin.
@@ -66,38 +72,39 @@ class SquareSampler(data:String) {
 
     //    print(s"total degree is :${totalDegree}")
 
-
-    val SamplesPos = SparkSingle.getSparkContext().parallelize(Range(0, parts), parts).mapPartitions(f => Range(0, k/parts).iterator)
-      .mapPartitions(f =>  f.map(_ => Math.abs(r.nextLong()) % totalDegree))
-      .map{f =>
-
+    val SamplesPos = SparkSingle
+      .getSparkContext()
+      .parallelize(Range(0, parts), parts)
+      .mapPartitions(f => Range(0, k / parts).iterator)
+      .mapPartitions(f => f.map(_ => Math.abs(r.nextLong()) % totalDegree))
+      .map { f =>
         val size = pointPartitionInfo.size
         var i = 0
         var posSum = 0L
-        var result:(Int, Long) = null
-        while (i < size){
-          if (((posSum + (pointPartitionInfo(i)._2)) > f)){
-            result = (i, f-posSum)
+        var result: (Int, Long) = null
+        while (i < size) {
+          if (((posSum + (pointPartitionInfo(i)._2)) > f)) {
+            result = (i, f - posSum)
             i += size
           } else {
             posSum = posSum + (pointPartitionInfo(i)._2)
             i += 1
           }
 
-
         }
         result
-      }.partitionBy(new HashPartitioner(parts))
+      }
+      .partitionBy(new HashPartitioner(parts))
 
     //    There maybe some bugs when zipping the partitions
-    val rddSamples = weightedEdge.zipPartitions(SamplesPos){
-      case (it,dictIt) =>
-        val buffer = ArrayBuffer[(Int,Int)]()
+    val rddSamples = weightedEdge.zipPartitions(SamplesPos) {
+      case (it, dictIt) =>
+        val buffer = ArrayBuffer[(Int, Int)]()
         val samplePos = dictIt.toArray.map(_._2).sorted
         val samplePosSize = samplePos.size
         var idx = 0
-        val scanOp = {(sum:Long, g:((Int,Int),Long)) =>
-          while (idx < samplePosSize && samplePos(idx) < sum + g._2){
+        val scanOp = { (sum: Long, g: ((Int, Int), Long)) =>
+          while (idx < samplePosSize && samplePos(idx) < sum + g._2) {
             buffer += g._1
             idx += 1
           }
@@ -109,8 +116,6 @@ class SquareSampler(data:String) {
         buffer.toIterator
     }
 
-
-
     val samples = rddSamples.cache()
 
     samples.count()
@@ -120,42 +125,42 @@ class SquareSampler(data:String) {
 
 //    samples.toDS().map(f => f._1).distinct().map(f => (f,1)).
 
-
     samples
   }
 
-  def threePathSample(k:Int) = {
+  def threePathSample(k: Int) = {
     val edgeSamples = selectEdges(k).cache()
     edgeSamples.count()
 
     val groupedEdges = edge.groupByKey(new HashPartitioner(200)).cache()
     groupedEdges.count()
 
-    val lEdges = groupedEdges.mapPartitions{
-      f =>
+    val lEdges = groupedEdges
+      .mapPartitions { f =>
         val r = scala.util.Random
         r.setSeed(System.currentTimeMillis())
-        f.map{g =>
+        f.map { g =>
           val edges = g._2.toArray
           val size = edges.size
-          (g._1,edges(r.nextInt(size)))
+          (g._1, edges(r.nextInt(size)))
         }
-    }.cache()
+      }
+      .cache()
 
-    val rEdges = groupedEdges.mapPartitions{
-      f =>
+    val rEdges = groupedEdges
+      .mapPartitions { f =>
         val r = scala.util.Random
         r.setSeed(System.currentTimeMillis())
-        f.map{g =>
+        f.map { g =>
           val edges = g._2.toArray
           val size = edges.size
-          (g._1,edges(r.nextInt(size)))
+          (g._1, edges(r.nextInt(size)))
         }
-    }.cache()
+      }
+      .cache()
 
     val spark = SparkSingle.getSparkSession()
     import spark.implicits._
-
 
     edgeSamples.toDF("lNode", "rNode").createOrReplaceTempView("C")
     lEdges.toDF("lNode", "extendl").createOrReplaceTempView("L")
@@ -185,9 +190,7 @@ class SquareSampler(data:String) {
     threePaths.cache()
   }
 
-
-
-  def squareSamplesCount(k:Int) = {
+  def squareSamplesCount(k: Int) = {
     val spark = SparkSingle.getSparkSession()
     import spark.implicits._
     val threePaths = threePathSample(k)
@@ -207,39 +210,35 @@ class SquareSampler(data:String) {
     result.count()
   }
 
-
-  def threePathSampleForFourClique(k:Int) = {
+  def threePathSampleForFourClique(k: Int) = {
     val edgeSamples = selectEdges(k).cache()
     edgeSamples.count()
 
     val groupedEdges = edge.groupByKey(new HashPartitioner(200)).cache()
     groupedEdges.count()
 
-    val lEdges = groupedEdges.mapPartitions{
-      f =>
-        val r = scala.util.Random
-        r.setSeed(System.currentTimeMillis())
-        f.map{g =>
-          val edges = g._2.toArray
-          val size = edges.size
-          (g._1,edges(r.nextInt(size)))
-        }
+    val lEdges = groupedEdges.mapPartitions { f =>
+      val r = scala.util.Random
+      r.setSeed(System.currentTimeMillis())
+      f.map { g =>
+        val edges = g._2.toArray
+        val size = edges.size
+        (g._1, edges(r.nextInt(size)))
+      }
     }
 
-    val rEdges = groupedEdges.mapPartitions{
-      f =>
-        val r = scala.util.Random
-        r.setSeed(System.currentTimeMillis())
-        f.map{g =>
-          val edges = g._2.toArray
-          val size = edges.size
-          (g._1,edges(r.nextInt(size)))
-        }
+    val rEdges = groupedEdges.mapPartitions { f =>
+      val r = scala.util.Random
+      r.setSeed(System.currentTimeMillis())
+      f.map { g =>
+        val edges = g._2.toArray
+        val size = edges.size
+        (g._1, edges(r.nextInt(size)))
+      }
     }
 
     val spark = SparkSingle.getSparkSession()
     import spark.implicits._
-
 
     edgeSamples.toDF("lNode", "rNode").createOrReplaceTempView("C")
     lEdges.toDF("lNode", "extendl").createOrReplaceTempView("L")
@@ -269,7 +268,7 @@ class SquareSampler(data:String) {
     threePaths
   }
 
-  def fourCliqueSamplesCount(k:Int) = {
+  def fourCliqueSamplesCount(k: Int) = {
     val spark = SparkSingle.getSparkSession()
     import spark.implicits._
     val threePaths = threePathSampleForFourClique(k)

@@ -10,10 +10,11 @@ libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.2.0" % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-core" % "2.2.0" % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-graphx" % "2.2.0" % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-mllib" % "2.2.0" % "provided"
-libraryDependencies += "com.joptimizer" % "joptimizer" % "4.0.0" % "provided"
+libraryDependencies += "com.joptimizer" % "joptimizer" % "4.0.0"
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.3" % "test"
 libraryDependencies += "net.sf.trove4j" % "trove4j" % "3.0.3" % "provided"
 libraryDependencies += "com.typesafe" % "config" % "1.3.4"
+libraryDependencies += "org.jgrapht" % "jgrapht-core" % "1.3.0"
 
 watchSources += baseDirectory.value / "script/"
 

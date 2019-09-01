@@ -1,8 +1,8 @@
 package leapfrog
 
 import org.apache.spark.adj.database.Catalog
-import org.apache.spark.adj.leapfrog.LeapFrogJoin
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.execution.leapfrog.LeapFrogJoin
+import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.adj.utils.testing.{
   HCubeTester,
   LeapFrogJoinValidator,

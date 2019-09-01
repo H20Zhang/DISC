@@ -2,10 +2,10 @@ package org.apache.spark.adj.utils.testing
 
 import org.apache.spark.adj.database.Catalog.DataType
 import org.apache.spark.adj.database.{Catalog, Query, Relation, RelationSchema}
-import org.apache.spark.adj.hcube.TupleHCubeBlock
-import org.apache.spark.adj.leapfrog.{Alg, ArraySegment}
-import org.apache.spark.adj.plan.{AttributeOrderInfo, SubJoin}
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.execution.hcube.TupleHCubeBlock
+import org.apache.spark.adj.execution.leapfrog.{Alg, ArraySegment}
+import org.apache.spark.adj.plan.{AttributeOrderInfo, LeapFrogJoinSubTask}
+import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
@@ -124,7 +124,11 @@ class LeapFrogJoinValidator(contents: Seq[Array[Array[DataType]]],
     val attrOrder = Random.shuffle(attrIds.toSeq).toArray
     val info = AttributeOrderInfo(attrOrder)
     val subjoin =
-      new SubJoin(shareVector.values.toArray, HCubeTupleBlocks, info)
+      new LeapFrogJoinSubTask(
+        shareVector.values.toArray,
+        HCubeTupleBlocks,
+        info
+      )
 
     val leapIt = subjoin.execute()
     var count = 0

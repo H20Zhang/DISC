@@ -1,15 +1,12 @@
 package hzhang.test.exp.entry
 
-
 import hzhang.test.exp.utils.{ADJPattern, ExamplePatternSampler}
 import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Decrapted.CostBasedOptimizer._
-import org.apache.spark.adj.utils.SparkSingle
-
+import org.apache.spark.adj.utils.misc.SparkSingle
 
 object SampleExp {
 
-
-  def testPlans(args:Array[String]) = {
+  def testPlans(args: Array[String]) = {
 
     val data = args(0)
     val patternName = args(1)
@@ -18,16 +15,16 @@ object SampleExp {
     val k2 = args(4).toInt
 
     SparkSingle.isCluster = true
-    SparkSingle.appName = s"SAMPLE:data:${data}-patternName:${patternName}-h:${h}-k:${k}-k2:${k2}"
+    SparkSingle.appName =
+      s"SAMPLE:data:${data}-patternName:${patternName}-h:${h}-k:${k}-k2:${k2}"
 
     val memCoefficient = List(1)
-    val memLimits = memCoefficient.map(Math.pow(2,_))
-
+    val memLimits = memCoefficient.map(Math.pow(2, _))
 
     patternName match {
       case "houseQuery" => {
-        val houseEstimator = new HouseCostEstimator(data,h,k, k2)
-        memLimits.map{f =>
+        val houseEstimator = new HouseCostEstimator(data, h, k, k2)
+        memLimits.map { f =>
           val housePlans = houseEstimator.generatePlans(f)
 
           println(s"memLimit is ${f}*10^6")
@@ -37,9 +34,9 @@ object SampleExp {
         }
       }
       case "near5CliqueQuery" => {
-        val near5CliqueEstimator = new near5CliqueCostEstimator(data,h,k, k2)
+        val near5CliqueEstimator = new near5CliqueCostEstimator(data, h, k, k2)
 
-        memLimits.map{f =>
+        memLimits.map { f =>
           val near5CliquePlans = near5CliqueEstimator.generatePlans(f)
 
           println()
@@ -49,9 +46,10 @@ object SampleExp {
       }
 
       case "chordalSquareQuery" => {
-        val chordalSquareEstimator = new ChordalSquareCostEstimator(data,h,k, k2)
+        val chordalSquareEstimator =
+          new ChordalSquareCostEstimator(data, h, k, k2)
 
-        memLimits.map{f =>
+        memLimits.map { f =>
 //          val near5CliquePlans = chordalSquareEstimator.generatePlans()
 
           println()
@@ -61,9 +59,10 @@ object SampleExp {
       }
 
       case "ThreeTriangleQuery" => {
-        val threeTriangleEstimator = new ThreeTriangleCostEstimator(data,h,k, k2)
+        val threeTriangleEstimator =
+          new ThreeTriangleCostEstimator(data, h, k, k2)
 
-        memLimits.map{f =>
+        memLimits.map { f =>
 //          val near5CliquePlans = threeTriangleEstimator.generatePlans()
 
           println()
@@ -73,13 +72,9 @@ object SampleExp {
       }
     }
 
-
-
-
   }
 
-
-  def testIndividual(args:Array[String]): Unit ={
+  def testIndividual(args: Array[String]): Unit = {
     val data = args(0)
     val patternName = args(1)
     val h = args(2).toInt
@@ -87,28 +82,38 @@ object SampleExp {
     val k2 = args(4).toInt
 
     SparkSingle.isCluster = true
-    SparkSingle.appName = s"SAMPLE:data:${data}-patternName:${patternName}-h:${h}-k:${k}"
+    SparkSingle.appName =
+      s"SAMPLE:data:${data}-patternName:${patternName}-h:${h}-k:${k}"
 
     val pattern = new ADJPattern(data)
 
     val kList = List(k)
 
     var query = List(patternName)
-    if (patternName == "all"){
-      query = List("triangle", "chordalSquare", "square", "fourClique", "squareTriangle", "fourCliqueTriangle", "triangleSquare", "triangleFourClique")
+    if (patternName == "all") {
+      query = List(
+        "triangle",
+        "chordalSquare",
+        "square",
+        "fourClique",
+        "squareTriangle",
+        "fourCliqueTriangle",
+        "triangleSquare",
+        "triangleFourClique"
+      )
     }
 
-    kList.foreach{
-      i => {
+    kList.foreach { i =>
+      {
         val base = i
         println(s"k is ${i}")
-        val sampledPatterns = new ExamplePatternSampler(data,h,h,i, k2)
+        val sampledPatterns = new ExamplePatternSampler(data, h, h, i, k2)
         val rawEdgeSize = sampledPatterns.rawEdgeSize
         val sampledRawEdgeSize = sampledPatterns.sampledRawEdgeSize
         val ratio = sampledRawEdgeSize.toDouble / rawEdgeSize
 
-        query.map{
-          f =>
+        query
+          .map { f =>
             val sampledPattern = sampledPatterns.pattern(f)
             val start_time = System.nanoTime()
             val time_size_pair = sampledPattern.time_size()
@@ -116,14 +121,25 @@ object SampleExp {
 
             val end_time = System.nanoTime()
 
-            (f,sampledSize,time_size_pair._2,end_time-start_time, time_size_pair._1)
-        }.foreach(f => println(s"SResults:${f._1}:sampledSize:${f._5}:estimatedSize:${f._2}:sampleTime:${f._3} ms"))
+            (
+              f,
+              sampledSize,
+              time_size_pair._2,
+              end_time - start_time,
+              time_size_pair._1
+            )
+          }
+          .foreach(
+            f =>
+              println(
+                s"SResults:${f._1}:sampledSize:${f._5}:estimatedSize:${f._2}:sampleTime:${f._3} ms"
+            )
+          )
 
 //        println(s"edge: ${rawEdgeSize/base},, sampledEdge: ${sampledRawEdgeSize/base}, ratio: ${ratio}")
       }
     }
   }
-
 
   def main(args: Array[String]): Unit = {
     testIndividual(args)

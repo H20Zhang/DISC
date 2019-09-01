@@ -1,30 +1,27 @@
 package org.apache.spark.adj.deprecated.execution.rdd.loader
 
 import org.apache.spark.adj.deprecated.execution.rdd._
-import org.apache.spark.adj.deprecated.execution.rdd.maker.{CompactRow3LogoRDDMaker, CompactRowLogoRDDMaker, SimpleRowLogoRDDMaker}
+import org.apache.spark.adj.deprecated.execution.rdd.maker.{
+  CompactRow3LogoRDDMaker,
+  CompactRowLogoRDDMaker,
+  SimpleRowLogoRDDMaker
+}
 import org.apache.spark.adj.deprecated.plan.deprecated.PhysicalPlan.LogoCompactEdgePhysicalPlan
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
-
-
 
 class EdgeLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
 
   var tempAddress = ""
 
-  lazy val edgeLogoRDDReference = new LogoCompactEdgePhysicalPlan(EdgePatternLogoRDD) toLogoRDDReference()
+  lazy val edgeLogoRDDReference = new LogoCompactEdgePhysicalPlan(
+    EdgePatternLogoRDD
+  ) toLogoRDDReference ()
   lazy val (_, sc) = SparkSingle.getSpark()
-
 
   def EdgePatternLogoRDD = {
     val (edgeRDD, schema) = EdgeRowLogoRDD
-
-
-
-
-
-
 
 //    val edgePatternLogoRDD = edgeRDD.map{f =>
 //      val w = f.asInstanceOf[RowLogoBlock[(Array[Int],Int)]]
@@ -49,12 +46,10 @@ class EdgeLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
     compactRDD
   }
 
-
   def EdgeRowLogoRDD = {
 //    RowLogoRDDMaker(rawRDD)
     CompactRowLogoRDDMaker(rawRDD)
   }
-
 
   /**
     *
@@ -65,7 +60,9 @@ class EdgeLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
     val edges = List((0, 1))
     val keySizeMap = Map((0, sizes(0)), (1, sizes(1)))
 
-    val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD, 1).setEdges(edges).setKeySizeMap(keySizeMap)
+    val logoRDDMaker = new SimpleRowLogoRDDMaker(rawRDD, 1)
+      .setEdges(edges)
+      .setKeySizeMap(keySizeMap)
 
     val logoRDD = logoRDDMaker.build()
     val schema = logoRDDMaker.getSchema
@@ -82,8 +79,9 @@ class EdgeLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
     val edges = List((0, 1))
     val keySizeMap = Map((0, sizes(0)), (1, sizes(1)))
 
-
-    val logoRDDMaker = new CompactRowLogoRDDMaker(rawRDD,1).setEdges(edges).setKeySizeMap(keySizeMap)
+    val logoRDDMaker = new CompactRowLogoRDDMaker(rawRDD, 1)
+      .setEdges(edges)
+      .setKeySizeMap(keySizeMap)
 
     val logoRDD = logoRDDMaker.build()
     val schema = logoRDDMaker.getSchema
@@ -96,8 +94,9 @@ class EdgeLoader(rawRDD: RDD[(Array[Int], Int)], sizes: Seq[Int]) {
     val edges = List((0, 1, 2))
     val keySizeMap = Map((0, sizes(0)), (1, sizes(1)), (2, sizes(2)))
 
-
-    val logoRDDMaker = new CompactRow3LogoRDDMaker(rawRDD,1).setEdges(edges).setKeySizeMap(keySizeMap)
+    val logoRDDMaker = new CompactRow3LogoRDDMaker(rawRDD, 1)
+      .setEdges(edges)
+      .setKeySizeMap(keySizeMap)
 
     val logoRDD = logoRDDMaker.build()
     val schema = logoRDDMaker.getSchema

@@ -1,29 +1,32 @@
 package deprecated
 
 import org.apache.log4j.{Level, LogManager}
-import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.GHDOptimize.{GHDGenerator, GHDPlanOptimizer}
-import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Structure.{Configuration, Relation, RelationSchema}
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.GHDOptimize.{
+  GHDGenerator,
+  GHDPlanOptimizer
+}
+import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Structure.{
+  Configuration,
+  Relation,
+  RelationSchema
+}
+import org.apache.spark.adj.utils.misc.SparkSingle
 import org.scalatest.FunSuite
 
 import scala.collection.mutable.ArrayBuffer
 
-class GHDPlanOptimizerTest extends FunSuite{
-
-
-
+class GHDPlanOptimizerTest extends FunSuite {
 
   val data = "./wikiV.txt"
   val relationSchema = RelationSchema.getRelationSchema()
 
   //house
-  relationSchema.addRelation(Relation("R1",Seq("A","B"),data, 201526))
-  relationSchema.addRelation(Relation("R2",Seq("B","C"),data, 201526))
-  relationSchema.addRelation(Relation("R3",Seq("C","D"),data, 201526))
-  relationSchema.addRelation(Relation("R4",Seq("D","E"),data, 201526))
-  relationSchema.addRelation(Relation("R5",Seq("E","A"),data, 201526))
-  relationSchema.addRelation(Relation("R6",Seq("B","E"),data, 201526))
-
+  relationSchema.addRelation(Relation("R1", Seq("A", "B"), data, 201526))
+  relationSchema.addRelation(Relation("R2", Seq("B", "C"), data, 201526))
+  relationSchema.addRelation(Relation("R3", Seq("C", "D"), data, 201526))
+  relationSchema.addRelation(Relation("R4", Seq("D", "E"), data, 201526))
+  relationSchema.addRelation(Relation("R5", Seq("E", "A"), data, 201526))
+  relationSchema.addRelation(Relation("R6", Seq("B", "E"), data, 201526))
 
   //threeTriangle
 //      relationSchema.addRelation(Relation("R1",Seq("A","B"),50000))
@@ -46,19 +49,17 @@ class GHDPlanOptimizerTest extends FunSuite{
   //
   //
 
-
-  test("GHDOptimizer"){
+  test("GHDOptimizer") {
     val conf = Configuration.getConfiguration()
     val relationSchema = RelationSchema.getRelationSchema()
-    val generator = new GHDGenerator((0 until relationSchema.relations.size).to[ArrayBuffer])
+    val generator =
+      new GHDGenerator((0 until relationSchema.relations.size).to[ArrayBuffer])
     val optimizer = new GHDPlanOptimizer(generator.fhwOptimalGHD()._1)
-
-
 
     val spark = SparkSingle.getSparkSession()
 
     val log = LogManager.getLogger(this.getClass)
-    log.log(Level.toLevel(25000),"testing")
+    log.log(Level.toLevel(25000), "testing")
 
     val tree = optimizer.tree
     println(tree)
@@ -96,7 +97,7 @@ class GHDPlanOptimizerTest extends FunSuite{
     println(cost)
 
     val bestPlan = optimizer.genBestPlan()
-    val plansWithCost = plans.map(f => (f,f.costEstimation()))
+    val plansWithCost = plans.map(f => (f, f.costEstimation()))
 
     plansWithCost.foreach(println)
 
@@ -107,9 +108,6 @@ class GHDPlanOptimizerTest extends FunSuite{
     val size = subPattern.logo.size()
     println(size)
 
-
-
   }
-
 
 }

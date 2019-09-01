@@ -1,9 +1,9 @@
 package org.apache.spark.adj.utils.testing
 
 import org.apache.spark.adj.database.{Relation, RelationSchema}
-import org.apache.spark.adj.hcube.{HCubePlan, TupleHCubeBlock}
-import org.apache.spark.adj.plan.{AttributeOrderInfo, SubJoin}
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.execution.hcube.{HCubePlan, TupleHCubeBlock}
+import org.apache.spark.adj.plan.{AttributeOrderInfo, LeapFrogJoinSubTask}
+import org.apache.spark.adj.utils.misc.SparkSingle
 @deprecated
 object TestingSubJoins {
 
@@ -44,7 +44,11 @@ object TestingSubJoins {
     val attrOrder = query_schema.flatMap(_.attrIDs).distinct.toArray
     val notImportantShare = Array(1, 2, 3, 4, 5)
 
-    new SubJoin(notImportantShare, blocks, AttributeOrderInfo(attrOrder))
+    new LeapFrogJoinSubTask(
+      notImportantShare,
+      blocks,
+      AttributeOrderInfo(attrOrder)
+    )
   }
 
   lazy val testing_subjoins2 = {
@@ -64,7 +68,11 @@ object TestingSubJoins {
     val attrOrder = query_schema.flatMap(_.attrIDs).distinct.toArray
     val notImportantShare = Array(1, 2, 3, 4, 5)
 
-    new SubJoin(notImportantShare, blocks, AttributeOrderInfo(attrOrder))
+    new LeapFrogJoinSubTask(
+      notImportantShare,
+      blocks,
+      AttributeOrderInfo(attrOrder)
+    )
   }
 
   lazy val testing_query1_hcubePlan = {

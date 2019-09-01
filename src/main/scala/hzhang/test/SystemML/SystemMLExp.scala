@@ -2,7 +2,7 @@ package hzhang.test.SystemML
 
 import org.apache
 import org.apache.spark
-import org.apache.spark.adj.utils.SparkSingle
+import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.sysml.api.mlcontext._
 import org.apache.sysml.api.mlcontext.ScriptFactory._
 import org.apache.sysml.api.mlcontext.{MLContext, MatrixMetadata}
@@ -17,7 +17,7 @@ class SystemMLExp {
   val spark = SparkSingle.getSparkSession()
   val sc = SparkSingle.getSparkContext()
   val ml = new MLContext(spark)
-  def testBasic(){
+  def testBasic() {
 
     val helloScript = dml("print('hello world')")
     ml.execute(helloScript)
@@ -30,7 +30,7 @@ class SystemMLExp {
 //    val perf = clf.eval(probs, dummy.Y)
   }
 
-  def testMatrix(): Unit ={
+  def testMatrix(): Unit = {
 
     //explain the execution
     //ml.setExplain(true)
@@ -38,8 +38,12 @@ class SystemMLExp {
     //create a matrix
     val numRows = 10000
     val numCols = 100
-    val data = sc.parallelize(0 to numRows-1).map { _ => Row.fromSeq(Seq.fill(numCols)(Random.nextDouble)) }
-    val schema = StructType((0 to numCols-1).map { i => StructField("C" + i, DoubleType, true) } )
+    val data = sc.parallelize(0 to numRows - 1).map { _ =>
+      Row.fromSeq(Seq.fill(numCols)(Random.nextDouble))
+    }
+    val schema = StructType((0 to numCols - 1).map { i =>
+      StructField("C" + i, DoubleType, true)
+    })
     val df = spark.createDataFrame(data, schema)
 
     //There are four types in script "double, integer, string, and boolean"
@@ -74,12 +78,15 @@ class SystemMLExp {
       """.stripMargin
 
     val mm = new MatrixMetadata(numRows, numCols)
-    val minMaxMeanScript = dml(minMaxMean).in("Xin", df, mm).out("minOut", "maxOut", "meanOut")
-    val (min, max, mean) = ml.execute(minMaxMeanScript).getTuple[Double, Double, Double]("minOut", "maxOut", "meanOut")
+    val minMaxMeanScript =
+      dml(minMaxMean).in("Xin", df, mm).out("minOut", "maxOut", "meanOut")
+    val (min, max, mean) = ml
+      .execute(minMaxMeanScript)
+      .getTuple[Double, Double, Double]("minOut", "maxOut", "meanOut")
     println(min, max, mean)
     minMaxMeanScript.clearAll()
 
-  //create matrix inside dml and print
+    //create matrix inside dml and print
     val s =
       """
       m = matrix("11 22 33 44", rows=2, cols=2)
@@ -96,7 +103,6 @@ class SystemMLExp {
     val scr = dml(s).out("m", "n");
     val res = ml.execute(scr)
     val (x, y) = res.getTuple[Matrix, Double]("m", "n")
-
 
     val readWriteMatrix =
       """
@@ -149,7 +155,6 @@ class SystemMLExp {
     val matrixOperationScript = dml(matrixOperation)
     ml.execute(matrixOperationScript)
 
-
     val controlFlowAndFunction =
       """
         |i = 1
@@ -195,11 +200,9 @@ class SystemMLExp {
     //clear the name reference hold inside script src
     scr.clearAll()
 
-
-
   }
 
-  def testRDDIntegration(): Unit ={
+  def testRDDIntegration(): Unit = {
     val rdd1 = sc.parallelize(Array("1.0,2.0", "3.0,4.0"))
     val rdd2 = sc.parallelize(Array("5.0,6.0", "7.0,8.0"))
     val sums = """
@@ -214,7 +217,9 @@ if (s1 > s2) {
 }
 """
 //    scala.tools.nsc.io.File("sums.dml").writeAll(sums)
-    val sumScript = dmlFromFile("sums.dml").in(Map("m1"-> rdd1, "m2"-> rdd2)).out("s1", "s2", "message")
+    val sumScript = dmlFromFile("sums.dml")
+      .in(Map("m1" -> rdd1, "m2" -> rdd2))
+      .out("s1", "s2", "message")
     val sumResults = ml.execute(sumScript)
     val s1 = sumResults.getDouble("s1")
     val s2 = sumResults.getDouble("s2")
@@ -222,15 +227,20 @@ if (s1 > s2) {
     println(message)
   }
 
-  def testHaberman(): Unit ={
-    val habermanUrl = "http://archive.ics.uci.edu/ml/machine-learning-databases/haberman/haberman.data"
+  def testHaberman(): Unit = {
+    val habermanUrl =
+      "http://archive.ics.uci.edu/ml/machine-learning-databases/haberman/haberman.data"
     val habermanList = scala.io.Source.fromURL(habermanUrl).mkString.split("\n")
     val habermanRDD = sc.parallelize(habermanList)
     val habermanMetadata = new MatrixMetadata(306, 4)
     val typesRDD = sc.parallelize(Array("1.0,1.0,1.0,2.0"))
     val typesMetadata = new MatrixMetadata(1, 4)
-    val scriptUrl = "https://raw.githubusercontent.com/apache/systemml/master/scripts/algorithms/Univar-Stats.dml"
-    val uni = dmlFromUrl(scriptUrl).in("A", habermanRDD, habermanMetadata).in("K", typesRDD, typesMetadata).in("$CONSOLE_OUTPUT", true)
+    val scriptUrl =
+      "https://raw.githubusercontent.com/apache/systemml/master/scripts/algorithms/Univar-Stats.dml"
+    val uni = dmlFromUrl(scriptUrl)
+      .in("A", habermanRDD, habermanMetadata)
+      .in("K", typesRDD, typesMetadata)
+      .in("$CONSOLE_OUTPUT", true)
     ml.execute(uni)
   }
 
@@ -240,5 +250,3 @@ if (s1 > s2) {
 //    val prediction = model.transform(X_test_df)
 //  }
 }
-
-
