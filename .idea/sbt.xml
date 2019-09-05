@@ -14,13 +14,12 @@
           </set>
         </option>
         <option name="resolveSbtClassifiers" value="true" />
-        <option name="sbtVersion" value="1.2.7" />
         <option name="useAutoImport" value="true" />
         <option name="useQualifiedModuleNames" value="true" />
         <option name="useSbtShellForBuild" value="true" />
         <option name="useSbtShellForImport" value="true" />
       </SbtProjectSettings>
     </option>
-    <option name="maximumHeapSize" value="1024" />
+    <option name="maximumHeapSize" value="2048" />
   </component>
 </project>

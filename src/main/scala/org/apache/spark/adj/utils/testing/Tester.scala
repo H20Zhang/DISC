@@ -2,6 +2,7 @@ package org.apache.spark.adj.utils.testing
 
 import breeze.util.ArrayUtil
 import org.apache.spark.adj.database.Catalog
+import org.apache.spark.adj.optimization.stat.Statistic
 import org.apache.spark.sql.AnalysisException
 import org.bouncycastle.util.test.TestFailedException
 
@@ -33,6 +34,7 @@ class HCubeTester(numRelation: Int, arity: Int, cardinality: Int, testRun: Int)
       }
 
       Catalog.reset()
+      Statistic.reset()
     }
   }
 }

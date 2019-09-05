@@ -3,7 +3,6 @@ package org.apache.spark.adj.utils.testing
 import org.apache.spark.adj.database.Catalog.DataType
 import org.apache.spark.adj.database.RelationSchema
 import org.apache.spark.adj.execution.hcube.TupleHCubeBlock
-import org.apache.spark.adj.plan.{AttributeOrderInfo, LeapFrogJoinSubTask}
 import org.apache.spark.adj.utils.extension.SeqUtil
 
 import scala.util.Random

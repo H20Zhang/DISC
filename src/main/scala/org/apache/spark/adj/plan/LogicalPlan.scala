@@ -54,7 +54,8 @@ case class Join(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
   val attrIDs = schemas.flatMap(_.attrIDs).distinct
 
   def optimizedPlan(): LogicalPlan = {
-    UnOptimizedHCubeJoin(childrenOps.map(_.optimizedPlan()))
+//    UnOptimizedHCubeJoin(childrenOps.map(_.optimizedPlan()))
+    OptimizedHCubeJoin(childrenOps.map(_.optimizedPlan()))
   }
 
   def getSchema(): Seq[RelationSchema] = {

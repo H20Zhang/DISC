@@ -3,8 +3,12 @@ package org.apache.spark.adj.utils.testing
 import org.apache.spark.adj.database.Catalog.DataType
 import org.apache.spark.adj.database.{Catalog, Query, Relation, RelationSchema}
 import org.apache.spark.adj.execution.hcube.TupleHCubeBlock
-import org.apache.spark.adj.execution.leapfrog.{Alg, ArraySegment}
-import org.apache.spark.adj.plan.{AttributeOrderInfo, LeapFrogJoinSubTask}
+import org.apache.spark.adj.execution.subtask.{
+  Alg,
+  ArraySegment,
+  AttributeOrderInfo,
+  LeapFrogJoinSubTask
+}
 import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Row

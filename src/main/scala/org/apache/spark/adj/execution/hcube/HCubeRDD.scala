@@ -3,6 +3,7 @@ package org.apache.spark.adj.execution.hcube
 import java.io.{IOException, ObjectOutputStream}
 
 import org.apache.spark.adj.database.Catalog.AttributeID
+import org.apache.spark.adj.execution.subtask.{SubTask, TaskInfo}
 import org.apache.spark.{
   OneToOneDependency,
   Partition,
@@ -11,7 +12,7 @@ import org.apache.spark.{
   SparkEnv,
   TaskContext
 }
-import org.apache.spark.adj.plan.{LeapFrogJoinSubTask, SubTask, TaskInfo}
+
 import org.apache.spark.rdd.RDD
 import org.apache.spark.scheduler.TaskLocation
 import org.apache.spark.storage.RDDBlockId

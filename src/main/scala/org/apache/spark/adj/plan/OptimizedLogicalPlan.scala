@@ -2,8 +2,12 @@ package org.apache.spark.adj.plan
 
 import org.apache.spark.adj.database.Catalog.AttributeID
 import org.apache.spark.adj.database.{Relation, RelationSchema}
-import org.apache.spark.adj.optimization.{OrderComputer, ShareComputer}
-import org.apache.spark.adj.optimization.utils.Statistic
+import org.apache.spark.adj.optimization.comp.{
+  EnumShareComputer,
+  NonLinearShareComputer,
+  OrderComputer
+}
+import org.apache.spark.adj.optimization.stat.Statistic
 
 //trait OptimizedLogicalPlan extends LogicalPlan {
 //  val statistic = new Statistic
@@ -39,7 +43,6 @@ case class UnOptimizedHCubeJoin(childrenOps: Seq[LogicalPlan])
   override def getChildren(): Seq[LogicalPlan] = childrenOps
 }
 
-//TODO: debug this class and all the class involved in this class
 case class OptimizedHCubeJoin(childrenOps: Seq[LogicalPlan], task: Int = 4)
     extends LogicalPlan {
 
@@ -67,7 +70,7 @@ case class OptimizedHCubeJoin(childrenOps: Seq[LogicalPlan], task: Int = 4)
     val orderComputer = new OrderComputer(schemas)
     attrOrder = orderComputer.optimalOrder()
 
-    val shareComputer = new ShareComputer(schemas, task)
+    val shareComputer = new EnumShareComputer(schemas, task)
     share = shareComputer.optimalShare()
   }
 

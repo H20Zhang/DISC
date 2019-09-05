@@ -54,10 +54,21 @@ case class RelationSchema(name: String, attrs: Seq[Attribute])
   def getGlobalAttributeWithIdx(idx: Int) = {
     attrIDs(idx)
   }
+
+  override def toString: Attribute = {
+    s"RelationSchema:${name}, attrs:${attrs}, attrIds:${attrIDs}"
+  }
 }
 
-case class Relation(val schema: RelationSchema,
-                    val content: RDD[Array[DataType]])
+//object RelationSchema {
+//  def apply(name: String, attrs: Seq[Attribute]): RelationSchema =
+//    new RelationSchema(name, attrs)
+//
+//  def apply(name: String, attrs: Seq[AttributeID]): RelationSchema =
+//    new RelationSchema(name, attrs)
+//}
+
+case class Relation(val schema: RelationSchema, val rdd: RDD[Array[DataType]])
 
 //
 //object Relation{

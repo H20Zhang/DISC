@@ -74,7 +74,7 @@ class HyperTreeDecompositionTest extends FunSuite {
         }
 
     val decomposer = new RelationDecomposer(schemas)
-    val relationGHD = decomposer.decompose().head
+    val relationGHD = decomposer.decomposeTree().head
     println(s"relationGHD:${relationGHD}")
   }
 }

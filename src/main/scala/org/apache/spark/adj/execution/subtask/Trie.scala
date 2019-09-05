@@ -1,9 +1,10 @@
-package org.apache.spark.adj.execution.leapfrog
+package org.apache.spark.adj.execution.subtask
 
 import java.util.Comparator
 
 import org.apache.spark.adj.database.Catalog.DataType
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 trait Trie {
@@ -19,18 +20,23 @@ class ArrayTrie(neighbors: Array[Int],
                 level: Int)
     extends Trie {
 
+  var rootBegin = neighborBegins(0)
+  var rootEnd = neighborEnds(0)
+//  val rootLevelMap = mutable.HashMap[Int, Int]() ++ values
+//    .slice(rootBegin, rootEnd)
+//    .zip(Range(rootBegin, rootEnd))
+
   def nextLevel(binding: ArraySegment): ArraySegment = {
 
     var id = 0
-    var start = neighborBegins(id)
-    var end = neighborEnds(id)
+    var start = rootBegin
+    var end = rootEnd
 
     val level = binding.size
     var i = 0
 
     while (i < level) {
-
-      val pos = Alg.binarySearch(values, binding(i), start, end)
+      val pos = BSearch.search(values, binding(i), start, end)
 
       if (pos == -1) {
         return ArraySegment.emptyArray()
@@ -74,9 +80,84 @@ class ArrayTrie(neighbors: Array[Int],
 
 }
 
-class HashMapTrie extends Trie {
-  override def nextLevel(binding: ArraySegment): ArraySegment = ???
+//TODO: debug
+class HashMapTrie(rootLevel: ArraySegment,
+                  nextLevelMap: mutable.HashMap[Int, mutable.HashMap[Array[
+                    DataType
+                  ], ArraySegment]],
+                  arity: Int)
+    extends Trie {
+
+  val tempArrayForIthLevel = mutable.HashMap[Int, Array[DataType]]()
+
+  init()
+  def init() = {
+    Range(1, arity).foreach { i =>
+      tempArrayForIthLevel(i) = new Array[DataType](i)
+    }
+  }
+
+  override def nextLevel(binding: ArraySegment): ArraySegment = {
+    val bindingSize = binding.size
+    val level = bindingSize - 1
+
+    if (bindingSize == 0) {
+      return rootLevel
+    } else {
+      val tempArray = tempArrayForIthLevel(level)
+      var i = 0
+      while (i < bindingSize) {
+        tempArray(i) = binding(i)
+      }
+
+      return nextLevelMap(level)(tempArray)
+    }
+  }
   override def toRelation(): Array[Array[DataType]] = ???
+}
+
+object HashMapTrie {
+  def apply(table: Array[Array[DataType]], arity: Int): HashMapTrie = {
+    val rootLevel = ArraySegment(table.map(t => t(0)).distinct)
+    val nextLevelMap =
+      mutable.HashMap[Int, mutable.HashMap[Array[DataType], ArraySegment]]()
+    var i = 0
+    while (i < arity - 1) {
+      var projectedTable = ArrayBuffer[Array[DataType]]()
+      table.foreach { tuple =>
+        val projectedTuple = new Array[DataType](i + 1)
+        var j = 0
+        while (j <= i) {
+          projectedTuple(j) = tuple(j)
+        }
+
+        projectedTable += projectedTuple
+      }
+
+      projectedTable = projectedTable.distinct
+
+      val levelMap = mutable.HashMap[Array[DataType], ArrayBuffer[DataType]]()
+
+      projectedTable.foreach { tuple =>
+        val key = new Array[DataType](i)
+        var j = 0
+        while (j < i) {
+          key(i) = tuple(i)
+        }
+
+        levelMap.get(key) match {
+          case Some(buffer) => buffer += tuple(i)
+          case None =>
+            val buffer = ArrayBuffer(tuple(i)); levelMap(key) = buffer
+        }
+      }
+
+      nextLevelMap(i) =
+        levelMap.map(f => (f._1, ArraySegment(f._2.toArray.sorted)))
+    }
+
+    new HashMapTrie(rootLevel, nextLevelMap, arity)
+  }
 }
 
 // Scan the tuples of the relation sequentially, for each tuple,

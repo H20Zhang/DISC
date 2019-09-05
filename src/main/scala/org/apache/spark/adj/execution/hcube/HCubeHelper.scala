@@ -7,7 +7,8 @@ import org.apache.spark.adj.database.Catalog.{
   DataType,
   RelationID
 }
-import org.apache.spark.adj.plan.{Join, TaskInfo}
+import org.apache.spark.adj.execution.subtask.TaskInfo
+import org.apache.spark.adj.plan.Join
 import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable.ArrayBuffer

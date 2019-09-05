@@ -28,14 +28,57 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
     val schemaR0 = RelationSchema("R0", Seq("A", "B"))
     val schemaR1 = RelationSchema("R1", Seq("B", "C"))
     val schemaR2 = RelationSchema("R2", Seq("C", "A"))
+    val schemaR3 = RelationSchema("R3", Seq("C", "D"))
+    val schemaR4 = RelationSchema("R4", Seq("B", "D"))
+    val schemaR5 = RelationSchema("R5", Seq("A", "D"))
+    val schemaR6 = RelationSchema("R6", Seq("C", "E"))
+    val schemaR7 = RelationSchema("R7", Seq("D", "E"))
 
     schemaR0.register(dataAdress)
     schemaR1.register(dataAdress)
     schemaR2.register(dataAdress)
+    schemaR3.register(dataAdress)
+    schemaR4.register(dataAdress)
+    schemaR5.register(dataAdress)
+    schemaR6.register(dataAdress)
+    schemaR7.register(dataAdress)
+
+    val query0 = "Join R3;R6;R7"
+    val relation8 = Query.query(query0)
+    relation8.schema.register(relation8.rdd)
 
     //form query
-    val query = "Join R0;R1;R2"
+//    val query = "Join R0;R1;R2;R3;R4;R5;R6;R7"
+//    Query.countQuery(query)
+
+    //chordalSquare
+//    val query0 = "Join R1;R3;R4"
+//    val relation8 = Query.query(query0)
+//    relation8.schema.register(relation8.content)
+//
+//    val query = s"Join R0;R2;${relation8.schema.name}"
+//    Query.countQuery(query)
+
+    //chordalSquare -- no intermediate
+//    val query = s"Join R0;R1;R2;R3;R4"
+//    Query.countQuery(query)
+
+    //fourClique
+//    val query = s"Join R0;R1;R2;R3;R4;R5"
+//    Query.countQuery(query)
+
+    //near5Clique
+//    val query = s"Join R0;R1;R2;R3;R4;R5;${relation8.schema.name}"
+//    Query.countQuery(query)
+
+    //near5Clique -- no intermediate
+    val query = s"Join R0;R1;R2;R3;R4;R5;R6;R7"
     Query.countQuery(query)
+
+    //lolipop
+//    val query = s"Join R0;R1;R8"
+//    Query.countQuery(query)
+
   }
 
   test("HCubeJoin") {
@@ -62,7 +105,7 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
   }
 
   override protected def afterAll(): Unit = {
-    SparkSingle.close()
+//    SparkSingle.close()
   }
 
 }

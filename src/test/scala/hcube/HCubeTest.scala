@@ -6,7 +6,7 @@ import org.apache.spark.adj.execution.hcube.{
   RelationPartitioner,
   TupleHCubeBlock
 }
-import org.apache.spark.adj.plan.AttributeOrderInfo
+import org.apache.spark.adj.execution.subtask.AttributeOrderInfo
 import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.adj.utils.testing.TestingSubJoins
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FunSuite}
@@ -22,7 +22,7 @@ class HCubeTest extends FunSuite with BeforeAndAfterAll {
     //testing partitioner for R1
     val partitionerForR1 = helper.partitionerForRelation(testingRelationID)
     val contentForR1 =
-      hcubePlan.idForRelation(testingRelationID).content.collect()
+      hcubePlan.idForRelation(testingRelationID).rdd.collect()
 
     val isPartitionerValid = contentForR1.forall { tuple =>
       val tupleHashValue = partitionerForR1.getPartition(tuple)

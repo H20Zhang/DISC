@@ -47,6 +47,7 @@ object ContentGenerator {
       }.toArray
     }
 
+    Random.setSeed(System.currentTimeMillis())
     content = Random.shuffle(content.toSeq).toArray
     content.filter(p => Random.nextDouble() < SampleRate)
   }

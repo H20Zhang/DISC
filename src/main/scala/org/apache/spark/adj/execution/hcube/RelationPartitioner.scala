@@ -16,7 +16,7 @@ class RelationPartitioner(relation: Relation, helper: HCubeHelper) {
     val schema = relation.schema
     val sentry = helper.genSentry(schema.id.get)
     val sentryRDD = sc.parallelize(sentry)
-    val relationRDD = relation.content.map(f => (f, false))
+    val relationRDD = relation.rdd.map(f => (f, false))
 
 //    println(s"relationRDD:${relationRDD.collect().toSeq.map(f => (f._1.toSeq, f._2))}")
 //    println(s"sentryRDD:${sentryRDD.collect().toSeq.map(f => (f._1.toSeq, f._2))}")

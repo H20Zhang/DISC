@@ -2,7 +2,11 @@ package org.apache.spark.adj.utils.testing
 
 import org.apache.spark.adj.database.{Relation, RelationSchema}
 import org.apache.spark.adj.execution.hcube.{HCubePlan, TupleHCubeBlock}
-import org.apache.spark.adj.plan.{AttributeOrderInfo, LeapFrogJoinSubTask}
+import org.apache.spark.adj.execution.subtask.{
+  AttributeOrderInfo,
+  LeapFrogJoinSubTask
+}
+
 import org.apache.spark.adj.utils.misc.SparkSingle
 @deprecated
 object TestingSubJoins {

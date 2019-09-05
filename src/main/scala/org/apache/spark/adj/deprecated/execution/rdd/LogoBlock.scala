@@ -2,7 +2,7 @@ package org.apache.spark.adj.deprecated.execution.rdd
 
 import java.util
 
-import org.apache.spark.adj.execution.leapfrog.Alg
+import org.apache.spark.adj.execution.subtask.Alg
 import org.apache.spark.adj.deprecated.plan.deprecated.PhysicalPlan.FilteringCondition
 import org.apache.spark.adj.deprecated.utlis.MapBuilder
 

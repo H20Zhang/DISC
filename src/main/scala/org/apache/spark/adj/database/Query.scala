@@ -32,4 +32,25 @@ object Query {
     outputSize
   }
 
+  def query(dml: String) = {
+    val parser = new SimpleParser()
+    parser.parseDml(dml)
+
+    val plan = parser.parseDml(dml)
+    println(s"unoptimized logical plan:${plan}")
+
+    //optimize plan
+    val optimizedPlan = plan.optimizedPlan()
+    println(s"optimized logical plan:${optimizedPlan}")
+
+    //convert to physical plan
+    val phyiscalPlan = optimizedPlan.phyiscalPlan()
+    println(s"phyiscal plan:${phyiscalPlan}")
+
+    //execute physical plan
+    val output = phyiscalPlan.execute()
+
+    output
+  }
+
 }

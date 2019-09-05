@@ -1,4 +1,4 @@
-package org.apache.spark.adj.execution.leapfrog
+package org.apache.spark.adj.execution.subtask
 
 import org.apache.spark.adj.database.Catalog.DataType
 
@@ -95,7 +95,9 @@ case class ArraySegment(array: Array[DataType],
 }
 
 object ArraySegment {
-  def emptyArray() = ArraySegment(Array.emptyIntArray, 0, 0, 0)
+  val emptyArraySegment = ArraySegment(Array.emptyIntArray, 0, 0, 0)
+
+  def emptyArray() = emptyArraySegment
   def apply(array: Array[DataType]): ArraySegment = {
     ArraySegment(array, 0, array.size, array.size)
   }

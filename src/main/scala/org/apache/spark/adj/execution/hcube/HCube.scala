@@ -2,7 +2,7 @@ package org.apache.spark.adj.execution.hcube
 
 import org.apache.spark.adj.database.Catalog.{AttributeID, RelationID}
 import org.apache.spark.adj.database.Relation
-import org.apache.spark.adj.plan.TaskInfo
+import org.apache.spark.adj.execution.subtask.TaskInfo
 import org.apache.spark.adj.utils.misc.SparkSingle
 
 //TODO:debug

@@ -14,6 +14,7 @@ class Catalog extends Serializable {
 
   private var relationIDCount = 0
   private var attributeIDCount = 0
+  private var tempRelationIDCount = -1
 
   private val _nameToSchema: mutable.HashMap[String, RelationSchema] =
     mutable.HashMap()
@@ -31,6 +32,10 @@ class Catalog extends Serializable {
     mutable.HashMap()
   private val _attributeToID: mutable.HashMap[Attribute, AttributeID] =
     mutable.HashMap()
+
+  def nextRelationID(): Int = {
+    relationIDCount
+  }
 
   def addOrReplaceContent(schema: RelationSchema,
                           content: RDD[Array[DataType]]): Int = {

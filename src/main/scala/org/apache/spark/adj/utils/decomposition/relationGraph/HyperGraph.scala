@@ -129,6 +129,19 @@ case class HyperTree(val V: Seq[HyperNode], val E: Seq[HyperEdge])
     V.map(_.g.E().size).max
   }
 
+  //TODO: test
+  def fractionHyperStarWidth(rootId: Int): Double = {
+    val relatedEdges = E.filter { e =>
+      e.u == rootId || e.v == rootId
+    }
+
+    relatedEdges.map { e =>
+      val Vs = e.v.g.V() ++ e.u.g.V()
+      val Es = e.v.g.E() ++ e.u.g.E()
+      RelationGraph(Vs, Es).width()
+    }.max
+  }
+
   override def toString: String = {
     s"""
        |V:${V}

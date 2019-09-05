@@ -1,9 +1,9 @@
-package org.apache.spark.adj.optimization.utils
+package org.apache.spark.adj.optimization.stat
 
 import org.apache.spark.adj.database.Catalog.{Attribute, AttributeID}
 import org.apache.spark.adj.database.{Relation, RelationSchema}
 import org.apache.spark.adj.execution.hcube.{HCube, HCubePlan}
-import org.apache.spark.adj.plan.TaskInfo
+import org.apache.spark.adj.execution.subtask.TaskInfo
 import org.apache.spark.adj.utils.extension.SeqUtil
 
 import scala.collection.mutable
@@ -17,7 +17,7 @@ class StatisticComputer(relation: Relation, taskNum: Int = 4)
     extends Serializable {
 
   val schema = relation.schema
-  val content = relation.content
+  val content = relation.rdd
 
   def compute(): StatisticResult = {
     val arity = schema.arity

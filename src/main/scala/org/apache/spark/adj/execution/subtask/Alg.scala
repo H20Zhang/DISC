@@ -1,4 +1,4 @@
-package org.apache.spark.adj.execution.leapfrog
+package org.apache.spark.adj.execution.subtask
 
 import org.apache.spark.adj.database.Catalog.DataType
 
@@ -61,7 +61,6 @@ object BSearch {
     while (right > left) {
       val mid = left + (right - left) / 2
       val midVal = array(mid)
-//      val comp = arithmetic.compare(array(mid), value)
 
       var comp = 0
       if (midVal > value) {
