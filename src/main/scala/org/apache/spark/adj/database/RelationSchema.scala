@@ -6,8 +6,6 @@ import org.apache.spark.adj.database.Catalog.{
   DataType,
   RelationID
 }
-import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Structure
-import org.apache.spark.adj.deprecated.plan.deprecated.LogicalPlan.Structure.Relation
 import org.apache.spark.adj.execution.hcube.HCubeBlock
 import org.apache.spark.rdd.RDD
 

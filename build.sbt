@@ -10,11 +10,13 @@ libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.2.0" % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-core" % "2.2.0" % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-graphx" % "2.2.0" % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-mllib" % "2.2.0" % "provided"
-libraryDependencies += "com.joptimizer" % "joptimizer" % "4.0.0"
+libraryDependencies += "com.joptimizer" % "joptimizer" % "5.0.0"
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.3" % "test"
-libraryDependencies += "net.sf.trove4j" % "trove4j" % "3.0.3" % "provided"
+libraryDependencies += "net.sf.trove4j" % "trove4j" % "3.0.3"
 libraryDependencies += "com.typesafe" % "config" % "1.3.4"
 libraryDependencies += "org.jgrapht" % "jgrapht-core" % "1.3.0"
+// https://mvnrepository.com/artifact/com.github.scopt/scopt
+libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.0-RC2"
 
 watchSources += baseDirectory.value / "script/"
 

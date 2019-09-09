@@ -6,6 +6,8 @@ import org.apache.spark.adj.database.Catalog.{
   RelationID
 }
 import org.apache.spark.adj.database.{Catalog, Relation, RelationSchema}
+import org.apache.spark.adj.utils.misc.Conf
+import org.apache.spark.adj.utils.misc.Conf.Method
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.DataType
 
@@ -52,10 +54,20 @@ case class Join(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
 
   val schemas = childrenOps.map(_.info())
   val attrIDs = schemas.flatMap(_.attrIDs).distinct
+  val conf = Conf.defaultConf()
 
   def optimizedPlan(): LogicalPlan = {
 //    UnOptimizedHCubeJoin(childrenOps.map(_.optimizedPlan()))
-    OptimizedHCubeJoin(childrenOps.map(_.optimizedPlan()))
+
+    val inputs = childrenOps.map(_.optimizedPlan())
+    import Method._
+    conf.method match {
+      case PushHCube   => OptimizedPushHCubeJoin(inputs)
+      case PullHCube   => OptimizedPullHCubeJoin(inputs)
+      case MergedHCube => OptimizedMergedHCubeJoin(inputs)
+      case Factorize   => OptimizedHCubeFactorizedJoin(inputs)
+      case _           => throw new Exception(s"not such method supported ${conf.method}")
+    }
   }
 
   def getSchema(): Seq[RelationSchema] = {

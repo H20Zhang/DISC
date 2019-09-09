@@ -2,8 +2,12 @@ package org.apache.spark.adj.execution.subtask
 
 import org.apache.spark.adj.database.Catalog
 import org.apache.spark.adj.database.Catalog.{Attribute, AttributeID, DataType}
-import org.apache.spark.adj.execution.hcube.{HCubeBlock, TupleHCubeBlock}
-import org.apache.spark.adj.utils.decomposition.relationGraph.RelationGHDTree
+import org.apache.spark.adj.execution.hcube.{
+  HCubeBlock,
+  TrieHCubeBlock,
+  TupleHCubeBlock
+}
+import org.apache.spark.adj.optimization.decomposition.relationGraph.RelationGHDTree
 
 class TaskInfo
 class SubTask(_shareVector: Array[Int],
@@ -13,7 +17,7 @@ class SubTask(_shareVector: Array[Int],
   val shareVector = _shareVector
   val info = _info
 
-  def execute(): Iterator[Array[DataType]] = {
+  def execute(): LongSizeIterator[Array[DataType]] = {
     throw new NotImplementedError()
   }
 
@@ -42,8 +46,33 @@ class LeapFrogJoinSubTask(_shareVector: Array[Int],
   }
 
   override def execute() = {
-    new LeapFrogJoin(this)
+    val leapfrog = new LeapFrogJoin(this)
+//    leapfrog.init()
+    leapfrog
   }
+}
+
+class TrieConstructedLeapFrogJoinSubTask(_shareVector: Array[Int],
+                                         val tries: Seq[HCubeBlock],
+                                         attrOrderInfo: AttributeOrderInfo)
+    extends LeapFrogJoinSubTask(
+      _shareVector,
+      tries.map(
+        f =>
+          TupleHCubeBlock(
+            f.schema,
+            f.shareVector,
+            new Array[Array[DataType]](0)
+        )
+      ),
+      attrOrderInfo
+    ) {
+
+  override def execute() = {
+    val leapfrog = new TrieConstructedLeapFrogJoin(this)
+    leapfrog
+  }
+
 }
 
 case class FactorizedAttributeOrderInfo(attrOrder: Array[AttributeID],
@@ -53,12 +82,12 @@ class FactorizedLeapFrogJoinSubTask(
   _shareVector: Array[Int],
   _blocks: Seq[TupleHCubeBlock],
   factorizedAttrOrderInfo: FactorizedAttributeOrderInfo
-) extends LeapFrogJoinSubTask(
+) extends SubTask(
       _shareVector,
       _blocks,
       AttributeOrderInfo(factorizedAttrOrderInfo.attrOrder)
     ) {
-  override val attrOrders = factorizedAttrOrderInfo.attrOrder
+  val attrOrders = factorizedAttrOrderInfo.attrOrder
   override val blocks = _blocks
   val corePos = factorizedAttrOrderInfo.corePos
 
@@ -71,7 +100,8 @@ class FactorizedLeapFrogJoinSubTask(
   }
 
   override def execute() = {
-    new FactorizedLeapFrogJoin(this)
+    val leapfrog = new FactorizedLeapFrogJoin(this)
+    leapfrog
   }
 }
 
@@ -127,4 +157,31 @@ class GHDJoinSubTask(_shareVector: Array[Int],
   override def execute() = {
     new GHDJoin(this)
   }
+}
+
+object SubTaskFactory {
+  def genSubTask(shareVector: Array[Int],
+                 blocks: Seq[TupleHCubeBlock],
+                 info: TaskInfo) = {
+    info match {
+      case s: AttributeOrderInfo =>
+        new LeapFrogJoinSubTask(shareVector, blocks, s)
+      case s: FactorizedAttributeOrderInfo =>
+        new FactorizedLeapFrogJoinSubTask(shareVector, blocks, s)
+      case _ =>
+        throw new Exception(s"subtask with info type ${info} not supported")
+    }
+  }
+
+  def genMergedSubTask(shareVector: Array[Int],
+                       blocks: Seq[HCubeBlock],
+                       info: TaskInfo) = {
+    info match {
+      case s: AttributeOrderInfo =>
+        new TrieConstructedLeapFrogJoinSubTask(shareVector, blocks, s)
+      case _ =>
+        throw new Exception(s"subtask with info type ${info} not supported")
+    }
+  }
+
 }

@@ -1,6 +1,5 @@
 package org.apache.spark.adj.utils.misc
 
-import org.apache.spark.adj.deprecated.execution.rdd._
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -19,27 +18,27 @@ object SparkSingle {
     //    Log.set(LEVEL_TRACE)
 
     new SparkConf()
-      .registerKryoClasses(
-        Array(
-          classOf[LogoSchema],
-          classOf[CompositeLogoSchema],
-          classOf[LogoMetaData],
-          classOf[ConcretePatternLogoBlock],
-          classOf[KeyValuePatternLogoBlock],
-          classOf[CompositeTwoPatternLogoBlock],
-          classOf[FilteringPatternLogoBlock[_]],
-          classOf[PatternInstance],
-          classOf[OneKeyPatternInstance],
-          classOf[TwoKeyPatternInstance],
-          classOf[ValuePatternInstance],
-          classOf[KeyMapping],
-          classOf[mutable.LongMap[ValuePatternInstance]]
-        )
-      )
-      .set(
-        "spark.kryo.registrator",
-        "org.apache.spark.adj.deprecated.utlis.KryoRegistor"
-      )
+//      .registerKryoClasses(
+//        Array(
+//          classOf[LogoSchema],
+//          classOf[CompositeLogoSchema],
+//          classOf[LogoMetaData],
+//          classOf[ConcretePatternLogoBlock],
+//          classOf[KeyValuePatternLogoBlock],
+//          classOf[CompositeTwoPatternLogoBlock],
+//          classOf[FilteringPatternLogoBlock[_]],
+//          classOf[PatternInstance],
+//          classOf[OneKeyPatternInstance],
+//          classOf[TwoKeyPatternInstance],
+//          classOf[ValuePatternInstance],
+//          classOf[KeyMapping],
+//          classOf[mutable.LongMap[ValuePatternInstance]]
+//        )
+//      )
+//      .set(
+//        "spark.kryo.registrator",
+//        "org.apache.spark.adj.deprecated.utlis.KryoRegistor"
+//      )
 
   }
 
@@ -47,7 +46,7 @@ object SparkSingle {
   //        .config("spark.memory.offHeap.size","500M")
 
   var isCluster = false
-  var appName = "Logo"
+  var appName = "ADJ"
 
   private def getSparkInternal() = {
     isCluster match {

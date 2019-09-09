@@ -32,7 +32,7 @@ class ShareComputerTest extends SparkFunSuite {
       s"all plausible share:${shareComputer.genAllShare().map(_.toSeq).size}"
     )
 
-    val optimalShare = shareComputer.optimalShareAndLoadAndCost(numServer)
+    val optimalShare = shareComputer.optimalShareAndLoadAndCost()
     println(s"optimal share:${optimalShare._1.map(
       f => (catlog.getAttribute(f._1), f._2)
     )}, cost:${optimalShare._2}, load:${optimalShare._3}")

@@ -1,26 +1,21 @@
 package org.apache.spark.adj.execution.hcube
 
 import org.apache.spark.adj.database.Catalog
-import org.apache.spark.adj.database.Catalog.{
-  Attribute,
-  AttributeID,
-  DataType,
-  RelationID
-}
+import org.apache.spark.adj.database.Catalog.{AttributeID, DataType, RelationID}
+import org.apache.spark.adj.execution.hcube.pull.{HCubePlan, SubTaskPartition}
 import org.apache.spark.adj.execution.subtask.TaskInfo
-import org.apache.spark.adj.plan.Join
 import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable.ArrayBuffer
 
-class HCubeHelper(query: HCubePlan) {
+class HCubeHelper(@transient query: HCubePlan) extends Serializable {
 
-  val shareSpace = query.share
+  @transient val shareSpace = query.share
   val catalog = Catalog.defaultCatalog()
 
   def taskPartitioner = new HCubePartitioner(shareSpace.values.toArray)
 
-  private def genShareForAttrs(attrsID: Seq[AttributeID]) = {
+  def genShareForAttrs(attrsID: Seq[AttributeID]) = {
     val attrsShareSpace = attrsID
       .filter(shareSpace.contains)
       .map(attrID => shareSpace.get(attrID).get)
@@ -51,7 +46,7 @@ class HCubeHelper(query: HCubePlan) {
 
   def genSubTaskPartitions(
     info: TaskInfo,
-    rdds: Seq[RDD[TupleHCubeBlock]]
+    rdds: Seq[RDD[HCubeBlock]]
   ): Array[SubTaskPartition] = {
 
     val attrIDs = shareSpace.keys.toArray

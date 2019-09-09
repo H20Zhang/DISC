@@ -1,8 +1,8 @@
 package org.apache.spark.adj.execution.misc
 
-import org.apache.spark.adj.utils.misc.SparkSingle
+import org.apache.spark.adj.utils.misc.{Conf, SparkSingle}
 
-class DataLoader(partitionSize: Int = 4) {
+class DataLoader(partitionSize: Int = Conf.defaultConf().getTaskNum()) {
 
   lazy val (_, sc) = SparkSingle.getSpark()
   lazy val spark = SparkSingle.getSparkSession()
@@ -21,8 +21,13 @@ class DataLoader(partitionSize: Int = 4) {
         res
       }
       .filter(f => f != null)
+      .map(f => (f(0), f(1)))
+      .flatMap(f => Iterator(f, f.swap))
+      .distinct()
+      .map(f => Array(f._1, f._2))
 
     relationRDD.cache()
+    relationRDD.count()
 
     relationRDD
   }

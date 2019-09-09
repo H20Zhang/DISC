@@ -5,8 +5,12 @@ import org.apache.spark.adj.execution.subtask.Intersection.seek
 
 import scala.collection.mutable.ArrayBuffer
 
+abstract class LongSizeIterator[T] extends Iterator[T] {
+  def longSize: Long
+}
+
 class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
-    extends Iterator[Array[DataType]] {
+    extends LongSizeIterator[Array[DataType]] {
 
   protected val contents =
     subJoins.blocks.map(_.content).map(f => f.map(g => g.clone()))
@@ -16,8 +20,12 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
   protected val attrSize = attrOrders.size
   protected val binding = new Array[DataType](attrSize)
   protected var hasEnd = false
-  protected val tries = new Array[Trie](numRelations)
+  protected var tries = new Array[Trie](numRelations)
   protected val unaryIterators = new Array[Iterator[DataType]](attrSize)
+  protected val initV = {
+//    println(s"init")
+    init()
+  }
 
   //record
   // 1) for each attribute: the relevant relations
@@ -56,26 +64,28 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
     }
   }
 
-  //init the leapfrog
-  init()
+  def init() = {
 
-  protected def init() = {
+    //init relations
+    initRelations()
 
+    //init unary iterator for all attributes
+    initIterators()
+  }
+
+  def initRelations() = {
     //init content of relations
     var i = 0
     while (i < numRelations) {
 
       //reorder the content according to attribute order
       reorderRelations(i)
-//      println(s"schema:${schema.name}, content-${i}, content:${content.toSeq.map(_.toSeq)}")
+      //      println(s"schema:${schema.name}, content-${i}, content:${content.toSeq.map(_.toSeq)}")
 
       //construct trie based on reordered content
       tries(i) = ArrayTrie(contents(i), schemas(i).arity)
       i += 1
     }
-
-    //init unary iterator for all attributes
-    initIterators()
   }
 
   //reorder tuples of relation-idx according to attribute order
@@ -139,7 +149,9 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
           return
         }
       }
+    }
 
+    while (hasEnd != true) {
       //case: fix the iterator for the rest of the attributes
       val prevIdx = idx - 1
       val prevIterator = unaryIterators(prevIdx)
@@ -152,14 +164,14 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
           return
         }
       }
-
       if (prevIdx == 0) {
         hasEnd = true
         return
       } else {
         fixIterators(idx - 1)
-        fixIterators(idx)
+//        fixIterators(idx)
       }
+
     }
 
   }
@@ -210,7 +222,7 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
     binding
   }
 
-  def longSize() = {
+  override def longSize() = {
 
     var count = 0l
     while (!hasEnd) {
@@ -232,86 +244,4 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
     count
   }
 
-//  private def debugInternal() = {
-//
-//    val seperatorLine = s"-----------------------------------"
-//    //test dataset
-//
-//    println(s"Testing Dataset")
-//    println(seperatorLine)
-//    var idx = 0
-//    while (idx < numRelations) {
-//      val schema = schemas(idx)
-//      val content = contents(idx)
-//      println(
-//        s"Relation:${schema.name}, Attrs:${schema.attrs}, AttrIDs:${schema.attrIDs}, AttrIDOrder:${attrOrders.toSeq}"
-//      )
-//      println(s"Original Content:${content.toSeq.map(_.toSeq)}")
-//      idx += 1
-//    }
-//    println(seperatorLine)
-//    println()
-//
-//    //test reorderRelationContent
-//    println(s"Testing reorder relation content")
-//    println(seperatorLine)
-//
-//    idx = 0
-//    while (idx < numRelations) {
-//      val schema = schemas(idx)
-//      val content = contents(idx)
-//      reorderRelations(idx)
-//      println(
-//        s"Relation:${schema.name}, Attrs:${schema.attrs}, AttrIDs:${schema.attrIDs}, AttrIDOrder:${attrOrders.toSeq}"
-//      )
-//      println(s"Reordered Content:${content.toSeq.map(_.toSeq)}")
-//      idx += 1
-//    }
-//    println(seperatorLine)
-//    println()
-//
-//    //test construct iterator
-//    println(s"Testing construct iterator")
-//    println(seperatorLine)
-//    var i = 0
-//    while (i < numRelations) {
-//      val content = contents(i)
-//      val schema = schemas(i)
-//
-//      //prepare trie
-//      tries(i) = ArrayTrie(content, schema.arity)
-////      tries(i) = HashMapTrie(content, schema.arity)
-//      println(s"trie of Relation:${schema.name}")
-//      println(s"${tries(i).toRelation().toSeq.map(_.toSeq)}")
-//
-//      i += 1
-//    }
-////    val iterator1 =
-//    unaryIterators(0) = constructIthIterator(0)
-////    println(s"content of the first level iterator:${unaryIterators(0).content}")
-//    println(seperatorLine)
-//    println()
-//
-//    //test init iterator
-//    println(s"Testing init iterator")
-//    println(seperatorLine)
-//
-//    //init iterators
-//    i = 1
-//    while (i < attrSize) {
-//      fixIterators(i)
-//      i += 1
-//    }
-//
-//    i = 0
-//    while (i < attrSize) {
-//      if (unaryIterators(i) != null) {
-////        println(s"${i}-th iterators content:${unaryIterators(i).content}")
-//      }
-//      i += 1
-//    }
-//    println(seperatorLine)
-//    println()
-//    //test leapfrog iterator
-//  }
 }

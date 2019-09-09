@@ -1,0 +1,900 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="GraphFrameTest" />
+    </artifacts-to-build>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b08b817a-7650-4861-9fbb-cc46ad7efa6c" name="Default" comment="LeapFrog Implemented And Tested">
+      <change afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/optimization/OnePassSimpleOptimizer.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/optimization/utils/ShareComputer.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/parser/simpleDml/SimpleParser.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/parser/sql/SQLAST.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/parser/sql/SQLParser.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/plan/OptimizedLogicalPlan.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/scala/MainTest.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/scala/parser/SQLParserTest.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/scala/parser/SimpleParserTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/database/Database.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/database/Database.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/database/Query.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/database/Query.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/database/RelationSchema.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/database/RelationSchema.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/database/Statistic.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/optimization/utils/Statistic.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/database/util/RelationLoader.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/database/DataLoader.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/database/util/StatisticComputer.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/optimization/utils/StatisticComputer.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/hcube/HCube.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/hcube/HCube.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/hcube/HCubeHelper.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/hcube/HCubeHelper.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/hcube/RelationPartitioner.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/hcube/RelationPartitioner.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/leapfrog/Alg.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/leapfrog/Alg.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/leapfrog/LeapFrog.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/leapfrog/LeapFrog.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/leapfrog/Trie.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/leapfrog/Trie.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/optimization/OrderOptimizer.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/optimization/utils/OrderComputer.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/optimization/ShareOptimizer.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/parser/SQLParser.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/parser/SimpleParser.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/plan/LogicalPlan.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/plan/LogicalPlan.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/plan/PhysicalPlan.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/plan/PhysicalPlan.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/plan/SubTask.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/plan/SubTask.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/database/RelationTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/database/RelationTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/leapfrog/AlgTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/leapfrog/AlgTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/leapfrog/LeapFrogTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/leapfrog/LeapFrogTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/utils/ContentGenerator.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/utils/ContentGenerator.scala" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeStyleSettingsInfer">
+    <option name="done" value="true" />
+  </component>
+  <component name="DaemonCodeAnalyzer">
+    <disable_hints>
+      <file url="file://$PROJECT_DIR$/build.sbt" />
+    </disable_hints>
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="false" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_TABLE_DETAILS" value="true" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <expand />
+    <select />
+  </component>
+  <component name="DefaultGradleProjectSettings">
+    <option name="testRunner" value="GRADLE" />
+    <option name="delegatedBuild" value="true" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="SBT">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Logo" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="CurrentCode">
+      <favorite_root url="file://$PROJECT_DIR$/src/test/scala/Plan/QTreeTest.scala" type="psiFile" klass="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+    </favorites_list>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="Scala Object" />
+        <option value="Scala Class" />
+        <option value="Package Object" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Organize_Code" />
+      </map>
+    </option>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/test/scala/deprecated/Plan/ADJPatternTest.scala" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/build.sbt" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="IgnoredFileRootStore">
+    <option name="generatedRoots">
+      <set>
+        <option value="$PROJECT_DIR$/.idea" />
+      </set>
+    </option>
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="1" />
+  </component>
+  <component name="ProjectId" id="1PjskVPjmilzwkZer6Or66xUQGJ" />
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>CollectionsScala</id>
+          </State>
+          <State>
+            <id>GeneralScala</id>
+          </State>
+          <State>
+            <id>OtherCollectionsScala</id>
+          </State>
+          <State>
+            <id>RegExp</id>
+          </State>
+          <State>
+            <id>SQL</id>
+          </State>
+          <State>
+            <id>Scala</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>Less</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="SearchEverywhereHistoryKey" value="{&#9;null&#9;null" />
+    <property name="ToolWindowDatabase.ShowToolbar" value="false" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_directory_selection" value="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/internal/rdd/loader" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/exp" />
+      <recent name="$PROJECT_DIR$/examples" />
+      <recent name="$PROJECT_DIR$/script" />
+      <recent name="$PROJECT_DIR$/resource" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="org.apache.spark.adj.internal.rdd.loader" />
+      <recent name="org.apache.spark.Logo.Plan.LogicalPlan.Structure" />
+      <recent name="org.apache.spark.Logo.utlis" />
+      <recent name="" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.apache.spark.Logo.Experiment" />
+      <recent name="org.apache.spark.Logo.UnderLying.utlis" />
+      <recent name="org.apache.spark.Logo.Logical" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.TriangleEfficientTest">
+    <configuration default="true" type="Applet">
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TriangleEfficientTest" type="Application" factoryName="Application" temporary="true">
+      <option name="MAIN_CLASS_NAME" value="org.apache.spark.Logo.Experiment.TriangleEfficientTest" />
+      <module name="logo" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="hzhang.framework.test.exp.entry.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Debug SBT Shell" type="Remote" temporary="true">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="127.0.0.1" />
+      <option name="PORT" value="59227" />
+      <option name="AUTO_RESTART" value="false" />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="59227" />
+        <option name="LOCAL" value="false" />
+      </RunnerSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="Debug sbt shell" type="Remote" activateToolWindowBeforeRun="false" singleton="true" temporary="true">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="57792" />
+      <option name="AUTO_RESTART" value="false" />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="57792" />
+        <option name="LOCAL" value="false" />
+      </RunnerSettings>
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="TestNG">
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+      <option name="PROGRAM_PARAMETERS" />
+      <predefined_log_file enabled="true" id="idea.log" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.TriangleEfficientTest" />
+      <item itemvalue="Remote.Debug SBT Shell" />
+      <item itemvalue="Remote.Debug sbt shell" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Remote.Debug sbt shell" />
+        <item itemvalue="Remote.Debug SBT Shell" />
+        <item itemvalue="Application.TriangleEfficientTest" />
+        <item itemvalue="Remote.Debug sbt shell" />
+        <item itemvalue="Remote.Debug SBT Shell" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SbtLocalSettings">
+    <option name="availableProjects">
+      <map>
+        <entry>
+          <key>
+            <ExternalProjectPojo>
+              <option name="name" value="ADJ" />
+              <option name="path" value="$PROJECT_DIR$" />
+            </ExternalProjectPojo>
+          </key>
+          <value>
+            <list>
+              <ExternalProjectPojo>
+                <option name="name" value="adj [file:/Users/zhanghao/Dropbox/research/code/ADJ_Code/ADJ/]" />
+                <option name="path" value="$PROJECT_DIR$" />
+              </ExternalProjectPojo>
+              <ExternalProjectPojo>
+                <option name="name" value="ADJ-build" />
+                <option name="path" value="$PROJECT_DIR$/project" />
+              </ExternalProjectPojo>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="modificationStamps">
+      <map>
+        <entry key="$PROJECT_DIR$" value="6202229638228" />
+        <entry key="$PROJECT_DIR$/build.sbt" value="4133758752" />
+        <entry key="$PROJECT_DIR$/project/assembly.sbt" value="3661142816" />
+        <entry key="$PROJECT_DIR$/project/build.properties" value="3280644262" />
+        <entry key="$PROJECT_DIR$/project/plugins.sbt" value="0" />
+      </map>
+    </option>
+  </component>
+  <component name="ScalaProjectSettings">
+    <option name="dontCacheCompoundTypes" value="true" />
+    <option name="treatDocCommentAsBlockComment" value="true" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration>$USER_HOME$/.subversion</configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b08b817a-7650-4861-9fbb-cc46ad7efa6c" name="Default" comment="" />
+      <created>1509353119686</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1509353119686</updated>
+      <workItem from="1509353121181" duration="676000" />
+      <workItem from="1509353875512" duration="10081000" />
+      <workItem from="1509371807767" duration="602000" />
+      <workItem from="1509437806998" duration="3131000" />
+      <workItem from="1509448390307" duration="3384000" />
+      <workItem from="1509452508355" duration="1529000" />
+      <workItem from="1509512728638" duration="620000" />
+      <workItem from="1509786618954" duration="7559000" />
+      <workItem from="1509933406079" duration="4111000" />
+      <workItem from="1509974575313" duration="564000" />
+      <workItem from="1509976612372" duration="581000" />
+      <workItem from="1510044398021" duration="10770000" />
+      <workItem from="1510193653916" duration="348000" />
+      <workItem from="1510194290132" duration="633000" />
+      <workItem from="1510380308008" duration="6937000" />
+      <workItem from="1510405166213" duration="374000" />
+      <workItem from="1510540594991" duration="1464000" />
+      <workItem from="1510555680328" duration="10978000" />
+      <workItem from="1510582926721" duration="288000" />
+      <workItem from="1510585222296" duration="870000" />
+      <workItem from="1510642498488" duration="635000" />
+      <workItem from="1510647239418" duration="30195000" />
+      <workItem from="1510908939323" duration="6389000" />
+      <workItem from="1511084906173" duration="104000" />
+      <workItem from="1511085084946" duration="85000" />
+      <workItem from="1511085250084" duration="78000" />
+      <workItem from="1511085371459" duration="131000" />
+      <workItem from="1511326098367" duration="603000" />
+      <workItem from="1511333877276" duration="253000" />
+      <workItem from="1511579482556" duration="7210000" />
+      <workItem from="1511594527861" duration="86000" />
+      <workItem from="1511595127126" duration="22000" />
+      <workItem from="1511763844984" duration="7486000" />
+      <workItem from="1511869044029" duration="7366000" />
+      <workItem from="1512302201020" duration="1695000" />
+      <workItem from="1512712193629" duration="21000" />
+      <workItem from="1512803734973" duration="574000" />
+      <workItem from="1512888284445" duration="68841000" />
+      <workItem from="1514972164533" duration="74000" />
+      <workItem from="1515051812297" duration="10961000" />
+      <workItem from="1515075443719" duration="234000" />
+      <workItem from="1515075714852" duration="569000" />
+      <workItem from="1515076492862" duration="231000" />
+      <workItem from="1515076730155" duration="555000" />
+      <workItem from="1515077339312" duration="70000" />
+      <workItem from="1515077415133" duration="2919000" />
+      <workItem from="1515233579349" duration="30687000" />
+      <workItem from="1515657313985" duration="39827000" />
+      <workItem from="1515910285596" duration="80403000" />
+      <workItem from="1516417351826" duration="25000" />
+      <workItem from="1516417458129" duration="436000" />
+      <workItem from="1516595680945" duration="48549000" />
+      <workItem from="1516970016422" duration="4943000" />
+      <workItem from="1517198100965" duration="17000" />
+      <workItem from="1517198171113" duration="4556000" />
+      <workItem from="1517210844976" duration="12527000" />
+      <workItem from="1517225970417" duration="245000" />
+      <workItem from="1517226269967" duration="9918000" />
+      <workItem from="1517290304696" duration="12000" />
+      <workItem from="1517309688491" duration="4059000" />
+      <workItem from="1517389691675" duration="19000" />
+      <workItem from="1517398514741" duration="9657000" />
+      <workItem from="1517460768899" duration="2910000" />
+      <workItem from="1517539303639" duration="280000" />
+      <workItem from="1517541724087" duration="27523000" />
+      <workItem from="1517585909519" duration="15597000" />
+      <workItem from="1517659461699" duration="13221000" />
+      <workItem from="1517677094410" duration="3095000" />
+      <workItem from="1517994049686" duration="1375000" />
+      <workItem from="1518054879886" duration="714000" />
+      <workItem from="1518055860727" duration="584000" />
+      <workItem from="1518078119200" duration="1677000" />
+      <workItem from="1518351746987" duration="8095000" />
+      <workItem from="1518360165908" duration="1221000" />
+      <workItem from="1518401588411" duration="847000" />
+      <workItem from="1518418191414" duration="299000" />
+      <workItem from="1518479062804" duration="1898000" />
+      <workItem from="1518485494733" duration="4304000" />
+      <workItem from="1518843384973" duration="157000" />
+      <workItem from="1518914312523" duration="122000" />
+      <workItem from="1519616974456" duration="21386000" />
+      <workItem from="1519654217467" duration="284000" />
+      <workItem from="1519734678003" duration="4582000" />
+      <workItem from="1519744515277" duration="8623000" />
+      <workItem from="1519958460706" duration="878000" />
+      <workItem from="1520256883902" duration="9614000" />
+      <workItem from="1520325166322" duration="4943000" />
+      <workItem from="1520507499071" duration="8385000" />
+      <workItem from="1520570903833" duration="4644000" />
+      <workItem from="1520657535336" duration="465000" />
+      <workItem from="1520658037252" duration="221000" />
+      <workItem from="1520658297895" duration="34000" />
+      <workItem from="1520658365298" duration="549000" />
+      <workItem from="1520658955142" duration="1217000" />
+      <workItem from="1520663217735" duration="13000" />
+      <workItem from="1520663308442" duration="155000" />
+      <workItem from="1520663498477" duration="223000" />
+      <workItem from="1520737715846" duration="4738000" />
+      <workItem from="1520743316142" duration="6527000" />
+      <workItem from="1520776944873" duration="5303000" />
+      <workItem from="1520784349597" duration="685000" />
+      <workItem from="1566170355568" duration="65000" />
+      <workItem from="1566170450091" duration="24000" />
+      <workItem from="1566170499545" duration="384000" />
+      <workItem from="1566170972979" duration="1756000" />
+      <workItem from="1566398991474" duration="67000" />
+      <workItem from="1566399101287" duration="429000" />
+      <workItem from="1566836840704" duration="454000" />
+    </task>
+    <task id="LOCAL-00011" summary="Logo Script One Step prelimary testing finish, further testing required">
+      <created>1510914847477</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1510914847478</updated>
+    </task>
+    <task id="LOCAL-00012" summary="triangle Counting Test Complete, need to implement LogoBlock's ability">
+      <created>1511792340349</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1511792340349</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Composite LogoBlock Still need to finish">
+      <created>1511876640774</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1511876640775</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Composite LogoBlock Still need to finish">
+      <created>1512303607741</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1512303607741</updated>
+    </task>
+    <task id="LOCAL-00015" summary="CompositeLogoBlock assemble and iterator waiting to fninish">
+      <created>1512962789050</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1512962789050</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Work has been decomposed into TODO, waiting to finish TODO">
+      <created>1512994804027</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1512994804027</updated>
+    </task>
+    <task id="LOCAL-00017" summary="implement the assemble and iterator method, later we need to finish the testing and then optimize the layout of the code">
+      <created>1513239539629</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1513239539629</updated>
+    </task>
+    <task id="LOCAL-00018" summary="implement the assemble and iterator method, later we need to finish the testing and then optimize the layout of the code">
+      <created>1513245144658</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1513245144658</updated>
+    </task>
+    <task id="LOCAL-00019" summary="needs continuing testing">
+      <created>1513332211766</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1513332211766</updated>
+    </task>
+    <task id="LOCAL-00020" summary="needs further integrate PatternLogoBlock with previous LogoBuild code">
+      <created>1513341273574</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1513341273575</updated>
+    </task>
+    <task id="LOCAL-00021" summary="plan for this week's work, which is shown in TODO">
+      <created>1513590505544</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1513590505544</updated>
+    </task>
+    <task id="LOCAL-00022" summary="huge change, many test required, split function into logical part, and physical part">
+      <created>1513739860065</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1513739860065</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Initial test passed, more test required">
+      <created>1513749609390</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1513749609390</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Initial test passed, more test required, distributed enviornment debug triangle">
+      <created>1513766002042</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1513766002042</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Initial test passed, more test required, distributed enviornment debug triangle">
+      <created>1514886432232</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1514886432232</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Initial test passed, more test required, distributed enviornment debug triangle">
+      <created>1514972031033</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1514972031033</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Initial test passed, more test required, distributed enviornment debug triangle">
+      <created>1515062698613</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1515062698614</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Initial test passed, more test required, distributed enviornment debug triangle">
+      <created>1515411043221</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1515411043221</updated>
+    </task>
+    <task id="LOCAL-00029" summary="more testing needed on complex pattern and pattern with filtering condition">
+      <created>1515573569023</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1515573569023</updated>
+    </task>
+    <task id="LOCAL-00030" summary="more testing needed on complex pattern and pattern with filtering condition">
+      <created>1515662586593</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1515662586594</updated>
+    </task>
+    <task id="LOCAL-00031" summary="more testing needed on complex pattern and pattern with filtering condition">
+      <created>1515775918764</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1515775918764</updated>
+    </task>
+    <task id="LOCAL-00032" summary="implementing testing pattern">
+      <created>1515930757876</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1515930757877</updated>
+    </task>
+    <task id="LOCAL-00033" summary="implementing testing pattern">
+      <created>1516083279046</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1516083279046</updated>
+    </task>
+    <task id="LOCAL-00034" summary="implementing testing pattern">
+      <created>1516286797168</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1516286797168</updated>
+    </task>
+    <task id="LOCAL-00035" summary="implementing testing pattern">
+      <created>1516340010345</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1516340010345</updated>
+    </task>
+    <task id="LOCAL-00036" summary="implementing testing pattern">
+      <created>1516797774460</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1516797774461</updated>
+    </task>
+    <task id="LOCAL-00037" summary="implementing testing pattern">
+      <created>1516804088471</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1516804088471</updated>
+    </task>
+    <task id="LOCAL-00038" summary="implementing compact list">
+      <created>1517213180282</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1517213180283</updated>
+    </task>
+    <task id="LOCAL-00039" summary="implementing compact list">
+      <created>1517218089710</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1517218089710</updated>
+    </task>
+    <task id="LOCAL-00040" summary="implementing compact list">
+      <created>1517220540082</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1517220540082</updated>
+    </task>
+    <task id="LOCAL-00041" summary="implementing compact list">
+      <created>1517313996773</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1517313996773</updated>
+    </task>
+    <task id="LOCAL-00042" summary="implementing compact list">
+      <created>1517406586427</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1517406586427</updated>
+    </task>
+    <task id="LOCAL-00043" summary="implementing compact list">
+      <created>1517410319784</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1517410319784</updated>
+    </task>
+    <task id="LOCAL-00044" summary="implementing compact list">
+      <created>1517585041877</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1517585041878</updated>
+    </task>
+    <task id="LOCAL-00045" summary="implementing compact list">
+      <created>1517796642206</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1517796642206</updated>
+    </task>
+    <task id="LOCAL-00046" summary="implementing compact list">
+      <created>1518358816114</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1518358816114</updated>
+    </task>
+    <task id="LOCAL-00047" summary="implementing compact list">
+      <created>1518488818683</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1518488818683</updated>
+    </task>
+    <task id="LOCAL-00048" summary="Code Optimize">
+      <created>1519654031491</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1519654031491</updated>
+    </task>
+    <task id="LOCAL-00049" summary="Code Optimize">
+      <created>1519738788895</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1519738788895</updated>
+    </task>
+    <task id="LOCAL-00050" summary="Code Optimize">
+      <created>1520265762832</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1520265762837</updated>
+    </task>
+    <task id="LOCAL-00051" summary="Code Optimize">
+      <created>1520330414299</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1520330414301</updated>
+    </task>
+    <task id="LOCAL-00052" summary="Code Optimize">
+      <created>1520517236635</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1520517236635</updated>
+    </task>
+    <task id="LOCAL-00053" summary="Code Optimize">
+      <created>1520642181607</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1520642181608</updated>
+    </task>
+    <task id="LOCAL-00054" summary="Code Optimize">
+      <created>1520659896484</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1520659896487</updated>
+    </task>
+    <task id="LOCAL-00055" summary="Code Optimize">
+      <created>1520660222439</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1520660222439</updated>
+    </task>
+    <task id="LOCAL-00056" summary="Code Optimize">
+      <created>1520742347501</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1520742347503</updated>
+    </task>
+    <task id="LOCAL-00057" summary="Code Optimize">
+      <created>1520742415310</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1520742415310</updated>
+    </task>
+    <task id="LOCAL-00058" summary="Code Optimize">
+      <created>1520754152579</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1520754152580</updated>
+    </task>
+    <task id="LOCAL-00059" summary="Code Optimize">
+      <created>1520779477475</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1520779477477</updated>
+    </task>
+    <option name="localTasksCounter" value="60" />
+    <servers />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <MESSAGE value="Simple Composite Logo Schema added" />
+    <MESSAGE value="Logo Script (partial finish)" />
+    <MESSAGE value="Logo Script One Step Finished" />
+    <MESSAGE value="Logo Script One Step prelimary testing finish, further testing required" />
+    <MESSAGE value="triangle Counting Test Complete, need to implement LogoBlock's ability" />
+    <MESSAGE value="Composite LogoBlock Still need to finish" />
+    <MESSAGE value="CompositeLogoBlock assemble and iterator waiting to fninish" />
+    <MESSAGE value="Work has been decomposed into TODO, waiting to finish TODO" />
+    <MESSAGE value="implement the assemble and iterator method, later we need to finish the testing and then optimize the layout of the code" />
+    <MESSAGE value="needs continuing testing" />
+    <MESSAGE value="needs further integrate PatternLogoBlock with previous LogoBuild code" />
+    <MESSAGE value="plan for this week's work, which is shown in TODO" />
+    <MESSAGE value="huge change, many test required, split function into logical part, and physical part" />
+    <MESSAGE value="Initial test passed, more test required" />
+    <MESSAGE value="Initial test passed, more test required, distributed enviornment debug triangle" />
+    <MESSAGE value="more testing needed on complex pattern and pattern with filtering condition" />
+    <MESSAGE value="implementing testing pattern" />
+    <MESSAGE value="implementing compact list" />
+    <MESSAGE value="Code Optimize" />
+    <MESSAGE value="Commit" />
+    <MESSAGE value="Organize Name - 1" />
+    <MESSAGE value="Reorganize" />
+    <MESSAGE value="Code Reorganize" />
+    <MESSAGE value="HCube Implemented And Tested" />
+    <MESSAGE value="LeapFrog Implemented And Tested" />
+    <option name="LAST_COMMIT_MESSAGE" value="LeapFrog Implemented And Tested" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/leapfrog/Trie.scala</url>
+          <line>83</line>
+          <option name="timeStamp" value="28" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="java-exception">
+          <dependency leave-enabled="true" master-id="0" />
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

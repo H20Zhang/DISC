@@ -1,6 +1,6 @@
 package org.jgrapht.alg.isomorphism
 
-import org.apache.spark.adj.utils.decomposition.graph.Graph._
+import org.apache.spark.adj.optimization.decomposition.graph.Graph._
 
 import scala.collection.mutable.ArrayBuffer
 

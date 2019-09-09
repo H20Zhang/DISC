@@ -30,6 +30,7 @@ class LeapFrogJoinTest extends FunSuite with BeforeAndAfterAll {
   test("debug internal") {
     val subJoins1 = TestingSubJoins.testing_subjoins1
     val leapfrog = new LeapFrogJoin(subJoins1)
+    leapfrog.init()
 //    leapfrog.debugInternal()
   }
 

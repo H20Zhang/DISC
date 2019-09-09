@@ -7,7 +7,7 @@ import org.apache.spark.adj.database.Catalog.DataType
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-trait Trie {
+trait Trie extends Serializable {
   def nextLevel(binding: ArraySegment): ArraySegment
   def toRelation(): Array[Array[DataType]]
 }

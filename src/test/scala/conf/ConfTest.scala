@@ -7,7 +7,7 @@ class ConfTest extends FunSuite {
 
   test("conf") {
     val conf = Conf.defaultConf()
-    println(conf.taskNum())
+    println(conf.getTaskNum())
 
   }
 }

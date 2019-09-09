@@ -2,14 +2,15 @@ package org.apache.spark.adj.execution.subtask
 
 import org.apache.spark.adj.database.Catalog.DataType
 import org.apache.spark.adj.database.{Catalog, RelationSchema}
-import org.apache.spark.adj.execution.hcube.TupleHCubeBlock
-import org.apache.spark.adj.utils.decomposition.relationGraph.RelationGHDTree
+import org.apache.spark.adj.execution.hcube
+import org.apache.spark.adj.execution.hcube.{TupleHCubeBlock, pull}
+import org.apache.spark.adj.optimization.decomposition.relationGraph.RelationGHDTree
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 //TODO: Debug
-class GHDJoin(task: GHDJoinSubTask) extends Iterator[Array[DataType]] {
+class GHDJoin(task: GHDJoinSubTask) extends LongSizeIterator[Array[DataType]] {
 
   val schemas = task.blocks.map(_.schema)
   val contents = task.blocks.map(_.content)
@@ -45,7 +46,7 @@ class GHDJoin(task: GHDJoinSubTask) extends Iterator[Array[DataType]] {
         val attrOrderInfo = AttributeOrderInfo(attrOrder.toArray)
         val tupleHCubeBlocks = schemas.zip(contents).map {
           case (schema, content) =>
-            TupleHCubeBlock(schema, null, content)
+            hcube.TupleHCubeBlock(schema, null, content)
         }
 
         val leapFrogTask = new LeapFrogJoinSubTask(
@@ -90,6 +91,9 @@ class GHDJoin(task: GHDJoinSubTask) extends Iterator[Array[DataType]] {
   override def hasNext: Boolean = leapfrogIt.hasNext
   override def next(): Array[DataType] = leapfrogIt.next()
 
+  override def longSize: Long = {
+    size
+  }
 }
 
 class YannakakisTask(

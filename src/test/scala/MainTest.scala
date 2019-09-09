@@ -1,5 +1,7 @@
 import org.apache.spark.adj.database.{Catalog, Query, RelationSchema}
 import org.apache.spark.adj.parser.simpleDml.SimpleParser
+import org.apache.spark.adj.utils.exp.ExpEntry
+import org.apache.spark.adj.utils.misc.Conf.Method
 import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.adj.utils.testing.{
   HCubeJoinValidator,
@@ -72,16 +74,20 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
 //    Query.countQuery(query)
 
     //near5Clique -- no intermediate
-    val query = s"Join R0;R1;R2;R3;R4;R5;R6;R7"
-    Query.countQuery(query)
+//    val query = s"Join R0;R1;R2;R3;R4;R5;R6;R7"
+//    Query.countQuery(query)
 
     //lolipop
 //    val query = s"Join R0;R1;R8"
 //    Query.countQuery(query)
 
+    //triangle
+    val query = s"Join R0;R1;R2"
+    Query.countQuery(query)
+
   }
 
-  test("HCubeJoin") {
+  test("RandomJoinTest") {
     val spark = SparkSingle.getSparkSession()
     val numRelation = 4
     val arity = 4
@@ -104,8 +110,17 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
     println(seq subset ())
   }
 
+  test("expEntry") {
+//    Factorize
+    val commands =
+      s"-q triangle -t 1000 -d ${dataAdress} -c false -m ${Method.MergedHCube}"
+
+//    val commands = s"--help"
+    ExpEntry.main(commands.split("\\s"))
+  }
+
   override protected def afterAll(): Unit = {
-//    SparkSingle.close()
+    SparkSingle.close()
   }
 
 }

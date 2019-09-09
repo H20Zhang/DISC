@@ -1,7 +1,7 @@
 package utils
 
 import org.apache.spark.adj.database.RelationSchema
-import org.apache.spark.adj.utils.decomposition.relationGraph.{
+import org.apache.spark.adj.optimization.decomposition.relationGraph.{
   HyperTreeDecomposer,
   RelationDecomposer,
   RelationEdge,
@@ -12,7 +12,7 @@ import org.scalatest.FunSuite
 class HyperTreeDecompositionTest extends FunSuite {
 
   test("graph decomposition") {
-    org.apache.spark.adj.utils.decomposition.graph.HyperTreeDecomposer.test()
+//    org.apache.spark.adj.utils.decomposition.graph.HyperTreeDecomposer.test()
   }
 
   test("RelationGraph") {
@@ -54,7 +54,7 @@ class HyperTreeDecompositionTest extends FunSuite {
     println(s"number of GHD is:${ghds.size}")
   }
 
-  test("Relation -- Decomposition") {
+  test("Relation -- Tree Decomposition") {
     val edge0 = Set(0)
     val edge1 = Set(0, 1)
     val edge2 = Set(0, 2)
@@ -76,5 +76,28 @@ class HyperTreeDecompositionTest extends FunSuite {
     val decomposer = new RelationDecomposer(schemas)
     val relationGHD = decomposer.decomposeTree().head
     println(s"relationGHD:${relationGHD}")
+  }
+
+  test("Relation -- Star Decomposition") {
+    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
+    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
+    val schemaR2 = RelationSchema("R2", Seq("C", "A"))
+    val schemaR3 = RelationSchema("R3", Seq("B", "D"))
+    val schemaR4 = RelationSchema("R4", Seq("C", "E"))
+    val schemaR5 = RelationSchema("R5", Seq("D", "E"))
+
+    val schemas =
+      Seq(schemaR0, schemaR1, schemaR2, schemaR3, schemaR4, schemaR5)
+    schemas.foreach(_.register())
+
+    val decomposer = new RelationDecomposer(schemas)
+    val relationGHDs = decomposer.decomposeStar()
+    println(s"relationGHD:${relationGHDs.head}")
+
+//    relationGHDs.foreach { star =>
+//      println()
+//      println(star)
+//    }
+
   }
 }

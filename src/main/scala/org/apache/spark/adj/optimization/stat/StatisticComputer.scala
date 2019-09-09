@@ -2,7 +2,6 @@ package org.apache.spark.adj.optimization.stat
 
 import org.apache.spark.adj.database.Catalog.{Attribute, AttributeID}
 import org.apache.spark.adj.database.{Relation, RelationSchema}
-import org.apache.spark.adj.execution.hcube.{HCube, HCubePlan}
 import org.apache.spark.adj.execution.subtask.TaskInfo
 import org.apache.spark.adj.utils.extension.SeqUtil
 
@@ -33,7 +32,8 @@ class StatisticComputer(relation: Relation, taskNum: Int = 4)
     allAttrSubSetsAndPos.foreach {
       case (subsetAttrs, pos) =>
         allAttrSubSetSize(subsetAttrs) =
-          content.map(tuple => pos.map(tuple).toSeq).distinct().count()
+          content.map(tuple => pos.map(tuple).toSeq).countApproxDistinct()
+//            distinct().count()
     }
 
     StatisticResult(schema, allAttrSubSetSize.toMap)
