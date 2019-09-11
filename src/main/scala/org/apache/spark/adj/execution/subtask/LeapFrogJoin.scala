@@ -83,7 +83,7 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
       //      println(s"schema:${schema.name}, content-${i}, content:${content.toSeq.map(_.toSeq)}")
 
       //construct trie based on reordered content
-      tries(i) = ArrayTrie(contents(i), schemas(i).arity)
+      tries(i) = Trie(contents(i), schemas(i).arity)
       i += 1
     }
   }
@@ -169,7 +169,6 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
         return
       } else {
         fixIterators(idx - 1)
-//        fixIterators(idx)
       }
 
     }

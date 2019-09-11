@@ -2,12 +2,12 @@ package org.apache.spark.adj.execution.hcube.pull
 
 import org.apache.spark.adj.database.Catalog.{AttributeID, RelationID}
 import org.apache.spark.adj.database.Relation
-import org.apache.spark.adj.execution.hcube.HCubeHelper
+import org.apache.spark.adj.execution.hcube.{HCube, HCubeHelper}
 import org.apache.spark.adj.execution.subtask.{SubTask, TaskInfo}
 import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.rdd.RDD
 
-class PullHCube(query: HCubePlan, info: TaskInfo) {
+class PullHCube(query: HCubePlan, info: TaskInfo) extends HCube {
 
   private val helper = new HCubeHelper(query)
   private val relations = query.relations
@@ -28,7 +28,7 @@ class PullHCube(query: HCubePlan, info: TaskInfo) {
 //    partitionedRelation
 //  }
 
-  def genHCubeRDD(f: PartitionedRelation => PartitionedRelation = { f =>
+  def genPullHCubeRDD(f: PartitionedRelation => PartitionedRelation = { f =>
     f
   }): RDD[SubTask] = {
     val partitionedRelations = genParititionedRelation()
@@ -51,6 +51,7 @@ class PullHCube(query: HCubePlan, info: TaskInfo) {
     hcubeRDD
   }
 
+  override def genHCubeRDD(): RDD[SubTask] = genPullHCubeRDD()
 }
 
 case class HCubePlan(@transient relations: Seq[Relation],

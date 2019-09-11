@@ -81,23 +81,41 @@ class HyperTreeDecompositionTest extends FunSuite {
   test("Relation -- Star Decomposition") {
     val schemaR0 = RelationSchema("R0", Seq("A", "B"))
     val schemaR1 = RelationSchema("R1", Seq("B", "C"))
-    val schemaR2 = RelationSchema("R2", Seq("C", "A"))
-    val schemaR3 = RelationSchema("R3", Seq("B", "D"))
-    val schemaR4 = RelationSchema("R4", Seq("C", "E"))
-    val schemaR5 = RelationSchema("R5", Seq("D", "E"))
+    val schemaR2 = RelationSchema("R2", Seq("C", "D"))
+    val schemaR3 = RelationSchema("R3", Seq("D", "A"))
+    val schemaR4 = RelationSchema("R4", Seq("A", "E"))
+    val schemaR5 = RelationSchema("R5", Seq("B", "E"))
+    val schemaR6 = RelationSchema("R6", Seq("C", "E"))
+    val schemaR7 = RelationSchema("R7", Seq("D", "E"))
 
     val schemas =
-      Seq(schemaR0, schemaR1, schemaR2, schemaR3, schemaR4, schemaR5)
+      Seq(
+        schemaR0,
+        schemaR1,
+        schemaR2,
+        schemaR3,
+        schemaR4,
+        schemaR5,
+        schemaR6,
+        schemaR7
+      )
     schemas.foreach(_.register())
 
     val decomposer = new RelationDecomposer(schemas)
-    val relationGHDs = decomposer.decomposeStar()
-    println(s"relationGHD:${relationGHDs.head}")
+    val relationGHDs = decomposer.decomposeTree()
+//    println(s"relationGHD:${relationGHDs}")
 
-//    relationGHDs.foreach { star =>
-//      println()
-//      println(star)
-//    }
+    relationGHDs.foreach { star =>
+      if (Math.ceil(star.fhtw).toInt == 2 && star.V.exists(
+            node =>
+              node._2
+                .map(_.name)
+                .toSet == Seq("R0", "R3", "R4", "R5", "R7").toSet
+          )) {
+        println()
+        println(star)
+      }
+    }
 
   }
 }

@@ -17,6 +17,7 @@ import org.apache.spark.adj.execution.subtask.{
   FactorizedLeapFrogJoin,
   FactorizedLeapFrogJoinSubTask,
   LeapFrogJoinSubTask,
+  SubTask,
   SubTaskFactory,
   TaskInfo
 }
@@ -31,7 +32,31 @@ trait PhysicalPlan {
   val db = Catalog.defaultCatalog()
 }
 
-//TODO: debug
+abstract class JoinExec(schema: RelationSchema,
+                        @transient children: Seq[PhysicalPlan])
+    extends PhysicalPlan {
+  def getChildren(): Seq[PhysicalPlan] = {
+    children
+  }
+}
+
+abstract class AbstractHCubeJoinExec(schema: RelationSchema,
+                                     @transient children: Seq[PhysicalPlan],
+                                     share: Map[AttributeID, Int],
+                                     info: TaskInfo)
+    extends JoinExec(schema, children)
+    with Serializable {
+
+  @transient val relations = getChildren().map(_.execute()).toArray
+  @transient val hcubePlan = HCubePlan(relations, share)
+  @transient val subTaskRDD = genSubTaskRDD()
+
+  def genSubTaskRDD(): RDD[SubTask]
+
+}
+
+//TODO: merge the common part of the following class into HCubeJoinExec, and make
+// sure that the Relation Returned by JoinExec have the same schema as the Join.info
 abstract class AbstractMergedPullHCubeJoinExec(
   @transient children: Seq[PhysicalPlan],
   share: Map[AttributeID, Int],
@@ -77,7 +102,7 @@ abstract class AbstractMergedPullHCubeJoinExec(
 
   def execute(): Relation = {
     val rdd = hcube
-      .genHCubeRDD {
+      .genPullHCubeRDD {
         preprocessHCube
       }
       .flatMap { task =>
@@ -93,15 +118,16 @@ abstract class AbstractMergedPullHCubeJoinExec(
 
     val catalog = Catalog.defaultCatalog()
     val schema = RelationSchema(
-      s"R${catalog.nextRelationID()}",
+      s"Temp-R${catalog.nextRelationID()}",
       share.keys.toArray.map(attrId => catalog.getAttribute(attrId))
     )
+    catalog.add(schema, rdd)
     Relation(schema, rdd)
   }
 
   def count() = {
     val num = hcube
-      .genHCubeRDD(preprocessHCube)
+      .genPullHCubeRDD(preprocessHCube)
       .map { task =>
         val subJoinTask = SubTaskFactory.genMergedSubTask(
           task.shareVector,
@@ -122,7 +148,7 @@ abstract class AbstractMergedPullHCubeJoinExec(
 
   def commOnly(): Long = {
     val num = hcube
-      .genHCubeRDD(preprocessHCube)
+      .genPullHCubeRDD(preprocessHCube)
       .map { task =>
         1
       }
@@ -160,9 +186,10 @@ abstract class AbstractPullHCubeJoinExec(children: Seq[PhysicalPlan],
 
     val catalog = Catalog.defaultCatalog()
     val schema = RelationSchema(
-      s"R${catalog.nextRelationID()}",
+      s"Temp-R${catalog.nextRelationID()}",
       share.keys.toArray.map(attrId => catalog.getAttribute(attrId))
     )
+    catalog.add(schema, rdd)
     Relation(schema, rdd)
   }
 
@@ -227,9 +254,10 @@ abstract class AbstractPushHCubeJoinExec(children: Seq[PhysicalPlan],
 
     val catalog = Catalog.defaultCatalog()
     val schema = RelationSchema(
-      s"R${catalog.nextRelationID()}",
+      s"Temp-R${catalog.nextRelationID()}",
       share.keys.toArray.map(attrId => catalog.getAttribute(attrId))
     )
+    catalog.add(schema, rdd)
     Relation(schema, rdd)
   }
 
@@ -310,50 +338,29 @@ case class MergedHCubeLeapJoinExec(children: Seq[PhysicalPlan],
       AttributeOrderInfo(attrOrder.toArray)
     )
 
+abstract class ScanExec(schema: RelationSchema) extends PhysicalPlan {
+  override def getChildren(): Seq[PhysicalPlan] = Seq()
+
+  override def count(): Long = {
+    execute().rdd.count()
+  }
+
+  override def commOnly(): Long = ???
+}
+
 case class DiskScanExec(schema: RelationSchema, dataAddress: String)
-    extends PhysicalPlan {
+    extends ScanExec(schema) {
   override def execute(): Relation = {
     val loader = new DataLoader()
     Relation(schema, loader.csv(dataAddress))
   }
 
-  override def getChildren(): Seq[PhysicalPlan] = Seq()
-
-  override def count(): Long = {
-    execute().rdd.count()
-  }
-
-  override def commOnly(): Long = ???
 }
 
 case class InMemoryScanExec(schema: RelationSchema,
                             content: RDD[Array[DataType]])
-    extends PhysicalPlan {
+    extends ScanExec(schema) {
   override def execute(): Relation = {
     Relation(schema, content)
   }
-
-  override def getChildren(): Seq[PhysicalPlan] = Seq()
-
-  override def count(): Long = {
-    execute().rdd.count()
-  }
-
-  override def commOnly(): Long = ???
-}
-
-//TODO: finish it
-case class ADJLeapJoinExec(children: Seq[PhysicalPlan],
-                           share: Map[AttributeID, Int],
-                           attrOrder: Seq[AttributeID],
-                           tasksNum: Int = 4)
-    extends PhysicalPlan {
-
-  override def execute(): Relation = ???
-
-  override def getChildren(): Seq[PhysicalPlan] = children
-
-  override def count(): Long = ???
-
-  override def commOnly(): Long = ???
 }

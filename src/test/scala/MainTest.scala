@@ -69,21 +69,21 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
 //    val query = s"Join R0;R1;R2;R3;R4;R5"
 //    Query.countQuery(query)
 
-    //near5Clique
+//    near5Clique
 //    val query = s"Join R0;R1;R2;R3;R4;R5;${relation8.schema.name}"
 //    Query.countQuery(query)
 
     //near5Clique -- no intermediate
-//    val query = s"Join R0;R1;R2;R3;R4;R5;R6;R7"
-//    Query.countQuery(query)
+    val query = s"Join R0;R1;R2;R3;R4;R5;R6;R7"
+    Query.countQuery(query)
 
     //lolipop
 //    val query = s"Join R0;R1;R8"
 //    Query.countQuery(query)
 
     //triangle
-    val query = s"Join R0;R1;R2"
-    Query.countQuery(query)
+//    val query = s"Join R0;R1;R2"
+//    Query.countQuery(query)
 
   }
 
@@ -113,7 +113,7 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
   test("expEntry") {
 //    Factorize
     val commands =
-      s"-q triangle -t 1000 -d ${dataAdress} -c false -m ${Method.MergedHCube}"
+      s"-q fourClique -t 1000 -d ${dataAdress} -c false -m ${Method.MergedHCube}"
 
 //    val commands = s"--help"
     ExpEntry.main(commands.split("\\s"))

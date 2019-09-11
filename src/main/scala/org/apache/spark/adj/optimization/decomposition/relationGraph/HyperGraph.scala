@@ -55,10 +55,10 @@ case class HyperTree(val V: Seq[HyperNode], val E: Seq[HyperEdge])
   private lazy val h =
     GraphBuilder.newGraph(he.flatMap(f => ArrayBuffer(f._1, f._2)).distinct, he)
 
-  def addHyperNode(hyperNode: HyperNode): Option[HyperTree] = {
+  def addHyperNode(hyperNode: HyperNode): Seq[HyperTree] = {
 
     if (isEmpty()) {
-      return Some(HyperTree(V :+ hyperNode, E))
+      return Seq(HyperTree(V :+ hyperNode, E))
     }
 
     val potentialHyperEdges = V
@@ -77,9 +77,9 @@ case class HyperTree(val V: Seq[HyperNode], val E: Seq[HyperEdge])
     }
 
     if (validHyperTreeList.isEmpty) {
-      None
+      Seq()
     } else {
-      Some(validHyperTreeList.head)
+      validHyperTreeList
     }
   }
 

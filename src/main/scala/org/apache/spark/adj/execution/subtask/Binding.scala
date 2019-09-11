@@ -23,7 +23,7 @@ class Binding {
   }
 }
 
-case class ArraySegment(array: Array[DataType],
+case class ArraySegment(var array: Array[DataType],
                         var begin: Int,
                         var end: Int,
                         var size: Int) {

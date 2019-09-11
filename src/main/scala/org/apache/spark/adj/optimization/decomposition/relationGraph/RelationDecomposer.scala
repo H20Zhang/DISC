@@ -68,7 +68,7 @@ class RelationDecomposer(schemas: Seq[RelationSchema]) {
     val ghds = HyperTreeDecomposer.allGHDs(graph)
 
     //filter out the HyperStar and construct RelationGHD
-    val stars = ghds
+    val stars = ghds.par
       .filter { t =>
         val adjList = t.E
           .map(edge => (edge.u.id, edge.v.id))
@@ -128,6 +128,7 @@ class RelationDecomposer(schemas: Seq[RelationSchema]) {
 
         RelationGHDStar(root, leaves, t.fractionHyperStarWidth(rootId))
       }
+      .toArray
 
     if (isSingleAttrFactorization) {
       stars

@@ -33,7 +33,7 @@ class Catalog extends Serializable {
   private val _attributeToID: mutable.HashMap[Attribute, AttributeID] =
     mutable.HashMap()
 
-  def nextRelationID(): Int = {
+  def nextRelationID(): Int = synchronized {
     relationIDCount
   }
 
@@ -57,7 +57,7 @@ class Catalog extends Serializable {
   }
 
 //  add relation schema to the database
-  def add(schema: RelationSchema): Int = {
+  def add(schema: RelationSchema): Int = synchronized {
 
     if (_nameToSchema.contains(schema.name)) {
       throw new Exception(s"Relation${schema.name} is duplicated ")
@@ -80,44 +80,6 @@ class Catalog extends Serializable {
       }
     }
   }
-//
-//  def addOrReplace(schema: RelationSchema, dataAdress: String): Int = {
-//    val id = addOrReplace(schema)
-//    _diskStore(id) = dataAdress
-//    id
-//  }
-//
-//  def addOrReplace(schema: RelationSchema,
-//                   content: RDD[Array[DataType]]): Int = {
-//    val id = addOrReplace(schema)
-//    _memoryStore(id) = content
-//    id
-//  }
-//
-//  //  add relation schema to the database
-//  def addOrReplace(schema: RelationSchema): Int = {
-//
-//    if (_nameToSchema.contains(schema.name)) {
-//      throw new Exception(s"Relation${schema.name} is duplicated ")
-//    }
-//
-//    _schemaToID.get(schema) match {
-//      case Some(id) => id
-//      case None => {
-//        val id = relationIDCount
-//
-//        _nameToSchema(schema.name) = schema
-//        _idToSchema(relationIDCount) = schema
-//        _schemaToID(schema) = relationIDCount
-//
-//        relationIDCount += 1
-//
-//        schema.attrs.foreach(add)
-//
-//        id
-//      }
-//    }
-//  }
 
 //  add attribute to database
   def add(attribute: Attribute): Int = {

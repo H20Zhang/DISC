@@ -14,19 +14,24 @@ import org.apache.spark.sql.types.DataType
 trait LogicalPlan extends Serializable {
   var defaultTasks = 224
   val defaultShare = 2
-
   val db = Catalog.defaultCatalog()
+  val outputSchema: RelationSchema
 
   def optimizedPlan(): LogicalPlan
   def phyiscalPlan(): PhysicalPlan
-  def info(): RelationSchema
+
   def getChildren(): Seq[LogicalPlan]
 }
 
-case class Scan(schema: RelationSchema) extends LogicalPlan {
-  override def getChildren(): Seq[LogicalPlan] = {
+abstract class Scan(schema: RelationSchema) extends LogicalPlan {
+  def getChildren(): Seq[LogicalPlan] = {
     Seq[LogicalPlan]()
   }
+
+  override val outputSchema = schema
+}
+
+case class UnOptimizedScan(schema: RelationSchema) extends Scan(schema) {
 
   override def optimizedPlan(): LogicalPlan = {
     val memoryData = db.getMemoryStore(schema.id.get)
@@ -43,32 +48,15 @@ case class Scan(schema: RelationSchema) extends LogicalPlan {
     throw new Exception(s"no data found for Relation:$schema")
   }
 
-  override def info(): RelationSchema = schema
-
   override def phyiscalPlan(): PhysicalPlan = {
     throw new Exception("not supported")
   }
 }
 
-case class Join(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
-
-  val schemas = childrenOps.map(_.info())
+abstract class Join(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
+  val schemas = childrenOps.map(_.outputSchema)
   val attrIDs = schemas.flatMap(_.attrIDs).distinct
   val conf = Conf.defaultConf()
-
-  def optimizedPlan(): LogicalPlan = {
-//    UnOptimizedHCubeJoin(childrenOps.map(_.optimizedPlan()))
-
-    val inputs = childrenOps.map(_.optimizedPlan())
-    import Method._
-    conf.method match {
-      case PushHCube   => OptimizedPushHCubeJoin(inputs)
-      case PullHCube   => OptimizedPullHCubeJoin(inputs)
-      case MergedHCube => OptimizedMergedHCubeJoin(inputs)
-      case Factorize   => OptimizedHCubeFactorizedJoin(inputs)
-      case _           => throw new Exception(s"not such method supported ${conf.method}")
-    }
-  }
 
   def getSchema(): Seq[RelationSchema] = {
     schemas
@@ -80,8 +68,31 @@ case class Join(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
 
   override def getChildren(): Seq[LogicalPlan] = childrenOps
 
-  override def info(): RelationSchema = {
-    RelationSchema("joinResult", attrIDs.map(db.getAttribute))
+  override val outputSchema: RelationSchema = {
+    val catalog = Catalog.defaultCatalog()
+    val schema = RelationSchema(
+      s"Temp-R${catalog.nextRelationID()}",
+      attrIDs.map(db.getAttribute)
+    )
+    catalog.add(schema)
+    schema
+  }
+}
+
+case class UnOptimizedJoin(childrenOps: Seq[LogicalPlan])
+    extends Join(childrenOps) {
+
+  def optimizedPlan(): LogicalPlan = {
+    val inputs = childrenOps.map(_.optimizedPlan())
+    import Method._
+    conf.method match {
+      case UnOptimizedHCube => UnOptimizedHCubeJoin(inputs)
+      case PushHCube        => OptimizedPushHCubeJoin(inputs)
+      case PullHCube        => OptimizedPullHCubeJoin(inputs)
+      case MergedHCube      => OptimizedMergedHCubeJoin(inputs)
+      case Factorize        => OptimizedHCubeFactorizedJoin(inputs)
+      case _                => throw new Exception(s"not such method supported ${conf.method}")
+    }
   }
 
   override def phyiscalPlan(): PhysicalPlan = {

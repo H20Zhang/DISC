@@ -12,6 +12,16 @@ trait Trie extends Serializable {
   def toRelation(): Array[Array[DataType]]
 }
 
+object Trie {
+  def apply(table: Array[Array[DataType]], arity: Int): Trie = {
+//    if (arity == 2) {
+//      GraphTrie(table, arity)
+//    } else {
+    ArrayTrie(table, arity)
+//    }
+  }
+}
+
 // edge:Array[(ID, ID, Value)], node:Array[(Start, End)]
 class ArrayTrie(neighbors: Array[Int],
                 values: Array[Int],
@@ -22,9 +32,18 @@ class ArrayTrie(neighbors: Array[Int],
 
   var rootBegin = neighborBegins(0)
   var rootEnd = neighborEnds(0)
-//  val rootLevelMap = mutable.HashMap[Int, Int]() ++ values
-//    .slice(rootBegin, rootEnd)
-//    .zip(Range(rootBegin, rootEnd))
+  val emptyArray = ArraySegment.emptyArraySegment
+
+  //TODO: test whether replace some level by hashmap improves the speed
+//  val rootLevelMap = {
+//    val tempMap = mutable.LongMap[Int]()
+//    var i = rootBegin
+//    while (i < rootEnd) {
+//      tempMap(values(i)) = i
+//      i += 1
+//    }
+//    tempMap
+//  }
 
   def nextLevel(binding: ArraySegment): ArraySegment = {
 
@@ -36,11 +55,22 @@ class ArrayTrie(neighbors: Array[Int],
     var i = 0
 
     while (i < level) {
-      val pos = BSearch.search(values, binding(i), start, end)
 
+      var pos = 0
+//      if (i == 100) {
+//        val ithBinding = binding(i)
+//        if (rootLevelMap.contains(ithBinding)) {
+//          pos = rootLevelMap(ithBinding)
+//        } else {
+//          return emptyArray
+//        }
+//
+//      } else {
+      pos = BSearch.search(values, binding(i), start, end)
       if (pos == -1) {
-        return ArraySegment.emptyArray()
+        return emptyArray
       }
+//      }
 
       id = neighbors(pos)
       start = neighborBegins(id)
@@ -80,20 +110,73 @@ class ArrayTrie(neighbors: Array[Int],
 
 }
 
-//TODO: debug
-class HashMapTrie(rootLevel: ArraySegment,
-                  nextLevelMap: mutable.HashMap[Int, mutable.HashMap[Array[
-                    DataType
-                  ], ArraySegment]],
-                  arity: Int)
-    extends Trie {
+class GraphTrie(graph: mutable.HashMap[DataType, ArraySegment]) extends Trie {
 
-  val tempArrayForIthLevel = mutable.HashMap[Int, Array[DataType]]()
+  val rootLevel = ArraySegment(graph.keys.toArray.sorted)
+  val emptyArray = ArraySegment.emptyArraySegment
+
+  def nextLevel(binding: ArraySegment): ArraySegment = {
+    val level = binding.size
+
+    if (level == 0) {
+      rootLevel
+    } else {
+      val bind = binding(0)
+      if (graph.contains(bind)) {
+        graph(bind)
+      } else {
+        emptyArray
+      }
+    }
+  }
+
+  override def toRelation(): Array[Array[DataType]] = {
+    graph.toArray.flatMap(f => f._2.array.map(g => Array(f._1, g)))
+  }
+}
+
+object GraphTrie {
+  def apply(table: Array[Array[DataType]], arity: Int): GraphTrie = {
+    assert(arity == 2)
+
+    val graphBuffer = mutable.HashMap[DataType, ArrayBuffer[DataType]]()
+
+    table.foreach { tuple =>
+      val key = tuple(0)
+      val value = tuple(1)
+      if (graphBuffer.contains(key)) {
+        graphBuffer(key) += value
+      } else {
+        val buffer = ArrayBuffer(value)
+        graphBuffer(key) = buffer
+      }
+    }
+
+    val graph = mutable.HashMap[DataType, ArraySegment]()
+
+    graphBuffer.foreach {
+      case (key, values) =>
+        graph(key) = ArraySegment(values.toArray.sorted)
+    }
+
+    new GraphTrie(graph)
+
+  }
+}
+
+class HashMapTrie(
+  rootLevel: ArraySegment,
+  nextLevelMap: mutable.HashMap[Int, mutable.HashMap[mutable.ArraySeq[DataType],
+                                                     ArraySegment]],
+  arity: Int
+) extends Trie {
+
+  val tempArrayForIthLevel = new Array[mutable.ArraySeq[DataType]](arity)
 
   init()
   def init() = {
-    Range(1, arity).foreach { i =>
-      tempArrayForIthLevel(i) = new Array[DataType](i)
+    Range(0, arity).foreach { i =>
+      tempArrayForIthLevel(i) = new mutable.ArraySeq[DataType](i + 1)
     }
   }
 
@@ -108,6 +191,7 @@ class HashMapTrie(rootLevel: ArraySegment,
       var i = 0
       while (i < bindingSize) {
         tempArray(i) = binding(i)
+        i += 1
       }
 
       return nextLevelMap(level)(tempArray)
@@ -118,17 +202,21 @@ class HashMapTrie(rootLevel: ArraySegment,
 
 object HashMapTrie {
   def apply(table: Array[Array[DataType]], arity: Int): HashMapTrie = {
-    val rootLevel = ArraySegment(table.map(t => t(0)).distinct)
+    val rootLevel = ArraySegment(table.map(t => t(0)).distinct.sorted)
     val nextLevelMap =
-      mutable.HashMap[Int, mutable.HashMap[Array[DataType], ArraySegment]]()
-    var i = 0
-    while (i < arity - 1) {
+      mutable.HashMap[Int, mutable.HashMap[mutable.ArraySeq[DataType],
+                                           ArraySegment]]()
+    var keyPos = 0
+    while (keyPos < arity - 1) {
+      val valuePos = keyPos + 1
+      val tupleSize = valuePos + 1
       var projectedTable = ArrayBuffer[Array[DataType]]()
       table.foreach { tuple =>
-        val projectedTuple = new Array[DataType](i + 1)
+        val projectedTuple = new Array[DataType](tupleSize)
         var j = 0
-        while (j <= i) {
+        while (j <= keyPos + 1) {
           projectedTuple(j) = tuple(j)
+          j += 1
         }
 
         projectedTable += projectedTuple
@@ -136,24 +224,28 @@ object HashMapTrie {
 
       projectedTable = projectedTable.distinct
 
-      val levelMap = mutable.HashMap[Array[DataType], ArrayBuffer[DataType]]()
+      val levelMap =
+        mutable.HashMap[mutable.ArraySeq[DataType], ArrayBuffer[DataType]]()
 
       projectedTable.foreach { tuple =>
-        val key = new Array[DataType](i)
+        val key = new mutable.ArraySeq[DataType](keyPos + 1)
         var j = 0
-        while (j < i) {
-          key(i) = tuple(i)
+        while (j <= keyPos) {
+          key(keyPos) = tuple(keyPos)
+          j += 1
         }
 
         levelMap.get(key) match {
-          case Some(buffer) => buffer += tuple(i)
+          case Some(buffer) => buffer += tuple(valuePos)
           case None =>
-            val buffer = ArrayBuffer(tuple(i)); levelMap(key) = buffer
+            val buffer = ArrayBuffer(tuple(valuePos)); levelMap(key) = buffer
         }
       }
 
-      nextLevelMap(i) =
+      nextLevelMap(keyPos) =
         levelMap.map(f => (f._1, ArraySegment(f._2.toArray.sorted)))
+
+      keyPos += 1
     }
 
     new HashMapTrie(rootLevel, nextLevelMap, arity)
@@ -174,7 +266,8 @@ object ArrayTrie {
     var leafIDCounter = -1
     val prevIDs = new Array[Int](arity)
     var prevTuple = new Array[Int](arity)
-    val edgeBuffer = ArrayBuffer[(Int, Int, DataType)]()
+//    val edgeBuffer = ArrayBuffer[(Int, Int, DataType)]()
+    val edgeBuffer = ArrayBuffer[ValuedEdge]()
     val nodeBuffer = ArrayBuffer[(Int, Int)]()
     val tableSize = table.size
 
@@ -185,7 +278,7 @@ object ArrayTrie {
       i += 1
     }
 
-    //construct edge for ArrayTrie
+    //construct edges for ArrayTrie
     val rootID = idCounter
     idCounter += 1
 
@@ -213,7 +306,7 @@ object ArrayTrie {
       }
 
       //for each value of curTuple diverge from preTuple, create a new NodeID
-      //create edge between NodeIDs
+      //create edges between NodeIDs
       while (diffPos < arity - 1) {
         val nextPos = diffPos + 1
         var prevID = 0
@@ -234,8 +327,9 @@ object ArrayTrie {
           leafIDCounter -= 1
         }
 
-        //create edge between NodeIDs
-        edgeBuffer += ((prevID, newID, curTuple(nextPos)))
+        //create edges between NodeIDs
+//        edgeBuffer += ((prevID, newID, curTuple(nextPos)))
+        edgeBuffer += ValuedEdge(prevID, newID, curTuple(nextPos))
         prevIDs(nextPos) = newID
 
         diffPos += 1
@@ -245,41 +339,68 @@ object ArrayTrie {
       i += 1
     }
 
-    //add a tuple to mark the end of the edge
-    edgeBuffer += ((Int.MaxValue, Int.MaxValue, Int.MaxValue))
+    //add a tuple to mark the end of the edges
+//    edgeBuffer += ((Int.MaxValue, Int.MaxValue, Int.MaxValue))
+    edgeBuffer += ValuedEdge(Int.MaxValue, Int.MaxValue, Int.MaxValue)
 
-    //sort edge first by "id" then "value"
-    val edge = edgeBuffer.toArray
-    val edgeComparator = new EdgeComparator
-    java.util.Arrays.sort(edge, edgeComparator)
+    //sort edges first by "id" then "value"
+    val edges = edgeBuffer.toArray
+    val edgeComparator = new ValuedEdgeComparator
+    java.util.Arrays.sort(edges, edgeComparator)
 
     //construct node for ArrayTrie
-    //  scan the sorted edge
+    //  scan the sorted edges
     i = 0
     var start = 0
     var end = 0
     var currentValue = 0
 
-    while (i < edge.size) {
-      if (edge(i)._1 == currentValue) {
+    while (i < edges.size) {
+      if (edges(i).u == currentValue) {
         end += 1
       } else {
         nodeBuffer += ((start, end))
 
-        currentValue = edge(i)._1
+        currentValue = edges(i).u
         start = i
         end = i + 1
       }
       i += 1
     }
 
-    new ArrayTrie(
-      edge.dropRight(1).map(_._2),
-      edge.dropRight(1).map(_._3),
-      nodeBuffer.map(_._1).toArray,
-      nodeBuffer.map(_._2).toArray,
-      arity
-    )
+    val neighbors = new Array[DataType](edges.size - 1)
+    val values = new Array[DataType](edges.size - 1)
+    val neighborsBegin = new Array[DataType](nodeBuffer.size)
+    val neighborsEnd = new Array[DataType](nodeBuffer.size)
+
+    val edgeSize = edges.size - 1
+
+    i = 0
+    while (i < edges.size - 1) {
+      val edge = edges(i)
+      neighbors(i) = edge.v
+      values(i) = edge.value
+      i += 1
+    }
+
+    i = 0
+    val nodesSize = nodeBuffer.size
+    while (i < nodesSize) {
+      val node = nodeBuffer(i)
+      neighborsBegin(i) = node._1
+      neighborsEnd(i) = node._2
+      i += 1
+    }
+
+    new ArrayTrie(neighbors, values, neighborsBegin, neighborsEnd, arity)
+
+//    new ArrayTrie(
+//      edges.dropRight(1).map(_._2),
+//      edges.dropRight(1).map(_._3),
+//      nodeBuffer.map(_._1).toArray,
+//      nodeBuffer.map(_._2).toArray,
+//      arity
+//    )
   }
 }
 
@@ -302,7 +423,7 @@ class LexicalOrderComparator(attrNum: Int)
   }
 }
 
-class EdgeComparator
+class TupleEdgeComparator
     extends Comparator[(Int, Int, DataType)]
     with Serializable {
 
@@ -317,6 +438,26 @@ class EdgeComparator
       if (o1._3 < o2._3) {
         return -1
       } else if (o1._3 > o2._3) {
+        return 1
+      } else return 0
+    }
+  }
+}
+
+case class ValuedEdge(u: Int, v: Int, value: DataType)
+
+class ValuedEdgeComparator extends Comparator[ValuedEdge] with Serializable {
+
+  override def compare(o1: ValuedEdge, o2: ValuedEdge): Int = {
+
+    if (o1.u < o2.u) {
+      return -1
+    } else if (o1.u > o2.u) {
+      return 1
+    } else {
+      if (o1.value < o2.value) {
+        return -1
+      } else if (o1.value > o2.value) {
         return 1
       } else return 0
     }

@@ -52,8 +52,10 @@ class ExpQuery(data: String) {
     case "chordalSquare" => chordalSquareSchema()
     case "fourClique"    => fourCliqueSchema()
     case "l31"           => l31Schema()
+    case "l32"           => l32Schema()
     case "b313"          => b313Schema()
     case "house"         => houseSchema()
+    case "solarSquare"   => solarSquareSchema()
     case "near5Clique"   => near5CliqueSchema()
     case _               => throw new Exception(s"no such pattern:${q}")
   }
@@ -111,6 +113,17 @@ class ExpQuery(data: String) {
     schemas
   }
 
+  def l32Schema() = {
+    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
+    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
+    val schemaR2 = RelationSchema("R2", Seq("C", "A"))
+    val schemaR3 = RelationSchema("R3", Seq("A", "D"))
+    val schemaR4 = RelationSchema("R4", Seq("D", "E"))
+
+    val schemas = Seq(schemaR0, schemaR1, schemaR2, schemaR3, schemaR4)
+    schemas
+  }
+
 //  barbell
   def b313Schema() = {
     val schemaR0 = RelationSchema("R0", Seq("A", "B"))
@@ -138,6 +151,32 @@ class ExpQuery(data: String) {
 
     val schemas =
       Seq(schemaR0, schemaR1, schemaR2, schemaR3, schemaR4, schemaR5)
+
+    schemas
+  }
+
+  //  solarSquare
+  def solarSquareSchema() = {
+    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
+    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
+    val schemaR2 = RelationSchema("R2", Seq("C", "D"))
+    val schemaR3 = RelationSchema("R3", Seq("D", "A"))
+    val schemaR4 = RelationSchema("R4", Seq("A", "E"))
+    val schemaR5 = RelationSchema("R5", Seq("B", "E"))
+    val schemaR6 = RelationSchema("R6", Seq("C", "E"))
+    val schemaR7 = RelationSchema("R7", Seq("D", "E"))
+
+    val schemas =
+      Seq(
+        schemaR0,
+        schemaR1,
+        schemaR2,
+        schemaR3,
+        schemaR4,
+        schemaR5,
+        schemaR6,
+        schemaR7
+      )
 
     schemas
   }

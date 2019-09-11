@@ -2,7 +2,7 @@ package org.apache.spark.adj.parser.simpleDml
 
 import org.apache.spark.adj.database.Catalog
 import org.apache.spark.adj.parser.sql.SQLAST
-import org.apache.spark.adj.plan.{Join, LogicalPlan, Scan}
+import org.apache.spark.adj.plan.{UnOptimizedJoin, LogicalPlan, UnOptimizedScan}
 
 class SimpleParser {
   import scala.util.parsing.combinator._
@@ -19,12 +19,13 @@ class SimpleParser {
         case res             => throw new Exception(res.toString)
       }
 
-    def tablesClause: Parser[Seq[Scan]] =
+    def tablesClause: Parser[Seq[UnOptimizedScan]] =
       """((\w+\;)|(\w+))+""".r ^^ {
-        case t => t.split("\\;").map(name => Scan(catalog.getSchema(name)))
+        case t =>
+          t.split("\\;").map(name => UnOptimizedScan(catalog.getSchema(name)))
       }
-    def joinClause: Parser[Join] = """Join""".r ~ tablesClause ^^ {
-      case _ ~ tables => Join(tables)
+    def joinClause: Parser[UnOptimizedJoin] = """Join""".r ~ tablesClause ^^ {
+      case _ ~ tables => UnOptimizedJoin(tables)
     }
 
   }

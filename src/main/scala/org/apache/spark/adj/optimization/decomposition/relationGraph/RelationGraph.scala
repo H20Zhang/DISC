@@ -16,13 +16,19 @@ class RelationGraph(_id: Int, V: Seq[NodeID], E: Seq[RelationEdge]) {
     toInducedGraph(baseGraph.E)
   }
 
-  def toInducedGraph(edges: Seq[RelationEdge]): RelationGraph = {
+  def toInducedGraph(edges: Seq[RelationEdge],
+                     isIdChange: Boolean = false): RelationGraph = {
     val inducedEdges = edges.filter { edge =>
       val nodes = edge.attrs
       nodes.diff(V.toSet).isEmpty
     }
 
-    RelationGraph(V, inducedEdges)
+    if (isIdChange) {
+      RelationGraph(V, inducedEdges)
+    } else {
+      new RelationGraph(id, V, inducedEdges)
+    }
+
   }
 
   def isConnected(): Boolean = {

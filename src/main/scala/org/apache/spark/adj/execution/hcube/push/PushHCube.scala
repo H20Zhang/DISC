@@ -3,6 +3,7 @@ package org.apache.spark.adj.execution.hcube.push
 import org.apache.spark.adj.database.Catalog.DataType
 import org.apache.spark.adj.database.Relation
 import org.apache.spark.adj.execution.hcube.{
+  HCube,
   HCubeHelper,
   HCubePartitioner,
   TupleHCubeBlock
@@ -16,7 +17,8 @@ import org.apache.spark.util.Utils
 import scala.collection.mutable.ArrayBuffer
 
 class PushHCube(@transient query: HCubePlan, info: TaskInfo)
-    extends Serializable {
+    extends HCube
+    with Serializable {
 
   @transient val sc = SparkSingle.getSparkContext()
   @transient val shareMap = query.share
