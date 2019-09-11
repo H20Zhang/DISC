@@ -14,12 +14,12 @@ import org.apache.spark.adj.execution.misc.DataLoader
 import org.apache.spark.adj.execution.subtask.{
   AttributeOrderInfo,
   FactorizedAttributeOrderInfo,
-  FactorizedLeapFrogJoin,
   FactorizedLeapFrogJoinSubTask,
   LeapFrogJoinSubTask,
   SubTask,
   SubTaskFactory,
-  TaskInfo
+  TaskInfo,
+  TrieConstructedAttributeOrderInfo
 }
 import org.apache.spark.rdd.RDD
 
@@ -29,7 +29,7 @@ trait PhysicalPlan {
   def count(): Long
   def commOnly(): Long
   def getChildren(): Seq[PhysicalPlan]
-  val db = Catalog.defaultCatalog()
+  val catalog = Catalog.defaultCatalog()
 }
 
 abstract class JoinExec(schema: RelationSchema,
@@ -53,20 +53,54 @@ abstract class AbstractHCubeJoinExec(schema: RelationSchema,
 
   def genSubTaskRDD(): RDD[SubTask]
 
+  def execute(): Relation = {
+    val rdd = subTaskRDD
+      .flatMap { task =>
+        val subJoinTask =
+          SubTaskFactory.genSubTask(task.shareVector, task.blocks, task.info)
+
+        val iterator = subJoinTask.execute()
+        iterator
+      }
+
+    catalog.setContent(schema, rdd)
+    Relation(schema, rdd)
+  }
+
+  def count() = {
+    val num = subTaskRDD
+      .map { task =>
+        val subJoinTask =
+          SubTaskFactory.genSubTask(task.shareVector, task.blocks, task.info)
+
+        val iterator =
+          subJoinTask.execute()
+        iterator.longSize
+
+      }
+      .sum()
+      .toLong
+
+    num
+  }
+
+  def commOnly(): Long = {
+    val num = subTaskRDD
+      .map { task =>
+        1
+      }
+      .sum()
+    num.toLong
+  }
+
 }
 
-//TODO: merge the common part of the following class into HCubeJoinExec, and make
-// sure that the Relation Returned by JoinExec have the same schema as the Join.info
 abstract class AbstractMergedPullHCubeJoinExec(
+  schema: RelationSchema,
   @transient children: Seq[PhysicalPlan],
   share: Map[AttributeID, Int],
   info: TaskInfo
-) extends PhysicalPlan
-    with Serializable {
-
-  @transient val relations = getChildren().par.map(_.execute()).toArray
-  @transient val hcubePlan = HCubePlan(relations, share)
-  @transient val hcube = new PullHCube(hcubePlan, info)
+) extends AbstractHCubeJoinExec(schema, children, share, info) {
 
   def preprocessHCube(f: PartitionedRelation): PartitionedRelation = {
     val info_ = info
@@ -81,7 +115,7 @@ abstract class AbstractMergedPullHCubeJoinExec(
       var outputBlock = block
 
       info_ match {
-        case s: AttributeOrderInfo => {
+        case s: TrieConstructedAttributeOrderInfo => {
           val attrOrders = s.attrOrder
           val triePreConstructor =
             new TriePreConstructor(attrOrders, schema, content)
@@ -100,242 +134,83 @@ abstract class AbstractMergedPullHCubeJoinExec(
     PartitionedRelation(preprocessedRDD, partitioner)
   }
 
-  def execute(): Relation = {
-    val rdd = hcube
-      .genPullHCubeRDD {
-        preprocessHCube
-      }
-      .flatMap { task =>
-        val subJoinTask = SubTaskFactory.genMergedSubTask(
-          task.shareVector,
-          task.blocks.map(_.asInstanceOf[TrieHCubeBlock]),
-          task.info
-        )
-
-        val iterator = subJoinTask.execute()
-        iterator
-      }
-
-    val catalog = Catalog.defaultCatalog()
-    val schema = RelationSchema(
-      s"Temp-R${catalog.nextRelationID()}",
-      share.keys.toArray.map(attrId => catalog.getAttribute(attrId))
-    )
-    catalog.add(schema, rdd)
-    Relation(schema, rdd)
-  }
-
-  def count() = {
-    val num = hcube
-      .genPullHCubeRDD(preprocessHCube)
-      .map { task =>
-        val subJoinTask = SubTaskFactory.genMergedSubTask(
-          task.shareVector,
-          task.blocks.map(_.asInstanceOf[TrieHCubeBlock]),
-          task.info
-        )
-
-        val iterator =
-          subJoinTask.execute()
-        iterator.longSize
-
-      }
-      .sum()
-      .toLong
-
-    num
-  }
-
-  def commOnly(): Long = {
-    val num = hcube
-      .genPullHCubeRDD(preprocessHCube)
-      .map { task =>
-        1
-      }
-      .sum()
-    num.toLong
-  }
-
-  def getChildren(): Seq[PhysicalPlan] = {
-    children
+  override def genSubTaskRDD(): RDD[SubTask] = {
+    val hcube = new PullHCube(hcubePlan, info)
+    hcube.genPullHCubeRDD(preprocessHCube)
   }
 }
 
-abstract class AbstractPullHCubeJoinExec(children: Seq[PhysicalPlan],
+abstract class AbstractPullHCubeJoinExec(schema: RelationSchema,
+                                         children: Seq[PhysicalPlan],
                                          share: Map[AttributeID, Int],
                                          info: TaskInfo)
-    extends PhysicalPlan {
+    extends AbstractHCubeJoinExec(schema, children, share, info) {
 
-  val relations = getChildren().map(_.execute()).toArray
-  val hcubePlan = HCubePlan(relations, share)
-  val hcube = new PullHCube(hcubePlan, info)
-
-  def execute(): Relation = {
-    val rdd = hcube
-      .genHCubeRDD()
-      .flatMap { task =>
-        val subJoinTask = SubTaskFactory.genSubTask(
-          task.shareVector,
-          task.blocks.map(_.asInstanceOf[TupleHCubeBlock]),
-          task.info
-        )
-
-        val iterator = subJoinTask.execute()
-        iterator
-      }
-
-    val catalog = Catalog.defaultCatalog()
-    val schema = RelationSchema(
-      s"Temp-R${catalog.nextRelationID()}",
-      share.keys.toArray.map(attrId => catalog.getAttribute(attrId))
-    )
-    catalog.add(schema, rdd)
-    Relation(schema, rdd)
-  }
-
-  def count() = {
-    val num = hcube
-      .genHCubeRDD()
-      .map { task =>
-        val subJoinTask = SubTaskFactory.genSubTask(
-          task.shareVector,
-          task.blocks.map(_.asInstanceOf[TupleHCubeBlock]),
-          task.info
-        )
-
-        val iterator =
-          subJoinTask.execute()
-        iterator.longSize
-
-      }
-      .sum()
-      .toLong
-
-    num
-  }
-
-  def commOnly(): Long = {
-    val num = hcube
-      .genHCubeRDD()
-      .map { task =>
-        1
-      }
-      .sum()
-    num.toLong
-  }
-
-  def getChildren(): Seq[PhysicalPlan] = {
-    children
+  override def genSubTaskRDD(): RDD[SubTask] = {
+    val hcube = new PullHCube(hcubePlan, info)
+    hcube.genHCubeRDD()
   }
 }
 
-abstract class AbstractPushHCubeJoinExec(children: Seq[PhysicalPlan],
+abstract class AbstractPushHCubeJoinExec(schema: RelationSchema,
+                                         children: Seq[PhysicalPlan],
                                          share: Map[AttributeID, Int],
                                          info: TaskInfo)
-    extends PhysicalPlan {
+    extends AbstractHCubeJoinExec(schema, children, share, info) {
 
-  val relations = getChildren().map(_.execute()).toArray
-  val hcubePlan = HCubePlan(relations, share)
-  val hcube = new PushHCube(hcubePlan, info)
-
-  def execute(): Relation = {
-    val rdd = hcube
-      .genHCubeRDD()
-      .flatMap { task =>
-        val subJoinTask = SubTaskFactory.genSubTask(
-          task.shareVector,
-          task.blocks.map(_.asInstanceOf[TupleHCubeBlock]),
-          task.info
-        )
-
-        val iterator = subJoinTask.execute()
-        iterator
-      }
-
-    val catalog = Catalog.defaultCatalog()
-    val schema = RelationSchema(
-      s"Temp-R${catalog.nextRelationID()}",
-      share.keys.toArray.map(attrId => catalog.getAttribute(attrId))
-    )
-    catalog.add(schema, rdd)
-    Relation(schema, rdd)
-  }
-
-  def count() = {
-    val num = hcube
-      .genHCubeRDD()
-      .map { task =>
-        val subJoinTask = SubTaskFactory.genSubTask(
-          task.shareVector,
-          task.blocks.map(_.asInstanceOf[TupleHCubeBlock]),
-          task.info
-        )
-
-        val iterator =
-          subJoinTask.execute()
-        iterator.longSize
-
-      }
-      .sum()
-      .toLong
-
-    num
-  }
-
-  def commOnly(): Long = {
-    val num = hcube
-      .genHCubeRDD()
-      .map { task =>
-        1
-      }
-      .sum()
-    num.toLong
-  }
-
-  def getChildren(): Seq[PhysicalPlan] = {
-    children
+  override def genSubTaskRDD(): RDD[SubTask] = {
+    val hcube = new PushHCube(hcubePlan, info)
+    hcube.genHCubeRDD()
   }
 }
 
-case class PullFactorizedLeapJoinExec(children: Seq[PhysicalPlan],
+case class PullFactorizedLeapJoinExec(schema: RelationSchema,
+                                      children: Seq[PhysicalPlan],
                                       share: Map[AttributeID, Int],
                                       attrOrder: Seq[AttributeID],
                                       corePos: Int,
                                       tasksNum: Int = 4)
     extends AbstractPullHCubeJoinExec(
+      schema,
       children,
       share,
       FactorizedAttributeOrderInfo(attrOrder.toArray, corePos)
     )
 
-case class PullHCubeLeapJoinExec(children: Seq[PhysicalPlan],
+case class PullHCubeLeapJoinExec(schema: RelationSchema,
+                                 children: Seq[PhysicalPlan],
                                  share: Map[AttributeID, Int],
                                  attrOrder: Seq[AttributeID],
                                  tasksNum: Int)
     extends AbstractPullHCubeJoinExec(
+      schema,
       children,
       share,
       AttributeOrderInfo(attrOrder.toArray)
     )
 
-case class PushHCubeLeapJoinExec(children: Seq[PhysicalPlan],
+case class PushHCubeLeapJoinExec(schema: RelationSchema,
+                                 children: Seq[PhysicalPlan],
                                  share: Map[AttributeID, Int],
                                  attrOrder: Seq[AttributeID],
                                  tasksNum: Int)
     extends AbstractPushHCubeJoinExec(
+      schema,
       children,
       share,
       AttributeOrderInfo(attrOrder.toArray)
     )
 
-case class MergedHCubeLeapJoinExec(children: Seq[PhysicalPlan],
+case class MergedHCubeLeapJoinExec(schema: RelationSchema,
+                                   children: Seq[PhysicalPlan],
                                    share: Map[AttributeID, Int],
                                    attrOrder: Seq[AttributeID],
                                    tasksNum: Int)
     extends AbstractMergedPullHCubeJoinExec(
+      schema,
       children,
       share,
-      AttributeOrderInfo(attrOrder.toArray)
+      TrieConstructedAttributeOrderInfo(attrOrder.toArray)
     )
 
 abstract class ScanExec(schema: RelationSchema) extends PhysicalPlan {

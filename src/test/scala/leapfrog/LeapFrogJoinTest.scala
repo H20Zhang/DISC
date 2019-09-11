@@ -1,7 +1,7 @@
 package leapfrog
 
 import org.apache.spark.adj.database.Catalog
-import org.apache.spark.adj.execution.subtask.LeapFrogJoin
+import org.apache.spark.adj.execution.subtask.executor.LeapFrogJoin
 import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.adj.utils.testing.{
   HCubeTester,

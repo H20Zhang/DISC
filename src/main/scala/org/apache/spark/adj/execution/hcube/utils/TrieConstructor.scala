@@ -2,7 +2,7 @@ package org.apache.spark.adj.execution.hcube.utils
 
 import org.apache.spark.adj.database.Catalog.{AttributeID, DataType}
 import org.apache.spark.adj.database.RelationSchema
-import org.apache.spark.adj.execution.subtask.{ArrayTrie, Trie}
+import org.apache.spark.adj.execution.subtask.utils.{ArrayTrie, Trie}
 
 class TriePreConstructor(attrOrders: Array[AttributeID],
                          schema: RelationSchema,

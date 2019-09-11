@@ -34,7 +34,9 @@ class Catalog extends Serializable {
     mutable.HashMap()
 
   def nextRelationID(): Int = synchronized {
-    relationIDCount
+    val old = relationIDCount
+    relationIDCount += 1
+    old
   }
 
   def addOrReplaceContent(schema: RelationSchema,
@@ -54,6 +56,11 @@ class Catalog extends Serializable {
     val id = add(schema)
     _memoryStore(id) = content
     id
+  }
+
+  def setContent(schema: RelationSchema,
+                 content: RDD[Array[DataType]]): Unit = {
+    _memoryStore(schema.id.get) = content
   }
 
 //  add relation schema to the database

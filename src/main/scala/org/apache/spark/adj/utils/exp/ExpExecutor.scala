@@ -3,7 +3,7 @@ package org.apache.spark.adj.utils.exp
 import java.util.{Timer, TimerTask}
 import java.util.concurrent.{CancellationException, FutureTask}
 
-import org.apache.spark.adj.database.{Query, RelationSchema}
+import org.apache.spark.adj.database.{Catalog, Query, RelationSchema}
 import org.apache.spark.adj.execution.misc.DataLoader
 import org.apache.spark.adj.utils.misc.SparkSingle
 
@@ -47,161 +47,76 @@ class ExpQuery(data: String) {
 
   val rdd = new DataLoader().csv(data)
 
-  def getSchema(q: String) = q match {
-    case "triangle"      => triangleSchema()
-    case "chordalSquare" => chordalSquareSchema()
-    case "fourClique"    => fourCliqueSchema()
-    case "l31"           => l31Schema()
-    case "l32"           => l32Schema()
-    case "b313"          => b313Schema()
-    case "house"         => houseSchema()
-    case "solarSquare"   => solarSquareSchema()
-    case "near5Clique"   => near5CliqueSchema()
-    case _               => throw new Exception(s"no such pattern:${q}")
+  def getSchema(q: String) = {
+    val dml = q match {
+      case "triangle"      => triangleDml
+      case "chordalSquare" => chordalSquareDml
+      case "fourClique"    => fourCliqueDml
+      case "l31"           => l31Dml
+      case "l32"           => l32Dml
+      case "b313"          => b313Dml
+      case "house"         => houseDml
+      case "solarSquare"   => solarSquareDml
+      case "near5Clique"   => near5CliqueSchemaDml
+      case _               => throw new Exception(s"no such pattern:${q}")
+    }
+
+    ExpQueryHelper.dmlToSchemas(dml)
   }
 
   def query(q: String) = {
     val schemas = getSchema(q)
-    schemas.foreach(_.register(rdd))
+    schemas.foreach(schema => Catalog.defaultCatalog().setContent(schema, rdd))
     val query0 =
       s"Join ${schemas.map(schema => s"${schema.name};").reduce(_ + _).dropRight(1)}"
     query0
   }
 
-  def triangleSchema() = {
-    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
-    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
-    val schemaR2 = RelationSchema("R2", Seq("C", "A"))
+  //triangle
+  val triangleDml = "A-B;B-C;C-A;"
 
-    val schemas = Seq(schemaR0, schemaR1, schemaR2)
-    schemas
-  }
+  //fourClique
+  val fourCliqueDml = "A-B;B-C;A-C;A-D;C-D;B-D;"
 
-  def fourCliqueSchema() = {
-    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
-    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
-    val schemaR2 = RelationSchema("R2", Seq("A", "C"))
-    val schemaR3 = RelationSchema("R3", Seq("A", "D"))
-    val schemaR4 = RelationSchema("R4", Seq("C", "D"))
-    val schemaR5 = RelationSchema("R5", Seq("B", "D"))
+  //  chordalSquare
+  val chordalSquareDml = "A-B;B-C;A-C;A-D;C-D;"
 
-    val schemas =
-      Seq(schemaR0, schemaR1, schemaR2, schemaR3, schemaR4, schemaR5)
-    schemas
-  }
+  //  lolipop
+  val l31Dml = "A-B;B-C;C-A;A-D"
+  val l32Dml = "A-B;B-C;C-A;A-D;D-E;"
 
-  def chordalSquareSchema() = {
-    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
-    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
-    val schemaR2 = RelationSchema("R2", Seq("A", "C"))
-    val schemaR3 = RelationSchema("R3", Seq("A", "D"))
-    val schemaR4 = RelationSchema("R4", Seq("C", "D"))
-
-    val schemas =
-      Seq(schemaR0, schemaR1, schemaR2, schemaR3, schemaR4)
-    schemas
-  }
-
-//  lolipop
-  def l31Schema() = {
-    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
-    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
-    val schemaR2 = RelationSchema("R2", Seq("C", "A"))
-    val schemaR3 = RelationSchema("R3", Seq("A", "D"))
-
-    val schemas = Seq(schemaR0, schemaR1, schemaR2, schemaR3)
-    schemas
-  }
-
-  def l32Schema() = {
-    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
-    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
-    val schemaR2 = RelationSchema("R2", Seq("C", "A"))
-    val schemaR3 = RelationSchema("R3", Seq("A", "D"))
-    val schemaR4 = RelationSchema("R4", Seq("D", "E"))
-
-    val schemas = Seq(schemaR0, schemaR1, schemaR2, schemaR3, schemaR4)
-    schemas
-  }
-
-//  barbell
-  def b313Schema() = {
-    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
-    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
-    val schemaR2 = RelationSchema("R2", Seq("C", "A"))
-    val schemaR3 = RelationSchema("R3", Seq("C", "D"))
-    val schemaR4 = RelationSchema("R4", Seq("D", "E"))
-    val schemaR5 = RelationSchema("R5", Seq("D", "F"))
-    val schemaR6 = RelationSchema("R6", Seq("E", "F"))
-
-    val schemas =
-      Seq(schemaR0, schemaR1, schemaR2, schemaR3, schemaR4, schemaR5, schemaR6)
-
-    schemas
-  }
+  //  barbell
+  val b313Dml = "A-B;B-C;C-A;C-D;D-E;D-F;E-F;"
 
   //  house
-  def houseSchema() = {
-    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
-    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
-    val schemaR2 = RelationSchema("R2", Seq("C", "A"))
-    val schemaR3 = RelationSchema("R3", Seq("B", "D"))
-    val schemaR4 = RelationSchema("R4", Seq("C", "E"))
-    val schemaR5 = RelationSchema("R5", Seq("D", "E"))
-
-    val schemas =
-      Seq(schemaR0, schemaR1, schemaR2, schemaR3, schemaR4, schemaR5)
-
-    schemas
-  }
+  val houseDml = "A-B;B-C;C-A;B-D;C-E;D-E"
 
   //  solarSquare
-  def solarSquareSchema() = {
-    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
-    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
-    val schemaR2 = RelationSchema("R2", Seq("C", "D"))
-    val schemaR3 = RelationSchema("R3", Seq("D", "A"))
-    val schemaR4 = RelationSchema("R4", Seq("A", "E"))
-    val schemaR5 = RelationSchema("R5", Seq("B", "E"))
-    val schemaR6 = RelationSchema("R6", Seq("C", "E"))
-    val schemaR7 = RelationSchema("R7", Seq("D", "E"))
-
-    val schemas =
-      Seq(
-        schemaR0,
-        schemaR1,
-        schemaR2,
-        schemaR3,
-        schemaR4,
-        schemaR5,
-        schemaR6,
-        schemaR7
-      )
-
-    schemas
-  }
+  val solarSquareDml = "A-B;B-C;C-D;D-A;A-E;B-E;C-E;D-E;"
 
   //  near5Clique
-  def near5CliqueSchema() = {
-    val schemaR0 = RelationSchema("R0", Seq("A", "B"))
-    val schemaR1 = RelationSchema("R1", Seq("B", "C"))
-    val schemaR2 = RelationSchema("R2", Seq("A", "C"))
-    val schemaR3 = RelationSchema("R3", Seq("A", "D"))
-    val schemaR4 = RelationSchema("R4", Seq("C", "D"))
-    val schemaR5 = RelationSchema("R5", Seq("B", "D"))
-    val schemaR6 = RelationSchema("R6", Seq("A", "F"))
-    val schemaR7 = RelationSchema("R7", Seq("D", "F"))
+  val near5CliqueSchemaDml = "A-B;B-C;A-C;A-D;C-D;B-D;A-F;D-F;"
+}
 
-    val schemas = Seq(
-      schemaR0,
-      schemaR1,
-      schemaR2,
-      schemaR3,
-      schemaR4,
-      schemaR5,
-      schemaR6,
-      schemaR7
-    )
+object ExpQueryHelper {
+
+  //we use a very simple dml like "A-B; A-C; A-D;".
+  def dmlToSchemas(dml: String): Seq[RelationSchema] = {
+    val catalog = Catalog.defaultCatalog()
+    val pattern = "(([A-Z])-([A-Z]);)".r
+    val schemas = pattern
+      .findAllMatchIn(dml)
+      .toArray
+      .map { f =>
+        val src = f.subgroups(1)
+        val dst = f.subgroups(2)
+        val id = catalog.nextRelationID()
+        RelationSchema(s"R${id}", Seq(src, dst))
+      }
+
+    schemas.foreach { f =>
+      f.register()
+    }
 
     schemas
   }

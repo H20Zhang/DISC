@@ -1,4 +1,4 @@
-package org.apache.spark.adj.execution.subtask
+package org.apache.spark.adj.execution.subtask.utils
 
 import org.apache.spark.adj.database.Catalog.DataType
 

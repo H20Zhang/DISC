@@ -1,6 +1,6 @@
 package leapfrog
 
-import org.apache.spark.adj.execution.subtask.{Alg, ArraySegment, Intersection}
+import org.apache.spark.adj.execution.subtask.utils.{Alg, ArraySegment}
 import org.scalatest.FunSuite
 
 import scala.collection.mutable.ArrayBuffer

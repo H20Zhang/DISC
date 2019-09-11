@@ -1,6 +1,6 @@
 import org.apache.spark.adj.database.{Catalog, Query, RelationSchema}
 import org.apache.spark.adj.parser.simpleDml.SimpleParser
-import org.apache.spark.adj.utils.exp.ExpEntry
+import org.apache.spark.adj.utils.exp.{ExpEntry, ExpQueryHelper}
 import org.apache.spark.adj.utils.misc.Conf.Method
 import org.apache.spark.adj.utils.misc.SparkSingle
 import org.apache.spark.adj.utils.testing.{
@@ -113,10 +113,14 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
   test("expEntry") {
 //    Factorize
     val commands =
-      s"-q fourClique -t 1000 -d ${dataAdress} -c false -m ${Method.MergedHCube}"
+      s"-q fourClique -t 1000 -d ${dataAdress} -c false -m ${Method.PullHCube}"
 
 //    val commands = s"--help"
     ExpEntry.main(commands.split("\\s"))
+  }
+
+  test("dmlToSchemas") {
+    println(ExpQueryHelper.dmlToSchemas("A-B;B-C;A-C;A-D;C-D;B-D;A-F;D-F;"))
   }
 
   override protected def afterAll(): Unit = {

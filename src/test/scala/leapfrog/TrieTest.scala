@@ -1,6 +1,6 @@
 package leapfrog
 
-import org.apache.spark.adj.execution.subtask.{ArraySegment, ArrayTrie}
+import org.apache.spark.adj.execution.subtask.utils.{ArraySegment, ArrayTrie}
 import org.apache.spark.adj.utils.testing.TestingHelper
 import org.scalatest.FunSuite
 

@@ -1,6 +1,13 @@
-package org.apache.spark.adj.execution.subtask
+package org.apache.spark.adj.execution.subtask.executor
 
 import org.apache.spark.adj.database.Catalog.DataType
+import org.apache.spark.adj.execution.subtask.FactorizedLeapFrogJoinSubTask
+import org.apache.spark.adj.execution.subtask.utils.{
+  ArraySegment,
+  ArrayTrie,
+  IntersectionIterator,
+  Trie
+}
 
 class FactorizedLeapFrogJoin(task: FactorizedLeapFrogJoinSubTask)
     extends LongSizeIterator[Array[DataType]] {

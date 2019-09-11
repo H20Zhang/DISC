@@ -1,7 +1,7 @@
-package org.apache.spark.adj.execution.subtask
+package org.apache.spark.adj.execution.subtask.executor
 
-import org.apache.spark.adj.database.Catalog.DataType
 import org.apache.spark.adj.execution.hcube.TrieHCubeBlock
+import org.apache.spark.adj.execution.subtask.TrieConstructedLeapFrogJoinSubTask
 
 class TrieConstructedLeapFrogJoin(trieTask: TrieConstructedLeapFrogJoinSubTask)
     extends LeapFrogJoin(trieTask) {

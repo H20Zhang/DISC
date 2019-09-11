@@ -12,9 +12,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.DataType
 
 trait LogicalPlan extends Serializable {
-  var defaultTasks = 224
-  val defaultShare = 2
-  val db = Catalog.defaultCatalog()
+  val catalog = Catalog.defaultCatalog()
   val outputSchema: RelationSchema
 
   def optimizedPlan(): LogicalPlan
@@ -34,8 +32,8 @@ abstract class Scan(schema: RelationSchema) extends LogicalPlan {
 case class UnOptimizedScan(schema: RelationSchema) extends Scan(schema) {
 
   override def optimizedPlan(): LogicalPlan = {
-    val memoryData = db.getMemoryStore(schema.id.get)
-    val diskData = db.getDiskStore(schema.id.get)
+    val memoryData = catalog.getMemoryStore(schema.id.get)
+    val diskData = catalog.getDiskStore(schema.id.get)
 
     if (memoryData.isDefined) {
       return InMemoryScan(schema)
@@ -72,7 +70,7 @@ abstract class Join(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
     val catalog = Catalog.defaultCatalog()
     val schema = RelationSchema(
       s"Temp-R${catalog.nextRelationID()}",
-      attrIDs.map(db.getAttribute)
+      attrIDs.map(catalog.getAttribute)
     )
     catalog.add(schema)
     schema
@@ -91,11 +89,12 @@ case class UnOptimizedJoin(childrenOps: Seq[LogicalPlan])
       case PullHCube        => OptimizedPullHCubeJoin(inputs)
       case MergedHCube      => OptimizedMergedHCubeJoin(inputs)
       case Factorize        => OptimizedHCubeFactorizedJoin(inputs)
+      case ADJ              => OptimizedAdaptiveJoin(inputs)
       case _                => throw new Exception(s"not such method supported ${conf.method}")
     }
   }
 
   override def phyiscalPlan(): PhysicalPlan = {
-    throw new Exception("not supported")
+    throw new Exception("UnOptimized Join --- not supported")
   }
 }

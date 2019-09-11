@@ -7,6 +7,14 @@ import org.apache.spark.adj.execution.hcube.{
   TrieHCubeBlock,
   TupleHCubeBlock
 }
+import org.apache.spark.adj.execution.subtask.executor.{
+  CachedLeapFrogJoin,
+  FactorizedLeapFrogJoin,
+  GHDJoin,
+  LeapFrogJoin,
+  LongSizeIterator,
+  TrieConstructedLeapFrogJoin
+}
 import org.apache.spark.adj.optimization.decomposition.relationGraph.RelationGHDTree
 
 class TaskInfo
@@ -31,6 +39,9 @@ class SubTask(_shareVector: Array[Int],
 }
 
 case class AttributeOrderInfo(attrOrder: Array[AttributeID]) extends TaskInfo
+case class TrieConstructedAttributeOrderInfo(attrOrder: Array[AttributeID])
+    extends TaskInfo
+
 class LeapFrogJoinSubTask(_shareVector: Array[Int],
                           _blocks: Seq[TupleHCubeBlock],
                           attrOrderInfo: AttributeOrderInfo)
@@ -52,10 +63,11 @@ class LeapFrogJoinSubTask(_shareVector: Array[Int],
   }
 }
 
-class TrieConstructedLeapFrogJoinSubTask(_shareVector: Array[Int],
-                                         val tries: Seq[HCubeBlock],
-                                         attrOrderInfo: AttributeOrderInfo)
-    extends LeapFrogJoinSubTask(
+class TrieConstructedLeapFrogJoinSubTask(
+  _shareVector: Array[Int],
+  val tries: Seq[HCubeBlock],
+  attrOrderInfo: TrieConstructedAttributeOrderInfo
+) extends LeapFrogJoinSubTask(
       _shareVector,
       tries.map(
         f =>
@@ -65,7 +77,7 @@ class TrieConstructedLeapFrogJoinSubTask(_shareVector: Array[Int],
             new Array[Array[DataType]](0)
         )
       ),
-      attrOrderInfo
+      AttributeOrderInfo(attrOrderInfo.attrOrder)
     ) {
 
   override def execute() = {
@@ -157,31 +169,4 @@ class GHDJoinSubTask(_shareVector: Array[Int],
   override def execute() = {
     new GHDJoin(this)
   }
-}
-
-object SubTaskFactory {
-  def genSubTask(shareVector: Array[Int],
-                 blocks: Seq[TupleHCubeBlock],
-                 info: TaskInfo) = {
-    info match {
-      case s: AttributeOrderInfo =>
-        new LeapFrogJoinSubTask(shareVector, blocks, s)
-      case s: FactorizedAttributeOrderInfo =>
-        new FactorizedLeapFrogJoinSubTask(shareVector, blocks, s)
-      case _ =>
-        throw new Exception(s"subtask with info type ${info} not supported")
-    }
-  }
-
-  def genMergedSubTask(shareVector: Array[Int],
-                       blocks: Seq[HCubeBlock],
-                       info: TaskInfo) = {
-    info match {
-      case s: AttributeOrderInfo =>
-        new TrieConstructedLeapFrogJoinSubTask(shareVector, blocks, s)
-      case _ =>
-        throw new Exception(s"subtask with info type ${info} not supported")
-    }
-  }
-
 }

@@ -54,10 +54,10 @@ object SparkSingle {
         SparkSession
           .builder()
           .master("yarn")
-          .config(
-            "spark.serializer",
-            "org.apache.spark.serializer.KryoSerializer"
-          )
+//          .config(
+//            "spark.serializer",
+//            "org.apache.spark.serializer.KryoSerializer"
+//          )
           .config(getConf())
           .appName(appName)
           //        .config("spark.yarn.executor.memoryOverhead","600")
@@ -73,10 +73,10 @@ object SparkSingle {
         SparkSession
           .builder()
           .master("local[4]")
-          .config(
-            "spark.serializer",
-            "org.apache.spark.serializer.KryoSerializer"
-          )
+//          .config(
+//            "spark.serializer",
+//            "org.apache.spark.serializer.KryoSerializer"
+//          )
           .config(getConf())
           .appName(appName)
           //        .config("spark.yarn.executor.memoryOverhead","600")

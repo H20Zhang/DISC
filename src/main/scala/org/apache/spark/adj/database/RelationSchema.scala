@@ -15,22 +15,22 @@ import scala.collection.mutable
 case class RelationSchema(name: String, attrs: Seq[Attribute])
     extends Serializable {
 
-  var db: Catalog = Catalog.defaultCatalog()
+  var catalog: Catalog = Catalog.defaultCatalog()
   var id: Option[RelationID] = None
-  lazy val attrIDs = attrs.map(db.getAttributeID)
+  lazy val attrIDs = attrs.map(catalog.getAttributeID)
   lazy val globalIDTolocalIdx = attrIDs.zipWithIndex.toMap
   val arity = attrs.size
 
   def register(): Unit = {
-    id = Some(db.add(this))
+    id = Some(catalog.add(this))
   }
 
   def register(dataAddress: String): Unit = {
-    id = Some(db.add(this, dataAddress))
+    id = Some(catalog.add(this, dataAddress))
   }
 
   def register(content: RDD[Array[DataType]]): Unit = {
-    id = Some(db.add(this, content))
+    id = Some(catalog.add(this, content))
   }
 
   def containAttribute(attr: Attribute): Boolean = {

@@ -15,11 +15,16 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 case class UnOptimizedHCubeJoin(childrenOps: Seq[LogicalPlan])
     extends Join(childrenOps) {
+  val defaultShare = Math
+    .pow(Conf.defaultConf().taskNum.toDouble, 1 / attrIDs.size.toDouble)
+    .ceil
+    .toInt
   var share: Map[AttributeID, Int] = attrIDs.map(id => (id, defaultShare)).toMap
   var attrOrder: Array[AttributeID] = attrIDs.sorted.toArray
 
   override def phyiscalPlan(): PhysicalPlan = {
     PullHCubeLeapJoinExec(
+      outputSchema,
       getChildren().map(_.phyiscalPlan()),
       share,
       attrOrder,
@@ -75,6 +80,7 @@ case class OptimizedMergedHCubeJoin(childrenOps: Seq[LogicalPlan],
 
   override def phyiscalPlan(): PhysicalPlan = {
     MergedHCubeLeapJoinExec(
+      outputSchema,
       getChildren().map(_.phyiscalPlan()),
       share,
       attrOrder,
@@ -130,6 +136,7 @@ case class OptimizedPushHCubeJoin(childrenOps: Seq[LogicalPlan],
 
   override def phyiscalPlan(): PhysicalPlan = {
     PushHCubeLeapJoinExec(
+      outputSchema,
       getChildren().map(_.phyiscalPlan()),
       share,
       attrOrder,
@@ -185,6 +192,7 @@ case class OptimizedPullHCubeJoin(childrenOps: Seq[LogicalPlan],
 
   override def phyiscalPlan(): PhysicalPlan = {
     PullHCubeLeapJoinExec(
+      outputSchema,
       getChildren().map(_.phyiscalPlan()),
       share,
       attrOrder,
@@ -243,6 +251,7 @@ case class OptimizedHCubeFactorizedJoin(childrenOps: Seq[LogicalPlan],
 
   override def phyiscalPlan(): PhysicalPlan = {
     PullFactorizedLeapJoinExec(
+      outputSchema,
       getChildren().map(_.phyiscalPlan()),
       share,
       attrOrder,
@@ -324,6 +333,7 @@ case class OptimizedAdaptiveJoin(childrenOps: Seq[LogicalPlan], task: Int = 4)
     }
 
     MergedHCubeLeapJoinExec(
+      outputSchema,
       inputPhysicalPlans ++ remainingRelations
         .map(UnOptimizedScan)
         .map(_.optimizedPlan().phyiscalPlan()),
@@ -338,7 +348,7 @@ case class OptimizedAdaptiveJoin(childrenOps: Seq[LogicalPlan], task: Int = 4)
 case class DiskScan(schema: RelationSchema) extends Scan(schema) {
   override def phyiscalPlan(): PhysicalPlan = {
     val id = schema.id.get
-    val diskData = db.getDiskStore(id)
+    val diskData = catalog.getDiskStore(id)
 
     DiskScanExec(schema, diskData.get)
   }
@@ -353,7 +363,7 @@ case class InMemoryScan(schema: RelationSchema) extends Scan(schema) {
 
   override def phyiscalPlan(): PhysicalPlan = {
     val id = schema.id.get
-    val memoryData = db.getMemoryStore(id)
+    val memoryData = catalog.getMemoryStore(id)
 
     InMemoryScanExec(schema, memoryData.get)
   }

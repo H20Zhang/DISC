@@ -1,9 +1,12 @@
-package org.apache.spark.adj.execution.subtask
+package org.apache.spark.adj.execution.subtask.executor
 
-import org.apache.spark.adj.database.Catalog.{AttributeID, DataType}
-import org.apache.spark.adj.execution.subtask.Intersection.seek
-
-import scala.collection.mutable.ArrayBuffer
+import org.apache.spark.adj.database.Catalog.DataType
+import org.apache.spark.adj.execution.subtask.LeapFrogJoinSubTask
+import org.apache.spark.adj.execution.subtask.utils.{
+  ArraySegment,
+  IntersectionIterator,
+  Trie
+}
 
 abstract class LongSizeIterator[T] extends Iterator[T] {
   def longSize: Long
