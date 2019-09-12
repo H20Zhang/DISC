@@ -4,6 +4,8 @@ import org.apache.spark.adj.database.Catalog.DataType
 import org.apache.spark.adj.execution.subtask.LeapFrogJoinSubTask
 import org.apache.spark.adj.execution.subtask.utils.{
   ArraySegment,
+  ArrayTrie,
+  IntersectedListIterator,
   IntersectionIterator,
   Trie
 }
@@ -26,7 +28,6 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
   protected var tries = new Array[Trie](numRelations)
   protected val unaryIterators = new Array[Iterator[DataType]](attrSize)
   protected val initV = {
-//    println(s"init")
     init()
   }
 
@@ -44,6 +45,7 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
           schema.containAttribute(curAttr)
       }
 
+      //set up prefix information for each relation
       val prefixPosForEachRelation = relevantRelation.map {
         case (schema, schemaPos) =>
           val relativeOrder = attrOrders.filter(schema.containAttribute)
@@ -57,13 +59,15 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
             i += 1
           }
 
-          (schema, schemaPos, partialBindingPos, partialBinding)
-      }
+          (schemaPos, partialBindingPos, partialBinding)
+      }.toArray
 
-      (
-        prefixPosForEachRelation,
-        new Array[ArraySegment](prefixPosForEachRelation.size)
+      //set up the ArraySegments
+      val segmentArrays = Array.fill(prefixPosForEachRelation.size)(
+        new ArraySegment(Array(), 0, 0, 0)
       )
+
+      (prefixPosForEachRelation, segmentArrays)
     }
   }
 
@@ -83,10 +87,9 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
 
       //reorder the content according to attribute order
       reorderRelations(i)
-      //      println(s"schema:${schema.name}, content-${i}, content:${content.toSeq.map(_.toSeq)}")
 
       //construct trie based on reordered content
-      tries(i) = Trie(contents(i), schemas(i).arity)
+      tries(i) = ArrayTrie(contents(i), schemas(i).arity)
       i += 1
     }
   }
@@ -99,7 +102,7 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
     //The func that mapping idx-th value of each tuple to j-th pos, where j-th position is the reletive order of idx-th attribute determined via attribute order
     val tupleMappingFunc =
       attrOrders.filter(schema.containAttribute).map(schema.attrIDs.indexOf(_))
-//    .zipWithIndex.reverse.sortBy(_._1).map(_._2).toArray
+
     val contentArity = schema.arity
     val contentSize = content.size
     val tempArray = new Array[DataType](contentArity)
@@ -139,18 +142,16 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
   //Noted: this class wouldn't produce empty unary iterator unless all prefix for 0 to i-1th attribute has been tested.
   protected def fixIterators(idx: Int): Unit = {
 
-    if (hasEnd != true) {
+    if (idx == 0 && hasEnd != true) {
       //case: fix the iterator for first attribute, this will be fixed only once
-      if (idx == 0) {
-        val it = constructIthIterator(idx)
+      val it = constructIthIterator(idx)
 
-        if (it.hasNext) {
-          unaryIterators(idx) = it
-          return
-        } else {
-          hasEnd = true
-          return
-        }
+      if (it.hasNext) {
+        unaryIterators(idx) = it
+        return
+      } else {
+        hasEnd = true
+        return
       }
     }
 
@@ -161,17 +162,17 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
       while (prevIterator.hasNext) {
         binding(prevIdx) = prevIterator.next()
         val it = constructIthIterator(idx)
-
         if (it.hasNext) {
           unaryIterators(idx) = it
           return
         }
       }
+
       if (prevIdx == 0) {
         hasEnd = true
         return
       } else {
-        fixIterators(idx - 1)
+        fixIterators(prevIdx)
       }
 
     }
@@ -181,29 +182,30 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
   //construct the unary iterator for the i-th attribute given prefix consisting of 0 to i-1th attribute
   //Noted: this class could return empty unary iterator
   protected def constructIthIterator(idx: Int) = {
-    val prefixPosForEachRelation = relevantRelationForAttrMap(idx)._1
-    val segmentArrays = relevantRelationForAttrMap(idx)._2
+
+    val (prefixPosForEachRelation, segmentArrays) = relevantRelationForAttrMap(
+      idx
+    )
 
     var i = 0
     val sizeOfSegmentArrays = segmentArrays.size
     while (i < sizeOfSegmentArrays) {
 
-      val partialBindingPos = prefixPosForEachRelation(i)._3
-      val curBinding = prefixPosForEachRelation(i)._4
+      val (triePos, partialBindingPos, curBinding) =
+        prefixPosForEachRelation(i)
 
       var j = 0
-      while (j < partialBindingPos.size) {
+      val curBindingSize = partialBindingPos.size
+      while (j < curBindingSize) {
         curBinding(j) = binding(partialBindingPos(j))
         j += 1
       }
 
-      val trie = tries(prefixPosForEachRelation(i)._2)
-      segmentArrays(i) = trie.nextLevel(curBinding)
+      tries(triePos).nextLevelWithAdjust(curBinding, segmentArrays(i))
       i += 1
     }
 
     IntersectionIterator.leapfrogIt(segmentArrays)
-//    new IntersectedListIterator(segmentArrays)
   }
 
   protected val lastIdx = attrSize - 1
@@ -226,23 +228,12 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
 
   override def longSize() = {
 
-    var count = 0l
+    var count = 0L
     while (!hasEnd) {
-      if (lastIterator.hasNext) {
-        lastIterator.next()
-        count += 1
-      } else {
-        fixIterators(lastIdx)
-        lastIterator = unaryIterators(lastIdx)
-        !hasEnd
-      }
+      count += unaryIterators(lastIdx).size
+      fixIterators(lastIdx)
     }
 
-//    var count = 0l
-//    while (hasNext) {
-//      next()
-//      count += 1
-//    }
     count
   }
 

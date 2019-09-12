@@ -2,6 +2,7 @@ package org.apache.spark.adj.execution.subtask.utils
 
 import java.util.Comparator
 
+import gnu.trove.map.hash.{TIntIntHashMap, TIntObjectHashMap}
 import org.apache.spark.adj.database.Catalog.DataType
 
 import scala.collection.mutable
@@ -9,6 +10,9 @@ import scala.collection.mutable.ArrayBuffer
 
 trait Trie extends Serializable {
   def nextLevel(binding: ArraySegment): ArraySegment
+  def nextLevelWithAdjust(binding: ArraySegment,
+                          inputArraySegment: ArraySegment): Unit
+  def nextLevel(binding: ArraySegment, inputArraySegment: ArraySegment): Unit
   def toRelation(): Array[Array[DataType]]
 }
 
@@ -24,7 +28,7 @@ object Trie {
 
 // edge:Array[(ID, ID, Value)], node:Array[(Start, End)]
 class ArrayTrie(neighbors: Array[Int],
-                values: Array[Int],
+                val values: Array[Int],
                 neighborBegins: Array[Int],
                 neighborEnds: Array[Int],
                 level: Int)
@@ -33,44 +37,45 @@ class ArrayTrie(neighbors: Array[Int],
   var rootBegin = neighborBegins(0)
   var rootEnd = neighborEnds(0)
   val emptyArray = ArraySegment.emptyArraySegment
+  var prevLevel = 0
+  var prevBegin = rootBegin
+  var prevEnd = rootEnd
 
   //TODO: test whether replace some level by hashmap improves the speed
-//  val rootLevelMap = {
-//    val tempMap = mutable.LongMap[Int]()
-//    var i = rootBegin
-//    while (i < rootEnd) {
-//      tempMap(values(i)) = i
-//      i += 1
-//    }
-//    tempMap
-//  }
+  val rootLevelMap = {
+    val tempMap = new TIntIntHashMap((rootEnd - rootBegin), 0.5f, -1, -1)
+    var i = rootBegin
+    while (i < rootEnd) {
+      tempMap.put(values(i), i)
+      i += 1
+    }
+    tempMap.compact()
+    tempMap
+  }
 
-  def nextLevel(binding: ArraySegment): ArraySegment = {
-
+  override def nextLevel(binding: ArraySegment,
+                         inputArraySegment: ArraySegment): Unit = {
     var id = 0
     var start = rootBegin
     var end = rootEnd
+    val bindingLevel = binding.size
 
-    val level = binding.size
-    var i = 0
+    var i = prevLevel
+    start = prevBegin
+    end = prevEnd
+    var pos = 0
 
-    while (i < level) {
+    while (i < bindingLevel) {
 
-      var pos = 0
-//      if (i == 100) {
-//        val ithBinding = binding(i)
-//        if (rootLevelMap.contains(ithBinding)) {
-//          pos = rootLevelMap(ithBinding)
-//        } else {
-//          return emptyArray
-//        }
-//
-//      } else {
-      pos = BSearch.search(values, binding(i), start, end)
+      if (i == 0) {
+        pos = rootLevelMap.get(binding(i))
+      } else {
+        pos = BSearch.search(values, binding(i), start, end)
+      }
+
       if (pos == -1) {
         return emptyArray
       }
-//      }
 
       id = neighbors(pos)
       start = neighborBegins(id)
@@ -78,7 +83,63 @@ class ArrayTrie(neighbors: Array[Int],
       i += 1
     }
 
-    ArraySegment(values, start, end, end - start)
+    inputArraySegment.array = values
+    inputArraySegment.begin = start
+    inputArraySegment.end = end
+    inputArraySegment.size = end - start
+  }
+
+  def nextLevel(binding: ArraySegment): ArraySegment = {
+    val arraySegment = new ArraySegment(null, 0, 0, 0)
+    nextLevel(binding, arraySegment)
+
+    arraySegment
+  }
+
+  override def nextLevelWithAdjust(binding: ArraySegment,
+                                   inputArraySegment: ArraySegment): Unit = {
+
+    var id = 0
+    var start = rootBegin
+    var end = rootEnd
+    val bindingLevel = binding.size
+    var i = 0
+    var pos = 0
+
+    if (prevLevel < bindingLevel) {
+      i = prevLevel
+      start = prevBegin
+      end = prevEnd
+    }
+
+    while (i < bindingLevel) {
+
+      if (i == 0) {
+        pos = rootLevelMap.get(binding(i))
+      } else {
+        pos = BSearch.search(values, binding(i), start, end)
+      }
+
+      if (pos == -1) {
+        return emptyArray
+      }
+
+      id = neighbors(pos)
+      start = neighborBegins(id)
+      end = neighborEnds(id)
+      i += 1
+    }
+
+    prevLevel = i
+    prevBegin = start
+    prevEnd = end
+
+//    inputArraySegment.set(values, start, end, end - start)
+
+    inputArraySegment.array = values
+    inputArraySegment.begin = start
+    inputArraySegment.end = end
+    inputArraySegment.size = end - start
   }
 
   //just for verify the correctness of the trie implementation
@@ -133,6 +194,12 @@ class GraphTrie(graph: mutable.HashMap[DataType, ArraySegment]) extends Trie {
   override def toRelation(): Array[Array[DataType]] = {
     graph.toArray.flatMap(f => f._2.array.map(g => Array(f._1, g)))
   }
+
+  override def nextLevel(binding: ArraySegment,
+                         inputArraySegment: ArraySegment): Unit = ???
+
+  override def nextLevelWithAdjust(binding: ArraySegment,
+                                   inputArraySegment: ArraySegment): Unit = ???
 }
 
 object GraphTrie {
@@ -198,6 +265,11 @@ class HashMapTrie(
     }
   }
   override def toRelation(): Array[Array[DataType]] = ???
+  override def nextLevel(binding: ArraySegment,
+                         inputArraySegment: ArraySegment): Unit = ???
+
+  override def nextLevelWithAdjust(binding: ArraySegment,
+                                   inputArraySegment: ArraySegment): Unit = ???
 }
 
 object HashMapTrie {

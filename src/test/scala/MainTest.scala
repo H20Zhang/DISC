@@ -47,7 +47,9 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
 
     val query0 = "Join R3;R6;R7"
     val relation8 = Query.query(query0)
-    relation8.schema.register(relation8.rdd)
+
+    println(relation8.schema.name)
+//    relation8.schema.register(relation8.rdd)
 
     //form query
 //    val query = "Join R0;R1;R2;R3;R4;R5;R6;R7"
@@ -70,12 +72,12 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
 //    Query.countQuery(query)
 
 //    near5Clique
-//    val query = s"Join R0;R1;R2;R3;R4;R5;${relation8.schema.name}"
-//    Query.countQuery(query)
+    val query = s"Join R0;R1;R2;R3;R4;R5;${relation8.schema.name}"
+    Query.countQuery(query)
 
     //near5Clique -- no intermediate
-    val query = s"Join R0;R1;R2;R3;R4;R5;R6;R7"
-    Query.countQuery(query)
+//    val query = s"Join R0;R1;R2;R3;R4;R5;R6;R7"
+//    Query.countQuery(query)
 
     //lolipop
 //    val query = s"Join R0;R1;R8"

@@ -15,10 +15,11 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 case class UnOptimizedHCubeJoin(childrenOps: Seq[LogicalPlan])
     extends Join(childrenOps) {
-  val defaultShare = Math
-    .pow(Conf.defaultConf().taskNum.toDouble, 1 / attrIDs.size.toDouble)
-    .ceil
-    .toInt
+//  val defaultShare = Math
+//    .pow(Conf.defaultConf().taskNum.toDouble, 1 / attrIDs.size.toDouble)
+//    .ceil
+//    .toInt
+  val defaultShare = 1
   var share: Map[AttributeID, Int] = attrIDs.map(id => (id, defaultShare)).toMap
   var attrOrder: Array[AttributeID] = attrIDs.sorted.toArray
 

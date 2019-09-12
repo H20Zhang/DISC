@@ -119,7 +119,6 @@ class IntersectedListIterator(arrays: Array[ArraySegment])
   }
 }
 
-//TODO:debug, strange behavior
 class LeapFrogUnaryIterator(arrays: Array[ArraySegment])
     extends Iterator[DataType] {
 

@@ -36,6 +36,13 @@ case class ArraySegment(var array: Array[DataType],
     array(begin + i) = value
   }
 
+  def set(_array: Array[DataType], _begin: Int, _end: Int, _size: Int): Unit = {
+    array = _array
+    begin = _begin
+    end = _end
+    size = _size
+  }
+
   def slice(newBegin: Int, newEnd: Int): ArraySegment = {
     assert((newEnd + begin) < end)
 
@@ -78,6 +85,10 @@ case class ArraySegment(var array: Array[DataType],
       val curPos = pos
       pos += 1
       array(curPos)
+    }
+
+    override def size: DataType = {
+      end - begin
     }
   }
 

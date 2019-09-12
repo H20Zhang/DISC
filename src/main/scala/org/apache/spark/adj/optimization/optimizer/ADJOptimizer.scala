@@ -30,8 +30,9 @@ class ADJOptimizer(relations: Seq[Relation]) {
 
   //calculate the unified cost for an internalPlan
   private def calCost(internalPlan: InternalPlan): Double = ???
-  private def calComputationCost(internalPlan: InternalPlan): Double = ???
-  private def calCommunicationCost(internalPlan: InternalPlan): Double = ???
+  private def computationCostEq(internalPlan: InternalPlan): String = ???
+  private def communicationCostEq(internalPlan: InternalPlan): String = ???
+  private def memoryConstraintEq(internalPlan: InternalPlan): String = ???
 
   case class InternalPlan(traversalOrder: Array[Int],
                           lazyDecision: Array[Boolean],
