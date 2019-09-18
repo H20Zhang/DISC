@@ -13,6 +13,7 @@ import org.apache.spark.adj.execution.hcube.utils.TriePreConstructor
 import org.apache.spark.adj.execution.misc.DataLoader
 import org.apache.spark.adj.execution.subtask.{
   AttributeOrderInfo,
+  CachedLeapFrogAttributeOrderInfo,
   FactorizedAttributeOrderInfo,
   FactorizedLeapFrogJoinSubTask,
   LeapFrogJoinSubTask,
@@ -72,6 +73,13 @@ abstract class AbstractHCubeJoinExec(schema: RelationSchema,
       .map { task =>
         val subJoinTask =
           SubTaskFactory.genSubTask(task.shareVector, task.blocks, task.info)
+
+//        println(
+//          task.info
+//            .asInstanceOf[CachedLeapFrogAttributeOrderInfo]
+//            .cachePos
+//            .map(f => (f._1.toSeq, f._2.toSeq))
+//        )
 
         val iterator =
           subJoinTask.execute()
@@ -199,6 +207,20 @@ case class PushHCubeLeapJoinExec(schema: RelationSchema,
       children,
       share,
       AttributeOrderInfo(attrOrder.toArray)
+    )
+
+case class PushHCubeCachedLeapJoinExec(schema: RelationSchema,
+                                       children: Seq[PhysicalPlan],
+                                       share: Map[AttributeID, Int],
+                                       attrOrder: Seq[AttributeID],
+                                       cachePos: Seq[(Array[Int], Array[Int])],
+                                       cacheSize: Array[Int],
+                                       tasksNum: Int)
+    extends AbstractPushHCubeJoinExec(
+      schema,
+      children,
+      share,
+      CachedLeapFrogAttributeOrderInfo(attrOrder.toArray, cacheSize, cachePos)
     )
 
 case class MergedHCubeLeapJoinExec(schema: RelationSchema,

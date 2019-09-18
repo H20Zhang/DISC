@@ -2,7 +2,7 @@ package org.apache.spark.adj.optimization.stat
 
 import org.apache.spark.adj.database.Catalog.AttributeID
 import org.apache.spark.adj.database.RelationSchema
-import org.apache.spark.adj.execution.hcube.TupleHCubeBlock
+import org.apache.spark.adj.execution.hcube.{HCubeBlock, TupleHCubeBlock}
 import org.apache.spark.adj.execution.subtask.{
   AttributeOrderInfo,
   SubTask,
@@ -12,15 +12,16 @@ import org.apache.spark.adj.optimization.decomposition.relationGraph.RelationGHD
 
 import scala.collection.mutable
 
+//TODO: finish it
 class SampleTask(_shareVector: Array[Int],
-                 _blocks: Seq[TupleHCubeBlock],
+                 _blocks: Seq[HCubeBlock],
                  sampleTaskInfo: SampleTaskInfo)
     extends SubTask(_shareVector, _blocks, sampleTaskInfo) {
 
   private val tasks = sampleTaskInfo.parameterTaskInfos
   private var schemaToContentMap
-    : mutable.HashMap[RelationSchema, TupleHCubeBlock] = {
-    val theMap = mutable.HashMap[RelationSchema, TupleHCubeBlock]()
+    : mutable.HashMap[RelationSchema, HCubeBlock] = {
+    val theMap = mutable.HashMap[RelationSchema, HCubeBlock]()
     _blocks.map(f => (f.schema, f)).foreach { f =>
       theMap(f._1) = f._2
     }
@@ -48,10 +49,10 @@ class SampleTask(_shareVector: Array[Int],
 case class SampleTaskInfo(parameterTaskInfos: Seq[SampleParameterTaskInfo])
     extends TaskInfo
 
-class SampleParameterTaskInfo(prevHyperNodes: Set[Int],
-                              curHyperNodes: Int,
-                              ghd: RelationGHDTree,
-                              samplesPerMachine: Int = 10000) {
+case class SampleParameterTaskInfo(prevHyperNodes: Set[Int],
+                                   curHyperNodes: Int,
+                                   ghd: RelationGHDTree,
+                                   samplesPerMachine: Int = 10000) {
   lazy val sampleQuery: Seq[RelationSchema] = ???
   lazy val sampleQueryAttrOrder: Array[AttributeID] = ???
   lazy val sampledRelationAttrs: Array[AttributeID] = ???
@@ -65,4 +66,4 @@ case class SampledParameter(prevHyperNodes: Set[Int],
                             curHyperNodes: Int,
                             ghd: RelationGHDTree,
                             samplesPerMachine: Int = 10000,
-                            value: Double)
+                            var value: Double)

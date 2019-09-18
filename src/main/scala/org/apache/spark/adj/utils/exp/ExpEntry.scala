@@ -33,7 +33,10 @@ object ExpEntry {
           .text("execute communication step only"),
         opt[String]('m', "method")
           .action((x, c) => c.copy(method = x))
-          .text(s"method, avaiable methods:${Method.values}")
+          .text(s"method, avaiable methods:${Method.values}"),
+        opt[Int]('t', "taskNum")
+          .action((x, c) => c.copy(taskNum = x))
+          .text(s"num of task to execute")
       )
     }
 
@@ -41,7 +44,12 @@ object ExpEntry {
     OParser.parse(parser1, args, Config()) match {
       case Some(config) =>
         val conf = Conf.defaultConf()
+        conf.data = config.data
         conf.method = Method.withName(config.method)
+        conf.commOnly = config.commOnly
+        conf.query = config.query
+        conf.timeOut = config.timeout
+        conf.taskNum = config.taskNum
 
         val executor =
           new ExpExecutor(
@@ -61,4 +69,5 @@ case class Config(query: String = "",
                   timeout: Int = 60 * 60,
                   data: String = "",
                   commOnly: Boolean = false,
-                  method: String = "HCube")
+                  method: String = "HCube",
+                  taskNum: Int = 28 * 7)

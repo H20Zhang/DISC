@@ -162,15 +162,18 @@ case class RelationGHDTree(V: Seq[(Int, Seq[RelationSchema])],
     //all traversalOrders
     var traversalOrders = ids.permutations.toSeq
 
+    println(traversalOrders.toIndexedSeq)
+
     //only retain connected traversalOrders
-    traversalOrders = traversalOrders.filter { p =>
+    traversalOrders = traversalOrders.filter { order =>
       var valid = true
       var i = 1
-      while (i < p.size) {
-        val subPath = p.slice(0, i)
-        if (!subPath.exists(j => fullDirE.contains(j, i))) {
+      while (i < order.size) {
+        val subPath = order.slice(0, i)
+        if (!subPath.exists(j => fullDirE.contains(j, order(i)))) {
           valid = false
         }
+        i += 1
       }
       valid
     }
@@ -183,18 +186,23 @@ case class RelationGHDTree(V: Seq[(Int, Seq[RelationSchema])],
     val firstAttrs =
       idToGHDNode(traversalOrder.head).flatMap(_.attrIDs).distinct.toSeq
     var attrOrders = firstAttrs.permutations.toSeq
+
     var remainingTraversalOrder = traversalOrder.drop(1)
     val assignedAttrIds = ArrayBuffer[Int]()
     assignedAttrIds ++= firstAttrs
 
     while (remainingTraversalOrder.nonEmpty) {
-      val nextAttrIds = idToGHDNode(traversalOrder.head)
+      val nextAttrIds = idToGHDNode(remainingTraversalOrder.head)
         .flatMap(_.attrIDs)
+        .distinct
         .diff(assignedAttrIds)
       val nextAttrOrders = nextAttrIds.permutations.toSeq
       attrOrders = attrOrders.flatMap { attrOrder =>
         nextAttrOrders.map(nextOrder => attrOrder ++ nextOrder)
       }
+
+      remainingTraversalOrder = remainingTraversalOrder.drop(1)
+      assignedAttrIds ++= nextAttrIds
     }
 
     attrOrders.map(_.toArray)

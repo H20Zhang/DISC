@@ -85,12 +85,13 @@ case class UnOptimizedJoin(childrenOps: Seq[LogicalPlan])
     val inputs = childrenOps.map(_.optimizedPlan())
     import Method._
     conf.method match {
-      case UnOptimizedHCube => UnOptimizedHCubeJoin(inputs)
-      case PushHCube        => OptimizedPushHCubeJoin(inputs)
-      case PullHCube        => OptimizedPullHCubeJoin(inputs)
-      case MergedHCube      => OptimizedMergedHCubeJoin(inputs)
-      case Factorize        => OptimizedHCubeFactorizedJoin(inputs)
-      case ADJ              => OptimizedAdaptiveJoin(inputs)
+      case UnOptimizedHCube => UnCostOptimizedHCubeJoin(inputs)
+      case PushHCube        => CostOptimizedPushHCubeJoin(inputs)
+      case PullHCube        => CostOptimizedPullHCubeJoin(inputs)
+      case MergedHCube      => CostOptimizedMergedHCubeJoin(inputs)
+      case Factorize        => CostOptimizedHCubeFactorizedJoin(inputs)
+      case ADJ              => CostOptimizedAdaptiveJoin(inputs)
+      case CacheHCube       => CostOptimizedHCubeCachedJoin(inputs)
       case _                => throw new Exception(s"not such method supported ${conf.method}")
     }
   }

@@ -10,8 +10,15 @@ import scala.collection.mutable
 
 class Conf() {
 
-  var taskNum = 4
+  var taskNum = 7 * 28
+//  var taskNum = 4
   var method = Method.UnOptimizedHCube
+  var query = ""
+  var timeOut = 43200
+  var commOnly = false
+  var data = ""
+  var totalCacheSize = 100000
+  var isYarn = false
 
   def getTaskNum(): Int = taskNum
   def getMethod() = method
@@ -30,7 +37,8 @@ object Conf {
 
   object Method extends Enumeration {
     type Method = Value
-    val UnOptimizedHCube, PushHCube, PullHCube, Factorize, MergedHCube, ADJ =
+    val UnOptimizedHCube, PushHCube, PullHCube, Factorize, MergedHCube, ADJ,
+    CacheHCube =
       Value
   }
 

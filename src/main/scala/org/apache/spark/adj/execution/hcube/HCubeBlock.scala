@@ -5,7 +5,8 @@ import org.apache.spark.adj.database.RelationSchema
 import org.apache.spark.adj.execution.subtask.utils.Trie
 
 abstract class HCubeBlock(val schema: RelationSchema,
-                          val shareVector: Array[Int]) {}
+                          val shareVector: Array[Int])
+    extends Serializable {}
 
 case class TupleHCubeBlock(override val schema: RelationSchema,
                            override val shareVector: Array[Int],

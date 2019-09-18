@@ -2,6 +2,7 @@ package org.apache.spark.adj.database
 
 import org.apache.spark.adj.parser.simpleDml.SimpleParser
 import org.apache.spark.adj.plan.UnOptimizedJoin
+import org.apache.spark.adj.utils.misc.Conf
 
 object Query {
 
@@ -33,6 +34,9 @@ object Query {
   }
 
   def countQuery(dml: String) = {
+
+    val time1 = System.currentTimeMillis()
+
     val parser = new SimpleParser()
     parser.parseDml(dml)
 
@@ -49,12 +53,19 @@ object Query {
 
     //execute physical plan
     val outputSize = phyiscalPlan.count()
-    println(s"output relation size:${outputSize}")
+
+    val conf = Conf.defaultConf()
+    val time2 = System.currentTimeMillis()
+    println(
+      s"executed:${conf.query} dataset:${conf.data} method:${conf.method} commOnly:${conf.commOnly} timeOut:${conf.timeOut} size:${outputSize} time:${(time2 - time1) / 1000}"
+    )
 
     outputSize
   }
 
   def commOnlyQuery(dml: String) = {
+
+    val time1 = System.currentTimeMillis()
     val parser = new SimpleParser()
     parser.parseDml(dml)
 
@@ -71,7 +82,12 @@ object Query {
 
     //execute physical plan
     val outputSize = phyiscalPlan.commOnly()
-    println(s"output relation size:${outputSize}")
+    val time2 = System.currentTimeMillis()
+
+    val conf = Conf.defaultConf()
+    println(
+      s"executed:${conf.query} dataset:${conf.data} method:${conf.method} commOnly:${conf.commOnly} timeOut:${conf.timeOut} size:${outputSize} time:${(time2 - time1) / 1000}"
+    )
 
     outputSize
   }

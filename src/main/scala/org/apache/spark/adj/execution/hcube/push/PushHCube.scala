@@ -112,11 +112,6 @@ class PushHCube(@transient query: HCubePlan, info: TaskInfo)
     sc.union(rdds).groupByKey(Conf.defaultConf().taskNum).map {
       case (key, tuples) =>
         val localShare = partitioner.getShare(key)
-
-//        val localShare = key.toArray
-
-//        println(s"localShare:${localShare.toSeq}")
-
         val allSchemas = keyToSchema.values.toArray
         val receivedTupleHCubeBlocks = tuples
           .groupBy(_._1)
@@ -137,12 +132,6 @@ class PushHCube(@transient query: HCubePlan, info: TaskInfo)
             TupleHCubeBlock(schema, localShare, new Array[Array[DataType]](0))
           }
         }
-
-//        receivedTupleHCubeBlocks.foreach { block =>
-//          println(
-//            s"relation:${block.schema.id}, contents:${block.content.map(_.toSeq).toSeq}"
-//          )
-//        }
 
         val subTask = new SubTask(localShare, tupleHCubeBlocks, info)
         subTask

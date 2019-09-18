@@ -3,9 +3,9 @@ package org.apache.spark.adj.utils.exp
 import java.util.{Timer, TimerTask}
 import java.util.concurrent.{CancellationException, FutureTask}
 
-import org.apache.spark.adj.database.{Catalog, Query, RelationSchema}
+import org.apache.spark.adj.database.{Catalog, Query, Relation, RelationSchema}
 import org.apache.spark.adj.execution.misc.DataLoader
-import org.apache.spark.adj.utils.misc.SparkSingle
+import org.apache.spark.adj.utils.misc.{Conf, SparkSingle}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
@@ -17,25 +17,25 @@ class ExpExecutor(data: String,
                   isCommOnly: Boolean) {
 
   def execute() = {
+
+    SparkSingle.appName =
+      s"ADJ-data:${data}-query:${query}-timeout:${timeout}-isCommOnly:${isCommOnly}-method:${Conf.defaultConf().method}"
+
     val expQuery = new ExpQuery(data)
 
     import scala.concurrent.ExecutionContext.Implicits.global
-
     import scala.concurrent.duration._
+
     val someTask = FutureTask.schedule(timeout seconds) {
       SparkSingle.getSparkContext().cancelAllJobs()
       println("timeout")
-//      System.exit(0)
     }
-
-    SparkSingle.appName =
-      s"ADJ-data:${data}-query:${query}-timeout:${timeout}-isCommOnly:${isCommOnly}"
 
 //    val future = Future {
     if (isCommOnly) {
-      Query.commOnlyQuery(expQuery.query(query))
+      Query.commOnlyQuery(expQuery.getQuery(query))
     } else {
-      Query.countQuery(expQuery.query(query))
+      Query.countQuery(expQuery.getQuery(query))
     }
 
 //    Await.result(future, timeout second)
@@ -49,22 +49,33 @@ class ExpQuery(data: String) {
 
   def getSchema(q: String) = {
     val dml = q match {
-      case "triangle"      => triangleDml
-      case "chordalSquare" => chordalSquareDml
-      case "fourClique"    => fourCliqueDml
-      case "l31"           => l31Dml
-      case "l32"           => l32Dml
-      case "b313"          => b313Dml
-      case "house"         => houseDml
-      case "solarSquare"   => solarSquareDml
-      case "near5Clique"   => near5CliqueSchemaDml
-      case _               => throw new Exception(s"no such pattern:${q}")
+      case "triangle"           => triangleDml
+      case "chordalSquare"      => chordalSquareDml
+      case "fourClique"         => fourCliqueDml
+      case "fiveClique"         => fiveCliqueDml
+      case "l31"                => l31Dml
+      case "l32"                => l32Dml
+      case "b313"               => b313Dml
+      case "house"              => houseDml
+      case "threeTriangle"      => threeTriangleDml
+      case "solarSquare"        => solarSquareDml
+      case "near5Clique"        => near5CliqueSchemaDml
+      case "fiveCliqueMinusOne" => fiveCliqueMinusOneDml
+      case _                    => throw new Exception(s"no such pattern:${q}")
     }
+
+    assert(dml.endsWith(";"))
 
     ExpQueryHelper.dmlToSchemas(dml)
   }
 
-  def query(q: String) = {
+  def getRelations(q: String) = {
+    val schemas = getSchema(q)
+    schemas.foreach(schema => Catalog.defaultCatalog().setContent(schema, rdd))
+    schemas.map(schema => Relation(schema, rdd))
+  }
+
+  def getQuery(q: String) = {
     val schemas = getSchema(q)
     schemas.foreach(schema => Catalog.defaultCatalog().setContent(schema, rdd))
     val query0 =
@@ -72,30 +83,42 @@ class ExpQuery(data: String) {
     query0
   }
 
+  //experiment query
   //triangle
   val triangleDml = "A-B;B-C;C-A;"
 
   //fourClique
-  val fourCliqueDml = "A-B;B-C;A-C;A-D;C-D;B-D;"
+  val fourCliqueDml = "A-B;B-C;C-D;D-A;A-C;B-D;"
 
-  //  chordalSquare
-  val chordalSquareDml = "A-B;B-C;A-C;A-D;C-D;"
+  //  fiveClique
+  val fiveCliqueDml = "A-B;B-C;C-D;D-E;E-A;A-C;A-D;B-D;B-E;C-E;"
 
+  //  house
+  val houseDml = "A-B;B-C;C-D;D-E;E-A;B-E;"
+
+  //  threeTriangle
+  val threeTriangleDml = "A-B;B-C;C-D;D-E;E-A;B-E;C-E;"
+
+  //  near5Clique
+  val near5CliqueSchemaDml = "A-B;B-C;C-D;D-E;E-A;B-E;B-D;C-E;"
+
+  //  fiveCliqueMinusOne, A-D removed
+  val fiveCliqueMinusOneDml = "A-B;B-C;C-D;D-E;E-A;A-C;B-D;B-E;C-E;"
+
+  //optional query
   //  lolipop
-  val l31Dml = "A-B;B-C;C-A;A-D"
+  val l31Dml = "A-B;B-C;C-A;A-D;"
   val l32Dml = "A-B;B-C;C-A;A-D;D-E;"
 
   //  barbell
   val b313Dml = "A-B;B-C;C-A;C-D;D-E;D-F;E-F;"
 
-  //  house
-  val houseDml = "A-B;B-C;C-A;B-D;C-E;D-E"
-
   //  solarSquare
   val solarSquareDml = "A-B;B-C;C-D;D-A;A-E;B-E;C-E;D-E;"
 
-  //  near5Clique
-  val near5CliqueSchemaDml = "A-B;B-C;A-C;A-D;C-D;B-D;A-F;D-F;"
+  //  chordalSquare
+  val chordalSquareDml = "A-B;B-C;A-C;A-D;C-D;"
+
 }
 
 object ExpQueryHelper {

@@ -13,39 +13,13 @@ object SparkSingle {
   private val conf = getConf()
 
   private def getConf() = {
-
-    // ...
-    //    Log.set(LEVEL_TRACE)
-
     new SparkConf()
-//      .registerKryoClasses(
-//        Array(
-//          classOf[LogoSchema],
-//          classOf[CompositeLogoSchema],
-//          classOf[LogoMetaData],
-//          classOf[ConcretePatternLogoBlock],
-//          classOf[KeyValuePatternLogoBlock],
-//          classOf[CompositeTwoPatternLogoBlock],
-//          classOf[FilteringPatternLogoBlock[_]],
-//          classOf[PatternInstance],
-//          classOf[OneKeyPatternInstance],
-//          classOf[TwoKeyPatternInstance],
-//          classOf[ValuePatternInstance],
-//          classOf[KeyMapping],
-//          classOf[mutable.LongMap[ValuePatternInstance]]
-//        )
-//      )
-//      .set(
-//        "spark.kryo.registrator",
-//        "org.apache.spark.adj.deprecated.utlis.KryoRegistor"
-//      )
-
   }
 
   //        .config("spark.memory.offHeap.enabled","true")
   //        .config("spark.memory.offHeap.size","500M")
 
-  var isCluster = false
+  var isCluster = Conf.defaultConf().isYarn
   var appName = "ADJ"
 
   private def getSparkInternal() = {
@@ -67,6 +41,7 @@ object SparkSingle {
           .config("spark.kryo.unsafe", "true")
           .config("spark.shuffle.file.buffer", "1M")
           .config("conf spark.network.timeout", "10000000")
+          .config("spark.yarn.maxAppAttempts", "1")
           //          .config("spark.kryo.registrationRequired","true")
           .getOrCreate()
       case false =>

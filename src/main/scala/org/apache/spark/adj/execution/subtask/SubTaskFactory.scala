@@ -7,6 +7,12 @@ object SubTaskFactory {
                  blocks: Seq[HCubeBlock],
                  info: TaskInfo) = {
     info match {
+      case s: CachedLeapFrogAttributeOrderInfo =>
+        new CachedLeapFrogJoinSubTask(
+          shareVector,
+          blocks.map(_.asInstanceOf[TupleHCubeBlock]),
+          s
+        )
       case s: AttributeOrderInfo =>
         new LeapFrogJoinSubTask(
           shareVector,

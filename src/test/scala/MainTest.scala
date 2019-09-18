@@ -23,7 +23,7 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
     ("wikiV", "wikiV.txt"),
     ("debug", "debugData.txt")
   )
-  val dataAdress = prefix + graphDataAdresses("wikiV")
+  val dataAdress = prefix + graphDataAdresses("eu")
 
   test("main") {
     //register relations
@@ -115,7 +115,7 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
   test("expEntry") {
 //    Factorize
     val commands =
-      s"-q fourClique -t 1000 -d ${dataAdress} -c false -m ${Method.PullHCube}"
+      s"-q near5Clique -t 1000 -d ${dataAdress} -c true -m ${Method.PushHCube}"
 
 //    val commands = s"--help"
     ExpEntry.main(commands.split("\\s"))

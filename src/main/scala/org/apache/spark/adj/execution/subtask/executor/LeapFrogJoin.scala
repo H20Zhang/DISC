@@ -140,9 +140,12 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
 
   //construct the unary iterator for the i-th attribute given prefix consisting of 0 to i-1th attribute
   //Noted: this class wouldn't produce empty unary iterator unless all prefix for 0 to i-1th attribute has been tested.
+  var firstInitialized = false
+
   protected def fixIterators(idx: Int): Unit = {
 
-    if (idx == 0 && hasEnd != true) {
+    if (idx == 0 && firstInitialized == false) {
+      firstInitialized = true
       //case: fix the iterator for first attribute, this will be fixed only once
       val it = constructIthIterator(idx)
 
@@ -153,6 +156,9 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
         hasEnd = true
         return
       }
+    } else if (idx == 0 && firstInitialized == true) {
+      hasEnd = true
+      return
     }
 
     while (hasEnd != true) {
@@ -211,14 +217,20 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
   protected val lastIdx = attrSize - 1
   protected var lastIterator = unaryIterators(lastIdx)
   override def hasNext: Boolean = {
-    //check if last iterator hasNext, if not, trying to produce new last iterator
-    if (lastIterator.hasNext) {
-      return true
-    } else {
-      fixIterators(lastIdx)
+    if (!hasEnd) {
       lastIterator = unaryIterators(lastIdx)
-      return !hasEnd
+      //check if last iterator hasNext, if not, trying to produce new last iterator
+      if (lastIterator.hasNext) {
+        return true
+      } else {
+        fixIterators(lastIdx)
+        lastIterator = unaryIterators(lastIdx)
+        return !hasEnd
+      }
+    } else {
+      !hasEnd
     }
+
   }
 
   override def next(): Array[DataType] = {

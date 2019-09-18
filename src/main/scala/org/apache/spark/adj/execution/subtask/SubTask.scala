@@ -119,8 +119,8 @@ class FactorizedLeapFrogJoinSubTask(
 
 case class CachedLeapFrogAttributeOrderInfo(
   attrOrder: Array[AttributeID],
-  cacheSize: Int,
-  cachePos: Seq[(Array[Int], Array[Int])]
+  cacheSize: Array[Int],
+  keyAndValues: Seq[(Array[Int], Array[Int])]
 ) extends TaskInfo
 
 class CachedLeapFrogJoinSubTask(
@@ -134,20 +134,22 @@ class CachedLeapFrogJoinSubTask(
     ) {
   override val attrOrders = cachedLeapFrogAttrOrderInfo.attrOrder
   override val blocks = _blocks
-  val cachePos = cachedLeapFrogAttrOrderInfo.cachePos
+  val keyAndValues = cachedLeapFrogAttrOrderInfo.keyAndValues
   val cacheSize = cachedLeapFrogAttrOrderInfo.cacheSize
 
   override def toString: Attribute = {
     s"""
        |blocks:${_blocks.map(_.schema.name)}
        |attrOrder:${attrOrders.map(Catalog.defaultCatalog().getAttribute).toSeq}
-       |cachePos: ${cachePos}
+       |cachePos: ${keyAndValues}
        |cacheSize: ${cacheSize}
      """.stripMargin
   }
 
   override def execute() = {
-    new CachedLeapFrogJoin(this)
+    val cachedLeapFrogJoin = new CachedLeapFrogJoin(this)
+    cachedLeapFrogJoin.initCacheLeapFrogJoin()
+    cachedLeapFrogJoin
   }
 }
 
