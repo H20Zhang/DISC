@@ -23,6 +23,7 @@ import org.apache.spark.adj.execution.subtask.{
   TrieConstructedAttributeOrderInfo
 }
 import org.apache.spark.rdd.RDD
+import org.apache.spark.storage.StorageLevel
 
 //physical plan is the plan that describe the distributed execution process
 trait PhysicalPlan {
@@ -73,13 +74,6 @@ abstract class AbstractHCubeJoinExec(schema: RelationSchema,
       .map { task =>
         val subJoinTask =
           SubTaskFactory.genSubTask(task.shareVector, task.blocks, task.info)
-
-//        println(
-//          task.info
-//            .asInstanceOf[CachedLeapFrogAttributeOrderInfo]
-//            .cachePos
-//            .map(f => (f._1.toSeq, f._2.toSeq))
-//        )
 
         val iterator =
           subJoinTask.execute()
@@ -136,7 +130,7 @@ abstract class AbstractMergedPullHCubeJoinExec(
       outputBlock
     }
 
-    preprocessedRDD.cache()
+    preprocessedRDD.persist(StorageLevel.MEMORY_ONLY_SER)
     preprocessedRDD.count()
 
     PartitionedRelation(preprocessedRDD, partitioner)

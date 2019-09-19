@@ -4,6 +4,7 @@ import org.apache.spark.adj.database.Catalog.AttributeID
 import org.apache.spark.adj.database.RelationSchema
 import org.apache.spark.adj.optimization.stat.Statistic
 import org.apache.spark.adj.utils.misc.Conf
+import org.apache.spark.adj.utils.misc.Conf.Method
 
 import scala.collection.mutable.ArrayBuffer
 //
@@ -29,7 +30,14 @@ class EnumShareComputer(schemas: Seq[RelationSchema],
     var optimalShare = optimalShareAndCost._1
     var optimalLoad = optimalShareAndCost._3
 
-    while (optimalLoad > 3 * Math.pow(10, 7)) {
+    var maximalLoad = 0.0
+
+    Conf.defaultConf().method match {
+      case Method.MergedHCube => maximalLoad = 5 * Math.pow(10, 7)
+      case _                  => maximalLoad = 3 * Math.pow(10, 7)
+    }
+
+    while (optimalLoad > maximalLoad) {
       numTask = (numTask * 2).toInt
       Conf.defaultConf().taskNum = numTask
       optimalShareAndCost = optimalShareAndLoadAndCost()

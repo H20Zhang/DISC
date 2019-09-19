@@ -49,8 +49,8 @@ class RelationPartitioner(relation: Relation, helper: HCubeHelper) {
     }
 
     //cache the hcubeBlockRDD in memory
-    hcubeBlockRDD.cache()
-    hcubeBlockRDD.count()
+//    hcubeBlockRDD.cache()
+//    hcubeBlockRDD.count()
 
     PartitionedRelation(hcubeBlockRDD, partitioner)
   }

@@ -1,7 +1,7 @@
 package org.apache.spark.adj.optimization.optimizer
 
 import org.apache.spark.adj.database.{Relation, RelationSchema}
-import org.apache.spark.adj.optimization.comp.CostModel
+import org.apache.spark.adj.optimization.comp.AttrOrderCostModel
 import org.apache.spark.adj.optimization.decomposition.relationGraph.RelationDecomposer
 import org.apache.spark.adj.optimization.stat.Statistic
 
@@ -22,7 +22,10 @@ class CacheLeapFrogOptimizer(
       .map { traversalOrder =>
         val attrOrders = ghd.compatibleAttrOrder(traversalOrder)
         val minimalCostAttrOrder = attrOrders
-          .map(attrOrder => (attrOrder, CostModel(attrOrder, schemas).cost()))
+          .map(
+            attrOrder =>
+              (attrOrder, AttrOrderCostModel(attrOrder, schemas).cost())
+          )
           .minBy(_._2)
         (minimalCostAttrOrder, traversalOrder)
       }

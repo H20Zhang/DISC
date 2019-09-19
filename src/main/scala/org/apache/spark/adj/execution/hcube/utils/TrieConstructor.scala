@@ -9,7 +9,8 @@ class TriePreConstructor(attrOrders: Array[AttributeID],
                          _content: Array[Array[DataType]])
     extends Serializable {
 
-  private val content = _content.map(f => f.clone())
+  private val content = _content
+//    .map(f => f.clone())
 
   def reorder() = {
     //The func that mapping idx-th value of each tuple to j-th pos, where j-th position is the reletive order of idx-th attribute determined via attribute order

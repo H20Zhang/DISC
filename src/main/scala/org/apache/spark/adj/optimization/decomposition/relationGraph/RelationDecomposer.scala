@@ -152,6 +152,11 @@ case class RelationGHDTree(V: Seq[(Int, Seq[RelationSchema])],
                            fhtw: Double) {
 
   val idToGHDNode = V.toMap
+  val schemas = V.flatMap(_._2).distinct
+
+  def getSchemas(nodeId: Int) = {
+    idToGHDNode(nodeId)
+  }
 
   //enumerate all the possible traversal orders of the ghd
   def allTraversalOrder: Seq[Seq[Int]] = {
@@ -162,7 +167,7 @@ case class RelationGHDTree(V: Seq[(Int, Seq[RelationSchema])],
     //all traversalOrders
     var traversalOrders = ids.permutations.toSeq
 
-    println(traversalOrders.toIndexedSeq)
+//    println(traversalOrders.toIndexedSeq)
 
     //only retain connected traversalOrders
     traversalOrders = traversalOrders.filter { order =>
@@ -183,6 +188,11 @@ case class RelationGHDTree(V: Seq[(Int, Seq[RelationSchema])],
 
   //find the compatible attribute orders for an given traversal order
   def compatibleAttrOrder(traversalOrder: Seq[Int]): Seq[Array[AttributeID]] = {
+
+    if (traversalOrder.isEmpty) {
+      return Seq()
+    }
+
     val firstAttrs =
       idToGHDNode(traversalOrder.head).flatMap(_.attrIDs).distinct.toSeq
     var attrOrders = firstAttrs.permutations.toSeq

@@ -38,4 +38,10 @@ class StatisticComputer(relation: Relation, taskNum: Int = 4)
 
     StatisticResult(schema, allAttrSubSetSize.toMap)
   }
+
+  def computeCardinalityOnly(): StatisticResult = {
+    val attrIDsSet = schema.attrIDs.toSet
+    val cardinalities = Map((attrIDsSet, content.count()))
+    StatisticResult(schema, cardinalities)
+  }
 }

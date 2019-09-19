@@ -4,9 +4,10 @@ import org.apache.spark.adj.database.Catalog.AttributeID
 import org.apache.spark.adj.database.RelationSchema
 import org.apache.spark.adj.optimization.stat.Statistic
 
-case class CostModel(attrIdOrder: Array[AttributeID],
-                     schemas: Seq[RelationSchema],
-                     statistic: Statistic = Statistic.defaultStatistic()) {
+case class AttrOrderCostModel(attrIdOrder: Array[AttributeID],
+                              schemas: Seq[RelationSchema],
+                              statistic: Statistic =
+                                Statistic.defaultStatistic()) {
 
   val arity = attrIdOrder.size
   val maximalPos = arity - 1
@@ -68,13 +69,14 @@ class OrderComputer(schemas: Seq[RelationSchema],
   def genAllOrderWithCost(): Seq[(Array[AttributeID], Long)] = {
     val allOrder = genAllOrder()
     val allCost =
-      allOrder.map(attrOrder => CostModel(attrOrder, schemas).cost())
+      allOrder.map(attrOrder => AttrOrderCostModel(attrOrder, schemas).cost())
     allOrder.zip(allCost)
   }
 
   def optimalOrder(): Array[AttributeID] = {
     val allOrder = genAllOrder()
-    val allCostModel = allOrder.map(attrOrder => CostModel(attrOrder, schemas))
+    val allCostModel =
+      allOrder.map(attrOrder => AttrOrderCostModel(attrOrder, schemas))
     val minimalCostModel = allCostModel.map(f => (f, f.cost())).minBy(_._2)
     minimalCostModel._1.attrIdOrder
   }

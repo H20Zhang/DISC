@@ -465,14 +465,6 @@ object ArrayTrie {
     }
 
     new ArrayTrie(neighbors, values, neighborsBegin, neighborsEnd, arity)
-
-//    new ArrayTrie(
-//      edges.dropRight(1).map(_._2),
-//      edges.dropRight(1).map(_._3),
-//      nodeBuffer.map(_._1).toArray,
-//      nodeBuffer.map(_._2).toArray,
-//      arity
-//    )
   }
 }
 

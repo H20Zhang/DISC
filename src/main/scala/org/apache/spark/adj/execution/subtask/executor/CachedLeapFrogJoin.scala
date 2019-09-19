@@ -12,7 +12,6 @@ import org.apache.spark.adj.execution.subtask.utils.{ArraySegment, LRUCache}
 
 import scala.collection.mutable
 
-//TODO: debug this
 class CachedLeapFrogJoin(task: CachedLeapFrogJoinSubTask)
     extends LeapFrogJoin(task) {
 

@@ -34,7 +34,10 @@ class PullHCube(query: HCubePlan, info: TaskInfo) extends HCube {
     val partitionedRelations = genParititionedRelation()
 
     val preprocessedPartitionedRelation =
-      partitionedRelations.par.map(f).toArray
+      partitionedRelations
+//        .par
+        .map(f)
+        .toArray
 
     val subTaskPartitions = helper.genSubTaskPartitions(
       info,

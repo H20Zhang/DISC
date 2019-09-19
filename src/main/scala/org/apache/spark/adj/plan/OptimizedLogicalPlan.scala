@@ -50,6 +50,7 @@ case class CostOptimizedMergedHCubeJoin(childrenOps: Seq[LogicalPlan],
   var share: Map[AttributeID, Int] = Map()
   var attrOrder: Array[AttributeID] = Array()
   val statistic = Statistic.defaultStatistic()
+  var numTask = Conf.defaultConf().taskNum
 
   init()
 
@@ -71,6 +72,7 @@ case class CostOptimizedMergedHCubeJoin(childrenOps: Seq[LogicalPlan],
     val shareComputer = new EnumShareComputer(schemas, task)
     share = shareComputer.optimalShare()._1
 
+    numTask = Conf.defaultConf().taskNum
     val catlog = Catalog.defaultCatalog()
 
     println(
@@ -89,7 +91,7 @@ case class CostOptimizedMergedHCubeJoin(childrenOps: Seq[LogicalPlan],
       getChildren().map(_.phyiscalPlan()),
       share,
       attrOrder,
-      task
+      share.values.product
     )
   }
 

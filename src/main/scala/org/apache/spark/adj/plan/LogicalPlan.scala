@@ -67,14 +67,7 @@ abstract class Join(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
   override def getChildren(): Seq[LogicalPlan] = childrenOps
 
   override val outputSchema: RelationSchema = {
-    val catalog = Catalog.defaultCatalog()
-    val schema = RelationSchema(
-      s"TempR${catalog.nextRelationID()}",
-      attrIDs.map(catalog.getAttribute)
-    )
-    schema.register()
-//    catalog.add(schema)
-    schema
+    RelationSchema.tempSchemaWithAttrIds(attrIDs)
   }
 }
 

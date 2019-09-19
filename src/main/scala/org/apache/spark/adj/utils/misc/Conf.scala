@@ -10,8 +10,9 @@ import scala.collection.mutable
 
 class Conf() {
 
-  var taskNum = 7 * 28
-//  var taskNum = 4
+//  var taskNum = 7 * 28
+  var taskNum = 1
+  var numMachine = 7 * 28
   var method = Method.UnOptimizedHCube
   var query = ""
   var timeOut = 43200
@@ -19,6 +20,7 @@ class Conf() {
   var data = ""
   var totalCacheSize = 100000
   var isYarn = false
+  var defaultNumSamples = 100000
 
   def getTaskNum(): Int = taskNum
   def getMethod() = method
@@ -37,8 +39,8 @@ object Conf {
 
   object Method extends Enumeration {
     type Method = Value
-    val UnOptimizedHCube, PushHCube, PullHCube, Factorize, MergedHCube, ADJ,
-    CacheHCube =
+    val SPARKSQL, UnOptimizedHCube, PushHCube, PullHCube, Factorize,
+    MergedHCube, ADJ, CacheHCube =
       Value
   }
 

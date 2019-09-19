@@ -33,6 +33,12 @@ case class RelationSchema(name: String, attrs: Seq[Attribute])
     id = Some(catalog.add(this, content))
   }
 
+  def setContent(rdd: RDD[Array[DataType]]): Unit = {
+    rdd.cache()
+    rdd.count()
+    catalog.setContent(this, rdd)
+  }
+
   def containAttribute(attr: Attribute): Boolean = {
     attr.contains(attr)
   }
@@ -58,13 +64,35 @@ case class RelationSchema(name: String, attrs: Seq[Attribute])
   }
 }
 
-//object RelationSchema {
-//  def apply(name: String, attrs: Seq[Attribute]): RelationSchema =
-//    new RelationSchema(name, attrs)
-//
-//  def apply(name: String, attrs: Seq[AttributeID]): RelationSchema =
-//    new RelationSchema(name, attrs)
-//}
+object RelationSchema {
+  def tempSchemaWithAttrIds(attrIDs: Seq[AttributeID]): RelationSchema = {
+    val catalog = Catalog.defaultCatalog()
+    tempSchemaWithAttrName(attrIDs.map(catalog.getAttribute))
+  }
+
+  def tempSchemaWithAttrIds(attrIDs: Seq[AttributeID],
+                            rdd: RDD[Array[DataType]]): RelationSchema = {
+    val catalog = Catalog.defaultCatalog()
+    tempSchemaWithAttrName(attrIDs.map(catalog.getAttribute), rdd)
+  }
+
+  def tempSchemaWithAttrName(attr: Seq[Attribute]): RelationSchema = {
+    val catalog = Catalog.defaultCatalog()
+    val schema = RelationSchema(s"TempR${catalog.nextRelationID()}", attr)
+    schema.register()
+    schema
+  }
+
+  def tempSchemaWithAttrName(attr: Seq[Attribute],
+                             rdd: RDD[Array[DataType]]): RelationSchema = {
+    val catalog = Catalog.defaultCatalog()
+    val schema = RelationSchema(s"TempR${catalog.nextRelationID()}", attr)
+    rdd.cache()
+    rdd.count()
+    schema.register(rdd)
+    schema
+  }
+}
 
 case class Relation(val schema: RelationSchema, val rdd: RDD[Array[DataType]])
 

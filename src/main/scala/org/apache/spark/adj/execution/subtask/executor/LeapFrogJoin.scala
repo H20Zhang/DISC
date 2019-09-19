@@ -11,7 +11,17 @@ import org.apache.spark.adj.execution.subtask.utils.{
 }
 
 abstract class LongSizeIterator[T] extends Iterator[T] {
-  def longSize: Long
+  def longSize(): Long
+  def recordCardinalityAndTime(): (Double, Double) = {
+
+    val time1 = System.nanoTime()
+    val cardinality = longSize().toDouble
+    val time2 = System.nanoTime()
+    val time = ((time2 - time1).toDouble) / Math.pow(10, 6)
+
+    (cardinality, time)
+
+  }
 }
 
 class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)

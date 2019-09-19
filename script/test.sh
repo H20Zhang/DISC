@@ -33,8 +33,8 @@ Test() {
   done
 }
 
-#methods=(CacheHCube, Factorize, PullHCube, MergedHCube, PushHCube)
-#input=(as lj webB wikiT  enwiki-2013 orkut)
+#methods=(CacheHCube, Factorize, PullHCube, MergedHCube, PushHCube, ADJ, SPARKSQL)
+#input=(as lj webB wikiT orkut)
 #querys=(triangle fourClique fiveClique house threeTriangle near5Clique fiveCliqueMinusOne)
 
 #input=(as)
@@ -51,12 +51,31 @@ Test() {
 #querys=(threeTriangle near5Clique)
 #Test CacheHCube false 196
 
-input=(lj)
-querys=(near5Clique)
-Test CacheHCube false 196
+#input=(orkut)
+#querys=(triangle)
+#Test MergedHCube false 196
 
 #input=(lj)
 #querys=(near5Clique)
 #Test PushHCube false 1536
 
+#input=(orkut)
+#querys=(fiveClique)
+#Test MergedHCube false 196
 
+
+input=(webB as wikiT lj orkut)
+querys=(triangle fourClique fiveClique)
+Test MergedHCube false 196
+
+input=(webB as wikiT lj orkut)
+querys=(triangle fourClique fiveClique)
+Test PushHCube false 196
+
+input=(webB as wikiT lj orkut)
+querys=(triangle fourClique fiveClique)
+Test CacheHCube false 196
+
+input=(webB as wikiT lj orkut)
+querys=(triangle fourClique fiveClique)
+Test SPARKSQL false 196

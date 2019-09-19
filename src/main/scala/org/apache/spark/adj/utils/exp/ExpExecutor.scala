@@ -5,6 +5,7 @@ import java.util.concurrent.{CancellationException, FutureTask}
 
 import org.apache.spark.adj.database.{Catalog, Query, Relation, RelationSchema}
 import org.apache.spark.adj.execution.misc.DataLoader
+import org.apache.spark.adj.utils.misc.Conf.Method
 import org.apache.spark.adj.utils.misc.{Conf, SparkSingle}
 
 import scala.concurrent.duration.Duration
@@ -32,13 +33,21 @@ class ExpExecutor(data: String,
     }
 
 //    val future = Future {
-    if (isCommOnly) {
-      Query.commOnlyQuery(expQuery.getQuery(query))
+
+    if (Conf.defaultConf().method != Method.SPARKSQL) {
+      if (isCommOnly) {
+        Query.showPlan(expQuery.getQuery(query))
+      } else {
+        Query.countQuery(expQuery.getQuery(query))
+      }
     } else {
-      Query.countQuery(expQuery.getQuery(query))
+      val sparkExecutor = new SparkSQLExecutor(
+        expQuery.getRelations(query).map(_.schema)
+      )
+      sparkExecutor.SparkSQLResult()
     }
 
-//    Await.result(future, timeout second)
+    //    Await.result(future, timeout second)
   }
 
 }

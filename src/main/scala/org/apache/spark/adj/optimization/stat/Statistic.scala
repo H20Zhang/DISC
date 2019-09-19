@@ -19,6 +19,13 @@ class Statistic {
     }
   }
 
+  def addCardinalityOnly(relation: Relation) = {
+    if (statisticResults.get(relation.schema).isEmpty) {
+      val computer = new StatisticComputer(relation)
+      statisticResults(relation.schema) = computer.computeCardinalityOnly()
+    }
+  }
+
   def get(schema: RelationSchema): Option[StatisticResult] = {
     statisticResults.get(schema)
   }

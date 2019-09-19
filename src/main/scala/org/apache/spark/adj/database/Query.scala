@@ -22,9 +22,9 @@ object Query {
     val optimizedPlan = plan.optimizedPlan()
     println(s"optimized logical plan:${optimizedPlan}")
 
-    //convert to physical plan
-    val phyiscalPlan = optimizedPlan.phyiscalPlan()
-    println(s"phyiscal plan:${phyiscalPlan}")
+//    //convert to physical plan
+//    val phyiscalPlan = optimizedPlan.phyiscalPlan()
+//    println(s"phyiscal plan:${phyiscalPlan}")
 
     //execute physical plan
 //    val outputSize = phyiscalPlan.count()

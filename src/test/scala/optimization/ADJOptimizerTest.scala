@@ -13,7 +13,7 @@ class ADJOptimizerTest extends SparkFunSuite {
     ("wikiV", "wikiV.txt"),
     ("debug", "debugData.txt")
   )
-  val dataAdress = prefix + graphDataAdresses("debug")
+  val dataAdress = prefix + graphDataAdresses("wikiV")
   val query = s"house"
 
   test("adj") {
