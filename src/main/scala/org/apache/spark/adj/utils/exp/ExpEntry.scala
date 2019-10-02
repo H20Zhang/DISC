@@ -70,4 +70,4 @@ case class Config(query: String = "",
                   data: String = "",
                   commOnly: Boolean = false,
                   method: String = "HCube",
-                  taskNum: Int = 28 * 7)
+                  taskNum: Int = Conf.defaultConf().numMachine)

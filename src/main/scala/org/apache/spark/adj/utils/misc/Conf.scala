@@ -11,20 +11,20 @@ import scala.collection.mutable
 class Conf() {
 
   //For Single Machine
-//  var taskNum = 4
-//  var numMachine = 4
-//  var defaultNumSamples = 100
-//  val commSpeed = 1 * Math.pow(10, 7)
-//  val ADJHCubeMemoryBudget = 5 * Math.pow(10, 8)
+  var taskNum = 4
+  var numMachine = 4
+  var defaultNumSamples = 100
+  val commSpeed = 1 * Math.pow(10, 7)
+  val ADJHCubeMemoryBudget = 5 * Math.pow(10, 8)
 
   //For Cluster
-  var defaultNumSamples = 100000
-  var taskNum = 7 * 28
-  var numMachine = 7 * 28
-  val commSpeed = 1 * Math.pow(10, 9)
-
-//  in terms of real size
-  val ADJHCubeMemoryBudget = 4.5 * Math.pow(10, 8)
+//  var defaultNumSamples = 100000
+//  var taskNum = 7 * 28
+//  var numMachine = 7 * 28
+//  val commSpeed = 1 * Math.pow(10, 9)
+//
+////  in terms of real size
+//  val ADJHCubeMemoryBudget = 4.5 * Math.pow(10, 8)
 
   var method = Method.UnOptimizedHCube
   var query = ""

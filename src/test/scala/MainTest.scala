@@ -115,7 +115,7 @@ class MainTest extends FunSuite with BeforeAndAfterAll {
   test("expEntry") {
 //    Factorize
     val commands =
-      s"-q near5Clique -t 43200 -d ${dataAdress} -c false -m ${Method.ADJ}"
+      s"-q fourClique -t 43200 -d ${dataAdress} -c false -m ${Method.MergedHCube}"
 
 //    val commands = s"--help"
     ExpEntry.main(commands.split("\\s"))
