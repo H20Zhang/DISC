@@ -2,15 +2,15 @@ package org.apache.spark.adj.plan
 
 import org.apache.spark.adj.database.Catalog.AttributeID
 import org.apache.spark.adj.database.{Catalog, Relation, RelationSchema}
-import org.apache.spark.adj.optimization.comp.{
+import org.apache.spark.adj.optimization.costBased.comp.{
   EnumShareComputer,
   FactorizeOrderComputer,
   NonLinearShareComputer,
   OrderComputer
 }
-import org.apache.spark.adj.optimization.optimizer.{
-  ADJOptimizer,
-  CacheLeapFrogOptimizer
+import org.apache.spark.adj.optimization.costBased.optimizer.{
+  ADJCostOptimizer,
+  CacheLeapFrogCostOptimizer
 }
 import org.apache.spark.adj.optimization.stat.Statistic
 import org.apache.spark.adj.utils.misc.Conf
@@ -99,6 +99,10 @@ case class CostOptimizedMergedHCubeJoin(childrenOps: Seq[LogicalPlan],
     throw new NotImplementedError()
   }
 
+  override val outputSchema: RelationSchema = {
+    RelationSchema.tempSchemaWithAttrIds(attrOrder)
+  }
+
 }
 
 case class CostOptimizedPushHCubeJoin(childrenOps: Seq[LogicalPlan],
@@ -159,6 +163,10 @@ case class CostOptimizedPushHCubeJoin(childrenOps: Seq[LogicalPlan],
     throw new NotImplementedError()
   }
 
+  override val outputSchema: RelationSchema = {
+    RelationSchema.tempSchemaWithAttrIds(attrOrder)
+  }
+
 }
 
 case class CostOptimizedPullHCubeJoin(childrenOps: Seq[LogicalPlan],
@@ -214,6 +222,10 @@ case class CostOptimizedPullHCubeJoin(childrenOps: Seq[LogicalPlan],
 
   override def optimizedPlan(): LogicalPlan = {
     throw new NotImplementedError()
+  }
+
+  override val outputSchema: RelationSchema = {
+    RelationSchema.tempSchemaWithAttrIds(attrOrder)
   }
 }
 
@@ -276,6 +288,10 @@ case class CostOptimizedHCubeFactorizedJoin(childrenOps: Seq[LogicalPlan],
     throw new NotImplementedError()
   }
 
+  override val outputSchema: RelationSchema = {
+    RelationSchema.tempSchemaWithAttrIds(attrOrder)
+  }
+
 }
 
 case class CostOptimizedHCubeCachedJoin(childrenOps: Seq[LogicalPlan],
@@ -306,7 +322,7 @@ case class CostOptimizedHCubeCachedJoin(childrenOps: Seq[LogicalPlan],
     relations.foreach(statistic.add)
 
     //compute cache related parameters
-    val temp = new CacheLeapFrogOptimizer(relations) genOptimalPlan ()
+    val temp = new CacheLeapFrogCostOptimizer(relations) genOptimalPlan ()
     attrOrder = temp._1
     keyAndValues = temp._2
 
@@ -364,15 +380,7 @@ case class CostOptimizedHCubeCachedJoin(childrenOps: Seq[LogicalPlan],
   }
 }
 
-//case class OptimizedHCubeGHDJoin(childrenOps: Seq[LogicalPlan], task: Int = 4)
-//    extends Join(childrenOps) {
-//  override def optimizedPlan(): LogicalPlan = ???
-//
-//  override def phyiscalPlan(): PhysicalPlan = ???
-//
-//}
-
-//TODO: finish the remaining part then debug
+//TODO: debug
 case class CostOptimizedAdaptiveJoin(childrenOps: Seq[LogicalPlan],
                                      task: Int = 4)
     extends Join(childrenOps) {
@@ -397,17 +405,23 @@ case class CostOptimizedAdaptiveJoin(childrenOps: Seq[LogicalPlan],
       .map(_.phyiscalPlan().execute())
     relations.foreach(statistic.add)
 
-    val adjOptimizer = new ADJOptimizer(relations)
+    val adjOptimizer = new ADJCostOptimizer(relations)
     val temp = adjOptimizer.genOptimalPlan()
 
     share = temp._4
     attrOrder = temp._3
     preMaterializeQuery = temp._1
     remainingRelations = temp._2
+
+    println(s"share:${share}")
+    println(s"attrOrder:${attrOrder.toSeq}")
+    println(s"preMaterializeQuery:${preMaterializeQuery}")
+    println(s"remainingRelations:${remainingRelations}")
   }
 
   override def optimizedPlan(): LogicalPlan = {
     throw new NotImplementedException
+
   }
 
   override def phyiscalPlan(): PhysicalPlan = {
@@ -422,9 +436,9 @@ case class CostOptimizedAdaptiveJoin(childrenOps: Seq[LogicalPlan],
 
     MergedHCubeLeapJoinExec(
       outputSchema,
-      inputPhysicalPlans ++ remainingRelations
+      inputPhysicalPlans ++ (remainingRelations
         .map(UnOptimizedScan)
-        .map(_.optimizedPlan().phyiscalPlan()),
+        .map(_.optimizedPlan().phyiscalPlan())),
       share,
       attrOrder,
       task

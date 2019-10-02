@@ -1,7 +1,7 @@
-package org.apache.spark.adj.optimization.decomposition.graph
+package org.apache.spark.adj.optimization.costBased.decomposition.graph
 
-import org.apache.spark.adj.optimization.decomposition.graph.Graph._
-import org.apache.spark.adj.optimization.decomposition.graph.HyperNodeGraph.NHyperNode
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.Graph._
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.HyperNodeGraph.NHyperNode
 import org.apache.spark.adj.utils.extension.ArrayUtil
 import org.apache.spark.adj.utils.misc.LogAble
 import org.apache.spark.adj.utils.testing.GraphGenerator

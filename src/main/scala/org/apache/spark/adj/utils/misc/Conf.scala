@@ -10,9 +10,22 @@ import scala.collection.mutable
 
 class Conf() {
 
-//  var taskNum = 7 * 28
-  var taskNum = 1
+  //For Single Machine
+//  var taskNum = 4
+//  var numMachine = 4
+//  var defaultNumSamples = 100
+//  val commSpeed = 1 * Math.pow(10, 7)
+//  val ADJHCubeMemoryBudget = 5 * Math.pow(10, 8)
+
+  //For Cluster
+  var defaultNumSamples = 100000
+  var taskNum = 7 * 28
   var numMachine = 7 * 28
+  val commSpeed = 1 * Math.pow(10, 9)
+
+//  in terms of real size
+  val ADJHCubeMemoryBudget = 4.5 * Math.pow(10, 8)
+
   var method = Method.UnOptimizedHCube
   var query = ""
   var timeOut = 43200
@@ -20,11 +33,14 @@ class Conf() {
   var data = ""
   var totalCacheSize = 100000
   var isYarn = false
-  var defaultNumSamples = 100000
+  val partitionSpeed = numMachine * Math.pow(10, 5)
+
+  //in terms of cardinality
+  val mergeHCubeMemoryBudget = 5 * Math.pow(10, 7)
+  val pushHCubeMemoryBudget = 3 * Math.pow(10, 7)
 
   def getTaskNum(): Int = taskNum
   def getMethod() = method
-//    conf.getInt("taskNum")
 }
 
 object Conf {

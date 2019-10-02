@@ -415,6 +415,7 @@ object ArrayTrie {
 //    edgeBuffer += ((Int.MaxValue, Int.MaxValue, Int.MaxValue))
     edgeBuffer += ValuedEdge(Int.MaxValue, Int.MaxValue, Int.MaxValue)
 
+//    val x = mutable.ArrayBuilder()
     //sort edges first by "id" then "value"
     val edges = edgeBuffer.toArray
     val edgeComparator = new ValuedEdgeComparator

@@ -100,6 +100,7 @@ class PullHCubeRDD[A <: HCubeBlock: Manifest](sc: SparkContext,
     val subTaskPartition = split.asInstanceOf[SubTaskPartition]
     val blockList = subTaskPartition.partitionValues.par.map { f =>
       val iterator1 = rdds(f._1).iterator(f._2, context)
+//      iterator1.hasNext
       val block = iterator1.next()
       iterator1.hasNext
 

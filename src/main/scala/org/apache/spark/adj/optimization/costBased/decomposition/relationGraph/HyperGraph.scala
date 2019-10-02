@@ -1,17 +1,17 @@
-package org.apache.spark.adj.optimization.decomposition.relationGraph
+package org.apache.spark.adj.optimization.costBased.decomposition.relationGraph
 
-import org.apache.spark.adj.optimization.decomposition.graph.Graph._
-import org.apache.spark.adj.optimization.decomposition.graph.{
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.Graph._
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.{
   Graph,
   GraphBuilder
 }
-import org.apache.spark.adj.optimization.decomposition.graph.HyperNodeGraph.{
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.HyperNodeGraph.{
   NHyperEdge,
   NHyperEdgeSet,
   NHyperNode,
   NHyperNodeSet
 }
-import org.apache.spark.adj.optimization.decomposition.relationGraph.HyperGraph.{
+import org.apache.spark.adj.optimization.costBased.decomposition.relationGraph.HyperGraph.{
   HyperEdge,
   HyperNode
 }

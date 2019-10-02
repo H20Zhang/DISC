@@ -1,7 +1,7 @@
 package utils
 
 import org.apache.spark.adj.database.RelationSchema
-import org.apache.spark.adj.optimization.decomposition.relationGraph.{
+import org.apache.spark.adj.optimization.costBased.decomposition.relationGraph.{
   HyperTreeDecomposer,
   RelationDecomposer,
   RelationEdge,

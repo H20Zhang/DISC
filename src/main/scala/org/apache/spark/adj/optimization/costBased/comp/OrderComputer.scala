@@ -1,7 +1,8 @@
-package org.apache.spark.adj.optimization.comp
+package org.apache.spark.adj.optimization.costBased.comp
 
 import org.apache.spark.adj.database.Catalog.AttributeID
 import org.apache.spark.adj.database.RelationSchema
+import org.apache.spark.adj.optimization.costBased.decomposition.relationGraph.RelationDecomposer
 import org.apache.spark.adj.optimization.stat.Statistic
 
 case class AttrOrderCostModel(attrIdOrder: Array[AttributeID],
@@ -79,5 +80,27 @@ class OrderComputer(schemas: Seq[RelationSchema],
       allOrder.map(attrOrder => AttrOrderCostModel(attrOrder, schemas))
     val minimalCostModel = allCostModel.map(f => (f, f.cost())).minBy(_._2)
     minimalCostModel._1.attrIdOrder
+  }
+}
+
+class FactorizeOrderComputer(
+  schemas: Seq[RelationSchema],
+  statistic: Statistic = Statistic.defaultStatistic()
+) {
+  def optimalOrder(): (Seq[AttributeID], Int) = {
+
+    val decomposer = new RelationDecomposer(schemas)
+    val stars = decomposer.decomposeStar(true)
+
+    if (stars.size > 0) {
+      val optimalStar = stars.head
+      println(s"optimal optimalStar:${optimalStar}")
+
+      optimalStar.factorizeSingleAttrOrder()
+    } else {
+      val orderComputer = new OrderComputer(schemas)
+      (orderComputer.optimalOrder(), 0)
+    }
+
   }
 }

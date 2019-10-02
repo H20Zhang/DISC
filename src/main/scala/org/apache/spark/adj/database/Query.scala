@@ -18,9 +18,16 @@ object Query {
     val plan = parser.parseDml(dml)
     println(s"unoptimized logical plan:${plan}")
 
+    val time1 = System.currentTimeMillis()
     //optimize plan
     val optimizedPlan = plan.optimizedPlan()
     println(s"optimized logical plan:${optimizedPlan}")
+
+    val conf = Conf.defaultConf()
+    val time2 = System.currentTimeMillis()
+    println(
+      s"executed:${conf.query} dataset:${conf.data} method:${conf.method} commOnly:${conf.commOnly} timeOut:${conf.timeOut} time:${(time2 - time1) / 1000}"
+    )
 
 //    //convert to physical plan
 //    val phyiscalPlan = optimizedPlan.phyiscalPlan()

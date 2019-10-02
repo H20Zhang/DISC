@@ -1,8 +1,8 @@
-package org.apache.spark.adj.optimization.decomposition.relationGraph
+package org.apache.spark.adj.optimization.costBased.decomposition.relationGraph
 
-import org.apache.spark.adj.optimization.decomposition.graph.Graph._
-import org.apache.spark.adj.optimization.decomposition.graph.HyperNodeGraph.NHyperNode
-import org.apache.spark.adj.optimization.decomposition.relationGraph.HyperGraph.HyperNode
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.Graph._
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.HyperNodeGraph.NHyperNode
+import org.apache.spark.adj.optimization.costBased.decomposition.relationGraph.HyperGraph.HyperNode
 import org.apache.spark.adj.utils.extension.{ArrayUtil, SeqUtil}
 import org.apache.spark.adj.utils.misc.LogAble
 import org.apache.spark.adj.utils.testing.GraphGenerator

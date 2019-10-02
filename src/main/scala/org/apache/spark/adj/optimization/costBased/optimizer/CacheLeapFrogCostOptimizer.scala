@@ -1,17 +1,16 @@
-package org.apache.spark.adj.optimization.optimizer
+package org.apache.spark.adj.optimization.costBased.optimizer
 
 import org.apache.spark.adj.database.{Relation, RelationSchema}
-import org.apache.spark.adj.optimization.comp.AttrOrderCostModel
-import org.apache.spark.adj.optimization.decomposition.relationGraph.RelationDecomposer
+import org.apache.spark.adj.optimization.costBased.comp.AttrOrderCostModel
+import org.apache.spark.adj.optimization.costBased.decomposition.relationGraph.RelationDecomposer
 import org.apache.spark.adj.optimization.stat.Statistic
 
 import scala.collection.mutable.ArrayBuffer
 
 //TODO: debug this
-class CacheLeapFrogOptimizer(
-  relations: Seq[Relation],
-  statistic: Statistic = Statistic.defaultStatistic()
-) {
+class CacheLeapFrogCostOptimizer(relations: Seq[Relation],
+                                 statistic: Statistic =
+                                   Statistic.defaultStatistic()) {
 
   def genOptimalPlan(): (Array[Int], Seq[(Array[Int], Array[Int])]) = {
     val schemas = relations.map(_.schema)

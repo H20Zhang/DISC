@@ -1,4 +1,4 @@
-package org.apache.spark.adj.optimization.decomposition.relationGraph
+package org.apache.spark.adj.optimization.costBased.decomposition.relationGraph
 
 import org.apache.spark.adj.database.Catalog.{AttributeID, RelationID}
 import org.apache.spark.adj.database.RelationSchema

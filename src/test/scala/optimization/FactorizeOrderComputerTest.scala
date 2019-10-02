@@ -1,7 +1,7 @@
 package optimization
 
 import org.apache.spark.adj.database.RelationSchema
-import org.apache.spark.adj.optimization.comp.FactorizeOrderComputer
+import org.apache.spark.adj.optimization.costBased.comp.FactorizeOrderComputer
 import org.scalatest.FunSuite
 
 class FactorizeOrderComputerTest extends FunSuite {

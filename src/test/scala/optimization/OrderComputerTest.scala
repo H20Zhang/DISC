@@ -1,7 +1,7 @@
 package optimization
 
 import org.apache.spark.adj.database.Relation
-import org.apache.spark.adj.optimization.comp.OrderComputer
+import org.apache.spark.adj.optimization.costBased.comp.OrderComputer
 import org.apache.spark.adj.optimization.stat.Statistic
 import org.apache.spark.adj.utils.testing.QueryGenerator
 import org.scalatest.FunSuite

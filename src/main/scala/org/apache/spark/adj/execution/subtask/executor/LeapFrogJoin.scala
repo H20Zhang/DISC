@@ -217,6 +217,7 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
         j += 1
       }
 
+//      tries(triePos).nextLevel(curBinding, segmentArrays(i))
       tries(triePos).nextLevelWithAdjust(curBinding, segmentArrays(i))
       i += 1
     }

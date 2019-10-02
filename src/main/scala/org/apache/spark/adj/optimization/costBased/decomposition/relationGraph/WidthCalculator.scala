@@ -1,8 +1,8 @@
-package org.apache.spark.adj.optimization.decomposition.relationGraph
+package org.apache.spark.adj.optimization.costBased.decomposition.relationGraph
 
 import cern.colt.matrix.impl.DenseDoubleMatrix2D
 import com.joptimizer.optimizers.{LPOptimizationRequest, LPPrimalDualMethod}
-import org.apache.spark.adj.optimization.decomposition.graph.Graph._
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.Graph._
 
 import scala.collection.mutable
 import scala.math.BigDecimal.RoundingMode

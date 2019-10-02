@@ -15,7 +15,7 @@ import org.apache.spark.adj.execution.subtask.executor.{
   LongSizeIterator,
   TrieConstructedLeapFrogJoin
 }
-import org.apache.spark.adj.optimization.decomposition.relationGraph.RelationGHDTree
+import org.apache.spark.adj.optimization.costBased.decomposition.relationGraph.RelationGHDTree
 
 class TaskInfo
 class SubTask(_shareVector: Array[Int],

@@ -1,6 +1,6 @@
 package org.apache.spark.adj.utils.testing
 
-import org.apache.spark.adj.optimization.decomposition.graph.GraphBuilder
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.GraphBuilder
 import org.apache.spark.adj.utils.testing.GraphGenerator.PatternName.PatternName
 
 object GraphGenerator {

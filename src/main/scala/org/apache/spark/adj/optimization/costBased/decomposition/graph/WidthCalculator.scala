@@ -1,8 +1,8 @@
-package org.apache.spark.adj.optimization.decomposition.graph
+package org.apache.spark.adj.optimization.costBased.decomposition.graph
 
 import cern.colt.matrix.impl.DenseDoubleMatrix2D
 import com.joptimizer.optimizers.{LPOptimizationRequest, LPPrimalDualMethod}
-import org.apache.spark.adj.optimization.decomposition.graph.Graph._
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.Graph._
 import org.apache.spark.adj.utils.misc.LogAble
 
 import scala.collection.mutable

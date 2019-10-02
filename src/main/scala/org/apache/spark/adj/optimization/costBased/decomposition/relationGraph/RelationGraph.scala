@@ -1,6 +1,6 @@
-package org.apache.spark.adj.optimization.decomposition.relationGraph
+package org.apache.spark.adj.optimization.costBased.decomposition.relationGraph
 
-import org.apache.spark.adj.optimization.decomposition.graph.Graph.NodeID
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.Graph.NodeID
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer

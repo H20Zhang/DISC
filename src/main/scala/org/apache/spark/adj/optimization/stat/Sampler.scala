@@ -1,23 +1,11 @@
 package org.apache.spark.adj.optimization.stat
 
 import org.apache.spark.adj.database.Catalog.AttributeID
-import org.apache.spark.adj.database.{Catalog, Relation, RelationSchema}
-import org.apache.spark.adj.execution.hcube.pull.{HCubePlan, PullHCube}
-import org.apache.spark.adj.execution.subtask.{
-  SubTask,
-  SubTaskFactory,
-  TaskInfo
-}
-import org.apache.spark.adj.optimization.comp.{EnumShareComputer, OrderComputer}
-import org.apache.spark.adj.optimization.decomposition.relationGraph.RelationGHDTree
-import org.apache.spark.adj.plan.{
-  CostOptimizedMergedHCubeJoin,
-  InMemoryScan,
-  InMemoryScanExec,
-  MergedHCubeLeapJoinExec
-}
+import org.apache.spark.adj.database.{Relation, RelationSchema}
+import org.apache.spark.adj.execution.subtask.SubTaskFactory
+import org.apache.spark.adj.optimization.costBased.comp.EnumShareComputer
+import org.apache.spark.adj.plan.{InMemoryScanExec, MergedHCubeLeapJoinExec}
 import org.apache.spark.adj.utils.misc.{Conf, SparkSingle}
-import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -103,9 +91,9 @@ class Sampler(relations: Seq[Relation],
         .zip(intersectedAttrIds.map(sampleSchema.attrIDs.indexOf))
         .toArray
 
-      println(
-        s"schema:${relation.schema}, sampleSchema:${sampleSchema}, intersectedLocalPosToFilterSetPos:${intersectedLocalPosToFilterSetPos.toSeq}"
-      )
+//      println(
+//        s"schema:${relation.schema}, sampleSchema:${sampleSchema}, intersectedLocalPosToFilterSetPos:${intersectedLocalPosToFilterSetPos.toSeq}"
+//      )
 
       val reducedRdd = relation.rdd.mapPartitions { it =>
         it.filter { tuple =>
@@ -256,14 +244,14 @@ class Sampler(relations: Seq[Relation],
     sampleParameterTaskInfo: SampleParameterTaskInfo
   ): SampledParameter = {
 
-    println(
-      s"performSampleTaskForOneParameter for sampleParameterTaskInfo:${sampleParameterTaskInfo}"
-    )
+//    println(
+//      s"performSampleTaskForOneParameter for sampleParameterTaskInfo:${sampleParameterTaskInfo}"
+//    )
 
     val sampleRelation = genSamples(sampleParameterTaskInfo)
     val sampleSize = sampleRelation.rdd.count().toInt
 
-    println(s"sampleSize:${sampleSize}")
+//    println(s"sampleSize:${sampleSize}")
     val testQuery =
       prepareReducedDatabase(sampleRelation, sampleParameterTaskInfo)
     val (avgCardinality, avgTime) =
@@ -296,8 +284,6 @@ class Sampler(relations: Seq[Relation],
 
     val numRelatedRDDs = projectedRelatedRDDs.size
 
-//    println(s"numRelatedRDDs:${numRelatedRDDs}")
-
     if (numRelatedRDDs == 1) {
       val contentRDD = projectedRelatedRDDs.head.distinct().map(f => Array(f))
       val schema = RelationSchema.tempSchemaWithAttrIds(Seq(attrID), contentRDD)
@@ -306,14 +292,6 @@ class Sampler(relations: Seq[Relation],
 
       val sc = SparkSingle.getSparkContext()
       val rawContentRDD = sc.union(projectedRelatedRDDs).distinct()
-
-//      var i = 1
-//      var rawContentRDD = projectedRelatedRDDs.head
-//      while (i < numRelatedRDDs) {
-//        val tempRDD = projectedRelatedRDDs(i)
-//        rawContentRDD = rawContentRDD.intersection(tempRDD)
-//        i += 1
-//      }
 
       val contentRDD = rawContentRDD.map(f => Array(f))
       val schema = RelationSchema.tempSchemaWithAttrIds(Seq(attrID), contentRDD)
@@ -352,9 +330,9 @@ class Sampler(relations: Seq[Relation],
     sampleParameterTaskInfo: SampleParameterTaskInfo
   ): SampledParameter = {
 
-    println(
-      s"performSampleTaskForEmptyPrevNodeParameter for sampleParameterTaskInfo:${sampleParameterTaskInfo}"
-    )
+//    println(
+//      s"performSampleTaskForEmptyPrevNodeParameter for sampleParameterTaskInfo:${sampleParameterTaskInfo}"
+//    )
 
     val testSchema = sampleParameterTaskInfo.testQuery
     val testQueryAttrOrder = sampleParameterTaskInfo.testQueryAttrOrder
@@ -369,7 +347,7 @@ class Sampler(relations: Seq[Relation],
     )
     val sampleSize = sampledFirstAttrRelation.rdd.count().toInt
 
-    println(s"firstAttrSize:${firstAttrSize}, sampleSize:${sampleSize}")
+//    println(s"firstAttrSize:${firstAttrSize}, sampleSize:${sampleSize}")
 
     val testQuery =
       prepareReducedDatabase(sampledFirstAttrRelation, sampleParameterTaskInfo)
@@ -389,11 +367,7 @@ class Sampler(relations: Seq[Relation],
   //perform the sampling and generate the Seq[SampledParameter].
   def genSampledParameters(): Seq[SampledParameter] = {
 
-    //TODO: delete this part after debug
-//    val topKSample = 2
-
     sampleInfos.parameterTaskInfos
-//      .slice(0, topKSample)
       .map(
         sampleInfo =>
           if (sampleInfo.prevHyperNodes.isEmpty) {
@@ -402,80 +376,5 @@ class Sampler(relations: Seq[Relation],
             performSampleTaskForOneParameter(sampleInfo)
         }
       )
-
   }
 }
-//    val infoOfSamples = sampleInfo
-//    val hcubePlan = HCubePlan(sampledRelations, share)
-//    val hcube = new PullHCube(hcubePlan, infoOfSamples)
-//    val subTaskRDD = hcube.genHCubeRDD()
-//
-//    subTaskRDD
-//      .map { task =>
-//        val subSampleTask =
-//          new SampleTask(
-//            task.shareVector,
-//            task.blocks,
-//            task.info.asInstanceOf[SampleTaskInfo]
-//          )
-//
-//        subSampleTask.genSampledParameters()
-//      }
-//      .collect()
-
-//  private def scaleTheSampleParameters(
-//    sampledParameters: Seq[Seq[SampledParameter]]
-//  ): Seq[SampledParameter] = {
-//    val summedParameters = sampledParameters
-//      .flatMap(f => f)
-//      .map { f =>
-//        ((f.prevHyperNodes, f.curHyperNodes), f)
-//      }
-//      .groupBy(_._1)
-//      .map {
-//        case (key, parameters) =>
-//          val headParameter = parameters.head._2
-//          val summedValue = parameters.map { parameter =>
-//            parameter._2.cardinalityValue
-//          }.sum
-//
-//          headParameter.cardinalityValue = summedValue
-//          headParameter
-//      }
-//      .toSeq
-//
-//    val scaledParameters = summedParameters.map { parameter =>
-//      val ghd = parameter.ghd
-//      val nodeIdToRelations = ghd.V.toMap
-//      val coreAttrIds = parameter.prevHyperNodes
-//        .map(nodeIdToRelations)
-//        .flatMap(f => f)
-//        .flatMap(_.attrIDs)
-//        .toSeq
-//      val leafAttrIds =
-//        nodeIdToRelations(parameter.curHyperNodes).flatMap(_.attrIDs).distinct
-//      val diffAttrIds = leafAttrIds.diff(coreAttrIds)
-//      val shareForDiffAttrIds = diffAttrIds.map(share)
-//      val scaleFactor = shareForDiffAttrIds.product
-//      parameter.cardinalityValue = parameter.cardinalityValue * scaleFactor
-//      parameter
-//    }
-//
-//    scaledParameters
-//  }
-
-//  private val sampledRelations: Seq[Relation] = prepareSampledDataBase()
-//  private var share: Map[AttributeID, Int] = prepareShare()
-
-//  def prepareShare(): Map[AttributeID, Int] = {
-//
-//    val schemas = sampledRelations.map(_.schema)
-//    val statistic = Statistic.defaultStatistic()
-//    sampledRelations.foreach(statistic.add)
-//
-//    val shareComputer =
-//      new EnumShareComputer(schemas, Conf.defaultConf().taskNum)
-//    share = shareComputer.optimalShare()._1
-//
-//    share
-//  }

@@ -1,6 +1,6 @@
-package org.apache.spark.adj.optimization.decomposition.graph
+package org.apache.spark.adj.optimization.costBased.decomposition.graph
 
-import org.apache.spark.adj.optimization.decomposition.graph.Graph._
+import org.apache.spark.adj.optimization.costBased.decomposition.graph.Graph._
 
 import scala.collection.mutable
 

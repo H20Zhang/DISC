@@ -65,6 +65,7 @@ abstract class AbstractHCubeJoinExec(schema: RelationSchema,
         iterator
       }
 
+//    schema.setContent(rdd)
     catalog.setContent(schema, rdd)
     Relation(schema, rdd)
   }

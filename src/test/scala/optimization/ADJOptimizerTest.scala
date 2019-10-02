@@ -1,6 +1,6 @@
 package optimization
 
-import org.apache.spark.adj.optimization.optimizer.ADJOptimizer
+import org.apache.spark.adj.optimization.costBased.optimizer.ADJCostOptimizer
 import org.apache.spark.adj.utils.exp.ExpQuery
 import org.scalatest.FunSuite
 import utils.SparkFunSuite
@@ -18,8 +18,6 @@ class ADJOptimizerTest extends SparkFunSuite {
 
   test("adj") {
     val relations = new ExpQuery(dataAdress) getRelations (query)
-    val adjOptimizer = new ADJOptimizer(relations)
-    adjOptimizer.debug()
-
+    val adjOptimizer = new ADJCostOptimizer(relations)
   }
 }

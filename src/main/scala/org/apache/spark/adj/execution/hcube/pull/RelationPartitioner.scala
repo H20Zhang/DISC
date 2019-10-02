@@ -30,16 +30,29 @@ class RelationPartitioner(relation: Relation, helper: HCubeHelper) {
       val content = it.toArray
       val array = new Array[Array[DataType]](content.size - 1)
 
+      var j = 0
       var i = 0
-      content.foreach {
-        case (tuple, isSentry) =>
-          if (isSentry) {
-            shareVector = tuple
-          } else {
-            array(i) = tuple
-            i += 1
-          }
+      val contentSize = content.size
+      while (j < contentSize) {
+        val (tuple, isSentry) = content(j)
+        if (isSentry) {
+          shareVector = tuple
+        } else {
+          array(i) = tuple
+          i += 1
+        }
+        j += 1
       }
+//
+//      content.foreach {
+//        case (tuple, isSentry) =>
+//          if (isSentry) {
+//            shareVector = tuple
+//          } else {
+//            array(i) = tuple
+//            i += 1
+//          }
+//      }
 
 //        println(s"schema:${schema}, share:${shareVector.toSeq}, content:${array.toSeq}")
 
