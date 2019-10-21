@@ -27,7 +27,6 @@ import org.apache.spark.adj.utils.misc.Conf
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-//TODO: finish it
 class ADJCostOptimizer(relations: Seq[Relation]) {
 
   val schemas = relations.map(_.schema)
@@ -163,6 +162,20 @@ class ADJCostOptimizer(relations: Seq[Relation]) {
         )
     }
 
+    val avgError = internalPlans
+      .map(f => internalPlanCostEstimator.avgCardinalityEstimationError(f))
+      .sum / internalPlans.size
+
+    val minDiff = internalPlans
+      .map(f => internalPlanCostEstimator.maxCardinalityEstimationError(f))
+      .map(_._1)
+      .min
+
+    val maxDiff = internalPlans
+      .map(f => internalPlanCostEstimator.maxCardinalityEstimationError(f))
+      .map(_._2)
+      .max
+
     val optimalPlan = internalPlans
       .map { plan =>
         (plan, internalPlanCostEstimator.estimateCost(plan))
@@ -172,6 +185,10 @@ class ADJCostOptimizer(relations: Seq[Relation]) {
       ._1
 
     println(s"optimalPlan:${optimalPlan}")
+
+    println(
+      s"avg cardinality error:${avgError}, minDiff:${minDiff}, maxDiff:${maxDiff}"
+    )
 
     //gen the parameters for the optimal internal plan
     val traversalOrder = optimalPlan.traversalOrder
@@ -274,7 +291,7 @@ object ADJCostOptimizer {
       )
     }
 
-    def estimateComputationCost(plan: InternalPlan): Double = {
+    def avgCardinalityEstimationError(plan: InternalPlan): Double = {
       val traversalOrder = plan.traversalOrder
       val lazyDecision = plan.lazyDecision
 
@@ -295,7 +312,199 @@ object ADJCostOptimizer {
         i += 1
       }
 
-//      println(s"cardinalityMap:${cardinalityMap}")
+//      LJ
+      val triangleSize = 1066920780L.toDouble
+      val wedgeSize = 8580898768L.toDouble
+      val triangleEdgeSize = 308189987436L.toDouble
+      val squareSize = 156530992417L.toDouble
+      val chordalSquareSize = 159035310704L.toDouble
+      val fourCliqueSize = 125206042584L.toDouble
+
+      val x = 1
+      //AS
+//      val triangleSize = 172619208L.toDouble
+//      val wedgeSize = 32065521958L.toDouble
+//      val triangleEdgeSize = 484220254116L.toDouble
+//      val squareSize = 764121597460L.toDouble
+//      val chordalSquareSize = 82263974148L.toDouble
+//      val fourCliqueSize = 3572026536L.toDouble
+
+//      OK
+//      val triangleSize = 3765505086L.toDouble
+//      val wedgeSize = 91485303308L.toDouble
+//      val triangleEdgeSize = 3487032740882L.toDouble
+//      val squareSize = 1020265364600L.toDouble
+//      val chordalSquareSize = 272161062790L.toDouble
+//      val fourCliqueSize = 77326707288L.toDouble
+
+      val groundTruthMap_LJ_H4 = Map(
+        (Set(66), triangleSize),
+        (Set(163), wedgeSize),
+        (Set(372), wedgeSize),
+        (Set(66, 163), triangleEdgeSize),
+        (Set(163, 372), squareSize)
+      )
+      val groundTruthMap_LJ_H5 = Map(
+        (Set(130), triangleSize),
+        (Set(333), triangleSize),
+        (Set(1038), triangleSize),
+        (Set(130, 333), chordalSquareSize),
+        (Set(333, 1038), chordalSquareSize)
+      )
+      val groundTruthMap_LJ_H6 =
+        Map((Set(258), triangleSize), (Set(704), fourCliqueSize))
+
+      var theTruthMap: Map[Set[Int], Double] = null
+
+      Conf.defaultConf().query match {
+        case "house"         => theTruthMap = groundTruthMap_LJ_H4
+        case "threeTriangle" => theTruthMap = groundTruthMap_LJ_H5
+        case "near5Clique"   => theTruthMap = groundTruthMap_LJ_H6
+      }
+
+      println(s"cardinalityMap:${cardinalityMap}")
+      println(s"groundTruthMap:${theTruthMap}")
+      val maxCardPos = cardinalityMap.keys.map(_.size).max
+
+      val filteredCardinalityMap = cardinalityMap
+        .filter(p => p._1.nonEmpty)
+        .filter(p => p._1.size < maxCardPos)
+
+      filteredCardinalityMap.map {
+        case (key, value) =>
+          val groundTruth = theTruthMap(key)
+          val ratio = Math.abs(value) / Math.abs(groundTruth)
+          if (ratio <= 1) {
+            1 / ratio
+          } else {
+            ratio
+          }
+
+      }.sum / filteredCardinalityMap.keys.size
+    }
+
+    def maxCardinalityEstimationError(plan: InternalPlan) = {
+      val traversalOrder = plan.traversalOrder
+      val lazyDecision = plan.lazyDecision
+
+      //obtain cardinality
+      var visitedNode = Set[Int]()
+      val cardinalityMap = mutable.HashMap[Set[Int], Double]()
+
+      var i = 0
+      var curCardinality = 1.0
+      cardinalityMap(visitedNode) = curCardinality
+
+      while (i < traversalOrder.size) {
+        curCardinality = curCardinality * sampleResults(
+          (visitedNode, traversalOrder(i))
+        ).cardinalityValue
+        visitedNode = visitedNode ++ Set(traversalOrder(i))
+        cardinalityMap(visitedNode) = curCardinality
+        i += 1
+      }
+
+      val triangleSize = 1066920780L.toDouble
+      val wedgeSize = 8580898768L.toDouble
+      val triangleEdgeSize = 308189987436L.toDouble
+      val squareSize = 156530992417L.toDouble
+      val chordalSquareSize = 159035310704L.toDouble
+      val fourCliqueSize = 125206042584L.toDouble
+
+//      AS
+//      val triangleSize = 172619208L.toDouble
+//      val wedgeSize = 32065521958L.toDouble
+//      val triangleEdgeSize = 484220254116L.toDouble
+//      val squareSize = 764121597460L.toDouble
+//      val chordalSquareSize = 82263974148L.toDouble
+//      val fourCliqueSize = 3572026536L.toDouble
+
+      //      OK
+//      val triangleSize = 3765505086L.toDouble
+//      val wedgeSize = 91485303308L.toDouble
+//      val triangleEdgeSize = 3487032740882L.toDouble
+//      val squareSize = 1020265364600L.toDouble
+//      val chordalSquareSize = 272161062790L.toDouble
+//      val fourCliqueSize = 77326707288L.toDouble
+
+      val groundTruthMap_LJ_H4 = Map(
+        (Set(66), triangleSize),
+        (Set(163), wedgeSize),
+        (Set(372), wedgeSize),
+        (Set(66, 163), triangleEdgeSize),
+        (Set(163, 372), squareSize)
+      )
+      val groundTruthMap_LJ_H5 = Map(
+        (Set(130), triangleSize),
+        (Set(333), triangleSize),
+        (Set(1038), triangleSize),
+        (Set(130, 333), chordalSquareSize),
+        (Set(333, 1038), chordalSquareSize)
+      )
+      val groundTruthMap_LJ_H6 =
+        Map((Set(258), triangleSize), (Set(704), fourCliqueSize))
+
+      var theTruthMap: Map[Set[Int], Double] = null
+
+      Conf.defaultConf().query match {
+        case "house"         => theTruthMap = groundTruthMap_LJ_H4
+        case "threeTriangle" => theTruthMap = groundTruthMap_LJ_H5
+        case "near5Clique"   => theTruthMap = groundTruthMap_LJ_H6
+      }
+
+      println(s"cardinalityMap:${cardinalityMap}")
+      println(s"groundTruthMap:${theTruthMap}")
+      val maxCardPos = cardinalityMap.keys.map(_.size).max
+
+      val filteredCardinalityMap = cardinalityMap
+        .filter(p => p._1.nonEmpty)
+        .filter(p => p._1.size < maxCardPos)
+
+      val maxDiff = filteredCardinalityMap.map {
+        case (key, value) =>
+          val groundTruth = theTruthMap(key)
+          val ratio = Math.abs(value) / Math.abs(groundTruth)
+          if (ratio <= 1) {
+            1 / ratio
+          } else {
+            ratio
+          }
+      }.max
+
+      val minDiff = filteredCardinalityMap.map {
+        case (key, value) =>
+          val groundTruth = theTruthMap(key)
+          val ratio = Math.abs(value) / Math.abs(groundTruth)
+          if (ratio <= 1) {
+            1 / ratio
+          } else {
+            ratio
+          }
+      }.min
+
+      (minDiff, maxDiff)
+    }
+
+    def estimateComputationCost(plan: InternalPlan): Double = {
+      val traversalOrder = plan.traversalOrder
+      val lazyDecision = plan.lazyDecision
+
+      //obtain cardinality
+      var visitedNode = Set[Int]()
+      val cardinalityMap = mutable.HashMap[Set[Int], Double]()
+
+      var i = 0
+      var curCardinality = 1.0
+      cardinalityMap(visitedNode) = curCardinality
+
+      while (i < traversalOrder.size) {
+        curCardinality = curCardinality * sampleResults(
+          (visitedNode, traversalOrder(i))
+        ).cardinalityValue
+        visitedNode = visitedNode ++ Set(traversalOrder(i))
+        cardinalityMap(visitedNode) = curCardinality
+        i += 1
+      }
 
       //obtain compute cost
       visitedNode = Set[Int]()
@@ -339,7 +548,8 @@ object ADJCostOptimizer {
     }
 
     def estimateCost(plan: InternalPlan): Double = {
-      estimateComputationCost(plan) + estimateCommunicationCost(plan)
+      estimateCommunicationCost(plan)
+      +estimateComputationCost(plan)
     }
 
   }

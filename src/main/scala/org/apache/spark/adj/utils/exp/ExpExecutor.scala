@@ -5,22 +5,25 @@ import java.util.concurrent.{CancellationException, FutureTask}
 
 import org.apache.spark.adj.database.{Catalog, Query, Relation, RelationSchema}
 import org.apache.spark.adj.execution.misc.DataLoader
-import org.apache.spark.adj.utils.misc.Conf.Method
+import org.apache.spark.adj.utils.misc.Conf.{Method, Mode}
 import org.apache.spark.adj.utils.misc.{Conf, SparkSingle}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import scala.util.Failure
 
-class ExpExecutor(data: String,
-                  query: String,
-                  timeout: Int,
-                  isCommOnly: Boolean) {
+class ExpExecutor(conf: Conf) {
 
   def execute() = {
 
+    val data = conf.data
+    val query = conf.query
+    val timeout = conf.timeOut
+    val mode = conf.mode
+    val method = conf.method
+
     SparkSingle.appName =
-      s"ADJ-data:${data}-query:${query}-timeout:${timeout}-isCommOnly:${isCommOnly}-method:${Conf.defaultConf().method}"
+      s"ADJ-data:${data}-query:${query}-timeout:${timeout}-mode:${mode}-method:${method}"
 
     val expQuery = new ExpQuery(data)
 
@@ -35,10 +38,10 @@ class ExpExecutor(data: String,
 //    val future = Future {
 
     if (Conf.defaultConf().method != Method.SPARKSQL) {
-      if (isCommOnly) {
-        Query.showPlan(expQuery.getQuery(query))
-      } else {
-        Query.countQuery(expQuery.getQuery(query))
+      mode match {
+        case Mode.ShowPlan => Query.showPlan(expQuery.getQuery(query))
+        case Mode.CommOnly => Query.commOnlyQuery(expQuery.getQuery(query))
+        case Mode.Count    => Query.countQuery(expQuery.getQuery(query))
       }
     } else {
       val sparkExecutor = new SparkSQLExecutor(
@@ -70,6 +73,12 @@ class ExpQuery(data: String) {
       case "solarSquare"        => solarSquareDml
       case "near5Clique"        => near5CliqueSchemaDml
       case "fiveCliqueMinusOne" => fiveCliqueMinusOneDml
+      case "triangleEdge"       => triangleEdgeDml
+      case "square"             => squareDml
+      case "chordalSquare"      => chordalSquareDml
+      case "threePath"          => threePathDml
+      case "chordalSquareEdge"  => chordalSquareEdgeDml
+      case "fourCliqueEdge"     => fourCliqueEdgeDml
       case _                    => throw new Exception(s"no such pattern:${q}")
     }
 
@@ -125,8 +134,23 @@ class ExpQuery(data: String) {
   //  solarSquare
   val solarSquareDml = "A-B;B-C;C-D;D-A;A-E;B-E;C-E;D-E;"
 
+  //triangleEdge
+  val triangleEdgeDml = "A-B;B-C;C-A;C-D;"
+
+  //square
+  val squareDml = "A-B;B-C;C-D;D-A;"
+
   //  chordalSquare
-  val chordalSquareDml = "A-B;B-C;A-C;A-D;C-D;"
+  val chordalSquareDml = "A-B;B-C;C-D;D-A;B-D;"
+
+  //threePath
+  val threePathDml = "A-B;B-C;C-D;"
+
+  //chordalSquareEdge
+  val chordalSquareEdgeDml = "A-B;B-C;C-D;D-A;B-D;A-E;"
+
+  //fourCliqueEdge
+  val fourCliqueEdgeDml = "A-B;B-C;C-D;D-A;A-C;B-D;A-E;"
 
 }
 

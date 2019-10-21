@@ -26,18 +26,8 @@ object Query {
     val conf = Conf.defaultConf()
     val time2 = System.currentTimeMillis()
     println(
-      s"executed:${conf.query} dataset:${conf.data} method:${conf.method} commOnly:${conf.commOnly} timeOut:${conf.timeOut} time:${(time2 - time1) / 1000}"
+      s"executed:${conf.query} dataset:${conf.data} method:${conf.method} mode:${conf.mode} timeOut:${conf.timeOut} time:${(time2 - time1) / 1000}"
     )
-
-//    //convert to physical plan
-//    val phyiscalPlan = optimizedPlan.phyiscalPlan()
-//    println(s"phyiscal plan:${phyiscalPlan}")
-
-    //execute physical plan
-//    val outputSize = phyiscalPlan.count()
-//    println(s"output relation size:${outputSize}")
-
-//    outputSize
   }
 
   def countQuery(dml: String) = {
@@ -64,7 +54,7 @@ object Query {
     val conf = Conf.defaultConf()
     val time2 = System.currentTimeMillis()
     println(
-      s"executed:${conf.query} dataset:${conf.data} method:${conf.method} commOnly:${conf.commOnly} timeOut:${conf.timeOut} size:${outputSize} time:${(time2 - time1) / 1000}"
+      s"executed:${conf.query} dataset:${conf.data} method:${conf.method} mode:${conf.mode} timeOut:${conf.timeOut} size:${outputSize} time:${(time2 - time1) / 1000}"
     )
 
     outputSize
@@ -93,7 +83,7 @@ object Query {
 
     val conf = Conf.defaultConf()
     println(
-      s"executed:${conf.query} dataset:${conf.data} method:${conf.method} commOnly:${conf.commOnly} timeOut:${conf.timeOut} size:${outputSize} time:${(time2 - time1) / 1000}"
+      s"executed:${conf.query} dataset:${conf.data} method:${conf.method} mode:${conf.mode} timeOut:${conf.timeOut} size:${outputSize} time:${(time2 - time1) / 1000}"
     )
 
     outputSize

@@ -4,7 +4,7 @@ import java.io.File
 
 import org.apache.spark.adj.database.{Query, RelationSchema}
 import org.apache.spark.adj.utils.misc.Conf
-import org.apache.spark.adj.utils.misc.Conf.Method
+import org.apache.spark.adj.utils.misc.Conf.{Method, Mode}
 import scopt.OParser
 
 object ExpEntry {
@@ -28,15 +28,18 @@ object ExpEntry {
         opt[String]('d', "data")
           .action((x, c) => c.copy(data = x))
           .text("input database"),
-        opt[Boolean]('c', "commOnly")
-          .action((x, c) => c.copy(commOnly = x))
+        opt[String]('c', "mode")
+          .action((x, c) => c.copy(mode = x))
           .text("execute communication step only"),
         opt[String]('m', "method")
           .action((x, c) => c.copy(method = x))
           .text(s"method, avaiable methods:${Method.values}"),
-        opt[Int]('t', "taskNum")
+        opt[Int]('n', "taskNum")
           .action((x, c) => c.copy(taskNum = x))
-          .text(s"num of task to execute")
+          .text(s"num of task to execute"),
+        opt[Int]('s', "numSamples")
+          .action((x, c) => c.copy(numSamples = x))
+          .text(s"num of samples to draw for each sampling process")
       )
     }
 
@@ -46,18 +49,14 @@ object ExpEntry {
         val conf = Conf.defaultConf()
         conf.data = config.data
         conf.method = Method.withName(config.method)
-        conf.commOnly = config.commOnly
+        conf.mode = Mode.withName(config.mode)
         conf.query = config.query
         conf.timeOut = config.timeout
         conf.taskNum = config.taskNum
+        conf.defaultNumSamples = config.numSamples
 
         val executor =
-          new ExpExecutor(
-            config.data,
-            config.query,
-            config.timeout,
-            config.commOnly
-          )
+          new ExpExecutor(conf)
         executor.execute()
       case _ =>
       // arguments are bad, error message will have been displayed
@@ -68,6 +67,7 @@ object ExpEntry {
 case class Config(query: String = "",
                   timeout: Int = 60 * 60,
                   data: String = "",
-                  commOnly: Boolean = false,
+                  mode: String = "Count",
                   method: String = "HCube",
-                  taskNum: Int = Conf.defaultConf().numMachine)
+                  taskNum: Int = Conf.defaultConf().numMachine,
+                  numSamples: Int = 100000)

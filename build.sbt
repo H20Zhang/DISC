@@ -17,6 +17,7 @@ libraryDependencies += "com.typesafe" % "config" % "1.3.4"
 libraryDependencies += "org.jgrapht" % "jgrapht-core" % "1.3.0"
 // https://mvnrepository.com/artifact/com.github.scopt/scopt
 libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.0-RC2"
+libraryDependencies += "it.unimi.dsi" % "webgraph" % "3.6.1"
 
 watchSources += baseDirectory.value / "script/"
 

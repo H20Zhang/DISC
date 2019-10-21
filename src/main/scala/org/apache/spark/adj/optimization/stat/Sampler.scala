@@ -161,8 +161,9 @@ class Sampler(relations: Seq[Relation],
           subJoinTask.execute()
 
         var i = 0
-        val rawSamplesCount = numSamples * 10
-        val secondSampleRatio = numSamples.toDouble / rawSamplesCount
+
+        //can be set larger to improve the accuracy on the skewed dataset
+        var rawSamplesCount = numSamples * 10
 
         var rawSamples = ArrayBuffer[Array[Int]]()
 
@@ -172,6 +173,8 @@ class Sampler(relations: Seq[Relation],
           rawSamples += attrIdToPreserve.map(tuple)
           i += 1
         }
+
+        val secondSampleRatio = numSamples.toDouble / rawSamples.size
 
         //secondary sample
         Random.setSeed(System.currentTimeMillis())
@@ -225,10 +228,24 @@ class Sampler(relations: Seq[Relation],
         val subJoinTask =
           SubTaskFactory.genSubTask(task.shareVector, task.blocks, task.info)
 
-        val iterator =
-          subJoinTask.execute()
+        val numTest = 2
+        val testResults = Range(0, numTest)
+          .map { idx =>
+            val iterator =
+              subJoinTask.execute()
+            iterator.recordCardinalityAndTime()
+          }
+          .drop(1)
 
-        iterator.recordCardinalityAndTime()
+        (
+          testResults.map(_._1).sum / (numTest - 1).toDouble,
+          testResults.map(_._2).sum / (numTest - 1).toDouble
+        )
+//
+//        val iterator =
+//          subJoinTask.execute()
+//
+//        iterator.recordCardinalityAndTime()
       }
       .collect()
 
