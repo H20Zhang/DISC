@@ -27,7 +27,7 @@ object ExpEntry {
           .text("maximal allowed time"),
         opt[String]('d', "data")
           .action((x, c) => c.copy(data = x))
-          .text("input database"),
+          .text("input adj.database"),
         opt[String]('c', "mode")
           .action((x, c) => c.copy(mode = x))
           .text("execute communication step only"),

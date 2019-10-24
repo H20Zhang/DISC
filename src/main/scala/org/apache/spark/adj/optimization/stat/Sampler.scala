@@ -284,7 +284,7 @@ class Sampler(relations: Seq[Relation],
     )
   }
 
-  //Generate a relation that only contains a single attr from the database
+  //Generate a relation that only contains a single attr from the adj.database
   private def genAttrRelation(attrID: AttributeID): Relation = {
     val relatedRelations = relations.filter { relation =>
       relation.schema.attrIDs.contains(attrID)

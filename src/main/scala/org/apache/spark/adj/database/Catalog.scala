@@ -63,7 +63,7 @@ class Catalog extends Serializable {
     _memoryStore(schema.id.get) = content
   }
 
-//  add relation schema to the database
+//  add relation schema to the adj.database
   def add(schema: RelationSchema): Int = synchronized {
 
     if (_nameToSchema.contains(schema.name)) {
@@ -81,15 +81,15 @@ class Catalog extends Serializable {
 
         relationIDCount += 1
 
-        schema.attrs.foreach(add)
+        schema.attrs.foreach(addAttr)
 
         id
       }
     }
   }
 
-//  add attribute to database
-  def add(attribute: Attribute): Int = {
+//  add attribute to adj.database
+  def addAttr(attribute: Attribute): Int = {
 
     _attributeToID.get(attribute) match {
       case Some(id) => id

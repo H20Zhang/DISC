@@ -1,10 +1,8 @@
 package org.apache.spark.adj.utils.testing
 
-import breeze.util.ArrayUtil
 import org.apache.spark.adj.database.Catalog
 import org.apache.spark.adj.optimization.stat.Statistic
 import org.apache.spark.sql.AnalysisException
-import org.bouncycastle.util.test.TestFailedException
 
 abstract class Tester(numRelation: Int,
                       arity: Int,
@@ -28,9 +26,9 @@ class HCubeTester(numRelation: Int, arity: Int, cardinality: Int, testRun: Int)
       try {
         assert(validator.validate())
       } catch {
-        case e: AnalysisException   =>
-        case e: TestFailedException => throw e
-        case e: Exception           => throw e
+        case e: AnalysisException =>
+//        case e:  => throw e
+        case e: Exception => throw e
       }
 
       Catalog.reset()
@@ -58,9 +56,8 @@ class LeapFrogUnaryTester(numRelation: Int, cardinality: Int, testRun: Int)
       try {
         assert(validator.validate())
       } catch {
-        case e: AnalysisException   =>
-        case e: TestFailedException => throw e
-        case e: Exception           => throw e
+        case e: AnalysisException =>
+        case e: Exception         => throw e
       }
 
       Catalog.reset()

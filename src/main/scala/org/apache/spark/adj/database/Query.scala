@@ -16,12 +16,12 @@ object Query {
     parser.parseDml(dml)
 
     val plan = parser.parseDml(dml)
-    println(s"unoptimized logical plan:${plan}")
+    println(s"unoptimized logical adj.plan:${plan}")
 
     val time1 = System.currentTimeMillis()
-    //optimize plan
+    //optimize adj.plan
     val optimizedPlan = plan.optimizedPlan()
-    println(s"optimized logical plan:${optimizedPlan}")
+    println(s"optimized logical adj.plan:${optimizedPlan}")
 
     val conf = Conf.defaultConf()
     val time2 = System.currentTimeMillis()
@@ -38,17 +38,17 @@ object Query {
     parser.parseDml(dml)
 
     val plan = parser.parseDml(dml)
-    println(s"unoptimized logical plan:${plan}")
+    println(s"unoptimized logical adj.plan:${plan}")
 
-    //optimize plan
+    //optimize adj.plan
     val optimizedPlan = plan.optimizedPlan()
-    println(s"optimized logical plan:${optimizedPlan}")
+    println(s"optimized logical adj.plan:${optimizedPlan}")
 
-    //convert to physical plan
+    //convert to physical adj.plan
     val phyiscalPlan = optimizedPlan.phyiscalPlan()
-    println(s"phyiscal plan:${phyiscalPlan}")
+    println(s"phyiscal adj.plan:${phyiscalPlan}")
 
-    //execute physical plan
+    //execute physical adj.plan
     val outputSize = phyiscalPlan.count()
 
     val conf = Conf.defaultConf()
@@ -67,17 +67,17 @@ object Query {
     parser.parseDml(dml)
 
     val plan = parser.parseDml(dml)
-    println(s"unoptimized logical plan:${plan}")
+    println(s"unoptimized logical adj.plan:${plan}")
 
-    //optimize plan
+    //optimize adj.plan
     val optimizedPlan = plan.optimizedPlan()
-    println(s"optimized logical plan:${optimizedPlan}")
+    println(s"optimized logical adj.plan:${optimizedPlan}")
 
-    //convert to physical plan
+    //convert to physical adj.plan
     val phyiscalPlan = optimizedPlan.phyiscalPlan()
-    println(s"phyiscal plan:${phyiscalPlan}")
+    println(s"phyiscal adj.plan:${phyiscalPlan}")
 
-    //execute physical plan
+    //execute physical adj.plan
     val outputSize = phyiscalPlan.commOnly()
     val time2 = System.currentTimeMillis()
 
@@ -94,17 +94,17 @@ object Query {
     parser.parseDml(dml)
 
     val plan = parser.parseDml(dml)
-    println(s"unoptimized logical plan:${plan}")
+    println(s"unoptimized logical adj.plan:${plan}")
 
-    //optimize plan
+    //optimize adj.plan
     val optimizedPlan = plan.optimizedPlan()
-    println(s"optimized logical plan:${optimizedPlan}")
+    println(s"optimized logical adj.plan:${optimizedPlan}")
 
-    //convert to physical plan
+    //convert to physical adj.plan
     val phyiscalPlan = optimizedPlan.phyiscalPlan()
-    println(s"phyiscal plan:${phyiscalPlan}")
+    println(s"phyiscal adj.plan:${phyiscalPlan}")
 
-    //execute physical plan
+    //execute physical adj.plan
     val output = phyiscalPlan.execute()
 
     output

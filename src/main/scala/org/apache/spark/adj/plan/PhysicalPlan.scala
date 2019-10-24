@@ -25,7 +25,7 @@ import org.apache.spark.adj.execution.subtask.{
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
 
-//physical plan is the plan that describe the distributed execution process
+//physical adj.plan is the adj.plan that describe the distributed execution process
 trait PhysicalPlan {
   def execute(): Relation
   def count(): Long

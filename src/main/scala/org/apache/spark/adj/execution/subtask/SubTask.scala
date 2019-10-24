@@ -58,7 +58,7 @@ class LeapFrogJoinSubTask(_shareVector: Array[Int],
 
   override def execute() = {
     val leapfrog = new LeapFrogJoin(this)
-//    leapfrog.init()
+//    adj.leapfrog.init()
     leapfrog
   }
 }

@@ -31,13 +31,13 @@ class ADJCostOptimizer(relations: Seq[Relation]) {
 
   val schemas = relations.map(_.schema)
 
-  //gen the GHD with optimal width as the foundation of the later optimization.
+  //gen the GHD with optimal width as the foundation of the later adj.optimization.
   private def genGHD(): RelationGHDTree = {
     val relationDecomposer = new RelationDecomposer(schemas)
     relationDecomposer.decomposeTree().head
   }
 
-  //gen all possible internal plan.
+  //gen all possible internal adj.plan.
   private def genInternalPlan(ghd: RelationGHDTree): Seq[InternalPlan] = {
     val traversalOrders = ghd.allTraversalOrder
     val treeNodeSize = ghd.V.size
@@ -56,7 +56,7 @@ class ADJCostOptimizer(relations: Seq[Relation]) {
     }
   }
 
-  //gen all possible parameters that could be used by the internal plan.
+  //gen all possible parameters that could be used by the internal adj.plan.
   private def genParametersToSample(
     internalPlans: Seq[InternalPlan]
   ): SampleTaskInfo = {
@@ -100,7 +100,7 @@ class ADJCostOptimizer(relations: Seq[Relation]) {
   private def calCost(internalPlan: InternalPlan,
                       parameters: Seq[SampledParameter]): Double = ???
 
-  //gen the optimal plan for the ADJExec with minimal unified cost
+  //gen the optimal adj.plan for the ADJExec with minimal unified cost
   def genOptimalPlan(): (Seq[Seq[RelationSchema]],
                          Seq[RelationSchema],
                          Array[AttributeID],
@@ -158,7 +158,7 @@ class ADJCostOptimizer(relations: Seq[Relation]) {
     internalPlans.zip(costs).foreach {
       case (plan, (compCost, commCost)) =>
         println(
-          s"plan:${plan}, computeCost:${compCost}, communicationCost:${commCost}"
+          s"adj.plan:${plan}, computeCost:${compCost}, communicationCost:${commCost}"
         )
     }
 
@@ -190,7 +190,7 @@ class ADJCostOptimizer(relations: Seq[Relation]) {
       s"avg cardinality error:${avgError}, minDiff:${minDiff}, maxDiff:${maxDiff}"
     )
 
-    //gen the parameters for the optimal internal plan
+    //gen the parameters for the optimal internal adj.plan
     val traversalOrder = optimalPlan.traversalOrder
     val share = internalPlanCostEstimator.getShareMapAndCommCost(optimalPlan)._1
     val preMaterializeQuery = optimalPlan.traversalOrder

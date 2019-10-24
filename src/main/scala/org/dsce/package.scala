@@ -1,6 +1,7 @@
 package org
 
 import org.apache.log4j.Logger
+import org.apache.spark.adj.database.Catalog
 import org.jgrapht.graph.{DefaultEdge, DefaultUndirectedGraph}
 
 import scala.collection.mutable
@@ -60,6 +61,24 @@ package object dsce {
     type Stage = Value
     val Unprocessed, SymmetryBreaked, NonInduceInstanceRemoved,
     NonIsomorphismRemoved, Decomposed, Optimized = Value
+  }
+
+  object CountAttrCounter {
+    var count = 0
+    def nextCountAttrId() = {
+      val old = count
+      count += 1
+      val countAttr = s"C${old}"
+      val catalog = Catalog.defaultCatalog()
+
+      val id = catalog.addAttr(countAttr)
+
+//      println(
+//        s"countAttr:${countAttr}, id:${id}, retrievedCountAttr:${catalog.getAttribute(id)}"
+//      )
+
+      id
+    }
   }
 
 }

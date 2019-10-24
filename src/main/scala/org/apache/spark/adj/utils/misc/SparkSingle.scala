@@ -40,7 +40,7 @@ object SparkSingle {
           //        .config("spark.memory.offHeap.size","800M")
           .config("spark.kryo.unsafe", "true")
           .config("spark.shuffle.file.buffer", "1M")
-          .config("conf spark.network.timeout", "10000000")
+          .config("adj.conf spark.network.timeout", "10000000")
           .config("spark.yarn.maxAppAttempts", "1")
           //          .config("spark.kryo.registrationRequired","true")
           .getOrCreate()
@@ -60,7 +60,7 @@ object SparkSingle {
           //          .config("spark.memory.offHeap.size","800M")
           .config("spark.shuffle.file.buffer", "1M")
           .config("spark.kryo.unsafe", "true")
-          .config("conf spark.network.timeout", "10000000")
+          .config("adj.conf spark.network.timeout", "10000000")
           //        .config("spark.kryo.registrationRequired","true")
           .getOrCreate()
     }

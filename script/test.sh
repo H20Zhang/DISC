@@ -16,7 +16,7 @@ Test() {
   method=$1
   isCommOnly=$2
   taskNum=$3
-  mainClass=org.apache.spark.adj.utils.exp.ExpEntry
+  mainClass=org.apache.spark.adj.adj.utils.exp.ExpEntry
 
   # shellcheck disable=SC2068
   for i in ${input[@]}; do
@@ -40,7 +40,7 @@ TestScalability() {
   method=$1
   isCommOnly=$2
   taskNum=$3
-  mainClass=org.apache.spark.adj.utils.exp.ExpEntry
+  mainClass=org.apache.spark.adj.adj.utils.exp.ExpEntry
   #  executeScript=runSpark-logo-vcore.sh
 
   # shellcheck disable=SC2068
@@ -60,7 +60,7 @@ TestScalability() {
 ConvertWebGraph() {
   input=$1
   output=$2
-  mainClass=org.apache.spark.adj.utils.misc.WebGraphConverter
+  mainClass=org.apache.spark.adj.adj.utils.misc.WebGraphConverter
   $executeScript --num-executors $numExecutors --class $mainClass $JAR $input $output
 }
 
