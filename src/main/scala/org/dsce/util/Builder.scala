@@ -1,7 +1,7 @@
 package org.dsce.util
 
-import org.dsce.optimization.subgraph.deprecated.graph.Graph
-import org.dsce.optimization.subgraph.deprecated.query.Query
+import org.dsce.deprecated.optimization.subgraph.graph.Graph
+import org.dsce.deprecated.optimization.subgraph.query.Query
 import org.dsce.{EdgeList, NodeList}
 import org.jgrapht.graph.{DefaultEdge, DefaultUndirectedGraph}
 

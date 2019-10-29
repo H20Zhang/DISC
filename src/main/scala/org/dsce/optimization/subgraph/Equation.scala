@@ -1,7 +1,7 @@
 package org.dsce.optimization.subgraph
 
 import org.dsce.optimization.subgraph.Element.State.Mode
-import org.dsce.optimization.subgraph.deprecated.graph.GraphUtil
+import org.dsce.deprecated.optimization.subgraph.graph.GraphUtil
 import org.dsce.util.Fraction
 import org.dsce.{ADJList, Edge, Mapping, NodeID}
 import org.jgrapht.alg.connectivity.ConnectivityInspector
@@ -232,7 +232,7 @@ case class Equation(head: Element, body: Seq[Element]) {
     Equation(head, newBody)
   }
 
-  def transformWithRule(rule: Rule) = {
+  def transformWithRule(rule: SubgraphCountRule) = {
 
     val matchedIdx = body.indexWhere(p => rule.isMatch(p))
 

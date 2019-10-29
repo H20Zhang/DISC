@@ -1,6 +1,7 @@
 package dsce
 
 import adj.SparkFunSuite
+import org.apache.spark.sql.Row
 import org.dsce.parser.SubgraphParser
 import org.dsce.util.testing.{ExpData, ExpQuery}
 
@@ -14,6 +15,7 @@ class SubgraphParserTest extends SparkFunSuite {
     val logicalPlan = parser.parseDml(query)
     println(logicalPlan)
 
+    Row.fromSeq(Seq(1, 2))
   }
 
 }

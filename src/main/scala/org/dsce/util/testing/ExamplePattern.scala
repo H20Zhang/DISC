@@ -1,7 +1,7 @@
 package org.dsce.util.testing
 
 import org.dsce.Stage
-import org.dsce.optimization.subgraph.deprecated.remover.{
+import org.dsce.deprecated.optimization.subgraph.remover.{
   Element,
   SymmetryBreakingRule
 }
