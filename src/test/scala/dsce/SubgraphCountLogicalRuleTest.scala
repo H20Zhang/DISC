@@ -1,41 +1,30 @@
 package dsce
 
 import adj.SparkFunSuite
-import org.dsce.Query
-import org.dsce.optimization.subgraph.{
-  CliqueOptimizeRule,
-  InducedToNonInduceRule,
-  NonInduceToPartialRule,
-  EquationTransformer,
-  SubgraphCountLogicalRule,
-  SymmetryBreakRule
+import org.apache.spark.dsce.Query
+import org.apache.spark.dsce.optimization.subgraph.SubgraphCountLogicalRule
+import org.apache.spark.dsce.plan.{
+  UnOptimizedCountAggregate,
+  UnOptimizedSubgraphCount
 }
-import org.dsce.plan.UnOptimizedSubgraphCount
-import org.dsce.util.Fraction
-import org.dsce.util.testing.{ExpData, ExpQuery}
-import org.scalatest.FunSuite
+import org.apache.spark.dsce.util.Fraction
+import org.apache.spark.dsce.util.testing.{ExpData, ExpQuery}
 
 class SubgraphCountLogicalRuleTest extends SparkFunSuite {
 
   val data = ExpData.getDataAddress("eu")
-  val dmlString = "square"
+  val dmlString = "wedge"
   val dml = new ExpQuery(data) getQuery (dmlString)
   var plan = Query.simpleDml(dml).asInstanceOf[UnOptimizedSubgraphCount]
-  val schemas = plan.childrenOps.map(_.outputSchema)
+  val schemas = plan.edge.map(_.outputSchema)
   val coreIds =
-    plan.cores.map(coreAttr => plan.catalog.getAttributeID(coreAttr))
-  val subgraphOptimizer = new SubgraphCountLogicalRule(schemas, coreIds)
+    plan.coreAttrIds
+  val rule = new SubgraphCountLogicalRule()
 
-  test("initEquation") {
-    println(subgraphOptimizer.initEquation())
-  }
+  test("main") {
+    val optimizedPlan = plan.optimize()
 
-  test("optimizedEquation") {
-    var eq = subgraphOptimizer.initEquation()
-    eq = subgraphOptimizer.optimizeEquation(eq)
-
-    println(eq)
-
+    println(optimizedPlan.prettyString())
   }
 
   test("fraction") {

@@ -8,18 +8,45 @@ import org.apache.spark.adj.database.Catalog.{
 import org.apache.spark.adj.database.{Catalog, Relation, RelationSchema}
 import org.apache.spark.adj.utils.misc.Conf
 import org.apache.spark.adj.utils.misc.Conf.Method
+import org.apache.spark.dsce.optimization.Rule
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.DataType
+import org.apache.spark.dsce.optimization.LogicalRule
 
 trait LogicalPlan extends Serializable {
   val catalog = Catalog.defaultCatalog()
   val outputSchema: RelationSchema
-
-  def optimizedPlan(): LogicalPlan
+  lazy val outputRelationString =
+    s"${outputSchema.name}${outputSchema.attrs.mkString("(", ", ", ")")}"
+  def optimize(): LogicalPlan
   def phyiscalPlan(): PhysicalPlan
-
   def getChildren(): Seq[LogicalPlan]
+  def prettyString(): String = {
+
+    if (getChildren().nonEmpty) {
+      val childrenString =
+        getChildren()
+          .map(child => s"${child.prettyString()}\n")
+          .reduce(_ + _)
+          .dropRight(1)
+          .split("\n")
+          .map(str => s"\t${str}\n")
+          .reduce(_ + _)
+          .dropRight(1)
+
+      s"-${selfString()}->${outputRelationString}\n${childrenString}"
+    } else {
+      s"-${selfString()}->${outputRelationString}"
+    }
+  }
+
+  def selfString(): String = {
+    s"unknown"
+  }
 }
+
+class RuleNotMatchedException(rule: Rule)
+    extends Exception(s"Not Supported Plan Type:${rule.getClass}") {}
 
 abstract class Scan(schema: RelationSchema) extends LogicalPlan {
   def getChildren(): Seq[LogicalPlan] = {
@@ -27,11 +54,16 @@ abstract class Scan(schema: RelationSchema) extends LogicalPlan {
   }
 
   override val outputSchema = schema
+
+  override def selfString(): String = {
+    s"Scan(schema:${schema})"
+  }
+
 }
 
 case class UnOptimizedScan(schema: RelationSchema) extends Scan(schema) {
 
-  override def optimizedPlan(): LogicalPlan = {
+  override def optimize(): LogicalPlan = {
     val memoryData = catalog.getMemoryStore(schema.id.get)
     val diskData = catalog.getDiskStore(schema.id.get)
 
@@ -48,6 +80,22 @@ case class UnOptimizedScan(schema: RelationSchema) extends Scan(schema) {
 
   override def phyiscalPlan(): PhysicalPlan = {
     throw new Exception("not supported")
+  }
+
+  override def selfString(): String = {
+    s"UnOptimizedScan(schema:${schema})"
+  }
+}
+
+abstract class Filter(child: LogicalPlan) extends LogicalPlan {
+  def getChildren(): Seq[LogicalPlan] = {
+    Seq(child)
+  }
+
+  override val outputSchema = child.outputSchema
+
+  override def selfString(): String = {
+    s"Filter(schema:${outputSchema})"
   }
 }
 
@@ -74,8 +122,8 @@ abstract class Join(childrenOps: Seq[LogicalPlan]) extends LogicalPlan {
 case class UnOptimizedJoin(childrenOps: Seq[LogicalPlan])
     extends Join(childrenOps) {
 
-  def optimizedPlan(): LogicalPlan = {
-    val inputs = childrenOps.map(_.optimizedPlan())
+  def optimize(): LogicalPlan = {
+    val inputs = childrenOps.map(_.optimize())
     import Method._
     conf.method match {
       case UnOptimizedHCube => UnCostOptimizedHCubeJoin(inputs)

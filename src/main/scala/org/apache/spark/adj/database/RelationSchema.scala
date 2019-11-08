@@ -22,15 +22,15 @@ case class RelationSchema(name: String, attrs: Seq[Attribute])
   val arity = attrs.size
 
   def register(): Unit = {
-    id = Some(catalog.add(this))
+    id = Some(catalog.registerSchema(this))
   }
 
   def register(dataAddress: String): Unit = {
-    id = Some(catalog.add(this, dataAddress))
+    id = Some(catalog.registerSchema(this, dataAddress))
   }
 
   def register(content: RDD[Array[DataType]]): Unit = {
-    id = Some(catalog.add(this, content))
+    id = Some(catalog.registerSchema(this, content))
   }
 
   def setContent(rdd: RDD[Array[DataType]]): Unit = {
@@ -60,7 +60,8 @@ case class RelationSchema(name: String, attrs: Seq[Attribute])
   }
 
   override def toString: Attribute = {
-    s"RelationSchema:${name}, attrs:${attrs}, attrIds:${attrIDs}"
+    s"RelationSchema:${name}, attrs:${attrs.mkString("(", ", ", ")")}, attrIds:${attrIDs
+      .mkString("(", ", ", ")")}"
   }
 }
 
@@ -78,7 +79,8 @@ object RelationSchema {
 
   def tempSchemaWithAttrName(attr: Seq[Attribute]): RelationSchema = {
     val catalog = Catalog.defaultCatalog()
-    val schema = RelationSchema(s"TempR${catalog.nextRelationID()}", attr)
+//    val schema = RelationSchema(s"TempR${catalog.nextRelationID()}", attr)
+    val schema = RelationSchema(s"T${catalog.nextRelationID()}", attr)
     schema.register()
     schema
   }
@@ -86,7 +88,8 @@ object RelationSchema {
   def tempSchemaWithAttrName(attr: Seq[Attribute],
                              rdd: RDD[Array[DataType]]): RelationSchema = {
     val catalog = Catalog.defaultCatalog()
-    val schema = RelationSchema(s"TempR${catalog.nextRelationID()}", attr)
+//    val schema = RelationSchema(s"TempR${catalog.nextRelationID()}", attr)
+    val schema = RelationSchema(s"T${catalog.nextRelationID()}", attr)
     rdd.cache()
     rdd.count()
     schema.register(rdd)

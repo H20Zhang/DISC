@@ -20,7 +20,7 @@ object Query {
 
     val time1 = System.currentTimeMillis()
     //optimize adj.plan
-    val optimizedPlan = plan.optimizedPlan()
+    val optimizedPlan = plan.optimize()
     println(s"optimized logical adj.plan:${optimizedPlan}")
 
     val conf = Conf.defaultConf()
@@ -41,7 +41,7 @@ object Query {
     println(s"unoptimized logical adj.plan:${plan}")
 
     //optimize adj.plan
-    val optimizedPlan = plan.optimizedPlan()
+    val optimizedPlan = plan.optimize()
     println(s"optimized logical adj.plan:${optimizedPlan}")
 
     //convert to physical adj.plan
@@ -70,7 +70,7 @@ object Query {
     println(s"unoptimized logical adj.plan:${plan}")
 
     //optimize adj.plan
-    val optimizedPlan = plan.optimizedPlan()
+    val optimizedPlan = plan.optimize()
     println(s"optimized logical adj.plan:${optimizedPlan}")
 
     //convert to physical adj.plan
@@ -97,7 +97,7 @@ object Query {
     println(s"unoptimized logical adj.plan:${plan}")
 
     //optimize adj.plan
-    val optimizedPlan = plan.optimizedPlan()
+    val optimizedPlan = plan.optimize()
     println(s"optimized logical adj.plan:${optimizedPlan}")
 
     //convert to physical adj.plan

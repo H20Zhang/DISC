@@ -59,7 +59,7 @@ class ExpQuery(data: String) {
 
   val rdd = new DataLoader().csv(data)
 
-  def getSchema(q: String) = {
+  def getDml(q: String) = {
     val dml = q match {
       case "triangle"           => triangleDml
       case "chordalSquare"      => chordalSquareDml
@@ -84,6 +84,11 @@ class ExpQuery(data: String) {
 
     assert(dml.endsWith(";"))
 
+    dml
+  }
+
+  def getSchema(q: String) = {
+    val dml = getDml(q)
     ExpQueryHelper.dmlToSchemas(dml)
   }
 
@@ -96,6 +101,7 @@ class ExpQuery(data: String) {
   def getQuery(q: String) = {
     val schemas = getSchema(q)
     schemas.foreach(schema => Catalog.defaultCatalog().setContent(schema, rdd))
+
     val query0 =
       s"Join ${schemas.map(schema => s"${schema.name};").reduce(_ + _).dropRight(1)}"
     query0
@@ -176,6 +182,53 @@ object ExpQueryHelper {
 
     schemas
   }
+
+  //we use a very simple dml like "A-B; A-C; A-D;".
+  def dmlToNotIncludedEdgeSchemas(dml: String): Seq[RelationSchema] = {
+    val catalog = Catalog.defaultCatalog()
+    val pattern = "(([A-Z])-([A-Z]);)".r
+    val edges = pattern
+      .findAllMatchIn(dml)
+      .toArray
+      .map { f =>
+        val src = f.subgroups(1)
+        val dst = f.subgroups(2)
+        (src, dst)
+      }
+    val nodes = edges.flatMap(f => Seq(f._1, f._2)).distinct
+    val allEdges = nodes.combinations(2).toSeq.map(f => (f(0), f(1)))
+    val sortedEdges = edges.map {
+      case (u, v) =>
+        if (u > v) {
+          (v, u)
+        } else {
+          (u, v)
+        }
+    }.distinct
+    val sortedAllEdges = allEdges.map {
+      case (u, v) =>
+        if (u > v) {
+          (v, u)
+        } else {
+          (u, v)
+        }
+    }.distinct
+
+    val diffEdges = sortedAllEdges.diff(sortedEdges)
+
+    val notIncludedEdgesSchemas = diffEdges.map {
+      case (u, v) =>
+        val id = catalog.nextRelationID()
+        RelationSchema(s"N${id}", Seq(u, v))
+    }
+
+    notIncludedEdgesSchemas.foreach { f =>
+      f.register()
+    }
+
+    notIncludedEdgesSchemas
+  }
+
 }
 
 class FutureTask[T](f: => Future[T]) extends TimerTask {

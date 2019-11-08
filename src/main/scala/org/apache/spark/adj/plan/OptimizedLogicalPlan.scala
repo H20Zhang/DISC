@@ -32,7 +32,7 @@ case class UnCostOptimizedHCubeJoin(childrenOps: Seq[LogicalPlan])
     )
   }
 
-  override def optimizedPlan(): LogicalPlan = {
+  override def optimize(): LogicalPlan = {
     throw new NotImplementedError()
   }
 
@@ -91,7 +91,7 @@ case class CostOptimizedMergedHCubeJoin(childrenOps: Seq[LogicalPlan],
     )
   }
 
-  override def optimizedPlan(): LogicalPlan = {
+  override def optimize(): LogicalPlan = {
     throw new NotImplementedError()
   }
 
@@ -155,7 +155,7 @@ case class CostOptimizedPushHCubeJoin(childrenOps: Seq[LogicalPlan],
     )
   }
 
-  override def optimizedPlan(): LogicalPlan = {
+  override def optimize(): LogicalPlan = {
     throw new NotImplementedError()
   }
 
@@ -216,7 +216,7 @@ case class CostOptimizedPullHCubeJoin(childrenOps: Seq[LogicalPlan],
     )
   }
 
-  override def optimizedPlan(): LogicalPlan = {
+  override def optimize(): LogicalPlan = {
     throw new NotImplementedError()
   }
 
@@ -280,7 +280,7 @@ case class CostOptimizedHCubeFactorizedJoin(childrenOps: Seq[LogicalPlan],
     )
   }
 
-  override def optimizedPlan(): LogicalPlan = {
+  override def optimize(): LogicalPlan = {
     throw new NotImplementedError()
   }
 
@@ -371,7 +371,7 @@ case class CostOptimizedHCubeCachedJoin(childrenOps: Seq[LogicalPlan],
     )
   }
 
-  override def optimizedPlan(): LogicalPlan = {
+  override def optimize(): LogicalPlan = {
     throw new NotImplementedException
   }
 }
@@ -415,7 +415,7 @@ case class CostOptimizedAdaptiveJoin(childrenOps: Seq[LogicalPlan],
     println(s"remainingRelations:${remainingRelations}")
   }
 
-  override def optimizedPlan(): LogicalPlan = {
+  override def optimize(): LogicalPlan = {
     throw new NotImplementedException
 
   }
@@ -424,7 +424,7 @@ case class CostOptimizedAdaptiveJoin(childrenOps: Seq[LogicalPlan],
     val inputPhysicalPlans = preMaterializeQuery.map { query =>
       val logicalPlan =
         CostOptimizedMergedHCubeJoin(
-          query.map(UnOptimizedScan).map(_.optimizedPlan())
+          query.map(UnOptimizedScan).map(_.optimize())
         )
       val physicalPlan = logicalPlan.phyiscalPlan()
       physicalPlan
@@ -434,7 +434,7 @@ case class CostOptimizedAdaptiveJoin(childrenOps: Seq[LogicalPlan],
       outputSchema,
       inputPhysicalPlans ++ (remainingRelations
         .map(UnOptimizedScan)
-        .map(_.optimizedPlan().phyiscalPlan())),
+        .map(_.optimize().phyiscalPlan())),
       share,
       attrOrder,
       task
@@ -451,8 +451,12 @@ case class DiskScan(schema: RelationSchema) extends Scan(schema) {
     DiskScanExec(schema, diskData.get)
   }
 
-  override def optimizedPlan(): LogicalPlan = {
+  override def optimize(): LogicalPlan = {
     throw new NotImplementedError()
+  }
+
+  override def selfString(): String = {
+    s"DiskScan(schema:${schema})"
   }
 
 }
@@ -466,8 +470,12 @@ case class InMemoryScan(schema: RelationSchema) extends Scan(schema) {
     InMemoryScanExec(schema, memoryData.get)
   }
 
-  override def optimizedPlan(): LogicalPlan = {
+  override def optimize(): LogicalPlan = {
     throw new NotImplementedError()
+  }
+
+  override def selfString(): String = {
+    s"InMemoryScan(schema:${schema})"
   }
 
 }
