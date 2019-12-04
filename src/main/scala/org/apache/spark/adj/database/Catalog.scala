@@ -40,20 +40,20 @@ class Catalog extends Serializable {
   }
 
   def addOrReplaceContent(schema: RelationSchema,
-                          content: RDD[Array[DataType]]): Int = {
+                          content: RDD[Array[DataType]]): RelationID = {
     val id = _schemaToID(schema)
     _memoryStore(id) = content
     id
   }
 
-  def registerSchema(schema: RelationSchema, dataAdress: String): Int = {
+  def registerSchema(schema: RelationSchema, dataAdress: String): RelationID = {
     val id = registerSchema(schema)
     _diskStore(id) = dataAdress
     id
   }
 
   def registerSchema(schema: RelationSchema,
-                     content: RDD[Array[DataType]]): Int = {
+                     content: RDD[Array[DataType]]): RelationID = {
     val id = registerSchema(schema)
     _memoryStore(id) = content
     id
@@ -65,7 +65,7 @@ class Catalog extends Serializable {
   }
 
 //  add relation schema to the adj.database
-  def registerSchema(schema: RelationSchema): Int = synchronized {
+  def registerSchema(schema: RelationSchema): RelationID = synchronized {
 
     if (_nameToSchema.contains(schema.name)) {
       throw new Exception(s"Relation${schema.name} is duplicated ")
@@ -90,7 +90,7 @@ class Catalog extends Serializable {
   }
 
 //  add attribute to adj.database
-  def registerAttr(attribute: Attribute): Int = {
+  def registerAttr(attribute: Attribute): AttributeID = {
 
     _attributeToID.get(attribute) match {
       case Some(id) => id
@@ -147,9 +147,10 @@ class Catalog extends Serializable {
 
 object Catalog extends Serializable {
   var _catalog = new Catalog
+  val NotExists: DataType = -1
 
   type Attribute = String
-  type DataType = Int
+  type DataType = Long
   type AttributeID = Int
   type RelationID = Int
 

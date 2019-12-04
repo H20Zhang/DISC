@@ -22,6 +22,12 @@ class CountAggregateToMultiplyAggregateRule extends LogicalRule {
     countAggregate: UnOptimizedCountAggregate
   ): UnOptimizedMultiplyAggregate = {
     val schemas = countAggregate.childrenOps.map(_.outputSchema)
+    val schemaToLogicalPlanMap =
+      countAggregate.childrenOps.map(f => (f.outputSchema, f)).toMap
+//    val partialOrderEdgeSchemas = countAggregate.childrenOps
+//      .filter(f => f.isInstanceOf[PartialOrderScan])
+//      .map(f => f.asInstanceOf[PartialOrderScan])
+
     val coreAttrIds = countAggregate.coreAttrIds
     val relationDecomposer = new RelationDecomposer(schemas)
     val selectedGHD = relationDecomposer
@@ -68,14 +74,14 @@ class CountAggregateToMultiplyAggregateRule extends LogicalRule {
           constructMultiplAgg(newNode._1, newE, newCore)
         }
         UnOptimizedMultiplyAggregate(
-          idToNodeMap(nodeId)._2.map(UnOptimizedScan),
+          idToNodeMap(nodeId)._2.map(schemaToLogicalPlanMap).map(_.optimize()),
           neighborMultiplyAgg,
           coreAttrIds
         )
 
       } else {
         UnOptimizedMultiplyAggregate(
-          idToNodeMap(nodeId)._2.map(UnOptimizedScan),
+          idToNodeMap(nodeId)._2.map(schemaToLogicalPlanMap).map(_.optimize()),
           Seq(),
           coreAttrIds
         )
@@ -158,6 +164,8 @@ class CountAggregateToMultiplyAggregateRule extends LogicalRule {
     val countTableCache = CountTableCache.defaultCache()
 
     def checkAndReplace(agg: OptimizedLazyableMultiplyAggregate): Aggregate = {
+      val pattern = countTableCache.aggToPattern(agg)
+
       if (countTableCache.isCached(agg) && agg.isLazy == false) {
         countTableCache.getCachedScan(agg)
       } else {
@@ -176,7 +184,7 @@ class CountAggregateToMultiplyAggregateRule extends LogicalRule {
           agg.isLazy
         )
 
-        countTableCache.putAgg(resultAgg)
+        countTableCache.putAgg(resultAgg, pattern)
 
         resultAgg
       }
@@ -208,7 +216,7 @@ class CountTableCache {
     : mutable.HashMap[Pattern, (RelationSchema, Seq[AttributeID])] =
     mutable.HashMap()
 
-  private def aggToPattern(agg: OptimizedLazyableMultiplyAggregate): Pattern = {
+  def aggToPattern(agg: OptimizedLazyableMultiplyAggregate): Pattern = {
 
     def getAllRelatedSchemas(
       agg: OptimizedLazyableMultiplyAggregate
@@ -221,6 +229,7 @@ class CountTableCache {
       schemas ++ agg.edges.map(_.outputSchema)
     }
 
+//    println(s"aggToPattern:${agg.prettyString()}")
     val allSchemas = getAllRelatedSchemas(agg)
     val E = allSchemas
       .map(f => (f.attrIDs(0), f.attrIDs(1)))
@@ -241,6 +250,12 @@ class CountTableCache {
     }.nonEmpty
   }
 
+  def putAgg(agg: OptimizedLazyableMultiplyAggregate, p: Pattern): Unit = {
+    val schema = agg.outputSchema
+    //    println(s"agg:${agg}, schema:${schema}")
+    patternToRelationSchemaMap.put(p, (schema, schema.attrIDs))
+  }
+
   def putAgg(agg: OptimizedLazyableMultiplyAggregate): Unit = {
     val p = aggToPattern(agg)
     val schema = agg.outputSchema
@@ -254,27 +269,37 @@ class CountTableCache {
   ): CachedAggregate = {
     val catalog = Catalog.defaultCatalog()
     val p = aggToPattern(agg)
+
+    //find matched pattern
     val matchedQ = patternToRelationSchemaMap.keys.find { q =>
       q.isIsomorphic(p)
     }.get
-
     val matched = patternToRelationSchemaMap(matchedQ)
 
+    //ismorphism between count attr
     val countAttrId = agg.countAttrId
-
-    //    println(s"matched:${matched}")
-
     val mappedCountAttrId =
-      matched._2.find(id => catalog.getAttribute(id).startsWith("C")).get
-    val patternMapping = p.findIsomorphism(matchedQ).head
+      matched._2.find(id => catalog.getAttribute(id).startsWith("Count")).get
+//    println(
+//      s"countAttrId:${countAttrId}, mappedCountAttrId:${mappedCountAttrId}"
+//    )
 
+    //isomorphism between rest of the attr
+    val patternMapping = p.findIsomorphism(matchedQ).head
     val coreMapping = agg.coreAttrIds
       .map(f => (f, patternMapping(f)))
 
+    //construct mapping for whole isomorphism
     val countMapping = (countAttrId, mappedCountAttrId)
     val mapping = (coreMapping :+ countMapping).map(_.swap).toMap
 
-    plan.CachedAggregate(matched._1, matched._2, mapping)
+//    println(s"p:${p}, matchedQ:${matchedQ}, matched:${matched}")
+
+    plan.CachedAggregate(
+      matched._1,
+      matched._2.diff(Seq(mappedCountAttrId)),
+      mapping
+    )
 
   }
 

@@ -1,5 +1,5 @@
-eu-core
-
+eu-core (undirected)
+edge 32770
 triangle(6X)    715077
 square  4647873
 chordalSquare   5012720

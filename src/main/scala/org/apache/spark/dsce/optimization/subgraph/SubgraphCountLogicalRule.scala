@@ -86,10 +86,10 @@ class SubgraphCountLogicalRule() extends LogicalRule {
       .flatMap(f => Seq(f, (f._1.swap, f._2)))
       .toMap
 
-    println(EToSchemaMap)
-    println(
-      s"edgeSchemas:${edgeSchema}, notIncludedEdgesSchemas:${notExistedEdgeSchema}"
-    )
+//    println(EToSchemaMap)
+//    println(
+//      s"edgeSchemas:${edgeSchema}, notIncludedEdgesSchemas:${notExistedEdgeSchema}"
+//    )
 
     val countAggregates = body.map { element =>
       val schemas = element.E.filter { case (u, v) => v > u }.map(EToSchemaMap)

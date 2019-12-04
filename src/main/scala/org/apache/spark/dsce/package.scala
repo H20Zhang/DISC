@@ -68,7 +68,7 @@ package object dsce {
     def nextCountAttrId() = {
       val old = count
       count += 1
-      val countAttr = s"C${old}"
+      val countAttr = s"Count${old}"
       val catalog = Catalog.defaultCatalog()
 
       val id = catalog.registerAttr(countAttr)

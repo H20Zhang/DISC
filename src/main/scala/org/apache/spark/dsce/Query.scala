@@ -8,20 +8,33 @@ object Query {
     parser.parseDml(dml)
   }
 
+  //debug needed
   def showPlan(dml: String) = {
     val parser = new SubgraphParser()
     parser.parseDml(dml)
 
-    val plan = parser.parseDml(dml)
-    println(s"unoptimized logical adj.plan:${plan}")
+    var plan = parser.parseDml(dml)
+
+    println(s"unoptimized logical plan:${plan}")
 
     val time1 = System.currentTimeMillis()
-    //optimize adj.plan
-    val optimizedPlan = plan.optimize()
-    println(s"optimized logical adj.plan:${optimizedPlan}")
+
+    //optimize 1 -- decompose SumAgg over a series of countAgg
+    plan = plan.optimize()
+    println(s"optimized plan -- 1:\n${plan.prettyString()}")
+
+    //optimize 2 -- decompose each countAgg into a series of MultiplyAgg
+    plan = plan.optimize()
+    println(s"optimized plan -- 2:\n${plan.prettyString()}")
+
+    //optimize 3 -- physical plan
+    val physicalPlan = plan.phyiscalPlan()
+    println(s"physical plan :\n${physicalPlan.prettyString()}")
 
     val time2 = System.currentTimeMillis()
     println(s"time:${(time2 - time1) / 1000}")
+
+    plan
   }
 
   def countQuery(dml: String) = {

@@ -9,6 +9,8 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 trait Trie extends Serializable {
+
+//  def nextValue(binding: Binding): DataType
   def nextLevel(binding: ArraySegment): ArraySegment
   def nextLevelWithAdjust(binding: ArraySegment,
                           inputArraySegment: ArraySegment): Unit

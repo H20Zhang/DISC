@@ -32,11 +32,38 @@ trait PhysicalPlan {
   def commOnly(): Long
   def getChildren(): Seq[PhysicalPlan]
   val catalog = Catalog.defaultCatalog()
+  val outputSchema: RelationSchema
+  lazy val outputRelationString =
+    s"${outputSchema.name}${outputSchema.attrs.mkString("(", ", ", ")")}"
+  def prettyString(): String = {
+
+    if (getChildren().nonEmpty) {
+      val childrenString =
+        getChildren()
+          .map(child => s"${child.prettyString()}\n")
+          .reduce(_ + _)
+          .dropRight(1)
+          .split("\n")
+          .map(str => s"\t${str}\n")
+          .reduce(_ + _)
+          .dropRight(1)
+
+      s"-${selfString()}->${outputRelationString}\n${childrenString}"
+    } else {
+      s"-${selfString()}->${outputRelationString}"
+    }
+  }
+
+  def selfString(): String = {
+    s"unknown"
+  }
 }
 
 abstract class JoinExec(schema: RelationSchema,
                         @transient children: Seq[PhysicalPlan])
     extends PhysicalPlan {
+  override val outputSchema: RelationSchema = schema
+
   def getChildren(): Seq[PhysicalPlan] = {
     children
   }
@@ -231,6 +258,8 @@ case class MergedHCubeLeapJoinExec(schema: RelationSchema,
     )
 
 abstract class ScanExec(schema: RelationSchema) extends PhysicalPlan {
+  override val outputSchema: RelationSchema = schema
+
   override def getChildren(): Seq[PhysicalPlan] = Seq()
 
   override def count(): Long = {
@@ -247,6 +276,10 @@ case class DiskScanExec(schema: RelationSchema, dataAddress: String)
     Relation(schema, loader.csv(dataAddress))
   }
 
+  override def selfString(): String = {
+    s"DiskScanExec(schema:${schema}, dataAddress:${dataAddress})"
+  }
+
 }
 
 case class InMemoryScanExec(schema: RelationSchema,
@@ -254,5 +287,9 @@ case class InMemoryScanExec(schema: RelationSchema,
     extends ScanExec(schema) {
   override def execute(): Relation = {
     Relation(schema, content)
+  }
+
+  override def selfString(): String = {
+    s"InMemoryScanExec(schema:${schema})"
   }
 }

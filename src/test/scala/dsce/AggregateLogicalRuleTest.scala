@@ -12,7 +12,7 @@ import org.scalatest.FunSuite
 
 class AggregateLogicalRuleTest extends SparkFunSuite {
 
-  val data = ExpData.getDataAddress("eu")
+  val data = ExpData.getDataAddress("debug")
   val dmlString = "squareEdge"
   val dml = new ExpQuery(data) getQuery (dmlString)
   val plan = Query.simpleDml(dml).asInstanceOf[UnOptimizedSubgraphCount]

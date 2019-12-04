@@ -244,6 +244,11 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
 
   }
 
+  //return the underlying binding array
+  def getBinding(): Array[DataType] = {
+    binding
+  }
+
   override def next(): Array[DataType] = {
     binding(lastIdx) = lastIterator.next()
     binding

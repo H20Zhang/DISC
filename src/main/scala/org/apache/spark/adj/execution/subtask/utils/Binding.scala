@@ -109,6 +109,7 @@ object ArraySegment {
   val emptyArraySegment = ArraySegment(Array.emptyIntArray, 0, 0, 0)
 
   def emptyArray() = emptyArraySegment
+  def newEmptyArraySegment() = ArraySegment(Array.emptyIntArray, 0, 0, 0)
   def apply(array: Array[DataType]): ArraySegment = {
     ArraySegment(array, 0, array.size, array.size)
   }

@@ -15,13 +15,13 @@ class HCubeHelper(@transient query: HCubePlan) extends Serializable {
 
   def taskPartitioner = new HCubePartitioner(shareSpace.values.toArray)
 
-  def genShareForAttrs(attrsID: Seq[AttributeID]) = {
+  def genShareForAttrs(attrsID: Seq[AttributeID]): Array[Array[DataType]] = {
     val attrsShareSpace = attrsID
       .filter(shareSpace.contains)
       .map(attrID => shareSpace.get(attrID).get)
     var i = 0
     val attrsSize = attrsShareSpace.size
-    var buffer = new ArrayBuffer[Array[Int]]()
+    var buffer = new ArrayBuffer[Array[DataType]]()
 
     while (i < attrsSize) {
       if (i == 0) {
@@ -37,7 +37,7 @@ class HCubeHelper(@transient query: HCubePlan) extends Serializable {
     buffer.toArray
   }
 
-  def genShareForRelation(id: RelationID) = {
+  def genShareForRelation(id: RelationID): Array[Array[DataType]] = {
 
     val schema = query.idForRelation(id).schema
     println(s"schema:${schema}")

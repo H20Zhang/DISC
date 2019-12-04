@@ -19,7 +19,7 @@ class MainTest extends SparkFunSuite {
     println(optimizedPlan.prettyString())
   }
 
-  test("plan optimization") {
+  test("logical plan optimization") {
     val data = ExpData.getDataAddress("debug")
     val dmlString = "squareEdge"
     val dml = new ExpQuery(data) getQuery (dmlString)
@@ -29,5 +29,10 @@ class MainTest extends SparkFunSuite {
     val optimizedAgg = unOptimizedCountAgg.optimize()
   }
 
-  test("whole plan optimization") {}
+  test("whole plan optimization") {
+    val data = ExpData.getDataAddress("eu")
+    val dmlString = "wedge"
+    val dml = new ExpQuery(data) getQuery (dmlString)
+    val optimizedPlan = Query.showPlan(dml)
+  }
 }

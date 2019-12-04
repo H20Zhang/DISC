@@ -12,7 +12,7 @@ import org.apache.spark.adj.execution.hcube.{TrieHCubeBlock, TupleHCubeBlock}
 import org.apache.spark.adj.execution.subtask.SubTask
 import org.apache.spark.adj.optimization.costBased.comp.EnumShareComputer
 import org.apache.spark.adj.optimization.stat.Statistic
-import org.apache.spark.adj.plan.{PhysicalPlan, ScanExec}
+import org.apache.spark.adj.plan.{InMemoryScanExec, PhysicalPlan, ScanExec}
 import org.apache.spark.adj.utils.misc.{Conf, SparkSingle}
 import org.apache.spark.dsce.execution.subtask.{
   DSCESubTaskFactory,
@@ -20,19 +20,26 @@ import org.apache.spark.dsce.execution.subtask.{
 }
 import org.apache.spark.dsce.util.Fraction
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.types.{LongType, StructField, StructType}
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.types.{
+  IntegerType,
+  LongType,
+  StructField,
+  StructType
+}
+import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.storage.StorageLevel
 
-//TODO: debug this
+//TODO: debugging this
 case class MultiplyAggregateExec(
   schema: RelationSchema,
   edges: Seq[PhysicalPlan],
   eagerCountTables: Seq[MultiplyAggregateExec],
   lazyCountTables: Seq[Tuple2[Seq[PhysicalPlan], Seq[MultiplyAggregateExec]]],
   subTaskInfo: LeapFrogAggregateInfo,
-  coreIds: Seq[AttributeID]
+  coreAttrIds: Seq[AttributeID]
 ) extends PhysicalPlan {
+
+  override val outputSchema: RelationSchema = schema
 
   lazy val share = genShare()
   lazy val countTablesRelation = eagerCountTables.map(_.execute())
@@ -44,7 +51,7 @@ case class MultiplyAggregateExec(
   lazy val relationsForHCube = countTablesRelation ++ countTableRelationForLazyCountTables
     .flatMap(f => f) ++ edgeRelations ++ edgeRelationsForLazyCountTables
     .flatMap(f => f)
-  lazy val countAttrId = schema.attrIDs.diff(coreIds).head
+  lazy val countAttrId = schema.attrIDs.diff(coreAttrIds).head
 
   //share will be computed when this operator is evaluated.
   def genShare(): Map[AttributeID, Int] = {
@@ -86,7 +93,7 @@ case class MultiplyAggregateExec(
 
         info_ match {
           case s: LeapFrogAggregateInfo => {
-            val attrOrders = s.attrOrder
+            val attrOrders = s.attrIdsOrder
             val triePreConstructor =
               new TriePreConstructor(attrOrders, schema, content)
             val trie = triePreConstructor.construct()
@@ -121,13 +128,18 @@ case class MultiplyAggregateExec(
         val iterator = subJoinTask.execute()
         iterator
       }
-      .map(f => Row(f))
+      .map(f => Row.fromSeq(f))
+
+//    LongType
 
     val fields = schema.attrIDs.map(
-      attrId => StructField(catalog.getAttribute(attrId), LongType)
+      attrId => StructField(catalog.getAttribute(attrId), IntegerType)
     )
 
     val dfSchema = StructType(fields)
+
+    println(s"dfSchema:${dfSchema}")
+
     val spark = SparkSingle.getSparkSession()
 
     spark.createDataFrame(rowRdd, dfSchema)
@@ -148,6 +160,15 @@ case class MultiplyAggregateExec(
     Relation(schema, rdd)
   }
 
+  //aggregate the sub-count table
+  def globalAggregate(): Unit = {
+
+    val df = genSubCountTable()
+
+    import org.apache.spark.sql.functions._
+    df.agg(sum(catalog.getAttribute(countAttrId))).show()
+  }
+
   override def execute(): Relation = {
     aggregateSubCountTable(genSubCountTable())
   }
@@ -158,6 +179,26 @@ case class MultiplyAggregateExec(
 
   override def getChildren(): Seq[PhysicalPlan] =
     edges ++ eagerCountTables ++ lazyCountTables.flatMap(f => f._1 ++ f._2)
+
+  override def selfString(): String = {
+    val coreString =
+      coreAttrIds.map(catalog.getAttribute).mkString("(", ", ", ")")
+    val eagerCountTableString =
+      eagerCountTables.map(_.outputSchema.name).mkString("(", ", ", ")")
+    val lazyCountString =
+      lazyCountTables
+        .map {
+          case (edgeRelations, countTables) =>
+            (
+              edgeRelations.map(_.outputSchema.name).mkString("(", ", ", ")"),
+              countTables.map(_.outputSchema.name).mkString("(", ", ", ")")
+            )
+        }
+        .mkString("(", ", ", ")")
+    val edgesString = edges.map(_.outputSchema.name).mkString("(", ", ", ")")
+
+    s"MultiplyAggregateExec(core:${coreString}, edges:${edgesString}, eagerTables:${eagerCountTableString}, lazyTable:${lazyCountString}, Info:${subTaskInfo})"
+  }
 }
 
 //TODO: finish later
@@ -166,13 +207,30 @@ case class SumAggregateExec(schema: RelationSchema,
                             coefficients: Seq[Fraction],
                             coreAttrIds: Seq[AttributeID])
     extends PhysicalPlan {
+  override val outputSchema: RelationSchema = schema
+
   override def execute(): Relation = ???
 
   override def count(): Long = ???
 
   override def commOnly(): Long = ???
 
-  override def getChildren(): Seq[PhysicalPlan] = ???
+  override def getChildren(): Seq[PhysicalPlan] = countTables
+
+  override def selfString(): String = {
+    val equationString = coefficients
+      .zip(countTables)
+      .map {
+        case (coeff, countTable) =>
+          s"(${coeff}${countTable.outputSchema.name})+"
+      }
+      .reduce(_ + _)
+      .dropRight(1)
+
+    val coreString = coreAttrIds.map(catalog.getAttribute)
+
+    s"SumAggregateExec(core:${coreString}, equation:${equationString}"
+  }
 }
 
 case class PartialOrderInMemoryScanExec(
@@ -187,4 +245,30 @@ case class PartialOrderInMemoryScanExec(
 
     Relation(schema, content.filter(f => f(u) < f(v)))
   }
+
+  override def selfString(): String = {
+    s"PartialOrderInMemoryScanExec(schema:${schema}, partialOrder:${catalog
+      .getAttribute(attrWithPartialOrder._1)}<${catalog.getAttribute(attrWithPartialOrder._2)})"
+  }
+}
+
+case class CachedAggregateExec(originalSchema: RelationSchema,
+                               mappedSchema: RelationSchema)
+    extends ScanExec(mappedSchema) {
+
+  override def execute(): Relation = {
+
+    Relation(
+      mappedSchema,
+      InMemoryScanExec(
+        originalSchema,
+        catalog.getMemoryStore(originalSchema.id.get).get
+      ).execute().rdd
+    )
+  }
+
+  override def selfString(): String = {
+    s"CachedInMemoryScan(originalSchema:${originalSchema}, mappedSchema:${mappedSchema})"
+  }
+
 }

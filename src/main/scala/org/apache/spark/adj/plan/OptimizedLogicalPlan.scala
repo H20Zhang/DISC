@@ -471,7 +471,7 @@ case class InMemoryScan(schema: RelationSchema) extends Scan(schema) {
   }
 
   override def optimize(): LogicalPlan = {
-    throw new NotImplementedError()
+    this
   }
 
   override def selfString(): String = {

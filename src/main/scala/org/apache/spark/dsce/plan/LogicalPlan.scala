@@ -12,6 +12,7 @@ import org.apache.spark.adj.plan.{
 import org.apache.spark.dsce.CountAttrCounter
 import org.apache.spark.dsce.optimization.aggregate.{
   CountAggregateToMultiplyAggregateRule,
+  MultiplyAggregateToExecRule,
   SumAggregateToExecRule
 }
 import org.apache.spark.dsce.optimization.subgraph.SubgraphCountLogicalRule
@@ -224,7 +225,7 @@ case class OptimizedLazyableMultiplyAggregate(
       lazyCountTables.map(_.outputSchema.name).mkString("(", ", ", ")")
     val edgesString = edges.map(_.outputSchema.name).mkString("(", ", ", ")")
 
-    s"OptimizedLazyableMultiplyAggregate(core:${coreString}, edges:${edgesString}, eagerCountTables:${eagerCountTableString}, lazyCountTableString:${lazyCountString})"
+    s"OptimizedLazyableMultiplyAggregate(core:${coreString}, edges:${edgesString}, eagerCountTables:${eagerCountTableString}, lazyCountTableString:${lazyCountString}, isLazy:${isLazy})"
   }
 
   override def optimize(): LogicalPlan = {
@@ -239,6 +240,11 @@ case class OptimizedLazyableMultiplyAggregate(
     )
   }
 
+  override def phyiscalPlan(): PhysicalPlan = {
+    val rule = new MultiplyAggregateToExecRule()
+    rule(this)
+  }
+
 }
 
 case class CachedAggregate(schema: RelationSchema,
@@ -247,17 +253,22 @@ case class CachedAggregate(schema: RelationSchema,
     extends Aggregate(Seq(), coreAttrIds) {
   override val outputSchema: RelationSchema = {
     val attrIds = schema.attrIDs
-//    println(s"schema:${schema}, cores:${coreAttrIds}, mapping:${mapping}")
+    println(s"schema:${schema}, cores:${coreAttrIds}, mapping:${mapping}")
     val mappedAttrIds = attrIds.map(mapping)
     RelationSchema.tempSchemaWithAttrIds(mappedAttrIds)
   }
 
-  override val countAttrId = schema.attrIDs.diff(coreAttrIds).head
+  override val countAttrId = {
+//    println(
+//      s"schema:${schema}, schema.attrIds:${schema.attrIDs}, coreAttrIds:${coreAttrIds}"
+//    )
+    schema.attrIDs.diff(coreAttrIds).head
+  }
 
   override def optimize(): LogicalPlan = this
 
   override def phyiscalPlan(): plan.PhysicalPlan = {
-    InMemoryScanExec(outputSchema, catalog.getMemoryStore(schema.id.get).get)
+    CachedAggregateExec(schema, outputSchema)
   }
 
   override def getChildren(): Seq[LogicalPlan] = Seq()
@@ -282,7 +293,7 @@ case class PartialOrderScan(schema: RelationSchema,
   }
 
   override def optimize(): LogicalPlan = {
-    throw new NotImplementedError()
+    this
   }
 
   override def selfString(): String = {
@@ -290,28 +301,4 @@ case class PartialOrderScan(schema: RelationSchema,
       attrWithPartialOrder._1
     )}<${catalog.getAttribute(attrWithPartialOrder._2)})"
   }
-
 }
-//case class Alias(input: LogicalPlan, mapping: Map[AttributeID, AttributeID])
-//    extends LogicalPlan {
-//  override val outputSchema: RelationSchema = ???
-//
-//  override def optimizedPlan(): LogicalPlan = ???
-//
-//  override def phyiscalPlan(): plan.PhysicalPlan = ???
-//
-//  override def getChildren(): Seq[LogicalPlan] = ???
-//}
-
-//case class UnResolvedCacheScan(cacheId: Int,
-//                               cache: CountTableCache =
-//                                 CountTableCache.defaultCache())
-//    extends LogicalPlan {
-//  override val outputSchema: RelationSchema = ???
-//
-//  override def optimizedPlan(): LogicalPlan = ???
-//
-//  override def phyiscalPlan(): plan.PhysicalPlan = ???
-//
-//  override def getChildren(): Seq[LogicalPlan] = ???
-//}

@@ -28,7 +28,7 @@ class EquationTransformer {
     var appliedEq = eq
     var isChanged = true
     var count = Int.MaxValue
-    println(s"equation:${eq}")
+//    println(s"equation:${eq}")
 
     while (isChanged && count > 0) {
       val oldEq = appliedEq
@@ -41,7 +41,7 @@ class EquationTransformer {
 
       count -= 1
 
-      println(s"appliedEq:${appliedEq}")
+//      println(s"appliedEq:${appliedEq}")
     }
 
     appliedEq
@@ -185,7 +185,7 @@ class NonInduceToPartialRule extends SubgraphCountRule {
       nodeCollapseSet.size != V.size
     }
 
-    println(s"nodeCollapseSets:${nodeCollapseSets}")
+//    println(s"nodeCollapseSets:${nodeCollapseSets}")
 
     val nodeCollapseMaps = nodeCollapseSets.map { nodeCollapseSet =>
       nodeCollapseSet.flatMap { sameColorSet =>

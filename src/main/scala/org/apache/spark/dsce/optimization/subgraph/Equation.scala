@@ -16,14 +16,25 @@ class Pattern(V: Seq[NodeID], E: Seq[Edge], val C: Seq[NodeID])
     p match {
       case p2: Pattern => {
         val mappings = super.findIsomorphism(p2)
-        val constraints = C.zip(p2.C).toMap
 
-        //    filter the mappings that violate matchedNodes
-        val validMappings = mappings.filter { mapping =>
-          C.forall(nodeID => mapping(nodeID) == constraints(nodeID))
+        if (C.toSet == p2.C.toSet) {
+          val constraints = C.zip(p2.C).toMap
+
+          //    filter the mappings that violate matchedNodes
+//          println(
+//            s"V:${V}, E:${E}, C:${C.toList}, V2:${p2.V}, E2:${p2.E}, C2:${p2.C}"
+//          )
+//          println(s"mapping:${mappings}")
+//          println(s"constraints:${constraints}")
+
+          val validMappings = mappings.filter { mapping =>
+            C.forall(nodeID => mapping(nodeID) == constraints(nodeID))
+          }
+
+          validMappings
+        } else {
+          Seq()
         }
-
-        validMappings
       }
       case p1: Graph => {
         super.findIsomorphism(p1)
@@ -34,6 +45,10 @@ class Pattern(V: Seq[NodeID], E: Seq[Edge], val C: Seq[NodeID])
   override def findAutomorphism(): Seq[Mapping] = {
     val automorphism = findIsomorphism(this)
     automorphism
+  }
+
+  override def toString: String = {
+    s"Pattern(V:${V}, E:${E}, C:${C.toList})"
   }
 }
 
@@ -55,14 +70,14 @@ object Element {
 case class Equation(head: Element, body: Seq[Element]) {
 
   def simplify(): Equation = {
-    val newBody = ArrayBuffer[Element]()
+    val optimizedBody1 = ArrayBuffer[Element]()
     body.foreach { element =>
       var i = 0
       var doesExists = false
-      while (i < newBody.size) {
-        val newBodyElement = newBody(i)
+      while (i < optimizedBody1.size) {
+        val newBodyElement = optimizedBody1(i)
         if (newBodyElement.isIsomorphic(element)) {
-          newBody(i) = Element(
+          optimizedBody1(i) = Element(
             newBodyElement.V,
             newBodyElement.E,
             newBodyElement.C,
@@ -75,11 +90,18 @@ case class Equation(head: Element, body: Seq[Element]) {
       }
 
       if (doesExists == false) {
-        newBody += element
+        optimizedBody1 += element
       }
     }
 
-    Equation(head, newBody)
+    val optimizedBody2 = ArrayBuffer[Element]()
+    optimizedBody1.foreach { element =>
+      if (element.factor.doubleValue != 0) {
+        optimizedBody2 += element
+      }
+    }
+
+    Equation(head, optimizedBody2)
   }
 
   def transformWithRule(rule: SubgraphCountRule) = {

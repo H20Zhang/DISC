@@ -10,8 +10,8 @@ import org.apache.spark.adj.plan.{
 }
 import org.apache.spark.dsce.execution.subtask
 import org.apache.spark.dsce.execution.subtask.{
-  EagerCountTableSubInfo,
-  LazyCountTableSubInfo,
+  EagerTableSubInfo,
+  LazyTableSubInfo,
   LeapFrogAggregateInfo
 }
 import org.apache.spark.dsce.optimization.PhyiscalRule
@@ -49,8 +49,8 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
   ): LeapFrogAggregateInfo = {
 
     //init --- variables
-    val eagerCountTables = agg.eagerCountTables
-    val lazyCountTables = agg.lazyCountTables
+    val eagerTables = agg.eagerCountTables
+    val lazyTables = agg.lazyCountTables
     val coreIds = agg.coreAttrIds
     val edges = agg.edges
     val E = edges.map { plan =>
@@ -60,7 +60,7 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
 
     //init --- statistics
     val statistic = Statistic.defaultStatistic()
-    val statisticRequiredPlan = edges ++ lazyCountTables.flatMap(_.edges)
+    val statisticRequiredPlan = edges ++ lazyTables.flatMap(_.edges)
     val inputSchema = statisticRequiredPlan.map(_.outputSchema).zipWithIndex
     val statisticNotCollectedSchema = inputSchema.filter {
       case (schema, index) =>
@@ -73,7 +73,7 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
     relations.foreach(statistic.add)
 
     //filter the lazy count table whose coreIds cannot appear at the front
-    val filteredLazyCountTable = lazyCountTables.filter { t =>
+    val filteredLazyCountTable = lazyTables.filter { t =>
       val tCoreAttrIds = t.coreAttrIds
       val inducedEdges = E.filter {
         case (u, v) => tCoreAttrIds.contains(u) && tCoreAttrIds.contains(v)
@@ -96,54 +96,65 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
         val frontAttrIds = order.slice(0, priorityAttrIds.size)
         priorityAttrIds.diff(frontAttrIds).isEmpty
     }
-    val optimalOrderInEdge = validOrdersWithCost.sortBy(_._2).head._1
+    val attrOrder = validOrdersWithCost.sortBy(_._2).head._1
 
     //determine the attribute order for each lazy count table
-    val optimalOrderForLazyCountTables = lazyCountTables.map { t =>
+    val attrOrderForLazyTables = lazyTables.map { t =>
       val tPriorityAttrIds = t.coreAttrIds
-      val tEdgeSchemas = edges.map(_.outputSchema)
+      val tEdgeSchemas = t.edges.map(_.outputSchema)
       val orderComputer = new OrderComputer(tEdgeSchemas)
       val allOrdersWithCost = orderComputer.genAllOrderWithCost()
       val validOrdersWithCost = allOrdersWithCost.filter {
         case (order, _) =>
           val frontAttrIds = order.slice(0, tPriorityAttrIds.size)
-          priorityAttrIds.diff(frontAttrIds).isEmpty
+          tPriorityAttrIds.diff(frontAttrIds).isEmpty
       }
+
       val optimalOrderInTEdges = validOrdersWithCost.sortBy(_._2).head._1
-      optimalOrderInTEdges.diff(tPriorityAttrIds) ++ t.eagerCountTables.map(
-        _.countAttrId
-      )
+
+      optimalOrderInTEdges
     }
 
-    //determine the total attribute order
-    val attrOrder = optimalOrderInEdge ++ optimalOrderForLazyCountTables
-      .flatMap(f => f) ++ eagerCountTables.map(_.countAttrId)
-
     //assemble the info
-    val eagerCountTableSubInfos = eagerCountTables.map { t =>
-      EagerCountTableSubInfo(
+    val eagerTableSubInfos = eagerTables.map { t =>
+      EagerTableSubInfo(
         t.outputSchema,
         attrOrder.filter(attrId => t.outputSchema.attrIDs.contains(attrId)),
         t.countAttrId
       )
     }
 
-    val lazyCountTableSubInfo =
-      lazyCountTables.zip(optimalOrderForLazyCountTables).map {
-        case (t, partialOrder) =>
-          val containedAttrIds = partialOrder ++ t.coreAttrIds
-          LazyCountTableSubInfo(
+    val lazyTableSubInfos =
+      lazyTables.zip(attrOrderForLazyTables).map {
+        case (t, attrOrderForLazyTable) =>
+          val eagerCountTableSubInfos =
+            t.eagerCountTables.map { eagerTable =>
+              val eagerTableSchema = eagerTable.outputSchema
+              val eagerTableAttrIdOrder = eagerTableSchema.attrIDs
+                .diff(Seq(eagerTable.countAttrId))
+                .toArray
+              val countAttrId = eagerTable.countAttrId
+
+              EagerTableSubInfo(
+                eagerTableSchema,
+                eagerTableAttrIdOrder,
+                countAttrId
+              )
+            }
+
+          LazyTableSubInfo(
             (t.edges ++ t.eagerCountTables).map(_.outputSchema),
-            attrOrder.filter(attrId => containedAttrIds.contains(attrId)),
-            t.eagerCountTables.map(_.countAttrId)
+            attrOrderForLazyTable,
+            eagerCountTableSubInfos
           )
       }
 
     subtask.LeapFrogAggregateInfo(
       coreIds,
       attrOrder,
-      eagerCountTableSubInfos,
-      lazyCountTableSubInfo
+      edgeSchemas,
+      eagerTableSubInfos,
+      lazyTableSubInfos
     )
 
   }
