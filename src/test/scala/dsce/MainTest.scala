@@ -1,7 +1,8 @@
 package dsce
 
 import adj.SparkFunSuite
-import org.apache.spark.dsce.Query
+import org.apache.spark.dsce.DISCConf.Mode
+import org.apache.spark.dsce.{DISCConf, Query}
 import org.apache.spark.dsce.plan.{
   UnOptimizedCountAggregate,
   UnOptimizedSubgraphCount
@@ -10,29 +11,48 @@ import org.apache.spark.dsce.util.testing.{ExpData, ExpQuery}
 
 class MainTest extends SparkFunSuite {
 
-  test("equation generation") {
-    val data = ExpData.getDataAddress("eu")
-    val dmlString = "wedge"
-    val dml = new ExpQuery(data) getQuery (dmlString)
-    var plan = Query.simpleDml(dml).asInstanceOf[UnOptimizedSubgraphCount]
-    val optimizedPlan = plan.optimize()
-    println(optimizedPlan.prettyString())
+  val dataset = "wikiV"
+
+  def getPhyiscalPlan(dataset: String, query: String) = {
+    val data = ExpData.getDataAddress(dataset)
+    val dmlString = new ExpQuery(data) getQuery (query)
+    Query.optimizedPhyiscalPlan(dmlString)
   }
 
-  test("logical plan optimization") {
-    val data = ExpData.getDataAddress("debug")
-    val dmlString = "squareEdge"
-    val dml = new ExpQuery(data) getQuery (dmlString)
-    val plan = Query.simpleDml(dml).asInstanceOf[UnOptimizedSubgraphCount]
-    val unOptimizedCountAgg =
-      UnOptimizedCountAggregate(plan.edge, plan.coreAttrIds)
-    val optimizedAgg = unOptimizedCountAgg.optimize()
+  def getLogicalPlan(dataset: String, query: String) = {
+    val data = ExpData.getDataAddress(dataset)
+    val dmlString = new ExpQuery(data) getQuery (query)
+    Query.optimizedLogicalPlan(dmlString)
   }
 
-  test("whole plan optimization") {
-    val data = ExpData.getDataAddress("eu")
-    val dmlString = "wedge"
-    val dml = new ExpQuery(data) getQuery (dmlString)
-    val optimizedPlan = Query.showPlan(dml)
+  //check if whole pipeline can be compiled
+  test("triangle") {
+    val query = "triangle"
+    val plan = getPhyiscalPlan(dataset, query)
+    println(s"PhyiscalPlan:\n${plan.prettyString()}")
+
+    val output = plan.count()
+    println(s"Output Size:${output}")
   }
+
+  //check if whole pipeline can basically work
+  test("simple") {
+//    val queries = Seq("wedge", "triangle")
+    val discConf = DISCConf.defaultConf()
+    discConf.mode = Mode.NonInduce
+
+    val queries = Seq("near5Clique")
+    queries.foreach { query =>
+      val plan = getPhyiscalPlan(dataset, query)
+      println(s"plan:\n${plan.prettyString()}")
+      val outString = s"""
+                         |----------------$query-------------------
+                         |plan:\n${plan.prettyString()}
+                         |patternSize:${plan.count()}
+                         |""".stripMargin
+      print(outString)
+    }
+
+  }
+
 }

@@ -262,7 +262,7 @@ case class CachedAggregate(schema: RelationSchema,
 //    println(
 //      s"schema:${schema}, schema.attrIds:${schema.attrIDs}, coreAttrIds:${coreAttrIds}"
 //    )
-    schema.attrIDs.diff(coreAttrIds).head
+    outputSchema.attrIDs.diff(coreAttrIds).head
   }
 
   override def optimize(): LogicalPlan = this

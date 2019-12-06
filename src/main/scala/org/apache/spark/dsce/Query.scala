@@ -1,66 +1,71 @@
 package org.apache.spark.dsce
 
+import org.apache.spark.adj.utils.misc.Conf
+import org.apache.spark.adj.utils.misc.Conf.Method.Value
+import org.apache.spark.adj.utils.misc.Conf.Mode.{Mode, Value}
+import org.apache.spark.dsce.DISCConf.Mode
 import org.apache.spark.dsce.parser.SubgraphParser
 
 object Query {
-  def simpleDml(dml: String) = {
+  def unOptimizedPlan(dml: String) = {
     val parser = new SubgraphParser()
     parser.parseDml(dml)
   }
 
-  //debug needed
-  def showPlan(dml: String) = {
-    val parser = new SubgraphParser()
-    parser.parseDml(dml)
-
-    var plan = parser.parseDml(dml)
-
-    println(s"unoptimized logical plan:${plan}")
-
-    val time1 = System.currentTimeMillis()
+  def optimizedLogicalPlan(dml: String) = {
+    var plan = unOptimizedPlan(dml)
 
     //optimize 1 -- decompose SumAgg over a series of countAgg
     plan = plan.optimize()
-    println(s"optimized plan -- 1:\n${plan.prettyString()}")
 
     //optimize 2 -- decompose each countAgg into a series of MultiplyAgg
     plan = plan.optimize()
-    println(s"optimized plan -- 2:\n${plan.prettyString()}")
-
-    //optimize 3 -- physical plan
-    val physicalPlan = plan.phyiscalPlan()
-    println(s"physical plan :\n${physicalPlan.prettyString()}")
-
-    val time2 = System.currentTimeMillis()
-    println(s"time:${(time2 - time1) / 1000}")
 
     plan
   }
 
-  def countQuery(dml: String) = {
+  def optimizedPhyiscalPlan(dml: String) = {
+    var plan = optimizedLogicalPlan(dml)
+    //optimize 3 -- physical plan
+    val physicalPlan = plan.phyiscalPlan()
 
-    val time1 = System.currentTimeMillis()
+    physicalPlan
+  }
 
-    val parser = new SubgraphParser()
-    parser.parseDml(dml)
+  def execute(dml: String) = {
 
-    val plan = parser.parseDml(dml)
-    println(s"unoptimized logical adj.plan:${plan}")
+//    val time1 = System.currentTimeMillis()
 
-    //optimize adj.plan
-    val optimizedPlan = plan.optimize()
-    println(s"optimized logical adj.plan:${optimizedPlan}")
-
-    //convert to physical adj.plan
-    val phyiscalPlan = optimizedPlan.phyiscalPlan()
-    println(s"phyiscal adj.plan:${phyiscalPlan}")
+    val physicalPlan = optimizedPhyiscalPlan(dml)
 
     //execute physical adj.plan
-    val outputSize = phyiscalPlan.count()
+    val outputSize = physicalPlan.count()
 
-    val time2 = System.currentTimeMillis()
-    println(s"time:${(time2 - time1) / 1000}")
+//    val time2 = System.currentTimeMillis()
+//    println(s"time:${(time2 - time1) / 1000}")
 
     outputSize
   }
+}
+
+class DISCConf() {
+  var mode = Mode.NonInduce
+}
+
+object DISCConf {
+  lazy val conf = {
+    new DISCConf()
+    //    loadConf("./src/main/scala/org/apache/spark/adj/adj.utils/misc/default.adj.conf")
+  }
+
+  def defaultConf() = {
+    conf
+  }
+
+  object Mode extends Enumeration {
+    type Mode = Value
+    val Induce, NonInduce, Partial =
+      Value
+  }
+
 }

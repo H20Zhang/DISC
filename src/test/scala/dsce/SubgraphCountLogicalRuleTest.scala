@@ -12,19 +12,84 @@ import org.apache.spark.dsce.util.testing.{ExpData, ExpQuery}
 
 class SubgraphCountLogicalRuleTest extends SparkFunSuite {
 
-  val data = ExpData.getDataAddress("eu")
-  val dmlString = "wedge"
-  val dml = new ExpQuery(data) getQuery (dmlString)
-  var plan = Query.simpleDml(dml).asInstanceOf[UnOptimizedSubgraphCount]
-  val schemas = plan.edge.map(_.outputSchema)
-  val coreIds =
-    plan.coreAttrIds
-  val rule = new SubgraphCountLogicalRule()
+  val dataset = "eu"
 
-  test("main") {
-    val optimizedPlan = plan.optimize()
+  def getEquation(dataset: String, query: String) = {
+    val data = ExpData.getDataAddress(dataset)
+    val dmlString = new ExpQuery(data) getQuery (query)
+    Query.unOptimizedPlan(dmlString).optimize()
+  }
 
-    println(optimizedPlan.prettyString())
+  test("3-node") {
+    val queries = Seq("wedge", "triangle")
+    queries.foreach { query =>
+      val plan = getEquation(dataset, query)
+      val outString = s"""
+           |----------------$query-------------------
+           |${plan.prettyString()}
+           |""".stripMargin
+      print(outString)
+    }
+
+  }
+
+  test("4-node") {
+    val queries = Seq(
+      "threePath",
+      "threeStar",
+      "triangleEdge",
+      "square",
+      "chordalSquare",
+      "fourClique"
+    )
+
+//    val queries = Seq("threeStar")
+    queries.foreach { query =>
+      val plan = getEquation(dataset, query)
+      val outString = s"""
+           |----------------$query-------------------
+           |${plan.prettyString()}
+           |""".stripMargin
+
+      print(outString)
+    }
+  }
+
+  test("5-node") {
+//    val queries = Seq("house", "threeTriangle", "solarSquare", "near5Clique")
+    val queries = Seq("threeTriangle")
+
+    //    val queries = Seq("threeStar")
+    queries.foreach { query =>
+      val plan = getEquation(dataset, query)
+      val outString = s"""
+                         |----------------$query-------------------
+                         |${plan.prettyString()}
+                         |""".stripMargin
+
+      print(outString)
+    }
+  }
+
+  test("6-node") {
+    val queries = Seq(
+      "quadTriangle",
+      "triangleCore",
+      "twinCSquare",
+      "twinClique4",
+      "starofDavidPlus"
+    )
+
+    //    val queries = Seq("threeStar")
+    queries.foreach { query =>
+      val plan = getEquation(dataset, query)
+      val outString = s"""
+                         |----------------$query-------------------
+                         |${plan.prettyString()}
+                         |""".stripMargin
+
+      print(outString)
+    }
   }
 
   test("fraction") {

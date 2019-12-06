@@ -65,7 +65,7 @@ case class ArraySegment(var array: Array[DataType],
     if (begin == 0 && size == array.size) {
       array
     } else {
-      val buffer = ArrayBuffer[Int]()
+      val buffer = ArrayBuffer[DataType]()
       var i = begin
       while (i < end) {
         buffer += array(i)
@@ -87,7 +87,7 @@ case class ArraySegment(var array: Array[DataType],
       array(curPos)
     }
 
-    override def size: DataType = {
+    override def size: Int = {
       end - begin
     }
   }
@@ -106,10 +106,10 @@ case class ArraySegment(var array: Array[DataType],
 }
 
 object ArraySegment {
-  val emptyArraySegment = ArraySegment(Array.emptyIntArray, 0, 0, 0)
+  val emptyArraySegment = ArraySegment(Array.empty[DataType], 0, 0, 0)
 
   def emptyArray() = emptyArraySegment
-  def newEmptyArraySegment() = ArraySegment(Array.emptyIntArray, 0, 0, 0)
+  def newEmptyArraySegment() = ArraySegment(Array.empty[DataType], 0, 0, 0)
   def apply(array: Array[DataType]): ArraySegment = {
     ArraySegment(array, 0, array.size, array.size)
   }

@@ -20,6 +20,12 @@ libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.0-RC2"
 //libraryDependencies += "it.unimi.dsi" % "webgraph" % "3.6.1"
 libraryDependencies += "org.apache.hadoop" % "hadoop-client" % "2.7.2"
 
+//// https://mvnrepository.com/artifact/org.antlr/antlr4-runtime
+//libraryDependencies += "org.antlr" % "antlr4-runtime" % "4.7.2"
+
+// https://mvnrepository.com/artifact/it.unimi.dsi/fastutil
+libraryDependencies += "it.unimi.dsi" % "fastutil" % "8.1.0"
+
 //dependencyOverrides += "com.google.guava" % "guava" % "15.0"
 
 watchSources += baseDirectory.value / "script/"

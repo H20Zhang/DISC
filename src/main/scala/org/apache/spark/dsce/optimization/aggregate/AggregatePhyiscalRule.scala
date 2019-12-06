@@ -51,7 +51,7 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
     //init --- variables
     val eagerTables = agg.eagerCountTables
     val lazyTables = agg.lazyCountTables
-    val coreIds = agg.coreAttrIds
+    val coreAttrIds = agg.coreAttrIds
     val edges = agg.edges
     val E = edges.map { plan =>
       val schema = plan.outputSchema
@@ -72,7 +72,7 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
       .map(_.phyiscalPlan().execute())
     relations.foreach(statistic.add)
 
-    //filter the lazy count table whose coreIds cannot appear at the front
+    //filter the lazy count table whose coreAttrIds cannot appear at the front
     val filteredLazyCountTable = lazyTables.filter { t =>
       val tCoreAttrIds = t.coreAttrIds
       val inducedEdges = E.filter {
@@ -96,18 +96,19 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
         val frontAttrIds = order.slice(0, priorityAttrIds.size)
         priorityAttrIds.diff(frontAttrIds).isEmpty
     }
-    val attrOrder = validOrdersWithCost.sortBy(_._2).head._1
+    val edgeAttrIdsOrder = validOrdersWithCost.sortBy(_._2).head._1
 
     //determine the attribute order for each lazy count table
-    val attrOrderForLazyTables = lazyTables.map { t =>
-      val tPriorityAttrIds = t.coreAttrIds
+    val edgeAttrIdsOrderForLazyTables = lazyTables.map { t =>
+      val tPriorityAttrIds =
+        edgeAttrIdsOrder.filter(attrId => t.coreAttrIds.contains(attrId))
       val tEdgeSchemas = t.edges.map(_.outputSchema)
       val orderComputer = new OrderComputer(tEdgeSchemas)
       val allOrdersWithCost = orderComputer.genAllOrderWithCost()
       val validOrdersWithCost = allOrdersWithCost.filter {
         case (order, _) =>
           val frontAttrIds = order.slice(0, tPriorityAttrIds.size)
-          tPriorityAttrIds.diff(frontAttrIds).isEmpty
+          tPriorityAttrIds.containsSlice(frontAttrIds)
       }
 
       val optimalOrderInTEdges = validOrdersWithCost.sortBy(_._2).head._1
@@ -116,16 +117,18 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
     }
 
     //assemble the info
-    val eagerTableSubInfos = eagerTables.map { t =>
+    val eagerTableInfos = eagerTables.map { t =>
       EagerTableSubInfo(
         t.outputSchema,
-        attrOrder.filter(attrId => t.outputSchema.attrIDs.contains(attrId)),
+        edgeAttrIdsOrder.filter(
+          attrId => t.outputSchema.attrIDs.contains(attrId)
+        ),
         t.countAttrId
       )
     }
 
-    val lazyTableSubInfos =
-      lazyTables.zip(attrOrderForLazyTables).map {
+    val lazyTableInfos =
+      lazyTables.zip(edgeAttrIdsOrderForLazyTables).map {
         case (t, attrOrderForLazyTable) =>
           val eagerCountTableSubInfos =
             t.eagerCountTables.map { eagerTable =>
@@ -144,17 +147,18 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
 
           LazyTableSubInfo(
             (t.edges ++ t.eagerCountTables).map(_.outputSchema),
+            t.coreAttrIds.toArray,
             attrOrderForLazyTable,
             eagerCountTableSubInfos
           )
       }
 
     subtask.LeapFrogAggregateInfo(
-      coreIds,
-      attrOrder,
+      coreAttrIds,
+      edgeAttrIdsOrder,
       edgeSchemas,
-      eagerTableSubInfos,
-      lazyTableSubInfos
+      eagerTableInfos,
+      lazyTableInfos
     )
 
   }
@@ -164,9 +168,7 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
       case agg: OptimizedLazyableMultiplyAggregate => {
         val leapFrogAggregateInfo = genLeapFrogAggregateInfo(agg)
         val edgesExec = agg.edges.map(_.phyiscalPlan())
-        val eagerTableAggExec = agg.eagerCountTables.map(
-          _.phyiscalPlan().asInstanceOf[MultiplyAggregateExec]
-        )
+        val eagerTableAggExec = agg.eagerCountTables.map(_.phyiscalPlan())
         val lazyTableAggExec = agg.lazyCountTables.map(
           f =>
             (

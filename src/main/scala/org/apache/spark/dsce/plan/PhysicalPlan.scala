@@ -29,11 +29,10 @@ import org.apache.spark.sql.types.{
 import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.storage.StorageLevel
 
-//TODO: debugging this
 case class MultiplyAggregateExec(
   schema: RelationSchema,
   edges: Seq[PhysicalPlan],
-  eagerCountTables: Seq[MultiplyAggregateExec],
+  eagerCountTables: Seq[PhysicalPlan],
   lazyCountTables: Seq[Tuple2[Seq[PhysicalPlan], Seq[MultiplyAggregateExec]]],
   subTaskInfo: LeapFrogAggregateInfo,
   coreAttrIds: Seq[AttributeID]
@@ -93,7 +92,7 @@ case class MultiplyAggregateExec(
 
         info_ match {
           case s: LeapFrogAggregateInfo => {
-            val attrOrders = s.attrIdsOrder
+            val attrOrders = s.globalAttrIdsOrder
             val triePreConstructor =
               new TriePreConstructor(attrOrders, schema, content)
             val trie = triePreConstructor.construct()
@@ -133,7 +132,7 @@ case class MultiplyAggregateExec(
 //    LongType
 
     val fields = schema.attrIDs.map(
-      attrId => StructField(catalog.getAttribute(attrId), IntegerType)
+      attrId => StructField(catalog.getAttribute(attrId), LongType)
     )
 
     val dfSchema = StructType(fields)
@@ -156,7 +155,9 @@ case class MultiplyAggregateExec(
       .groupBy(groupByAttrs: _*)
       .sum(catalog.getAttribute(countAttrId))
       .rdd
-      .map(f => f.toSeq.toArray.map(_.asInstanceOf[DataType]))
+      .map(f => f.toSeq.asInstanceOf[Seq[DataType]].toArray)
+
+    schema.setContent(rdd)
     Relation(schema, rdd)
   }
 
@@ -174,7 +175,6 @@ case class MultiplyAggregateExec(
   }
 
   override def count(): Long = ???
-
   override def commOnly(): Long = ???
 
   override def getChildren(): Seq[PhysicalPlan] =
@@ -208,10 +208,76 @@ case class SumAggregateExec(schema: RelationSchema,
                             coreAttrIds: Seq[AttributeID])
     extends PhysicalPlan {
   override val outputSchema: RelationSchema = schema
+  val spark = SparkSingle.getSparkSession()
+  lazy val countAttrId = schema.attrIDs.diff(coreAttrIds).head
 
-  override def execute(): Relation = ???
+  def genCountTable(plan: PhysicalPlan): String = {
 
-  override def count(): Long = ???
+    val relation = plan.execute()
+    val rdd = relation.rdd.map(f => Row.fromSeq(f))
+    val relationSchema = relation.schema
+    val fields = relationSchema.attrIDs.map(
+      attrId => StructField(catalog.getAttribute(attrId), LongType)
+    )
+    val dfSchema = StructType(fields)
+
+    spark
+      .createDataFrame(rdd, dfSchema)
+      .createOrReplaceTempView(relationSchema.name)
+
+    relationSchema.name
+  }
+
+  //aggregate the sub-count table
+  def aggregateCountTable(tables: Seq[String],
+                          coefficients: Seq[Double]): DataFrame = {
+
+    val countAttr = catalog.getAttribute(countAttrId)
+    val inputCountAttrs = countTables
+      .map(_.outputSchema)
+      .map(schema => schema.attrIDs.diff(coreAttrIds).head)
+      .map(f => catalog.getAttribute(f))
+
+    val coreString =
+      coreAttrIds.map(attrId => catalog.getAttribute(attrId)).mkString(",")
+    val aggregateString =
+      inputCountAttrs
+        .zip(coefficients)
+        .map(f => s" (${f._2}*${f._1}) ")
+        .mkString("+")
+    val tableString = tables.mkString(" natural join ")
+
+    val q =
+      s"""
+         |select $coreString, $aggregateString as $countAttr
+         |from $tableString
+         |""".stripMargin
+
+    println(s"aggregateCountTableSQL: $q")
+
+    spark.sql(q)
+  }
+
+  override def execute(): Relation = {
+    val tables = countTables.map(genCountTable)
+    val outputTable = aggregateCountTable(tables, coefficients.map(_.toDouble))
+    val rdd =
+      outputTable.rdd.map(f => f.toSeq.asInstanceOf[Seq[DataType]].toArray)
+
+    schema.setContent(rdd)
+    Relation(schema, rdd)
+  }
+
+  override def count(): Long = {
+    val tables = countTables.map(genCountTable)
+    val df = aggregateCountTable(tables, coefficients.map(_.toDouble))
+
+    import org.apache.spark.sql.functions._
+    val count =
+      df.agg(sum(catalog.getAttribute(countAttrId))).first().getDecimal(0)
+
+    count.toString.toDouble.toLong
+  }
 
   override def commOnly(): Long = ???
 
@@ -268,7 +334,7 @@ case class CachedAggregateExec(originalSchema: RelationSchema,
   }
 
   override def selfString(): String = {
-    s"CachedInMemoryScan(originalSchema:${originalSchema}, mappedSchema:${mappedSchema})"
+    s"CachedAggregateExec(originalSchema:${originalSchema}, mappedSchema:${mappedSchema})"
   }
 
 }

@@ -13,16 +13,16 @@ class CachedLeapFrogJoinTest extends FunSuite {
     val cache = new IntArrayLRUCache(10)
     Range(0, 20).foreach { idx =>
       val array = new Array[Int](1)
-      val key = mutable.WrappedArray.make[Int](array)
+      val key = mutable.WrappedArray.make[DataType](array)
       key(0) = idx
       println(idx)
-      cache(key) = Range(0, idx).toArray.map(f => Array(f))
+      cache(key) = Range(0, idx).map(_.toLong).toArray.map(f => Array(f))
     }
 
 //    println(cache)
 
     val array = new Array[Int](1)
-    val key = mutable.WrappedArray.make[Int](array)
+    val key = mutable.WrappedArray.make[DataType](array)
     Range(5, 15).foreach { idx =>
       key(0) = idx
       if (cache.get(key) != null) {

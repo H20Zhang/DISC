@@ -1,5 +1,7 @@
 package org.apache.spark.adj.utils.testing
 
+import org.apache.spark.adj.database.Catalog.DataType
+
 import scala.io.Source
 import scala.util.Random
 
@@ -17,10 +19,10 @@ object ContentGenerator {
 
     val table = rawFile
       .map { f =>
-        var res: Array[Int] = null
+        var res: Array[Long] = null
         if (!f.startsWith("#") && !f.startsWith("%")) {
           val splittedString = f.split("\\s")
-          res = splittedString.map(_.toInt)
+          res = splittedString.map(_.toLong)
         }
         res
       }
@@ -36,15 +38,18 @@ object ContentGenerator {
     domainSize: Int,
     arity: Int,
     SampleRate: Double = 0.5
-  ): Array[Array[Int]] = {
-    var content = Range(0, domainSize).map(f => Array(f)).toArray
+  ): Array[Array[DataType]] = {
+    var content = Range(0, domainSize).map(_.toLong).map(f => Array(f)).toArray
 
     for (i <- 0 until arity - 1) {
-      content = Range(0, domainSize).flatMap { value =>
-        content.map { tuple =>
-          tuple :+ value
+      content = Range(0, domainSize)
+        .map(_.toLong)
+        .flatMap { value =>
+          content.map { tuple =>
+            tuple :+ value
+          }
         }
-      }.toArray
+        .toArray
     }
 
     Random.setSeed(System.currentTimeMillis())
@@ -56,7 +61,7 @@ object ContentGenerator {
     val table = Range(0, cardinality)
       .map { _ =>
         Range(0, artiy).map { _ =>
-          Math.abs(Random.nextInt() % (2 * cardinality))
+          Math.abs(Random.nextLong() % (2 * cardinality))
         }.toSeq
       }
       .distinct
@@ -68,7 +73,7 @@ object ContentGenerator {
 
   def genIdentityContent(cardinality: Int, artiy: Int) = {
 
-    val oneColumn = Range(0, cardinality)
+    val oneColumn = Range(0, cardinality).map(_.toLong)
     val table = oneColumn.map(v => Seq.fill(artiy)(v).toArray).toArray
 
     table
@@ -78,7 +83,7 @@ object ContentGenerator {
 
     val table = Range(0, cardinality)
       .map { _ =>
-        Math.abs(Random.nextInt() % (2 * cardinality))
+        Math.abs(Random.nextLong() % (2 * cardinality))
       }
       .distinct
       .toArray

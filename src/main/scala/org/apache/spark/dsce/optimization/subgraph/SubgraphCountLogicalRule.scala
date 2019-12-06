@@ -9,7 +9,7 @@ import org.apache.spark.adj.plan.{
 }
 import org.apache.spark.dsce.optimization.{LogicalRule, subgraph}
 import org.apache.spark.dsce.optimization.subgraph.Element.State
-import org.apache.spark.dsce.plan
+import org.apache.spark.dsce.{DISCConf, plan}
 import org.apache.spark.dsce.plan.{
   PartialOrderScan,
   UnOptimizedCountAggregate,
@@ -17,6 +17,8 @@ import org.apache.spark.dsce.plan.{
   UnOptimizedSumAggregate
 }
 import org.apache.spark.dsce.util.Fraction
+
+import scala.collection.mutable.ArrayBuffer
 
 //TODO: debug this
 class SubgraphCountLogicalRule() extends LogicalRule {
@@ -56,15 +58,38 @@ class SubgraphCountLogicalRule() extends LogicalRule {
 
   def optimizeEquation(eq: Equation): Equation = {
 
+    val discConf = DISCConf.defaultConf()
+
     //add rule
+
     val ruleExecutor = new EquationTransformer
     val rule1 = new SymmetryBreakRule
     val rule2 = new InducedToNonInduceRule
     val rule3 = new NonInduceToPartialRule
     val rule4 = new CliqueOptimizeRule
-    val rules = Seq(rule1, rule2, rule3, rule4)
 
-    rules.foreach(ruleExecutor.addRule)
+    discConf.mode match {
+      case org.apache.spark.dsce.DISCConf.Mode.Induce => {
+        ruleExecutor.addRule(rule1)
+        ruleExecutor.addRule(rule2)
+        ruleExecutor.addRule(rule3)
+        ruleExecutor.addRule(rule4)
+      }
+
+      case org.apache.spark.dsce.DISCConf.Mode.NonInduce => {
+        ruleExecutor.addRule(rule1)
+        ruleExecutor.addRule(new ByPassRule(State.Induced, State.NonInduced))
+        ruleExecutor.addRule(rule3)
+        ruleExecutor.addRule(rule4)
+      }
+
+      case org.apache.spark.dsce.DISCConf.Mode.Partial => {
+        ruleExecutor.addRule(rule1)
+        ruleExecutor.addRule(new ByPassRule(State.Induced, State.NonInduced))
+        ruleExecutor.addRule(new ByPassRule(State.NonInduced, State.Partial))
+        ruleExecutor.addRule(rule4)
+      }
+    }
 
     val optimizedRule = ruleExecutor.applyAllRulesTillFix(eq)
     optimizedRule
@@ -95,7 +120,7 @@ class SubgraphCountLogicalRule() extends LogicalRule {
       val schemas = element.E.filter { case (u, v) => v > u }.map(EToSchemaMap)
       val coreAttrIds = element.C
 
-      if (element.mode == State.CliqueWithSymmetryBreaked) {
+      if (element.state == State.CliqueWithSymmetryBreaked) {
         val edgeRelations = schemas.map { schema =>
           if (schema.attrIDs.intersect(coreAttrIds).isEmpty) {
             PartialOrderScan(schema, (schema.attrIDs(0), schema.attrIDs(1)))

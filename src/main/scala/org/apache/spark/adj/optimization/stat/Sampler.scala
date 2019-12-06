@@ -1,6 +1,6 @@
 package org.apache.spark.adj.optimization.stat
 
-import org.apache.spark.adj.database.Catalog.AttributeID
+import org.apache.spark.adj.database.Catalog.{AttributeID, DataType}
 import org.apache.spark.adj.database.{Relation, RelationSchema}
 import org.apache.spark.adj.execution.subtask.SubTaskFactory
 import org.apache.spark.adj.optimization.costBased.comp.EnumShareComputer
@@ -76,7 +76,7 @@ class Sampler(relations: Seq[Relation],
     val samples = sampleRDD.collect()
     val filterSetPerAttr = sampleSchema.attrIDs.zipWithIndex.map {
       case (_, idx) =>
-        val mutableSet = mutable.HashSet[Int]()
+        val mutableSet = mutable.HashSet[DataType]()
         samples.foreach { tuple =>
           mutableSet.add(tuple(idx))
         }
@@ -165,7 +165,7 @@ class Sampler(relations: Seq[Relation],
         //can be set larger to improve the accuracy on the skewed dataset
         var rawSamplesCount = numSamples * 10
 
-        var rawSamples = ArrayBuffer[Array[Int]]()
+        var rawSamples = ArrayBuffer[Array[DataType]]()
 
         //get raw sampleRDD
         while (i < rawSamplesCount && iterator.hasNext) {

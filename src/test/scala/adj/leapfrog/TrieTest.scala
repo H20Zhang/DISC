@@ -14,7 +14,7 @@ class TrieTest extends FunSuite {
 
     val table = Range(0, num).map { _ =>
       Range(0, arity).map { _ =>
-        Math.abs(Random.nextInt() % (2 * num))
+        Math.abs(Random.nextLong() % (2 * num))
       }.toArray
     }.toArray
 

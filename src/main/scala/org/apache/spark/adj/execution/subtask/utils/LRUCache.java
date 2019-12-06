@@ -61,6 +61,18 @@ public class LRUCache<K, V> {
     }
 
     /**
+     * Check if an entry is contained in the cache.<br>
+     *
+     * @param key
+     *            the key whose associated value is to be returned.
+     * @return the value associated to this key, or null if no value with this
+     *         key exists in the cache.
+     */
+    public Boolean contain(K key) {
+        return map.containsKey(key);
+    }
+
+    /**
      * Adds an entry to this cache. The new entry becomes the MRU (most recently
      * used) entry. If an entry with the specified key already exists in the
      * cache, it is replaced by the new entry. If the cache is full, the LRU

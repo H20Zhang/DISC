@@ -1,5 +1,6 @@
 package adj.leapfrog
 
+import org.apache.spark.adj.database.Catalog.DataType
 import org.apache.spark.adj.execution.subtask.utils.{Alg, ArraySegment}
 import org.scalatest.FunSuite
 
@@ -11,22 +12,22 @@ class AlgTest extends FunSuite {
   test("adj.leapfrog intersection -- boundary case") {
     val num = 100
     val array1 = Range(0, num)
-      .map(_ => Math.abs(Random.nextInt() % (100 * num)))
+      .map(_ => Math.abs(Random.nextLong() % (100 * num)))
       .sorted
       .distinct
       .toArray
     val array2 = Range(0, 10 * num)
-      .map(_ => Math.abs(Random.nextInt() % (100 * num)))
+      .map(_ => Math.abs(Random.nextLong() % (100 * num)))
       .sorted
       .distinct
       .toArray
     val array3 = Range(0, 5 * num)
-      .map(_ => Math.abs(Random.nextInt() % (100 * num)))
+      .map(_ => Math.abs(Random.nextLong() % (100 * num)))
       .sorted
       .distinct
       .toArray
 
-    val arrays1 = Array(array1, array2, Array[Int]())
+    val arrays1 = Array(array1, array2, Array[DataType]())
     val arrays2 = Array(array1)
 
     assert(Alg.leapfrogIntersection(arrays1).isEmpty)
@@ -43,22 +44,22 @@ class AlgTest extends FunSuite {
     def testFunc() = {
       val num = 100
       val array1 = Range(0, num)
-        .map(_ => Math.abs(Random.nextInt() % (100 * num)))
+        .map(_ => Math.abs(Random.nextLong() % (100 * num)))
         .sorted
         .distinct
         .toArray
       val array2 = Range(0, 10 * num)
-        .map(_ => Math.abs(Random.nextInt() % (100 * num)))
+        .map(_ => Math.abs(Random.nextLong() % (100 * num)))
         .sorted
         .distinct
         .toArray
       val array3 = Range(0, 5 * num)
-        .map(_ => Math.abs(Random.nextInt() % (100 * num)))
+        .map(_ => Math.abs(Random.nextLong() % (100 * num)))
         .sorted
         .distinct
         .toArray
       val array4 = Range(0, 3 * num)
-        .map(_ => Math.abs(Random.nextInt() % (100 * num)))
+        .map(_ => Math.abs(Random.nextLong() % (100 * num)))
         .sorted
         .distinct
         .toArray
@@ -104,28 +105,28 @@ class AlgTest extends FunSuite {
       val num = 10000
       val array1 = ArraySegment(
         Range(0, num)
-          .map(_ => Math.abs(Random.nextInt() % (2 * num)))
+          .map(_ => Math.abs(Random.nextLong() % (2 * num)))
           .sorted
           .distinct
           .toArray
       )
       val array2 = ArraySegment(
         Range(0, num)
-          .map(_ => Math.abs(Random.nextInt() % (2 * num)))
+          .map(_ => Math.abs(Random.nextLong() % (2 * num)))
           .sorted
           .distinct
           .toArray
       )
       val array3 = ArraySegment(
         Range(0, num)
-          .map(_ => Math.abs(Random.nextInt() % (2 * num)))
+          .map(_ => Math.abs(Random.nextLong() % (2 * num)))
           .sorted
           .distinct
           .toArray
       )
       val array4 = ArraySegment(
         Range(0, num)
-          .map(_ => Math.abs(Random.nextInt() % (2 * num)))
+          .map(_ => Math.abs(Random.nextLong() % (2 * num)))
           .sorted
           .distinct
           .toArray

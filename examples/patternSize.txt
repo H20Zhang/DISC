@@ -13,7 +13,7 @@ SolarSquarePlus 19016458836
 
 
 
-wiki
+wikiV
 
 triangle(6X)   3650334
 fourClique 2077903

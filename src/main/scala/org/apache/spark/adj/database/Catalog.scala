@@ -147,7 +147,7 @@ class Catalog extends Serializable {
 
 object Catalog extends Serializable {
   var _catalog = new Catalog
-  val NotExists: DataType = -1
+  val NotExists: DataType = 0
 
   type Attribute = String
   type DataType = Long

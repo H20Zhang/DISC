@@ -2,7 +2,13 @@ package org.apache.spark.adj.execution.subtask.utils
 
 import java.util.Comparator
 
-import gnu.trove.map.hash.{TIntIntHashMap, TIntObjectHashMap}
+import gnu.trove.map.hash.{
+  TIntIntHashMap,
+  TIntObjectHashMap,
+  TLongIntHashMap,
+  TLongLongHashMap
+}
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap
 import org.apache.spark.adj.database.Catalog.DataType
 
 import scala.collection.mutable
@@ -13,8 +19,8 @@ trait Trie extends Serializable {
 //  def nextValue(binding: Binding): DataType
   def nextLevel(binding: ArraySegment): ArraySegment
   def nextLevelWithAdjust(binding: ArraySegment,
-                          inputArraySegment: ArraySegment): Unit
-  def nextLevel(binding: ArraySegment, inputArraySegment: ArraySegment): Unit
+                          outputArraySegment: ArraySegment): Unit
+  def nextLevel(binding: ArraySegment, outputArraySegment: ArraySegment): Unit
   def toRelation(): Array[Array[DataType]]
 }
 
@@ -30,7 +36,7 @@ object Trie {
 
 // edge:Array[(ID, ID, Value)], node:Array[(Start, End)]
 class ArrayTrie(neighbors: Array[Int],
-                val values: Array[Int],
+                val values: Array[DataType],
                 neighborBegins: Array[Int],
                 neighborEnds: Array[Int],
                 level: Int)
@@ -43,34 +49,44 @@ class ArrayTrie(neighbors: Array[Int],
   var prevBegin = rootBegin
   var prevEnd = rootEnd
 
-  //TODO: test whether replace some level by hashmap improves the speed
   val rootLevelMap = {
-    val tempMap = new TIntIntHashMap((rootEnd - rootBegin), 0.5f, -1, -1)
+
+    //fastuil.HashMap
+    val tempMap = new Long2IntOpenHashMap((rootEnd - rootBegin))
+
+    //trove.HashMap
+//    val tempMap = new TLongIntHashMap((rootEnd - rootBegin), 0.5f, -1, -1)
+
     var i = rootBegin
     while (i < rootEnd) {
       tempMap.put(values(i), i)
       i += 1
     }
-    tempMap.compact()
+
+    tempMap.trim()
+//    tempMap.compact()
     tempMap
   }
 
   override def nextLevel(binding: ArraySegment,
                          inputArraySegment: ArraySegment): Unit = {
-    var id = 0
-    var start = rootBegin
-    var end = rootEnd
-    val bindingLevel = binding.size
 
-    var i = prevLevel
-    start = prevBegin
-    end = prevEnd
+//    var start = rootBegin
+//    var end = rootEnd
+    var start = 0
+    var end = 0
+    var id = 0
+    var i = 0
+    val bindingLevel = binding.size
+//    start = prevBegin
+//    end = prevEnd
     var pos = 0
 
     while (i < bindingLevel) {
 
       if (i == 0) {
-        pos = rootLevelMap.get(binding(i))
+//        pos = rootLevelMap.get(binding(i))
+        pos = rootLevelMap.getOrDefault(binding(i), -1)
       } else {
         pos = BSearch.search(values, binding(i), start, end)
       }
@@ -339,7 +355,7 @@ object ArrayTrie {
     var idCounter = 0
     var leafIDCounter = -1
     val prevIDs = new Array[Int](arity)
-    var prevTuple = new Array[Int](arity)
+    var prevTuple = new Array[DataType](arity)
 //    val edgeBuffer = ArrayBuffer[(Int, Int, DataType)]()
     val edgeBuffer = ArrayBuffer[ValuedEdge]()
     val nodeBuffer = ArrayBuffer[(Int, Int)]()
@@ -443,10 +459,10 @@ object ArrayTrie {
       i += 1
     }
 
-    val neighbors = new Array[DataType](edges.size - 1)
+    val neighbors = new Array[Int](edges.size - 1)
     val values = new Array[DataType](edges.size - 1)
-    val neighborsBegin = new Array[DataType](nodeBuffer.size)
-    val neighborsEnd = new Array[DataType](nodeBuffer.size)
+    val neighborsBegin = new Array[Int](nodeBuffer.size)
+    val neighborsEnd = new Array[Int](nodeBuffer.size)
 
     val edgeSize = edges.size - 1
 

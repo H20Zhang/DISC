@@ -10,15 +10,16 @@ object Alg {
                       value: T)(implicit arithmetic: Numeric[T]): Int =
     BSearch.search(array, value)
 
-  def binarySearch(array: Array[Int], value: Int, _left: Int, _right: Int)(
-    implicit arithmetic: Numeric[Int]
-  ): Int =
+  def binarySearch(array: Array[DataType],
+                   value: DataType,
+                   _left: Int,
+                   _right: Int)(implicit arithmetic: Numeric[Int]): Int =
     BSearch.search(array, value, _left, _right)
 
   def mergelikeIntersection(arrays: Array[ArraySegment]): ArraySegment =
     Intersection.mergeLikeIntersection(arrays)
 
-  def mergelikeIntersection(arrays: Array[Array[Int]]): Array[Int] = {
+  def mergelikeIntersection(arrays: Array[Array[DataType]]): Array[DataType] = {
     val segmentArrays = arrays.map(arr => ArraySegment(arr))
     Intersection.mergeLikeIntersection(segmentArrays).toArray()
   }
@@ -26,7 +27,7 @@ object Alg {
   def leapfrogIntersection(arrays: Array[ArraySegment]): ArraySegment =
     Intersection.leapfrogIntersection(arrays)
 
-  def leapfrogIntersection(arrays: Array[Array[Int]]): Array[Int] = {
+  def leapfrogIntersection(arrays: Array[Array[DataType]]): Array[DataType] = {
     val segmentArrays = arrays.map(arr => ArraySegment(arr))
     Intersection.leapfrogIntersection(segmentArrays).toArray()
   }
@@ -55,9 +56,12 @@ object BSearch {
     -1;
   }
 
-  def search(array: Array[Int], value: Int, _left: Int, _right: Int): Int = {
-    var left: Int = _left;
-    var right: Int = _right;
+  def search(array: Array[DataType],
+             value: DataType,
+             _leftPos: Int,
+             _rightPos: Int): Int = {
+    var left: Int = _leftPos;
+    var right: Int = _rightPos;
     while (right > left) {
       val mid = left + (right - left) / 2
       val midVal = array(mid)
@@ -122,9 +126,9 @@ class IntersectedListIterator(arrays: Array[ArraySegment])
 class LeapFrogUnaryIterator(arrays: Array[ArraySegment])
     extends Iterator[DataType] {
 
-  var value = Int.MaxValue
+  var value = Long.MaxValue
   val numOfArrays = arrays.size
-  var maximalElement = Int.MinValue
+  var maximalElement = Long.MinValue
   var isEnd = false
   var currentPosOfArrays = new Array[Int](numOfArrays)
   var count = 0
@@ -218,7 +222,7 @@ class LeapFrogUnaryIterator(arrays: Array[ArraySegment])
 object Intersection {
   //  find the position i where array(i) >= value and i is the minimal value
   //  noted: the input array should be sorted
-  def seek(array: ArraySegment, value: Int, _left: Int): Int = {
+  def seek(array: ArraySegment, value: DataType, _left: Int): Int = {
     var left: Int = _left;
     var right: Int = array.size;
 
@@ -251,7 +255,7 @@ object Intersection {
       return arrays(0)
     }
 
-    val buffer = new ArrayBuffer[Int]()
+    val buffer = new ArrayBuffer[DataType]()
 
     var i = 0
     while (i < arrays.size) {
@@ -263,7 +267,7 @@ object Intersection {
 
 //    find maximum element at the first position
     val numOfArrays = arrays.size
-    var maximalElement = Int.MinValue
+    var maximalElement = Long.MinValue
 
     i = 0
     var p = 0
@@ -328,7 +332,7 @@ object Intersection {
   def binaryMergeLikeIntersection(leftArray: ArraySegment,
                                   rightArray: ArraySegment): ArraySegment = {
 
-    val buffer = new ArrayBuffer[Int]()
+    val buffer = new ArrayBuffer[DataType]()
 
     if (leftArray == null || rightArray == null) {
       return ArraySegment(buffer.toArray)

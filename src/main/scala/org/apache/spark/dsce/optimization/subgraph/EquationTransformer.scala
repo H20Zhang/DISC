@@ -56,7 +56,7 @@ abstract class SubgraphCountRule {
 
 class SymmetryBreakRule extends SubgraphCountRule {
   override def isMatch(elem: Element): Boolean =
-    elem.mode == State.InducedWithSymmetryBreaked
+    elem.state == State.InducedWithSymmetryBreaked
 
   override def transform(elem: Element): Seq[Element] = {
     val automorphism = elem.findAutomorphism()
@@ -71,9 +71,19 @@ class SymmetryBreakRule extends SubgraphCountRule {
   }
 }
 
+class ByPassRule(fromState: State.State, toState: State.State)
+    extends SubgraphCountRule {
+  override def isMatch(elem: Element): Boolean =
+    elem.state == fromState
+
+  override def transform(elem: Element): Seq[Element] = {
+    Seq(subgraph.Element(elem.V, elem.E, elem.C, elem.factor, toState))
+  }
+}
+
 class InducedToNonInduceRule extends SubgraphCountRule {
   override def isMatch(elem: Element): Boolean =
-    elem.mode == State.Induced
+    elem.state == State.Induced
 
   override def transform(elem: Element): Seq[Element] = {
 
@@ -109,7 +119,7 @@ class InducedToNonInduceRule extends SubgraphCountRule {
       elem.E,
       elem.C,
       elem.factor,
-      State.Isomorphism
+      State.NonInduced
     )
 
     for (i <- 1 to orderedDiffEdges.size) {
@@ -133,7 +143,7 @@ class InducedToNonInduceRule extends SubgraphCountRule {
 
 class NonInduceToPartialRule extends SubgraphCountRule {
   override def isMatch(elem: Element): Boolean =
-    elem.mode == State.Isomorphism
+    elem.state == State.NonInduced
 
   override def transform(elem: Element): Seq[Element] = {
 
@@ -197,61 +207,6 @@ class NonInduceToPartialRule extends SubgraphCountRule {
       }.toMap
     }
 
-//    val numColor = V.size
-//
-//    val posToNodeIdMap = V.zipWithIndex.map(_.swap).toMap
-//
-//    //compute all color arrangment for all pos
-//    val arity = numColor
-//    var posColors = Seq[Seq[Int]]()
-//    posColors = Range(0, numColor).toSeq.map(f => Seq(f))
-//
-//    var i = 1
-//    while (i < arity) {
-//      posColors = posColors.flatMap { posColor =>
-//        Range(0, numColor).map(color => posColor :+ color)
-//      }
-//      i += 1
-//    }
-//
-//    //compute colorMap for all attributes
-//    var colorMaps = posColors.map { posColor =>
-//      val colorMap = posColor.zipWithIndex
-//        .groupBy(_._1)
-//        .map(f => (f._1, f._2.map(_._2).map(posToNodeIdMap)))
-//        .toMap
-//      colorMap
-//    }.distinct
-//
-//    //filter some colorMaps as two node of same cannot have same color
-//    colorMaps = colorMaps.filter { colorMap =>
-//      colorMap.forall {
-//        case (color, nodeIds) =>
-//          nodeIds
-//            .combinations(2)
-//            .map(f => (f(0), f(1)))
-//            .forall(edge => !E.contains(edge))
-//      }
-//    }
-//
-//
-//
-//    val nodeCollapseMaps = colorMaps.map { colorMap =>
-//      val nodeCollapseMap = colorMap.toSeq.flatMap {
-//        case (color, nodeIds) =>
-//          var valueNodeId = 0
-//          if (nodeIds.intersect(elem.C).nonEmpty) {
-//            valueNodeId = nodeIds.intersect(elem.C).head
-//          } else {
-//            nodeIds.head
-//          }
-//
-//          nodeIds.map(nodeId => (nodeId, valueNodeId))
-//      }.toMap
-//
-//      nodeCollapseMap
-//    }
-
     //gen new elements
     val elements = ArrayBuffer[Element]()
     elements += subgraph.Element(
@@ -274,7 +229,7 @@ class NonInduceToPartialRule extends SubgraphCountRule {
         collapsedE,
         collapsedC,
         elem.factor * Fraction(-1, 1),
-        State.Isomorphism
+        State.NonInduced
       )
     }
 
@@ -284,7 +239,7 @@ class NonInduceToPartialRule extends SubgraphCountRule {
 
 class CliqueOptimizeRule extends SubgraphCountRule {
   override def isMatch(elem: Element): Boolean = {
-    elem.mode == State.Partial && elem.isClique()
+    elem.state == State.Partial && elem.isClique()
   }
 
   override def transform(elem: Element): Seq[Element] = {

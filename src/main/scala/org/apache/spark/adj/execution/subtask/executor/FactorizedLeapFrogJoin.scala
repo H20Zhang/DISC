@@ -1,6 +1,6 @@
 package org.apache.spark.adj.execution.subtask.executor
 
-import org.apache.spark.adj.database.Catalog.DataType
+import org.apache.spark.adj.database.Catalog.{AttributeID, DataType}
 import org.apache.spark.adj.execution.subtask.FactorizedLeapFrogJoinSubTask
 import org.apache.spark.adj.execution.subtask.utils.{
   ArraySegment,
@@ -49,7 +49,7 @@ class FactorizedLeapFrogJoin(task: FactorizedLeapFrogJoinSubTask)
         case (schema, schemaPos) =>
           val relativeOrder = attrOrders.filter(schema.containAttribute)
           val attrPos = relativeOrder.indexOf(curAttr)
-          val partialBindingPos = new Array[DataType](attrPos)
+          val partialBindingPos = new Array[AttributeID](attrPos)
           val partialBinding = ArraySegment(new Array[DataType](attrPos))
 
           var i = 0

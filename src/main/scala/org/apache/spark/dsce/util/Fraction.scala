@@ -7,7 +7,7 @@ class Fraction(c: BigInt, d: BigInt) {
 
   def lcm(a: BigInt, b: BigInt): BigInt = (a * b).abs / a.gcd(b)
 
-  def doubleValue = (counter.doubleValue() / denominator.doubleValue())
+  def toDouble = (counter.doubleValue() / denominator.doubleValue())
 
   def +(f: Fraction): Fraction = {
     val lcmVal = lcm(f.denominator, denominator)

@@ -1,7 +1,10 @@
 package org.apache.spark.dsce.execution.subtask.executor
 
+import java.util
+
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
 import org.apache.spark.adj.database.{Catalog, RelationSchema}
-import org.apache.spark.adj.database.Catalog.DataType
+import org.apache.spark.adj.database.Catalog.{AttributeID, DataType}
 import org.apache.spark.adj.execution.hcube.TrieHCubeBlock
 import org.apache.spark.adj.execution.subtask.{
   TrieConstructedAttributeOrderInfo,
@@ -12,7 +15,11 @@ import org.apache.spark.adj.execution.subtask.executor.{
   PartialLeapFrogJoin,
   TrieConstructedLeapFrogJoin
 }
-import org.apache.spark.adj.execution.subtask.utils.{ArraySegment, LRUCache}
+import org.apache.spark.adj.execution.subtask.utils.{
+  ArraySegment,
+  LRUCache,
+  Trie
+}
 import org.apache.spark.dsce.execution.subtask.{
   EagerTableSubInfo,
   LazyTableSubInfo,
@@ -56,7 +63,7 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
   def constructHyperEdgeLeapFrog() = {
 
     //prepare trieConstructedAttributeOrderInfo
-    val attrIdsOrder = info.attrIdsOrder
+    val attrIdsOrder = info.edgeAttrIdsOrder
     val trieConstructedAttributeOrderInfo = TrieConstructedAttributeOrderInfo(
       attrIdsOrder
     )
@@ -74,21 +81,31 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
   }
 
   def constructEagerTables() = {
-    val eagerTableSubInfos = info.eagerTableInfos
-    eagerTableSubInfos.map { eagerTableSubInfo =>
+    val eagerTableInfos = info.eagerTableInfos
+    eagerTableInfos.map { eagerTableSubInfo =>
       val eagerTable =
-        new BindingAssociatedEagerTable(eagerTableSubInfo, schemaToTrieMap)
-      eagerTable.init(lf.getBinding(), info.attrIdsOrder)
+        new BindingAssociatedEagerTable(
+          schemaToTrieMap(eagerTableSubInfo.schema).content
+        )
+      eagerTable.init(
+        lf.getBinding(),
+        info.edgeAttrIdsOrder,
+        eagerTableSubInfo.coreAttrIdsOrder
+      )
       eagerTable
     }.toArray
   }
 
   def constructLazyTables() = {
-    val lazyTableSubInfos = info.lazyTableInfos
-    lazyTableSubInfos.map { lazyTableSubInfo =>
+    val lazyTableInfos = info.lazyTableInfos
+    lazyTableInfos.map { lazyTableInfo =>
       val lazyTable =
-        new BindingAssociatedLazyTable(lazyTableSubInfo, schemaToTrieMap)
-      lazyTable.init(lf.getBinding(), info.attrIdsOrder)
+        new BindingAssociatedLazyTable(lazyTableInfo, schemaToTrieMap)
+      lazyTable.init(
+        lf.getBinding(),
+        info.edgeAttrIdsOrder,
+        lazyTableInfo.coreAttrIds
+      )
       lazyTable
     }.toArray
   }
@@ -97,7 +114,7 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
     val outputTable = new BindingAssociatedOutputTable()
     outputTable.init(
       lf.getBinding(),
-      info.attrIdsOrder,
+      info.edgeAttrIdsOrder,
       info.coreAttrIds.toArray
     )
 
@@ -111,22 +128,23 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
     var i = 0
 
     while (lf.hasNext) {
-      val t = lf.next()
-      var C = 1
+      lf.next()
+      var C = 1l
 
       i = 0
       while (i < lazyTableNum) {
-        C = C * lazyTables(i).getCount()
+        C *= lazyTables(i).getCount()
         i += 1
       }
 
       i = 0
       while (i < eagerTableNum) {
-        C = C * eagerTables(i).getCount()
+        C *= eagerTables(i).getCount()
         i += 1
       }
 
-      outputTable.setCount(C + outputTable.getCount())
+      outputTable.increment(C)
+//      outputTable.setCount(C + outputTable.getCount())
     }
 
     outputTable.toArrays()
@@ -134,61 +152,50 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
 
 }
 
-//TODO: refractor needed
 abstract class BindingAssociatedCountTable {
-//  def init(binding: Array[DataType])
-
-//  var outerBinding: Array[DataType] = _
-//  val inputBinding: Array[DataType] = initInnerBinding()
-//  var outerBindingToInnerBindingArray: Array[DataType] = _
-//
-//  def initInnerBinding(): Array[DataType]
-//
-//  def initAssociation(binding: Array[DataType],
-//                      outerAttrIdOrder: Array[DataType]): Unit = {
-//    outerBindingToInnerBindingArray = info.attrIdsOrder
-//      .map(attrId => outerAttrIdOrder.indexOf(attrId))
-//  }
-
   def getCount(): DataType
 }
 
-class BindingAssociatedEagerTable(
-  info: EagerTableSubInfo,
-  schemaToTrieMap: Map[RelationSchema, TrieHCubeBlock]
-) extends BindingAssociatedCountTable {
+class BindingAssociatedEagerTable(trie: Trie)
+    extends BindingAssociatedCountTable {
 
+  //initialization required
   var outerBinding: Array[DataType] = _
-  val inputBinding: Array[DataType] =
-    new Array[DataType](info.attrIdsOrder.size - 1)
-  val inputArraySegement: ArraySegment = ArraySegment(inputBinding)
-  val outputValues: ArraySegment = ArraySegment.newEmptyArraySegment()
-  val tableSchema = info.schema
-  val trie = schemaToTrieMap(tableSchema).content
-  var outerBindingToInnerBindingArray: Array[DataType] = _
+  var innerBinding: Array[DataType] = _
+  var innerBindingKey: ArraySegment = _
+  var outerBindingToInnerBindingArray: Array[AttributeID] = _
 
-  def init(binding: Array[DataType],
-           outerAttrIdOrder: Array[DataType]): Unit = {
-    outerBindingToInnerBindingArray = info.attrIdsOrder
-      .map(attrId => outerAttrIdOrder.indexOf(attrId))
+  val outputArraySegement: ArraySegment = ArraySegment.newEmptyArraySegment()
+
+  lazy val inputBindingSize = innerBinding.size
+
+  def init(outerBinding: Array[DataType],
+           outerBindingSchema: Array[AttributeID],
+           innerBindingSchema: Array[AttributeID]): Unit = {
+
+    this.outerBinding = outerBinding
+    innerBinding = new Array[DataType](innerBindingSchema.size)
+    innerBindingKey = ArraySegment(innerBinding)
+    outerBindingToInnerBindingArray = innerBindingSchema
+      .map(attrId => outerBindingSchema.indexOf(attrId))
   }
 
   override def getCount(): DataType = {
 
     //update the input binding
     var i = 0
-    val inputBindingSize = inputBinding.size
+
     while (i < inputBindingSize) {
-      inputBinding(i) = outerBinding(outerBindingToInnerBindingArray(i))
+      innerBinding(i) = outerBinding(outerBindingToInnerBindingArray(i))
       i += 1
     }
 
     //query the trie to get the count value
-    trie.nextLevel(inputArraySegement, outputValues)
-    if (outputValues.size == 0) {
-      Catalog.NotExists
+    trie.nextLevel(innerBindingKey, outputArraySegement)
+    if (outputArraySegement.size == 0) {
+      0
     } else {
-      outputValues(0)
+      outputArraySegement(0)
     }
   }
 
@@ -201,31 +208,40 @@ class BindingAssociatedLazyTable(
 
   //binding conversion related variable
   var outerBinding: Array[DataType] = _
-  val inputBinding: Array[DataType] =
-    new Array[DataType](info.attrIdsOrder.size - 1)
-  val inputArraySegement: ArraySegment = ArraySegment(inputBinding)
-  val outputValues: ArraySegment = ArraySegment.newEmptyArraySegment()
-  var outerBindingToInnerBindingArray: Array[DataType] = _
+  var innerBinding: Array[DataType] = _
+  var innerBindingKey: ArraySegment = _
+  var outerBindingToInnerBindingArray: Array[AttributeID] = _
 
   //misc variable
-  var partialLeapFrogJoin: PartialLeapFrogJoin = _
+  var partialLF: PartialLeapFrogJoin = _
   var eagerTables: Array[BindingAssociatedEagerTable] = _
-  var lruCache: ArrayIntLRUCache = _
-  var lruKey: mutable.WrappedArray[DataType] = mutable.WrappedArray
-    .make[DataType](new Array[DataType](inputArraySegement.size))
 
-  def init(binding: Array[DataType], outerAttrIdOrder: Array[DataType]) = {
-    outerBindingToInnerBindingArray = info.attrIdsOrder
-      .map(attrId => outerAttrIdOrder.indexOf(attrId))
+  val outputValues: ArraySegment = ArraySegment.newEmptyArraySegment()
+  lazy val innerBindingSize = innerBinding.size
+  lazy val eagerTableSize = eagerTables.size
 
-    partialLeapFrogJoin = constructPatternIt()
+  var lruCache: ArrayLongLRUCache = _
+  lazy val lruKey: mutable.WrappedArray[DataType] = mutable.WrappedArray
+    .make[DataType](new Array[DataType](innerBindingKey.size))
+
+  def init(outerBinding: Array[DataType],
+           outerBindingSchema: Array[AttributeID],
+           innerBindingSchema: Array[AttributeID]) = {
+
+    this.outerBinding = outerBinding
+    innerBinding = new Array[DataType](info.edgeAttrIdsOrder.size - 1)
+    innerBindingKey = ArraySegment(innerBinding)
+    outerBindingToInnerBindingArray =
+      innerBindingSchema.map(attrId => outerBindingSchema.indexOf(attrId))
+
+    partialLF = constructPatternIt()
     eagerTables = constructEagerTables()
-    lruCache = new ArrayIntLRUCache()
+    lruCache = new ArrayLongLRUCache()
   }
 
   def constructPatternIt(): PartialLeapFrogJoin = {
     //prepare trieConstructedLeapFrogJoinInfo
-    val attrsIdOrder = info.attrIdsOrder
+    val attrsIdOrder = info.edgeAttrIdsOrder
     val trieConstructedLeapFrogJoinInfo = TrieConstructedAttributeOrderInfo(
       attrsIdOrder
     )
@@ -246,24 +262,29 @@ class BindingAssociatedLazyTable(
   }
 
   def constructEagerTables(): Array[BindingAssociatedEagerTable] = {
-    val eagerCountTableSubInfos = info.eagerCountTableInfos
-    eagerCountTableSubInfos.map { eagerCountTableSubInfo =>
+    val eagerTableInfos = info.eagerTableInfos
+    eagerTableInfos.map { eagerTableInfo =>
       val eagerTable =
-        new BindingAssociatedEagerTable(eagerCountTableSubInfo, schemaToTrieMap)
-      eagerTable.init(partialLeapFrogJoin.getBinding(), info.attrIdsOrder)
+        new BindingAssociatedEagerTable(
+          schemaToTrieMap(eagerTableInfo.schema).content
+        )
+      eagerTable.init(
+        partialLF.getBinding(),
+        info.edgeAttrIdsOrder,
+        eagerTableInfo.coreAttrIdsOrder
+      )
       eagerTable
     }.toArray
   }
 
-  protected def setCahce(content: DataType): Unit = {
+  protected def setCache(content: DataType): Unit = {
 
-    val keySize = inputBinding.size
     val lruKey =
-      mutable.WrappedArray.make[DataType](new Array[DataType](keySize))
+      mutable.WrappedArray.make[DataType](new Array[DataType](innerBindingSize))
 
     var i = 0
-    while (i < keySize) {
-      lruKey(i) = inputBinding(i)
+    while (i < innerBindingSize) {
+      lruKey(i) = innerBinding(i)
       i += 1
     }
 
@@ -271,56 +292,50 @@ class BindingAssociatedLazyTable(
   }
 
   protected def getCache(): DataType = {
-
-    val keySize = lruKey.size
     var i = 0
-    while (i < keySize) {
-      lruKey(i) = inputBinding(i)
+    while (i < innerBindingSize) {
+      lruKey(i) = innerBinding(i)
       i += 1
     }
-    val content = lruCache.get(lruKey)
-    content
+
+    if (lruCache.contain(lruKey)) {
+      lruCache.get(lruKey)
+    } else {
+      -1
+    }
   }
 
-  override def getCount(): DataType = {
+  override def getCount(): Long = {
     //update the input binding
     var i = 0
-    val inputBindingSize = inputBinding.size
-    while (i < inputBindingSize) {
-      inputBinding(i) = outerBinding(outerBindingToInnerBindingArray(i))
+    while (i < innerBindingSize) {
+      innerBinding(i) = outerBinding(outerBindingToInnerBindingArray(i))
       i += 1
     }
 
     val cachedResult = getCache()
 
-    if (cachedResult != null) {
+    if (cachedResult != -1) {
       return cachedResult
     }
 
-    partialLeapFrogJoin.setPrefix(inputArraySegement)
+    partialLF.setPrefix(innerBindingKey)
 
     //compute Count Value Online
-    var totalC = 0
-    while (partialLeapFrogJoin.hasNext) {
-      val t = partialLeapFrogJoin.next()
-      var C = 1
+    var totalC = 0l
+
+    while (partialLF.hasNext) {
+      partialLF.next()
+      var C = 1l;
       var i = 0
-      val eagerTableSize = eagerTables.size
       while (i < eagerTableSize) {
-        val CurC = eagerTables(i).getCount()
-
-        if (CurC == Catalog.NotExists) {
-          C = 0
-        } else {
-          C *= CurC
-        }
-
+        C *= eagerTables(i).getCount()
         i += 1
       }
       totalC += C
     }
 
-    setCahce(totalC)
+    setCache(totalC)
 
     totalC
   }
@@ -330,20 +345,30 @@ class BindingAssociatedOutputTable extends BindingAssociatedCountTable {
 
   //binding conversion related variable, initialization required
   var outerBinding: Array[DataType] = _
-  var innerBinding: mutable.WrappedArray[DataType] = _
-  var outerBindingToInnerBindingArray: Array[DataType] = _
+  var innerBinding: Array[DataType] = _
+  var innerBindingKey: mutable.WrappedArray[DataType] = _
+  var outerBindingToInnerBindingArray: Array[AttributeID] = _
 
   //hashTable that records count per inner binding
-  val hashTable: mutable.HashMap[mutable.WrappedArray[DataType], DataType] =
-    new mutable.HashMap()
+
+  //java.util.HashMap
+  val countTable: java.util.HashMap[mutable.WrappedArray[DataType], DataType] =
+    new java.util.HashMap[mutable.WrappedArray[DataType], DataType]()
+
+  //fastutil.HashMap
+//  val countTable: Object2LongOpenHashMap[mutable.WrappedArray[DataType]] =
+//    new Object2LongOpenHashMap[mutable.WrappedArray[DataType]](16, .5f)
+
+  lazy val innerBindingSize = innerBindingKey.size
 
   def init(outerBinding: Array[DataType],
-           outerBindingSchema: Array[DataType],
-           innerBindingSchema: Array[DataType]): Unit = {
+           outerBindingSchema: Array[AttributeID],
+           innerBindingSchema: Array[AttributeID]): Unit = {
 
-    innerBinding = mutable.WrappedArray
-      .make[DataType](new Array[DataType](innerBindingSchema.size))
+    innerBinding = new Array[DataType](innerBindingSchema.size)
 
+    innerBindingKey = mutable.WrappedArray
+      .make[DataType](innerBinding)
     this.outerBinding = outerBinding
 
     outerBindingToInnerBindingArray = innerBindingSchema
@@ -352,34 +377,68 @@ class BindingAssociatedOutputTable extends BindingAssociatedCountTable {
 
   override def getCount(): DataType = {
     var i = 0
-    val inputBindingSize = innerBinding.size
-    while (i < inputBindingSize) {
+    while (i < innerBindingSize) {
       innerBinding(i) = outerBinding(outerBindingToInnerBindingArray(i))
       i += 1
     }
 
-    hashTable.getOrElse(innerBinding, 0)
+    countTable.getOrDefault(innerBindingKey, 0)
   }
 
-  def setCount(value: DataType) = {
-
-    val key = mutable.WrappedArray.make[Int](new Array[Int](innerBinding.size))
+  def increment(value: DataType) = {
     var i = 0
-    while (i < key.size) {
-      key(i) = innerBinding(i)
+    while (i < innerBindingSize) {
+      innerBinding(i) = outerBinding(outerBindingToInnerBindingArray(i))
       i += 1
     }
 
-    hashTable(key) = value
+    val oldValue = countTable.getOrDefault(innerBindingKey, 0)
+    val newValue = oldValue + value
+
+    if (oldValue == 0) {
+      val key = mutable.WrappedArray
+        .make[DataType](new Array[DataType](innerBindingSize))
+      var i = 0
+      while (i < innerBindingSize) {
+        key(i) = innerBinding(i)
+        i += 1
+      }
+      countTable.put(key, newValue)
+    } else {
+//      countTable.addTo()
+      countTable.replace(innerBindingKey, newValue)
+    }
   }
 
   def toArrays(): Array[Array[DataType]] = {
-    hashTable.map(f => (f._1 :+ f._2).toArray).toArray
-  }
+    val outputArray = new Array[Array[DataType]](countTable.size())
+    import scala.collection.JavaConversions._
 
+    var j = 0
+    for (entry <- countTable.entrySet()) {
+
+      val key = entry.getKey
+      val value = entry.getValue
+      val oneTuple = new Array[DataType](key.size + 1)
+
+      var i = 0
+      val end = key.size
+
+      while (i < end) {
+        oneTuple(i) = key(i)
+        i += 1
+      }
+
+      oneTuple(end) = value
+      outputArray(j) = oneTuple
+
+      j += 1
+    }
+    outputArray
+  }
 }
 
-class ArrayIntLRUCache(cacheSize: Int = 1000000)
+class ArrayLongLRUCache(cacheSize: Int = 1000000)
     extends LRUCache[mutable.WrappedArray[DataType], DataType](cacheSize) {
   def apply(key: mutable.WrappedArray[DataType]): DataType =
     get(key)

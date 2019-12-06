@@ -1,6 +1,6 @@
 package org.apache.spark.dsce.optimization.subgraph
 
-import org.apache.spark.dsce.optimization.subgraph.Element.State.Mode
+import org.apache.spark.dsce.optimization.subgraph.Element.State.{State}
 import org.apache.spark.dsce.util.{Fraction, Graph}
 import org.apache.spark.dsce.{Edge, Mapping, NodeID}
 
@@ -56,13 +56,13 @@ case class Element(override val V: Seq[NodeID],
                    override val E: Seq[Edge],
                    override val C: Seq[NodeID],
                    factor: Fraction,
-                   mode: Mode)
+                   state: State)
     extends Pattern(V, E, C) {}
 
 object Element {
   object State extends Enumeration {
-    type Mode = Value
-    val CliqueWithSymmetryBreaked, Partial, Isomorphism, Induced,
+    type State = Value
+    val CliqueWithSymmetryBreaked, Partial, NonInduced, Induced,
     InducedWithSymmetryBreaked = Value
   }
 }
@@ -82,7 +82,7 @@ case class Equation(head: Element, body: Seq[Element]) {
             newBodyElement.E,
             newBodyElement.C,
             newBodyElement.factor + element.factor,
-            newBodyElement.mode
+            newBodyElement.state
           )
           doesExists = true
         }
@@ -96,7 +96,7 @@ case class Equation(head: Element, body: Seq[Element]) {
 
     val optimizedBody2 = ArrayBuffer[Element]()
     optimizedBody1.foreach { element =>
-      if (element.factor.doubleValue != 0) {
+      if (element.factor.toDouble != 0) {
         optimizedBody2 += element
       }
     }
