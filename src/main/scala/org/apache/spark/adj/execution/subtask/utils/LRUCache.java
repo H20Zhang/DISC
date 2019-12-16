@@ -26,8 +26,6 @@ public class LRUCache<K, V> {
     private LinkedHashMap<K, V> map;
     private int cacheSize;
 
-    private Object2LongLinkedOpenHashMap<K> map1;
-
     /**
      * Creates a new LRU cache. 在该方法中，new LinkedHashMap<K,V>(hashTableCapacity,
      * hashTableLoadFactor, true)中，true代表使用访问顺序
@@ -63,6 +61,10 @@ public class LRUCache<K, V> {
      */
     public V get(K key) {
         return map.get(key);
+    }
+
+    public V getOrDefault(K key, V value) {
+        return map.getOrDefault(key, value);
     }
 
     /**

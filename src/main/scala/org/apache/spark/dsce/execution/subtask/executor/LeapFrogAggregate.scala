@@ -288,9 +288,9 @@ abstract class AbstractBindingAssociatedLazyTable(
   lazy val eagerTableSize = eagerTables.size
 
   var lruCache: ArrayLongLRUCache = _
-  var lruKey: mutable.WrappedArray[DataType] = _
+//  var lruKey: mutable.WrappedArray[DataType] = _
 
-//  val lruKey: LongArrayList = new LongArrayList()
+  val lruKey: LongArrayList = new LongArrayList()
 
   def init(outerBinding: Array[DataType],
            outerBindingSchema: Array[AttributeID],
@@ -308,12 +308,13 @@ abstract class AbstractBindingAssociatedLazyTable(
     eagerTables = constructEagerTables()
     lruCache = new ArrayLongLRUCache()
 
-    lruKey = mutable.WrappedArray.make[Long](innerBinding)
-//    var i = 0; var size = outerBindingToInnerBindingArray.size
-//    while (i < size) {
-//      lruKey.add(0)
-//      i += 1
-//    }
+//    lruKey = mutable.WrappedArray.make[Long](innerBinding)
+    var i = 0; var size = outerBindingToInnerBindingArray.size
+    while (i < size) {
+      lruKey.add(0)
+      i += 1
+    }
+    lruKey.trim(size)
   }
 
   def constructPatternIt(): PartialLeapFrogJoin = {
@@ -365,7 +366,7 @@ class BindingAssociatedLazyTable(
     var i = 0
     while (i < innerBindingSize) {
       innerBinding(i) = outerBinding(outerBindingToInnerBindingArray(i))
-      //      lruKey.set(i, innerBinding(i))
+      lruKey.set(i, innerBinding(i))
       i += 1
     }
 
@@ -388,17 +389,17 @@ class BindingAssociatedLazyTable(
       totalC += C
     }
     if (totalC > 10) {
-      val newKey =
-        mutable.WrappedArray
-          .make[DataType](new Array[DataType](innerBindingSize))
+//      val newKey =
+//        mutable.WrappedArray
+//          .make[DataType](new Array[DataType](innerBindingSize))
+//
+//      var i = 0
+//      while (i < innerBindingSize) {
+//        newKey(i) = innerBinding(i)
+//        i += 1
+//      }
 
-      var i = 0
-      while (i < innerBindingSize) {
-        newKey(i) = innerBinding(i)
-        i += 1
-      }
-
-      lruCache.put(newKey, totalC)
+      lruCache.put(lruKey.clone(), totalC)
     }
 
     totalC
@@ -414,33 +415,39 @@ class NoEagerBindingAssociatedLazyTable(
     //update the input binding
     var i = 0
     while (i < innerBindingSize) {
-      innerBinding(i) = outerBinding(outerBindingToInnerBindingArray(i))
-      //      lruKey.set(i, innerBinding(i))
+      val temp = outerBinding(outerBindingToInnerBindingArray(i))
+      innerBinding(i) = temp
+      lruKey.set(i, temp)
       i += 1
     }
 
     var totalC = 0l
 
-    if (lruCache.contain(lruKey)) {
-      return lruCache.get(lruKey)
+//    if (lruCache.contain(lruKey)) {
+//      return lruCache.get(lruKey)
+//    }
+
+    val value = lruCache.getOrDefault(lruKey, -1l)
+    if (value != -1) {
+      return value
     }
+
     //compute Count Value Online
     partialLF.setPrefix(innerBindingKey)
 
     totalC = partialLF.longSize()
 
     if (totalC > 10) {
-      val newKey =
-        mutable.WrappedArray
-          .make[DataType](new Array[DataType](innerBindingSize))
-
-      var i = 0
-      while (i < innerBindingSize) {
-        newKey(i) = innerBinding(i)
-        i += 1
-      }
-
-      lruCache.put(newKey, totalC)
+//      val newKey =
+//        mutable.WrappedArray
+//          .make[DataType](new Array[DataType](innerBindingSize))
+//
+//      var i = 0
+//      while (i < innerBindingSize) {
+//        newKey(i) = innerBinding(i)
+//        i += 1
+//      }
+      lruCache.put(lruKey.clone(), totalC)
     }
 
     totalC
@@ -622,21 +629,21 @@ class BindingAssociatedOutputTable extends BindingAssociatedCountTable {
   }
 }
 
-class ArrayLongLRUCache(cacheSize: Int = DISCConf.defaultConf().cacheSize)
-    extends LRUCache[mutable.WrappedArray[Long], DataType](cacheSize) {
-  def apply(key: mutable.WrappedArray[Long]): DataType =
-    get(key)
-  def update(key: mutable.WrappedArray[Long], value: DataType): Unit =
-    put(key, value)
-}
-
 //class ArrayLongLRUCache(cacheSize: Int = DISCConf.defaultConf().cacheSize)
-//    extends LRUCache[LongArrayList, DataType](cacheSize) {
-//  def apply(key: LongArrayList): DataType =
+//    extends LRUCache[mutable.WrappedArray[Long], DataType](cacheSize) {
+//  def apply(key: mutable.WrappedArray[Long]): DataType =
 //    get(key)
-//  def update(key: LongArrayList, value: DataType): Unit =
+//  def update(key: mutable.WrappedArray[Long], value: DataType): Unit =
 //    put(key, value)
 //}
+
+class ArrayLongLRUCache(cacheSize: Int = DISCConf.defaultConf().cacheSize)
+    extends LRUCache[LongArrayList, DataType](cacheSize) {
+  def apply(key: LongArrayList): DataType =
+    get(key)
+  def update(key: LongArrayList, value: DataType): Unit =
+    put(key, value)
+}
 //    var i = 0
 //    while (i < innerBindingSize) {
 //      innerBinding(i) = outerBinding(outerBindingToInnerBindingArray(i))
