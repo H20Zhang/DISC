@@ -1,7 +1,7 @@
 import scala.sys.process._
 
-name := "ADJ"
-version := "0.1.1"
+name := "DISC"
+version := "0.1"
 scalaVersion := "2.11.12"
 
 /*Dependency*/

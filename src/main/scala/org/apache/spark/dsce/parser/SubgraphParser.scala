@@ -30,7 +30,7 @@ class SubgraphParser {
     }
 
     def subgraphCountClause: Parser[UnOptimizedSubgraphCount] =
-      """SubgraphCount""".r ~ tablesClause ~ """on""".r ~ """((\w+\;)|(\w+))+""".r ^^ {
+      """SubgraphCount""".r ~ tablesClause ~ """on""".r ~ """((\w+;)|(\w+))+""".r ^^ {
         case _ ~ tables ~ _ ~ attributes =>
           val catalog = Catalog.defaultCatalog()
           val edges = tables.filter(_.outputSchema.name.startsWith("R"))

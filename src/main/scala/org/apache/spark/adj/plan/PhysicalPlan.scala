@@ -158,7 +158,7 @@ abstract class AbstractMergedPullHCubeJoinExec(
       outputBlock
     }
 
-    preprocessedRDD.persist(StorageLevel.MEMORY_ONLY_SER)
+    preprocessedRDD.cache()
     preprocessedRDD.count()
 
     PartitionedRelation(preprocessedRDD, partitioner)

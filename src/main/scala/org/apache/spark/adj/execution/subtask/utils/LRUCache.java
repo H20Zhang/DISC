@@ -1,4 +1,6 @@
 package org.apache.spark.adj.execution.subtask.utils;
+import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
+
 import java.util.LinkedHashMap;
 import java.util.Collection;
 import java.util.Map;
@@ -20,9 +22,11 @@ import java.util.ArrayList;
  * Multi-licensed: EPL / LGPL / GPL / AL / BSD.
  */
 public class LRUCache<K, V> {
-    private static final float hashTableLoadFactor = 0.75f;
+    private static final float hashTableLoadFactor = 0.5f;
     private LinkedHashMap<K, V> map;
     private int cacheSize;
+
+    private Object2LongLinkedOpenHashMap<K> map1;
 
     /**
      * Creates a new LRU cache. 在该方法中，new LinkedHashMap<K,V>(hashTableCapacity,
@@ -35,6 +39,7 @@ public class LRUCache<K, V> {
         this.cacheSize = cacheSize;
         int hashTableCapacity = (int) Math
                 .ceil(cacheSize / hashTableLoadFactor) + 1;
+
         map = new LinkedHashMap<K, V>(hashTableCapacity, hashTableLoadFactor,
                 true) {
             // (an anonymous inner class)

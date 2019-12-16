@@ -61,6 +61,7 @@ class ExpQuery(data: String) {
 
   def getDml(q: String) = {
     val dml = q match {
+      case "wedge"              => wedgeDml
       case "triangle"           => triangleDml
       case "chordalSquare"      => chordalSquareDml
       case "fourClique"         => fourCliqueDml
@@ -108,6 +109,10 @@ class ExpQuery(data: String) {
   }
 
   //experiment query
+
+  //wedge
+  val wedgeDml = "A-B;B-C;"
+
   //triangle
   val triangleDml = "A-B;B-C;C-A;"
 

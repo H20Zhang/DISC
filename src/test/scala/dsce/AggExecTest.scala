@@ -11,7 +11,7 @@ import org.apache.spark.dsce.util.testing.{ExpData, ExpQuery}
 
 class AggExecTest extends SparkFunSuite {
 
-  val dataset = "wikiV"
+  val dataset = "eu"
 
   def getOptimizedPlan(dataset: String, query: String) = {
     val data = ExpData.getDataAddress(dataset)
@@ -100,6 +100,23 @@ class AggExecTest extends SparkFunSuite {
     multiplyAggExec.globalAggregate()
   }
 
-  //TODO: see if lazy aggregation can work
-  test("solarSquare") {}
+  test("solarSquare") {
+    val optimizedMultiplyAgg = getOptimizedPlan(dataset, "solarSquare")
+    println(s"optimizedMultiplyAgg:\n${optimizedMultiplyAgg.prettyString()}")
+    val multiplyAggExec =
+      optimizedMultiplyAgg.phyiscalPlan().asInstanceOf[MultiplyAggregateExec]
+    println(s"PhysicalMultiplyAgg:\n${multiplyAggExec.prettyString()}")
+
+    multiplyAggExec.globalAggregate()
+  }
+
+  test("6-node") {
+    val optimizedMultiplyAgg = getOptimizedPlan(dataset, "triangleCore")
+    println(s"optimizedMultiplyAgg:\n${optimizedMultiplyAgg.prettyString()}")
+    val multiplyAggExec =
+      optimizedMultiplyAgg.phyiscalPlan().asInstanceOf[MultiplyAggregateExec]
+    println(s"PhysicalMultiplyAgg:\n${multiplyAggExec.prettyString()}")
+
+//    multiplyAggExec.globalAggregate()
+  }
 }

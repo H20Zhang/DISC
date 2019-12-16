@@ -137,7 +137,7 @@ case class MultiplyAggregateExec(
 
     val dfSchema = StructType(fields)
 
-    println(s"dfSchema:${dfSchema}")
+//    println(s"dfSchema:${dfSchema}")
 
     val spark = SparkSingle.getSparkSession()
 
@@ -155,7 +155,16 @@ case class MultiplyAggregateExec(
       .groupBy(groupByAttrs: _*)
       .sum(catalog.getAttribute(countAttrId))
       .rdd
-      .map(f => f.toSeq.asInstanceOf[Seq[DataType]].toArray)
+      .map { f =>
+        val size = f.length
+        val array = new Array[DataType](size)
+        var i = 0
+        while (i < size) {
+          array(i) = f.get(i).asInstanceOf[DataType]
+          i += 1
+        }
+        array
+      }
 
     schema.setContent(rdd)
     Relation(schema, rdd)
@@ -201,7 +210,6 @@ case class MultiplyAggregateExec(
   }
 }
 
-//TODO: finish later
 case class SumAggregateExec(schema: RelationSchema,
                             countTables: Seq[PhysicalPlan],
                             coefficients: Seq[Fraction],
@@ -211,10 +219,62 @@ case class SumAggregateExec(schema: RelationSchema,
   val spark = SparkSingle.getSparkSession()
   lazy val countAttrId = schema.attrIDs.diff(coreAttrIds).head
 
-  def genCountTable(plan: PhysicalPlan): String = {
-
+  def genCoreCountTable(plan: PhysicalPlan) = {
     val relation = plan.execute()
-    val rdd = relation.rdd.map(f => Row.fromSeq(f))
+    val schema = relation.schema
+    val coreSize = schema.attrIDs.size
+    val relationRDD = relation.rdd
+    val coreRDD = relationRDD.map { f =>
+      val newArray = new Array[DataType](coreSize)
+      var i = 0
+      while (i < coreSize) {
+        newArray(i) = f(i)
+        i += 1
+      }
+      newArray(coreSize - 1) = 0
+      newArray.toSeq
+    }
+
+    coreRDD.cache()
+    coreRDD.count()
+
+    val rdd = relationRDD.map(f => Row.fromSeq(f))
+    val relationSchema = relation.schema
+    val fields = relationSchema.attrIDs.map(
+      attrId => StructField(catalog.getAttribute(attrId), LongType)
+    )
+    val dfSchema = StructType(fields)
+
+    //    spark.createDataFrame(rdd, dfSchema).join
+
+    spark
+      .createDataFrame(rdd, dfSchema)
+      .createOrReplaceTempView(relationSchema.name)
+
+    (coreRDD, relationSchema.name)
+  }
+
+  def genCountTable(plan: PhysicalPlan, coreRDD: RDD[Seq[DataType]]): String = {
+    val relation = plan.execute()
+    val schema = relation.schema
+    val coreSize = schema.attrIDs.size
+    val rdd = relation.rdd
+      .map(f => f.toSeq)
+      .union(coreRDD)
+      .map(f => (f.slice(0, coreSize - 1), f(coreSize - 1)))
+      .groupByKey()
+      .map {
+        case (key, counts) =>
+          val newArray = new Array[DataType](coreSize)
+          var i = 0
+          while (i < coreSize - 1) {
+            newArray(i) = key(i)
+            i += 1
+          }
+          newArray(coreSize - 1) = counts.sum
+          newArray
+      }
+      .map(f => Row.fromSeq(f))
     val relationSchema = relation.schema
     val fields = relationSchema.attrIDs.map(
       attrId => StructField(catalog.getAttribute(attrId), LongType)
@@ -258,9 +318,11 @@ case class SumAggregateExec(schema: RelationSchema,
     spark.sql(q)
   }
 
-  override def execute(): Relation = {
-    val tables = countTables.map(genCountTable)
-    val outputTable = aggregateCountTable(tables, coefficients.map(_.toDouble))
+  def execute_sparkSql(): Relation = {
+    val (coreRDD, coreTable) = genCoreCountTable(countTables(0))
+    val tables = countTables.drop(1).map(plan => genCountTable(plan, coreRDD))
+    val outputTable =
+      aggregateCountTable(tables :+ coreTable, coefficients.map(_.toDouble))
     val rdd =
       outputTable.rdd.map(f => f.toSeq.asInstanceOf[Seq[DataType]].toArray)
 
@@ -268,15 +330,25 @@ case class SumAggregateExec(schema: RelationSchema,
     Relation(schema, rdd)
   }
 
-  override def count(): Long = {
-    val tables = countTables.map(genCountTable)
-    val df = aggregateCountTable(tables, coefficients.map(_.toDouble))
+  def count_sparkSql(): Long = {
+    val (coreRDD, coreTable) = genCoreCountTable(countTables(0))
+    val tables = countTables.drop(1).map(plan => genCountTable(plan, coreRDD))
+    val df =
+      aggregateCountTable(tables :+ coreTable, coefficients.map(_.toDouble))
 
     import org.apache.spark.sql.functions._
     val count =
       df.agg(sum(catalog.getAttribute(countAttrId))).first().getDecimal(0)
 
     count.toString.toDouble.toLong
+  }
+
+  override def execute(): Relation = {
+    execute_sparkSql()
+  }
+
+  override def count(): Long = {
+    count_sparkSql()
   }
 
   override def commOnly(): Long = ???

@@ -92,6 +92,10 @@ class ArrayTrie(neighbors: Array[Int],
       }
 
       if (pos == -1) {
+        inputArraySegment.array = values
+        inputArraySegment.begin = start
+        inputArraySegment.end = start
+        inputArraySegment.size = 0
         return emptyArray
       }
 

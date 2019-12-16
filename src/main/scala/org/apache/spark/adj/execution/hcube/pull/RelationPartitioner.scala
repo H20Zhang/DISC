@@ -43,18 +43,6 @@ class RelationPartitioner(relation: Relation, helper: HCubeHelper) {
         }
         j += 1
       }
-//
-//      content.foreach {
-//        case (tuple, isSentry) =>
-//          if (isSentry) {
-//            shareVector = tuple
-//          } else {
-//            array(i) = tuple
-//            i += 1
-//          }
-//      }
-
-//        println(s"schema:${schema}, share:${shareVector.toSeq}, content:${array.toSeq}")
 
       Iterator(
         TupleHCubeBlock(schema, shareVector, array).asInstanceOf[HCubeBlock]

@@ -2,8 +2,9 @@ package org.apache.spark.dsce
 
 import org.apache.spark.adj.utils.misc.Conf
 import org.apache.spark.adj.utils.misc.Conf.Method.Value
+import org.apache.spark.adj.utils.misc.Conf.{Method, Mode}
 import org.apache.spark.adj.utils.misc.Conf.Mode.{Mode, Value}
-import org.apache.spark.dsce.DISCConf.Mode
+import org.apache.spark.dsce.DISCConf.{ExecutionMode, QueryType}
 import org.apache.spark.dsce.parser.SubgraphParser
 
 object Query {
@@ -32,11 +33,13 @@ object Query {
     physicalPlan
   }
 
-  def execute(dml: String) = {
+  def count(dml: String) = {
 
 //    val time1 = System.currentTimeMillis()
 
     val physicalPlan = optimizedPhyiscalPlan(dml)
+
+    println(physicalPlan.prettyString())
 
     //execute physical adj.plan
     val outputSize = physicalPlan.count()
@@ -49,7 +52,15 @@ object Query {
 }
 
 class DISCConf() {
-  var mode = Mode.NonInduce
+  var queryType = QueryType.NonInduce
+  var query = ""
+  var timeOut = 43200
+  var executionMode = ExecutionMode.Count
+  var data = ""
+  var cacheSize = 10000000
+  var isYarn = false
+  var core = "A"
+  val mergeHCubeMemoryBudget = 5 * Math.pow(10, 7)
 }
 
 object DISCConf {
@@ -62,9 +73,15 @@ object DISCConf {
     conf
   }
 
-  object Mode extends Enumeration {
-    type Mode = Value
+  object QueryType extends Enumeration {
+    type QueryType = Value
     val Induce, NonInduce, Partial =
+      Value
+  }
+
+  object ExecutionMode extends Enumeration {
+    type ExecutionMode = Value
+    val ShowPlan, CommOnly, Count =
       Value
   }
 

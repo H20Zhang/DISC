@@ -22,7 +22,7 @@ class Conf() {
 //  var taskNum = 7 * 28
 //  var numMachine = 7 * 28
 //  val commSpeed = 1 * Math.pow(10, 9)
-//  in terms of real size
+////  in terms of real size
 //  val ADJHCubeMemoryBudget = 4.5 * Math.pow(10, 8)
 
   var method = Method.UnOptimizedHCube

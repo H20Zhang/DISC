@@ -85,19 +85,20 @@ object BSearch {
 }
 
 object IntersectionIterator {
+
   def leapfrogIt(arrays: Array[ArraySegment]): Iterator[DataType] = {
     //    check some preliminary conditions
-    if (arrays.size == 1) {
-      return arrays(0).toIterator
-    }
+//    if (arrays.size == 1) {
+//      return arrays(0).toIterator
+//    }
 
-    var i = 0
-    while (i < arrays.size) {
-      if (arrays(i).size == 0) {
-        return Iterator.empty
-      }
-      i = i + 1
-    }
+//    var i = 0
+//    while (i < arrays.size) {
+//      if (arrays(i).size == 0) {
+//        return Iterator.empty
+//      }
+//      i = i + 1
+//    }
 
     new LeapFrogUnaryIterator(arrays)
   }
@@ -109,7 +110,7 @@ object IntersectionIterator {
 class IntersectedListIterator(arrays: Array[ArraySegment])
     extends Iterator[DataType] {
 
-  val content = Alg.leapfrogIntersection(arrays)
+  val content = Intersection.leapfrogIntersection(arrays)
   var idx = -1
   var end = content.size
 
@@ -123,7 +124,7 @@ class IntersectedListIterator(arrays: Array[ArraySegment])
   }
 }
 
-class LeapFrogUnaryIterator(arrays: Array[ArraySegment])
+class LeapFrogUnaryIterator(var arrays: Array[ArraySegment])
     extends Iterator[DataType] {
 
   var value = Long.MaxValue
@@ -260,7 +261,8 @@ object Intersection {
     var i = 0
     while (i < arrays.size) {
       if (arrays(i).size == 0) {
-        return ArraySegment(buffer.toArray)
+        return ArraySegment.newEmptyArraySegment()
+//        return ArraySegment(buffer.toArray)
       }
       i = i + 1
     }
@@ -282,7 +284,7 @@ object Intersection {
 
 //    intersect the arrays
     var isEnd = false
-    var currentPosOfArrays = new Array[Int](numOfArrays)
+    val currentPosOfArrays = new Array[Int](numOfArrays)
 
     var count = 1
 

@@ -29,7 +29,12 @@ class CountAggregateToMultiplyAggregateRule extends LogicalRule {
 //      .map(f => f.asInstanceOf[PartialOrderScan])
 
     val coreAttrIds = countAggregate.coreAttrIds
+
     val relationDecomposer = new RelationDecomposer(schemas)
+
+//    println(
+//      s"coreAttrIds:${coreAttrIds}, selectedGHD:${relationDecomposer.decomposeTree().head}"
+//    )
     val selectedGHD = relationDecomposer
       .decomposeTree()
       .filter { ghd =>
@@ -306,9 +311,16 @@ class CountTableCache {
 }
 
 object CountTableCache {
-  lazy val cache = new CountTableCache
+  var cache: CountTableCache = _
 
   def defaultCache() = {
+    if (cache == null) {
+      cache = new CountTableCache
+    }
     cache
+  }
+
+  def reset() = {
+    cache = null
   }
 }

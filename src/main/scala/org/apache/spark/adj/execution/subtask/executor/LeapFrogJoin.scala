@@ -7,6 +7,7 @@ import org.apache.spark.adj.execution.subtask.utils.{
   ArrayTrie,
   IntersectedListIterator,
   IntersectionIterator,
+  LeapFrogUnaryIterator,
   Trie
 }
 
@@ -197,7 +198,7 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
 
   //construct the unary iterator for the i-th attribute given prefix consisting of 0 to i-1th attribute
   //Noted: this class could return empty unary iterator
-  protected def constructIthIterator(idx: Int) = {
+  protected def constructIthIterator(idx: Int): Iterator[DataType] = {
 
     val (prefixPosForEachRelation, segmentArrays) = relevantRelationForAttrMap(
       idx
@@ -222,27 +223,40 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
       i += 1
     }
 
-    IntersectionIterator.leapfrogIt(segmentArrays)
+//    new LeapFrogUnaryIterator(segmentArrays)
+//    IntersectionIterator.leapfrogIt(segmentArrays)
+    new IntersectedListIterator(segmentArrays)
+//    IntersectionIterator.listIt(segmentArrays)
   }
 
   protected val lastIdx = attrSize - 1
   protected var lastIterator = unaryIterators(lastIdx)
   override def hasNext: Boolean = {
-    if (!hasEnd) {
-      lastIterator = unaryIterators(lastIdx)
-      //check if last iterator hasNext, if not, trying to produce new last iterator
-      if (lastIterator.hasNext) {
-        return true
-      } else {
-        fixIterators(lastIdx)
-        lastIterator = unaryIterators(lastIdx)
-        return !hasEnd
-      }
+    if (lastIterator.hasNext) {
+      true
     } else {
+      fixIterators(lastIdx)
+      lastIterator = unaryIterators(lastIdx)
       !hasEnd
     }
-
   }
+
+//  override def hasNext: Boolean = {
+//    if (!hasEnd) {
+//      //      lastIterator = unaryIterators(lastIdx)
+//      //check if last iterator hasNext, if not, trying to produce new last iterator
+//      if (lastIterator.hasNext) {
+//        return true
+//      } else {
+//        fixIterators(lastIdx)
+//        lastIterator = unaryIterators(lastIdx)
+//        return !hasEnd
+//      }
+//    } else {
+//      !hasEnd
+//    }
+//
+//  }
 
   //return the underlying binding array
   def getBinding(): Array[DataType] = {

@@ -3,11 +3,12 @@ package org.apache.spark.dsce.util.testing
 import org.apache.spark.adj.database.{Catalog, Relation}
 import org.apache.spark.adj.execution.misc.DataLoader
 import org.apache.spark.adj.utils.exp.ExpQueryHelper
+import org.apache.spark.dsce.DISCConf
 
 class ExpQuery(data: String) {
 
   val rdd = new DataLoader().csv(data)
-  val defaultCore = "A"
+  val core = DISCConf.defaultConf().core
 
   def getDml(q: String) = {
     val dml = q match {
@@ -82,7 +83,10 @@ class ExpQuery(data: String) {
     )
 
     val query0 =
-      s"SubgraphCount ${(schemas ++ notIncludedEdgesSchemas).map(schema => s"${schema.name};").reduce(_ + _).dropRight(1)} on A;"
+      s"SubgraphCount ${(schemas ++ notIncludedEdgesSchemas)
+        .map(schema => s"${schema.name};")
+        .reduce(_ + _)
+        .dropRight(1)} on $core;"
     query0
   }
 

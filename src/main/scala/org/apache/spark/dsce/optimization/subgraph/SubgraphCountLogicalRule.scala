@@ -68,22 +68,22 @@ class SubgraphCountLogicalRule() extends LogicalRule {
     val rule3 = new NonInduceToPartialRule
     val rule4 = new CliqueOptimizeRule
 
-    discConf.mode match {
-      case org.apache.spark.dsce.DISCConf.Mode.Induce => {
+    discConf.queryType match {
+      case org.apache.spark.dsce.DISCConf.QueryType.Induce => {
         ruleExecutor.addRule(rule1)
         ruleExecutor.addRule(rule2)
         ruleExecutor.addRule(rule3)
         ruleExecutor.addRule(rule4)
       }
 
-      case org.apache.spark.dsce.DISCConf.Mode.NonInduce => {
+      case org.apache.spark.dsce.DISCConf.QueryType.NonInduce => {
         ruleExecutor.addRule(rule1)
         ruleExecutor.addRule(new ByPassRule(State.Induced, State.NonInduced))
         ruleExecutor.addRule(rule3)
         ruleExecutor.addRule(rule4)
       }
 
-      case org.apache.spark.dsce.DISCConf.Mode.Partial => {
+      case org.apache.spark.dsce.DISCConf.QueryType.Partial => {
         ruleExecutor.addRule(rule1)
         ruleExecutor.addRule(new ByPassRule(State.Induced, State.NonInduced))
         ruleExecutor.addRule(new ByPassRule(State.NonInduced, State.Partial))

@@ -26,3 +26,13 @@ solar_square 301301877	ok
 Near5Clique 810216972	ok 3340607232
 QuadTriangle 251253387714	ok
 solar_square_plus 335488134448	ok
+
+
+solarSquare speed
+eu no optimization 17
+eu optimization 1 13
+eu optimization 2 12
+
+
+wikiV optimization 1 72
+wikiV optimization 2 65

@@ -145,9 +145,10 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
               )
             }
 
+          //the orders of the core attr of the lazy table needed to be changed based on globalAttrOrder, which is edgeAttrIdsOrder
           LazyTableSubInfo(
             (t.edges ++ t.eagerCountTables).map(_.outputSchema),
-            t.coreAttrIds.toArray,
+            edgeAttrIdsOrder.filter(attrId => t.coreAttrIds.contains(attrId)),
             attrOrderForLazyTable,
             eagerCountTableSubInfos
           )
