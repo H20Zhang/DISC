@@ -5,8 +5,8 @@ import org.apache.spark.dsce.deprecated.optimization.aggregate.util.WidthCalcula
 import org.apache.spark.dsce.deprecated.optimization.subgraph.query.Query
 import org.apache.spark.dsce.deprecated.optimization.subgraph.remover
 import org.apache.spark.dsce.util.ArrayUtil
-import org.apache.spark.dsce.util.testing.ExamplePattern
-import org.apache.spark.dsce.util.testing.ExamplePattern.PatternName
+import org.apache.spark.dsce.testing.ExamplePattern
+import org.apache.spark.dsce.testing.ExamplePattern.PatternName
 
 import scala.collection.mutable.ArrayBuffer
 

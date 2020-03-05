@@ -42,6 +42,10 @@ class Pattern(V: Seq[NodeID], E: Seq[Edge], val C: Seq[NodeID])
     }
   }
 
+  def toGraph: Graph = {
+    new Graph(V, E)
+  }
+
   override def findAutomorphism(): Seq[Mapping] = {
     val automorphism = findIsomorphism(this)
     automorphism
@@ -76,7 +80,7 @@ case class Equation(head: Element, body: Seq[Element]) {
       var doesExists = false
       while (i < optimizedBody1.size) {
         val newBodyElement = optimizedBody1(i)
-        if (newBodyElement.isIsomorphic(element)) {
+        if (newBodyElement.isIsomorphic(element) && newBodyElement.state == element.state) {
           optimizedBody1(i) = Element(
             newBodyElement.V,
             newBodyElement.E,
@@ -102,6 +106,8 @@ case class Equation(head: Element, body: Seq[Element]) {
     }
 
     Equation(head, optimizedBody2)
+
+//    this
   }
 
   def transformWithRule(rule: SubgraphCountRule) = {

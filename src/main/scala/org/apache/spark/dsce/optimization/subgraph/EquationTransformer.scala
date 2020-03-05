@@ -21,7 +21,7 @@ class EquationTransformer {
       appliedEq = appliedEq.transformWithRule(rule)
     }
 
-    appliedEq
+    appliedEq.simplify()
   }
 
   def applyAllRulesTillFix(eq: Equation): Equation = {

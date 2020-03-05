@@ -75,7 +75,7 @@ object DISCConf {
 
   object QueryType extends Enumeration {
     type QueryType = Value
-    val Induce, NonInduce, Partial =
+    val Induce, NonInduce, Partial, Debug =
       Value
   }
 

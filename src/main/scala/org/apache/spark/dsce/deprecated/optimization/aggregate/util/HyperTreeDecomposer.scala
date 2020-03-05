@@ -3,8 +3,8 @@ package org.apache.spark.dsce.deprecated.optimization.aggregate.util
 import org.apache.spark.dsce.{EdgeList, LogAble, TestAble}
 import org.apache.spark.dsce.deprecated.optimization.aggregate.util
 import org.apache.spark.dsce.deprecated.optimization.subgraph.graph.Graph
-import org.apache.spark.dsce.util.testing.ExamplePattern
-import org.apache.spark.dsce.util.testing.ExamplePattern.PatternName
+import org.apache.spark.dsce.testing.ExamplePattern
+import org.apache.spark.dsce.testing.ExamplePattern.PatternName
 import org.apache.spark.dsce.util.{ArrayUtil, GraphBuilder}
 
 import scala.collection.mutable.ArrayBuffer

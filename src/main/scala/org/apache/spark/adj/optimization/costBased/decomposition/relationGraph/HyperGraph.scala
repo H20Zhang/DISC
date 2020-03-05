@@ -28,7 +28,7 @@ object HyperGraph {
 
     val id = g.id
     //    Construct induced hyper-node according to the nodeset of current hypernode
-    def toInducedHyperNode(edges: Seq[RelationEdge]): HyperNode = {
+    def toInducedHyperNode(edges: Array[RelationEdge]): HyperNode = {
       val newG = g.toInducedGraph(edges)
       HyperNode(newG)
     }
@@ -46,7 +46,7 @@ object HyperGraph {
 }
 
 // We regard GHD as a special kinds of hypertree
-case class HyperTree(val V: Seq[HyperNode], val E: Seq[HyperEdge])
+case class HyperTree(val V: Array[HyperNode], val E: Array[HyperEdge])
     extends HyperGraph(V, E) {
 
   private lazy val vToLocalIdMap = V.zipWithIndex.toMap
@@ -55,10 +55,10 @@ case class HyperTree(val V: Seq[HyperNode], val E: Seq[HyperEdge])
   private lazy val h =
     GraphBuilder.newGraph(he.flatMap(f => ArrayBuffer(f._1, f._2)).distinct, he)
 
-  def addHyperNode(hyperNode: HyperNode): Seq[HyperTree] = {
+  def addHyperNode(hyperNode: HyperNode): Array[HyperTree] = {
 
     if (isEmpty()) {
-      return Seq(HyperTree(V :+ hyperNode, E))
+      return Array(HyperTree(V :+ hyperNode, E))
     }
 
     val potentialHyperEdges = V
@@ -77,7 +77,7 @@ case class HyperTree(val V: Seq[HyperNode], val E: Seq[HyperEdge])
     }
 
     if (validHyperTreeList.isEmpty) {
-      Seq()
+      Array()
     } else {
       validHyperTreeList
     }

@@ -1,14 +1,15 @@
 package dsce
 
 import adj.SparkFunSuite
-import org.apache.spark.dsce.Query
+import org.apache.spark.dsce.DISCConf.QueryType
+import org.apache.spark.dsce.{DISCConf, Query}
 import org.apache.spark.dsce.optimization.subgraph.SubgraphCountLogicalRule
 import org.apache.spark.dsce.plan.{
   UnOptimizedCountAggregate,
   UnOptimizedSubgraphCount
 }
 import org.apache.spark.dsce.util.Fraction
-import org.apache.spark.dsce.util.testing.{ExpData, ExpQuery}
+import org.apache.spark.dsce.testing.{ExpData, ExpQuery}
 
 class SubgraphCountLogicalRuleTest extends SparkFunSuite {
 
@@ -20,7 +21,22 @@ class SubgraphCountLogicalRuleTest extends SparkFunSuite {
     Query.unOptimizedPlan(dmlString).optimize()
   }
 
+  test("debug") {
+    DISCConf.defaultConf().queryType = QueryType.Debug
+//    val queries = Seq("DthreePath1", "DthreePath2")
+    val queries = Seq("t39")
+    queries.foreach { query =>
+      val plan = getEquation(dataset, query)
+      val outString = s"""
+                         |----------------$query-------------------
+                         |${plan.prettyString()}
+                         |""".stripMargin
+      print(outString)
+    }
+  }
+
   test("3-node") {
+    DISCConf.defaultConf().queryType = QueryType.Debug
     val queries = Seq("wedge", "triangle")
     queries.foreach { query =>
       val plan = getEquation(dataset, query)
@@ -30,10 +46,10 @@ class SubgraphCountLogicalRuleTest extends SparkFunSuite {
            |""".stripMargin
       print(outString)
     }
-
   }
 
   test("4-node") {
+    DISCConf.defaultConf().queryType = QueryType.Debug
     val queries = Seq(
       "threePath",
       "threeStar",

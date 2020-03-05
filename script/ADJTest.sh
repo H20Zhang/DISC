@@ -508,7 +508,7 @@ Test CacheHCube Count 196
 
 #input=(as)
 #querys=(house)
-#Test MergedHCube ShowPlan 196
+#Test MergedHCube Count 196
 
 #input=(as)
 #querys=(threeTriangle near5Clique)

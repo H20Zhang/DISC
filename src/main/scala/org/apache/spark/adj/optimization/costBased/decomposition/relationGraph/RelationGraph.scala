@@ -5,18 +5,18 @@ import org.apache.spark.adj.optimization.costBased.decomposition.graph.Graph.Nod
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class RelationGraph(_id: Int, V: Seq[NodeID], E: Seq[RelationEdge]) {
+class RelationGraph(_id: Int, V: Array[NodeID], E: Array[RelationEdge]) {
 
   //to change
   val id = _id
 
-  def V(): Seq[NodeID] = V
-  def E(): Seq[RelationEdge] = E
+  def V(): Array[NodeID] = V
+  def E(): Array[RelationEdge] = E
   def toInducedGraph(baseGraph: RelationGraph): RelationGraph = {
     toInducedGraph(baseGraph.E)
   }
 
-  def toInducedGraph(edges: Seq[RelationEdge],
+  def toInducedGraph(edges: Array[RelationEdge],
                      isIdChange: Boolean = false): RelationGraph = {
     val inducedEdges = edges.filter { edge =>
       val nodes = edge.attrs
@@ -61,7 +61,7 @@ class RelationGraph(_id: Int, V: Seq[NodeID], E: Seq[RelationEdge]) {
 
   def containNode(nodeID: NodeID): Boolean = V.contains(nodeID)
   def containEdge(edge: RelationEdge): Boolean = E.contains(edge)
-  def containAnyNodes(nodes: Seq[NodeID]): Boolean = nodes.exists(containNode)
+  def containAnyNodes(nodes: Array[NodeID]): Boolean = nodes.exists(containNode)
   def width(): Double = WidthCalculator.width(this)
   def containSubgraph(subgraph: RelationGraph): Boolean = {
     subgraph.V.forall(containNode) && subgraph.E.forall(containEdge)
@@ -75,7 +75,7 @@ class RelationGraph(_id: Int, V: Seq[NodeID], E: Seq[RelationEdge]) {
 object RelationGraph {
   var id = 0
 
-  def apply(V: Seq[NodeID], E: Seq[RelationEdge]) = {
+  def apply(V: Array[NodeID], E: Array[RelationEdge]) = {
     val graph = new RelationGraph(id, V, E)
     id += 1
     graph

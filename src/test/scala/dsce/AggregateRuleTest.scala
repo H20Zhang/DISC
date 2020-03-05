@@ -2,7 +2,7 @@ package dsce
 
 import adj.SparkFunSuite
 import org.apache.spark.dsce.Query
-import org.apache.spark.dsce.util.testing.{ExpData, ExpQuery}
+import org.apache.spark.dsce.testing.{ExpData, ExpQuery}
 
 class AggregateRuleTest extends SparkFunSuite {
 

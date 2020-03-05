@@ -87,18 +87,18 @@ object BSearch {
 object IntersectionIterator {
 
   def leapfrogIt(arrays: Array[ArraySegment]): Iterator[DataType] = {
-    //    check some preliminary conditions
-//    if (arrays.size == 1) {
-//      return arrays(0).toIterator
-//    }
+//        check some preliminary conditions
+    if (arrays.size == 1) {
+      return arrays(0).toIterator
+    }
 
-//    var i = 0
-//    while (i < arrays.size) {
-//      if (arrays(i).size == 0) {
-//        return Iterator.empty
-//      }
-//      i = i + 1
-//    }
+    var i = 0
+    while (i < arrays.size) {
+      if (arrays(i).size == 0) {
+        return Iterator.empty
+      }
+      i = i + 1
+    }
 
     new LeapFrogUnaryIterator(arrays)
   }

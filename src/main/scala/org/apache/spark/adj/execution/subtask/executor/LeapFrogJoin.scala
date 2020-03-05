@@ -231,32 +231,32 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
 
   protected val lastIdx = attrSize - 1
   protected var lastIterator = unaryIterators(lastIdx)
-  override def hasNext: Boolean = {
-    if (lastIterator.hasNext) {
-      true
-    } else {
-      fixIterators(lastIdx)
-      lastIterator = unaryIterators(lastIdx)
-      !hasEnd
-    }
-  }
-
 //  override def hasNext: Boolean = {
-//    if (!hasEnd) {
-//      //      lastIterator = unaryIterators(lastIdx)
-//      //check if last iterator hasNext, if not, trying to produce new last iterator
-//      if (lastIterator.hasNext) {
-//        return true
-//      } else {
-//        fixIterators(lastIdx)
-//        lastIterator = unaryIterators(lastIdx)
-//        return !hasEnd
-//      }
+//    if (lastIterator.hasNext) {
+//      true
 //    } else {
+//      fixIterators(lastIdx)
+//      lastIterator = unaryIterators(lastIdx)
 //      !hasEnd
 //    }
-//
 //  }
+
+  override def hasNext: Boolean = {
+    if (!hasEnd) {
+      //      lastIterator = unaryIterators(lastIdx)
+      //check if last iterator hasNext, if not, trying to produce new last iterator
+      if (lastIterator.hasNext) {
+        return true
+      } else {
+        fixIterators(lastIdx)
+        lastIterator = unaryIterators(lastIdx)
+        return !hasEnd
+      }
+    } else {
+      !hasEnd
+    }
+
+  }
 
   //return the underlying binding array
   def getBinding(): Array[DataType] = {

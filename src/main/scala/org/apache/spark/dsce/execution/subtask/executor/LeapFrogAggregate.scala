@@ -29,7 +29,7 @@ import org.apache.spark.dsce.execution.subtask.{
   LeapFrogAggregateInfo,
   LeapFrogAggregateSubTask
 }
-import org.apache.spark.dsce.util.Graph
+import org.apache.spark.dsce.util.{Counter, Graph}
 
 import scala.collection.mutable
 
@@ -163,8 +163,11 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
     val eagerTableNum = eagerTables.size
     var i = 0
 
+//    val counter = Counter.getDefaultCounter()
+
     if (lazyTableNum == 0 && eagerTableNum == 0) {
       while (lf.hasNext) {
+//        counter.increment()
         lf.next()
         outputTable.increment(1l)
       }
@@ -172,11 +175,13 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
       val theLazyTable = lazyTables(0)
 //      lf.longSize()
       while (lf.hasNext) {
+//        counter.increment()
         lf.next()
         outputTable.increment(theLazyTable.getCount())
       }
     } else if (lazyTableNum != 0 && eagerTableNum == 0) {
       while (lf.hasNext) {
+//        counter.increment()
         lf.next()
         var C = 1l
         i = 0
@@ -186,8 +191,16 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
         }
         outputTable.increment(C)
       }
+    } else if (lazyTableNum == 0 && eagerTableNum == 1) {
+      while (lf.hasNext) {
+//        counter.increment()
+        val theEagerTable = eagerTables(0)
+        lf.next()
+        outputTable.increment(theEagerTable.getCount())
+      }
     } else if (lazyTableNum == 0 && eagerTableNum != 0) {
       while (lf.hasNext) {
+//        counter.increment()
         lf.next()
         var C = 1l
         i = 0
@@ -199,6 +212,7 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
       }
     } else {
       while (lf.hasNext) {
+//        counter.increment()
         lf.next()
         var C = 1l
         i = 0
@@ -326,6 +340,7 @@ abstract class AbstractBindingAssociatedLazyTable(
 
     //prepare trieConstructedLeapFrogJoinSubTask
     val relatedSchemas = info.schemas
+      .diff(info.eagerTableInfos.map(_.schema))
     val relatedTries = relatedSchemas.map(schemaToTrieMap)
     val subTask = new TrieConstructedLeapFrogJoinSubTask(
       null,
@@ -388,7 +403,7 @@ class BindingAssociatedLazyTable(
       }
       totalC += C
     }
-    if (totalC > 10) {
+    if (totalC > 5) {
 //      val newKey =
 //        mutable.WrappedArray
 //          .make[DataType](new Array[DataType](innerBindingSize))
@@ -437,7 +452,7 @@ class NoEagerBindingAssociatedLazyTable(
 
     totalC = partialLF.longSize()
 
-    if (totalC > 10) {
+    if (totalC > 5) {
 //      val newKey =
 //        mutable.WrappedArray
 //          .make[DataType](new Array[DataType](innerBindingSize))

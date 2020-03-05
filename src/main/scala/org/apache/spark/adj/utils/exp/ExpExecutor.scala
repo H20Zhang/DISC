@@ -63,6 +63,7 @@ class ExpQuery(data: String) {
     val dml = q match {
       case "wedge"              => wedgeDml
       case "triangle"           => triangleDml
+      case "eTriangle"          => eTriangleDml
       case "chordalSquare"      => chordalSquareDml
       case "fourClique"         => fourCliqueDml
       case "fiveClique"         => fiveCliqueDml
@@ -123,13 +124,16 @@ class ExpQuery(data: String) {
   val fiveCliqueDml = "A-B;B-C;C-D;D-E;E-A;A-C;A-D;B-D;B-E;C-E;"
 
   //  house
-  val houseDml = "A-B;B-C;C-D;D-E;E-A;B-E;"
+  private val houseDml = "A-B;B-C;C-D;D-E;E-A;B-E;"
 
   //  threeTriangle
-  val threeTriangleDml = "A-B;B-C;C-D;D-E;E-A;B-E;C-E;"
+  private val threeTriangleDml = "A-B;B-C;C-D;D-E;E-A;B-E;C-E;"
+
+  //  solarSquare
+  private val solarSquareDml = "A-B;B-C;C-D;D-E;E-A;A-D;B-E;C-E;"
 
   //  near5Clique
-  val near5CliqueSchemaDml = "A-B;B-C;C-D;D-E;E-A;B-E;B-D;C-E;"
+  private val near5CliqueSchemaDml = "A-B;B-C;C-D;D-E;E-A;B-E;B-D;C-E;"
 
   //  fiveCliqueMinusOne, A-D removed
   val fiveCliqueMinusOneDml = "A-B;B-C;C-D;D-E;E-A;A-C;B-D;B-E;C-E;"
@@ -142,11 +146,11 @@ class ExpQuery(data: String) {
   //  barbell
   val b313Dml = "A-B;B-C;C-A;C-D;D-E;D-F;E-F;"
 
-  //  solarSquare
-  val solarSquareDml = "A-B;B-C;C-D;D-A;A-E;B-E;C-E;D-E;"
-
   //triangleEdge
   val triangleEdgeDml = "A-B;B-C;C-A;C-D;"
+
+  //ExtraEdgetriangle
+  val eTriangleDml = "A-B;B-C;A-C;A-C;"
 
   //square
   val squareDml = "A-B;B-C;C-D;D-A;"

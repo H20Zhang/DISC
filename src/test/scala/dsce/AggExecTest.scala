@@ -7,7 +7,7 @@ import org.apache.spark.dsce.plan.{
   UnOptimizedCountAggregate,
   UnOptimizedSubgraphCount
 }
-import org.apache.spark.dsce.util.testing.{ExpData, ExpQuery}
+import org.apache.spark.dsce.testing.{ExpData, ExpQuery}
 
 class AggExecTest extends SparkFunSuite {
 

@@ -2,7 +2,10 @@ package org.apache.spark.dsce.optimization.aggregate
 
 import org.apache.spark.adj.database.Catalog.AttributeID
 import org.apache.spark.adj.database.{Catalog, RelationSchema}
-import org.apache.spark.adj.optimization.costBased.decomposition.relationGraph.RelationDecomposer
+import org.apache.spark.adj.optimization.costBased.decomposition.relationGraph.{
+  RelationDecomposer,
+  RelationGHDTree
+}
 import org.apache.spark.adj.plan.{
   LogicalPlan,
   RuleNotMatchedException,
@@ -21,29 +24,38 @@ class CountAggregateToMultiplyAggregateRule extends LogicalRule {
   def countAggToMultiplyAgg(
     countAggregate: UnOptimizedCountAggregate
   ): UnOptimizedMultiplyAggregate = {
+
     val schemas = countAggregate.childrenOps.map(_.outputSchema)
     val schemaToLogicalPlanMap =
       countAggregate.childrenOps.map(f => (f.outputSchema, f)).toMap
-//    val partialOrderEdgeSchemas = countAggregate.childrenOps
-//      .filter(f => f.isInstanceOf[PartialOrderScan])
-//      .map(f => f.asInstanceOf[PartialOrderScan])
-
     val coreAttrIds = countAggregate.coreAttrIds
 
-    val relationDecomposer = new RelationDecomposer(schemas)
+    def findOptimalGHD: RelationGHDTree = {
 
-//    println(
-//      s"coreAttrIds:${coreAttrIds}, selectedGHD:${relationDecomposer.decomposeTree().head}"
-//    )
-    val selectedGHD = relationDecomposer
-      .decomposeTree()
-      .filter { ghd =>
-        ghd.V.exists { node =>
-          val nodeAttrIds = node._2.flatMap(_.attrIDs).distinct
-          coreAttrIds.diff(nodeAttrIds).isEmpty
-        }
+      val manualRelationGHDDecomposer = new ManualRelationDecomposer(schemas)
+      val manualGHDs = manualRelationGHDDecomposer.decomposeTree()
+
+      if (manualGHDs.nonEmpty) {
+        return manualGHDs.head
       }
-      .head
+
+      val relationDecomposer = new RelationDecomposer(schemas)
+      //    println(
+      //      s"coreAttrIds:${coreAttrIds}, selectedGHD:${relationDecomposer.decomposeTree().head}"
+      //    )
+      val selectedGHD = relationDecomposer
+        .decomposeTree()
+        .filter { ghd =>
+          ghd.V.exists { node =>
+            val nodeAttrIds = node._2.flatMap(_.attrIDs).distinct
+            coreAttrIds.diff(nodeAttrIds).isEmpty
+          }
+        }
+        .head
+      selectedGHD
+    }
+
+    val selectedGHD: RelationGHDTree = findOptimalGHD
 
     val E = selectedGHD.E.flatMap { e =>
       Iterable(e, e.swap)
@@ -57,8 +69,8 @@ class CountAggregateToMultiplyAggregateRule extends LogicalRule {
     val rootId = rootNode._1
 
     def constructMultiplAgg(
-      nodeId: Int,
-      E: Seq[(Int, Int)],
+      nodeId: AttributeID,
+      E: Seq[(AttributeID, AttributeID)],
       coreAttrIds: Seq[AttributeID]
     ): UnOptimizedMultiplyAggregate = {
       val adj = E.groupBy(_._1).map(f => (f._1, f._2.map(_._2))).toMap
@@ -124,6 +136,38 @@ class CountAggregateToMultiplyAggregateRule extends LogicalRule {
 
     checkAndEnableLazy(multiplyAggregate)
 
+  }
+
+  def mergeDoubleLazyAgg(
+    lazyAgg: LazyableMultiplyAggregate
+  ): LazyableMultiplyAggregate = {
+
+    def checkAndMerge(
+      lazyAgg: LazyableMultiplyAggregate
+    ): LazyableMultiplyAggregate = {
+
+      if (!lazyAgg.isLazy) {
+        LazyableMultiplyAggregate(
+          lazyAgg.edges,
+          lazyAgg.countTables
+            .map(countTable => checkAndMerge(countTable)),
+          lazyAgg.coreAttrIds,
+          lazyAgg.isLazy
+        )
+      } else {
+        val lazyCountTable = lazyAgg.countTables.filter(_.isLazy)
+        LazyableMultiplyAggregate(
+          lazyAgg.edges ++ lazyCountTable.flatMap(_.edges),
+          lazyAgg.countTables
+            .diff(lazyCountTable)
+            .map(countTable => checkAndMerge(countTable)),
+          lazyAgg.coreAttrIds,
+          lazyAgg.isLazy
+        )
+      }
+    }
+
+    checkAndMerge(lazyAgg)
   }
 
   def lazyAbleMultiplyAggToOptimizedLazyAbleMultiplyAgg(
@@ -204,9 +248,11 @@ class CountAggregateToMultiplyAggregateRule extends LogicalRule {
       case countAgg: UnOptimizedCountAggregate => {
         val agg1 = countAggToMultiplyAgg(countAgg)
         val agg2 = multiplyAggToLazyAbleMultipleyAgg(agg1)
-        val agg3 = lazyAbleMultiplyAggToOptimizedLazyAbleMultiplyAgg(agg2)
+        val agg2_1 = mergeDoubleLazyAgg(agg2)
+        val agg3 = lazyAbleMultiplyAggToOptimizedLazyAbleMultiplyAgg(agg2_1)
         val agg4 = optimizedMultiplyAggtoSharedOptimizedMultiplyAgg(agg3)
         agg4
+//        agg3
       }
       case _ => throw new RuleNotMatchedException(this)
     }
@@ -220,6 +266,17 @@ class CountTableCache {
   val patternToRelationSchemaMap
     : mutable.HashMap[Pattern, (RelationSchema, Seq[AttributeID])] =
     mutable.HashMap()
+  val cliqueToRelationSchemaMap
+    : mutable.HashMap[(Pattern, Boolean), (RelationSchema, Seq[AttributeID])] =
+    mutable.HashMap()
+
+  def isClique(p: Pattern) = {
+    p.E.size == p.V.size * (p.V.size - 1)
+  }
+
+  def isPartialScanExists(agg: OptimizedLazyableMultiplyAggregate) = {
+    agg.edges.exists(p => p.isInstanceOf[PartialOrderScan])
+  }
 
   def aggToPattern(agg: OptimizedLazyableMultiplyAggregate): Pattern = {
 
@@ -250,15 +307,38 @@ class CountTableCache {
 
   def isCached(agg: OptimizedLazyableMultiplyAggregate): Boolean = {
     val p = aggToPattern(agg)
-    patternToRelationSchemaMap.keys.find { q =>
-      q.isIsomorphic(p)
-    }.nonEmpty
+
+    if (!isClique(p)) {
+      patternToRelationSchemaMap.keys.par.find { q =>
+        q.isIsomorphic(p)
+      }.nonEmpty
+    } else {
+      if (isPartialScanExists(agg)) {
+        cliqueToRelationSchemaMap.keys.find { q =>
+          q._1.isIsomorphic(p) && q._2
+        }.nonEmpty
+      } else {
+        cliqueToRelationSchemaMap.keys.find { q =>
+          q._1.isIsomorphic(p) && !q._2
+        }.nonEmpty
+      }
+    }
+
   }
 
   def putAgg(agg: OptimizedLazyableMultiplyAggregate, p: Pattern): Unit = {
     val schema = agg.outputSchema
     //    println(s"agg:${agg}, schema:${schema}")
-    patternToRelationSchemaMap.put(p, (schema, schema.attrIDs))
+    if (!isClique(p)) {
+      patternToRelationSchemaMap.put(p, (schema, schema.attrIDs))
+    } else {
+      if (isPartialScanExists(agg)) {
+        cliqueToRelationSchemaMap.put((p, true), (schema, schema.attrIDs))
+      } else {
+        cliqueToRelationSchemaMap.put((p, false), (schema, schema.attrIDs))
+      }
+    }
+
   }
 
   def putAgg(agg: OptimizedLazyableMultiplyAggregate): Unit = {
@@ -266,7 +346,15 @@ class CountTableCache {
     val schema = agg.outputSchema
 
     //    println(s"agg:${agg}, schema:${schema}")
-    patternToRelationSchemaMap.put(p, (schema, schema.attrIDs))
+    if (!isClique(p)) {
+      patternToRelationSchemaMap.put(p, (schema, schema.attrIDs))
+    } else {
+      if (isPartialScanExists(agg)) {
+        cliqueToRelationSchemaMap.put((p, true), (schema, schema.attrIDs))
+      } else {
+        cliqueToRelationSchemaMap.put((p, false), (schema, schema.attrIDs))
+      }
+    }
   }
 
   def getCachedScan(
@@ -274,12 +362,35 @@ class CountTableCache {
   ): CachedAggregate = {
     val catalog = Catalog.defaultCatalog()
     val p = aggToPattern(agg)
+    var matched: (RelationSchema, Seq[AttributeID]) = null
+    var matchedQ: Pattern = null
 
     //find matched pattern
-    val matchedQ = patternToRelationSchemaMap.keys.find { q =>
-      q.isIsomorphic(p)
-    }.get
-    val matched = patternToRelationSchemaMap(matchedQ)
+//    val matchedQ = patternToRelationSchemaMap.keys.par.find { q =>
+//      q.isIsomorphic(p)
+//    }.get
+//    matched = patternToRelationSchemaMap(matchedQ)
+
+    if (!isClique(p)) {
+      matchedQ = patternToRelationSchemaMap.keys.par.find { q =>
+        q.isIsomorphic(p)
+      }.get
+      matched = patternToRelationSchemaMap(matchedQ)
+    } else {
+      if (isPartialScanExists(agg)) {
+        val key = cliqueToRelationSchemaMap.keys.find { q =>
+          q._1.isIsomorphic(p) && q._2
+        }.get
+        matchedQ = key._1
+        matched = cliqueToRelationSchemaMap(key)
+      } else {
+        val key = cliqueToRelationSchemaMap.keys.find { q =>
+          q._1.isIsomorphic(p) && !q._2
+        }.get
+        matchedQ = key._1
+        matched = cliqueToRelationSchemaMap(key)
+      }
+    }
 
     //ismorphism between count attr
     val countAttrId = agg.countAttrId

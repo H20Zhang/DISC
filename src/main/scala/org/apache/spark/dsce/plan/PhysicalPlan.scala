@@ -18,6 +18,7 @@ import org.apache.spark.dsce.execution.subtask.{
   DSCESubTaskFactory,
   LeapFrogAggregateInfo
 }
+
 import org.apache.spark.dsce.util.Fraction
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.{
@@ -71,6 +72,8 @@ case class MultiplyAggregateExec(
       relationsForHCube.map(_.schema),
       Conf.defaultConf().taskNum
     )
+
+    println(s"share:${shareComputer.optimalShare()._1}")
     shareComputer.optimalShare()._1
   }
 
@@ -141,7 +144,11 @@ case class MultiplyAggregateExec(
 
     val spark = SparkSingle.getSparkSession()
 
-    spark.createDataFrame(rowRdd, dfSchema)
+    val subCountTable = spark.createDataFrame(rowRdd, dfSchema)
+
+//    println(s"number of partition:${subCountTable.rdd.getNumPartitions}")
+
+    subCountTable
   }
 
   //aggregate the sub-count table
@@ -180,7 +187,12 @@ case class MultiplyAggregateExec(
   }
 
   override def execute(): Relation = {
-    aggregateSubCountTable(genSubCountTable())
+
+    val df = genSubCountTable()
+//    import org.apache.spark.sql.functions._
+//    df.agg(sum(catalog.getAttribute(countAttrId))).show()
+
+    aggregateSubCountTable(df)
   }
 
   override def count(): Long = ???
@@ -232,7 +244,7 @@ case class SumAggregateExec(schema: RelationSchema,
         i += 1
       }
       newArray(coreSize - 1) = 0
-      newArray.toSeq
+      (newArray.toSeq.slice(0, coreSize - 1), newArray(coreSize - 1))
     }
 
     coreRDD.cache()
@@ -254,14 +266,15 @@ case class SumAggregateExec(schema: RelationSchema,
     (coreRDD, relationSchema.name)
   }
 
-  def genCountTable(plan: PhysicalPlan, coreRDD: RDD[Seq[DataType]]): String = {
+  def genCountTable(plan: PhysicalPlan,
+                    coreRDD: RDD[(Seq[DataType], DataType)]): String = {
     val relation = plan.execute()
     val schema = relation.schema
     val coreSize = schema.attrIDs.size
     val rdd = relation.rdd
-      .map(f => f.toSeq)
+//      .map(f => f.toSeq)
+      .map(f => (f.toSeq.slice(0, coreSize - 1), f(coreSize - 1)))
       .union(coreRDD)
-      .map(f => (f.slice(0, coreSize - 1), f(coreSize - 1)))
       .groupByKey()
       .map {
         case (key, counts) =>
@@ -300,13 +313,60 @@ case class SumAggregateExec(schema: RelationSchema,
 
     val coreString =
       coreAttrIds.map(attrId => catalog.getAttribute(attrId)).mkString(",")
-    val aggregateString =
+
+    val splitNum = 5
+
+//    val splitPoint = inputCountAttrs.size / splitNum
+    val intermediateTables =
       inputCountAttrs
         .zip(coefficients)
-        .map(f => s" (${f._2}*${f._1}) ")
-        .mkString("+")
-    val tableString = tables.mkString(" natural join ")
+        .zip(tables)
+        .grouped(splitNum)
+        .zipWithIndex
+        .map {
+          case (tempInput, idx) =>
+            val tempTableName = s"Table${idx}"
+            val tempCountName = s"${countAttr}T${idx}"
+            val aggregateString =
+              tempInput
+                .map(_._1)
+                .map { f =>
+                  if (f._2 == 1.0) {
+                    s" (${f._2}*${f._1}) "
+                  } else {
+                    s" (${f._2}*${f._1}) "
+                  }
+                }
+                .mkString("+")
+            val tableString = tempInput.map(_._2).mkString(" natural join ")
 
+            val q =
+              s"""
+             |select $coreString, $aggregateString as $tempCountName
+             |from $tableString
+             |""".stripMargin
+
+            println(s"aggregateCountTableSQL: $q")
+
+            val intermediateTable = spark.sql(q)
+//            intermediateTable.cache().count()
+            intermediateTable.createOrReplaceTempView(tempTableName)
+
+            (tempTableName, tempCountName)
+        }
+
+    val tempInput = intermediateTables.toSeq
+
+    val aggregateString =
+      tempInput
+        .map(_._2)
+        .map { f =>
+          s" ${f} "
+        }
+        .mkString("+")
+    val tableString = tempInput.map(_._1).mkString(" natural join ")
+
+    println(tempInput)
     val q =
       s"""
          |select $coreString, $aggregateString as $countAttr
@@ -315,14 +375,44 @@ case class SumAggregateExec(schema: RelationSchema,
 
     println(s"aggregateCountTableSQL: $q")
 
-    spark.sql(q)
+    val aggregatedCountTable = spark.sql(q)
+
+//    val aggregateString =
+//      inputCountAttrs
+//        .zip(coefficients)
+//        .map { f =>
+//          if (f._2 == 1.0) {
+//            s" (${f._2}*${f._1}) "
+//          } else {
+//            s" (${f._2}*${f._1}) "
+//          }
+//        }
+//        .mkString("+")
+//    val tableString = tables.mkString(" natural join ")
+//
+//    val q =
+//      s"""
+//         |select $coreString, $aggregateString as $countAttr
+//         |from $tableString
+//         |""".stripMargin
+//
+//    println(s"aggregateCountTableSQL: $q")
+//
+//    val aggregatedCountTable = spark.sql(q)
+//
+//    println(
+//      s"aggregateCountedTable:${aggregatedCountTable.rdd.getNumPartitions}"
+//    )
+
+    aggregatedCountTable
+
   }
 
   def execute_sparkSql(): Relation = {
     val (coreRDD, coreTable) = genCoreCountTable(countTables(0))
     val tables = countTables.drop(1).map(plan => genCountTable(plan, coreRDD))
     val outputTable =
-      aggregateCountTable(tables :+ coreTable, coefficients.map(_.toDouble))
+      aggregateCountTable(coreTable +: tables, coefficients.map(_.toDouble))
     val rdd =
       outputTable.rdd.map(f => f.toSeq.asInstanceOf[Seq[DataType]].toArray)
 
@@ -334,7 +424,7 @@ case class SumAggregateExec(schema: RelationSchema,
     val (coreRDD, coreTable) = genCoreCountTable(countTables(0))
     val tables = countTables.drop(1).map(plan => genCountTable(plan, coreRDD))
     val df =
-      aggregateCountTable(tables :+ coreTable, coefficients.map(_.toDouble))
+      aggregateCountTable(coreTable +: tables, coefficients.map(_.toDouble))
 
     import org.apache.spark.sql.functions._
     val count =

@@ -88,6 +88,10 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
       priorityAttrIds ++= filteredLazyCountTable.head.coreAttrIds
     }
 
+    if (priorityAttrIds.isEmpty) {
+      priorityAttrIds ++= agg.coreAttrIds
+    }
+
     val edgeSchemas = edges.map(_.outputSchema)
     val orderComputer = new OrderComputer(edgeSchemas)
     val allOrdersWithCost = orderComputer.genAllOrderWithCost()
@@ -130,6 +134,11 @@ class MultiplyAggregateToExecRule extends PhyiscalRule {
     val lazyTableInfos =
       lazyTables.zip(edgeAttrIdsOrderForLazyTables).map {
         case (t, attrOrderForLazyTable) =>
+          if (t.lazyCountTables.nonEmpty) {
+            println(s"double lazy ${t.prettyString()}")
+          }
+          assert(t.lazyCountTables.isEmpty, "not allow double lazy")
+
           val eagerCountTableSubInfos =
             t.eagerCountTables.map { eagerTable =>
               val eagerTableSchema = eagerTable.outputSchema

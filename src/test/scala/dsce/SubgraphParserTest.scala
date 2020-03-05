@@ -2,7 +2,7 @@ package dsce
 
 import adj.SparkFunSuite
 import org.apache.spark.dsce.parser.SubgraphParser
-import org.apache.spark.dsce.util.testing.{ExpData, ExpQuery}
+import org.apache.spark.dsce.testing.{ExpData, ExpQuery}
 import org.apache.spark.sql.Row
 
 class SubgraphParserTest extends SparkFunSuite {

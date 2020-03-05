@@ -3,8 +3,8 @@ package org.apache.spark.dsce.deprecated.optimization.subgraph.remover
 import org.apache.spark.dsce.deprecated.optimization.subgraph.graph.Graph
 import org.apache.spark.dsce.deprecated.optimization.subgraph.query.Query
 import org.apache.spark.dsce.util.GraphBuilder
-import org.apache.spark.dsce.util.testing.ExamplePattern
-import org.apache.spark.dsce.util.testing.ExamplePattern.PatternName
+import org.apache.spark.dsce.testing.ExamplePattern
+import org.apache.spark.dsce.testing.ExamplePattern.PatternName
 import org.apache.spark.dsce.{LogAble, Stage, TestAble}
 
 import scala.collection.mutable.ArrayBuffer

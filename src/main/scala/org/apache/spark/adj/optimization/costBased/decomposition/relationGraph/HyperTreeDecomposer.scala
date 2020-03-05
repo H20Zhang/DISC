@@ -15,10 +15,9 @@ object HyperTreeDecomposer {
   //  Find all GHD decomposition
   def allGHDs(g: RelationGraph) = {
 
-    var extendableTree = ArrayBuffer[(HyperTree, Seq[RelationEdge])]()
+    var extendableTree = ArrayBuffer[(HyperTree, Array[RelationEdge])]()
     val GHDs = ArrayBuffer[HyperTree]()
-    extendableTree += ((HyperTree(ArrayBuffer(), ArrayBuffer()), g.E()))
-
+    extendableTree += ((HyperTree(Array(), Array()), g.E()))
     var counter = 0
 
     while (!extendableTree.isEmpty) {
@@ -29,24 +28,28 @@ object HyperTreeDecomposer {
       extendableTree = extendableTree.drop(1)
 
       remainingEdges.isEmpty match {
-        case true => GHDs += hypertree
+        case true => {
+          GHDs += hypertree
+        }
         case false => {
           val newNodes = potentialHyperNodes(g, hypertree, remainingEdges)
-
-          val newTrees = newNodes
+          newNodes.par
             .map {
-              case (node, edges) =>
-                (hypertree.addHyperNode(node).headOption, edges)
+              case (hyperNode, remainingEdges) =>
+                val hypertrees = hypertree.addHyperNode(hyperNode)
+                (hypertrees, remainingEdges)
             }
-            .filter(_._1.nonEmpty)
-            .map(f => (f._1.get, f._2))
-
-          newTrees.foreach(nodeAndedges => extendableTree += nodeAndedges)
-
+            .toArray
+            .foreach {
+              case (hypertrees, remainingEdges) =>
+                if (hypertrees.nonEmpty) {
+                  extendableTree += ((hypertrees.head, remainingEdges))
+                }
+            }
         }
+
       }
     }
-
     GHDs
   }
 
@@ -54,25 +57,27 @@ object HyperTreeDecomposer {
   private def potentialHyperNodes(
     basedGraph: RelationGraph,
     hypertree: HyperTree,
-    remainEdges: Seq[RelationEdge]
-  ): Seq[(HyperNode, Seq[RelationEdge])] = {
+    remainEdges: Array[RelationEdge]
+  ): Array[(HyperNode, Array[RelationEdge])] = {
 
-    val potentialEdgeSets = SeqUtil.subset(remainEdges)
+    var potentialEdgeSets: Array[Array[RelationEdge]] = null
+    if (remainEdges.size == basedGraph.E().size) {
+      potentialEdgeSets = SeqUtil.subset(remainEdges).map(_.toArray).toArray
+//      potentialEdgeSets =
+//        potentialEdgeSets.filter(arr => arr.contains(basedGraph.E().head))
+//      println(s"potentialEdges:${potentialEdgeSets.map(_.toSeq).toSeq}")
+    } else {
+      potentialEdgeSets = SeqUtil.subset(remainEdges).map(_.toArray).toArray
+    }
 
     //    filter the edgeSet that result in disconnected graph
-    var potentialGraphs = potentialEdgeSets
+    var potentialGraphs = potentialEdgeSets.par
       .map(
         edgeSet =>
           RelationGraph(edgeSet.flatMap(f => f.attrs).distinct, edgeSet)
       )
 
-    //    convert the graph into induced graph
-//    potentialGraphs = potentialGraphs
-//      .map(graph => graph.toInducedGraph(basedGraph).E())
-//      .distinct
-//      .map(E => RelationGraph(E.flatMap(_.attrs).distinct, E))
-
-    //    previous node in hypertree must contain new node as subgraph
+    //    previous node in hypertree must not contain new node as subgraph
     potentialGraphs = potentialGraphs
       .filter(
         g =>
@@ -85,22 +90,41 @@ object HyperTreeDecomposer {
       )
 
     //    only preserve hypernode that are connected
-    val validGraphs = potentialGraphs.filter {
+    potentialGraphs = potentialGraphs.filter {
       _.isConnected()
     }
 
-    validGraphs
-      .map(g => (g, remainEdges.diff(g.E())))
-      .filter(_._1.containEdge(remainEdges.head))
-      .map {
-        case (graph, edges) => (graph.toInducedGraph(basedGraph).E(), edges)
+//    if (remainEdges.size == basedGraph.E().size) {
+//      println(s"potentialGraph:${potentialGraphs.map(_.E().toSeq).toSeq}")
+//    }
+    potentialGraphs
+      .map { g =>
+        val inducedG = g.toInducedGraph(basedGraph)
+        val inducedEdges = inducedG.E()
+        val remainingEdges = remainEdges.diff(g.E())
+        (
+          HyperNode(
+            RelationGraph(inducedEdges.flatMap(_.attrs).distinct, inducedEdges)
+          ),
+          remainingEdges
+        )
       }
-      .distinct
-      .map {
-        case (e, edges) =>
-          (HyperNode(RelationGraph(e.flatMap(_.attrs).distinct, e)), edges)
-      }
-
+  }.toArray
+}
+//      .map(g => (g, remainEdges.diff(g.E())))
+////      .filter(_._1.containEdge(remainEdges.head)) //we need to add this line to improve efficiency
+////      .map {
+////        case (graph, edges) => (graph.toInducedGraph(basedGraph).E(), edges)
+////      }
+//      .distinct
+//      .map {
+//        case (e, edges) =>
+//          (
+//            HyperNode(RelationGraph(e.flatMap(_.attrs).distinct, e)),
+//            edges
+//          )
+//      }
+//      .toArray
 //    hypertree.isEmpty() match {
 //      case true => {
 //        validGraphs
@@ -123,6 +147,3 @@ object HyperTreeDecomposer {
 //
 //      }
 //    }
-  }
-
-}

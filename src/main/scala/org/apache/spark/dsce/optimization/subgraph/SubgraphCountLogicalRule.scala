@@ -72,8 +72,10 @@ class SubgraphCountLogicalRule() extends LogicalRule {
       case org.apache.spark.dsce.DISCConf.QueryType.Induce => {
         ruleExecutor.addRule(rule1)
         ruleExecutor.addRule(rule2)
+//        new ByPassRule(State.Induced, State.NonInduced)
         ruleExecutor.addRule(rule3)
         ruleExecutor.addRule(rule4)
+
       }
 
       case org.apache.spark.dsce.DISCConf.QueryType.NonInduce => {
@@ -89,9 +91,19 @@ class SubgraphCountLogicalRule() extends LogicalRule {
         ruleExecutor.addRule(new ByPassRule(State.NonInduced, State.Partial))
         ruleExecutor.addRule(rule4)
       }
+      case org.apache.spark.dsce.DISCConf.QueryType.Debug => {
+        ruleExecutor.addRule(rule1)
+        ruleExecutor.addRule(rule2)
+        ruleExecutor.addRule(new ByPassRule(State.NonInduced, State.Partial))
+//        ruleExecutor.addRule(rule4)
+      }
     }
 
     val optimizedRule = ruleExecutor.applyAllRulesTillFix(eq)
+
+//    val ruleExecutor2 = new EquationTransformer
+//    ruleExecutor2.addRule(rule4)
+//    val optimizedRule2 = ruleExecutor2.applyAllRulesTillFix(optimizedRule1)
     optimizedRule
       .simplify()
   }
