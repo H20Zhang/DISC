@@ -20,7 +20,7 @@ class RelationDecomposer(schemas: Seq[RelationSchema]) {
     val E = notContainedSchemas.map(f => RelationEdge(f.attrIDs.toSet)).toArray
     val V = E.flatMap(_.attrs).distinct.toArray
     val graph = RelationGraph(V, E)
-    val ghds = HyperTreeDecomposer.allGHDs(graph)
+    val ghds = HyperTreeDecomposer.genAllGHDs(graph)
 
     ghds
       .map(ghd => (ghd.V.toSeq, ghd.E.toSeq))
@@ -95,7 +95,7 @@ class RelationDecomposer(schemas: Seq[RelationSchema]) {
     val E = notContainedSchemas.map(f => RelationEdge(f.attrIDs.toSet)).toArray
     val V = E.flatMap(_.attrs).distinct.toArray
     val graph = RelationGraph(V, E)
-    val ghds = HyperTreeDecomposer.allGHDs(graph)
+    val ghds = HyperTreeDecomposer.genAllGHDs(graph)
 
     //filter out the HyperStar and construct RelationGHD
     val stars = ghds.par

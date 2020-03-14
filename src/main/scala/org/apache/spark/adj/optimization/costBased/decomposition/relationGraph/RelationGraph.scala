@@ -12,6 +12,15 @@ class RelationGraph(_id: Int, V: Array[NodeID], E: Array[RelationEdge]) {
 
   def V(): Array[NodeID] = V
   def E(): Array[RelationEdge] = E
+
+  def nodeInducedSubgraph(nodes: Array[NodeID]): RelationGraph = {
+    val inducedEdges = E.filter { edge =>
+      edge.attrs.diff(nodes.toSet).isEmpty
+    }
+
+    RelationGraph(nodes, inducedEdges)
+  }
+
   def toInducedGraph(baseGraph: RelationGraph): RelationGraph = {
     toInducedGraph(baseGraph.E)
   }
@@ -33,8 +42,8 @@ class RelationGraph(_id: Int, V: Array[NodeID], E: Array[RelationEdge]) {
 
   def isConnected(): Boolean = {
 
-    val visited = mutable.Set[NodeID]()
-    val next = mutable.Set[NodeID]()
+    val visited = mutable.HashSet[NodeID]()
+    val next = mutable.HashSet[NodeID]()
 
     //find the next for first nodeid
     next += V.head
@@ -46,11 +55,23 @@ class RelationGraph(_id: Int, V: Array[NodeID], E: Array[RelationEdge]) {
       next ++= findNext(cur)
     }
 
-    def findNext(nodeId: NodeID): Set[Int] = {
-      E.filter(e => e.attrs.contains(nodeId))
-        .flatMap(_.attrs)
-        .toSet
-        .diff(visited)
+    def findNext(nodeId: NodeID): mutable.HashSet[Int] = {
+      val nextSet = mutable.HashSet[Int]()
+      var i = 0
+      val end = E.size
+      while (i < end) {
+        val e = E(i)
+        if (e.attrs.contains(nodeId)) {
+          e.attrs.foreach { nextNode =>
+            if (!visited.contains(nextNode)) {
+              nextSet += nextNode
+            }
+          }
+        }
+        i += 1
+      }
+
+      nextSet
     }
 
 //    println(s"visited:${visited}")

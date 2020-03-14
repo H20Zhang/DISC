@@ -83,6 +83,7 @@ ExtraTask() {
   mainClass=org.apache.spark.dsce.testing.ExtraExpEntry
   $executeScript --class $mainClass $JAR 6
   $executeScript --class $mainClass $JAR 7
+  $executeScript --class $mainClass $JAR 8
 }
 
 TriangleTask() {

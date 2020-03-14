@@ -41,12 +41,18 @@ object ExtraExpEntry {
         val decomposer = new RelationDecomposer(schemas)
         val optimalGHD =
           decomposer.decomposeTree().head
-        optimalGHD
+        (dml, optimalGHD)
       }
       .collect()
 
+    ghds.foreach {
+      case (dml, ghd) =>
+        println(s"dml:${dml}, ghd:${ghd}")
+    }
     println(s"numPattern:${patterns.size}")
-    println(s"maximum fhtw for ${numNode}-node pattern:${ghds.maxBy(_.fhtw)}")
+    println(
+      s"maximum fhtw for ${numNode}-node pattern:${ghds.map(_._2).maxBy(_.fhtw)}"
+    )
 
   }
 }

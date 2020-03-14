@@ -13,7 +13,7 @@ import org.scalatest.FunSuite
 class GHDTest extends FunSuite {
 
   test("distGenGHDs") {
-    ExtraExpEntry.main(Array("6"))
+    ExtraExpEntry.main(Array("5"))
   }
 
   test("genGHD") {
@@ -24,7 +24,7 @@ class GHDTest extends FunSuite {
       "quadTriangle"
 //      "triangleCore",
 //      "twinCSquare",
-//      "twinClique4",
+//      "twinClique4"
 //      "starofDavidPlus"
     )
 
@@ -33,14 +33,17 @@ class GHDTest extends FunSuite {
       val expQuery = new ExpQuery(data)
       val schemas = expQuery.getSchema(query)
       val decomposer = new RelationDecomposer(schemas)
-      val optimalGHD =
-        decomposer.decomposeTree().head
+      val ghds = decomposer.decomposeTree()
+      val optimalGHD = ghds.head
 
-      println(optimalGHD)
+      println(s"num of GHD:${ghds.size}, optimal:${optimalGHD}")
+//      ghds.foreach { g =>
+//        println(g)
+//      }
     }
   }
 
-  val numNode = 5
+  val numNode = 7
   val queryComputer = new UniqueQueryComputer(numNode)
 
   test("genGHDs") {
