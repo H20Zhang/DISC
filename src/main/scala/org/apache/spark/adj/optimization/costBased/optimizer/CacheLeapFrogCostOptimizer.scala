@@ -7,7 +7,6 @@ import org.apache.spark.adj.optimization.stat.Statistic
 
 import scala.collection.mutable.ArrayBuffer
 
-//TODO: debug this
 class CacheLeapFrogCostOptimizer(relations: Seq[Relation],
                                  statistic: Statistic =
                                    Statistic.defaultStatistic()) {

@@ -20,7 +20,6 @@ import org.apache.spark.dsce.util.Fraction
 
 import scala.collection.mutable.ArrayBuffer
 
-//TODO: debug this
 class SubgraphCountLogicalRule() extends LogicalRule {
 
   def initEquation(schemas: Seq[RelationSchema],

@@ -34,46 +34,19 @@ class DISCMainTest extends SparkFunSuite {
 
   test("expEntry") {
     val data = ExpData.getDataAddress(dataset)
-//    val executeMode = "Count"
-    val queryType = "Induce"
-    val executeMode = "ShowPlan"
+    val executeMode = "Count"
+    //    val executeMode = "ShowPlan"
+    val queryType = "Partial"
 
-//    val queries =
-//      Seq("quadTriangle", "triangleCore", "twinCSquare", "twinClique4")
+    val platform = "Single"
+//    val platform = "Parallel"
 
-//    val queries =
-//      Seq("g13")
-
-//    val queries = Seq("t7", "t8", "t9")
-
-//    val queries = Range(13, 19) ++ Range(20, 46) map (id => s"g${id}")
-
-//    println(queries)
-//    val queries =
-//      Seq("house", "threeTriangle", "near5Clique", "solarSquare")
-    //    val queries =
-    //      Seq("threePath", "threeStar", "square", "triangleEdge", "chordalSquare")
-    val queries =
-      Seq("4profile")
-//    val queries =
-//      Seq("Dwedge1", "Dwedge2")
-//    val queries =
-//      Seq("DchordalSquare1", "DchordalSquare2")
-//    val queries =
-//      Seq("t3", "t4", "t5", "t6")
-//    val queries =
-//      Seq("square", "t38", "t39")
-//    val queries =
-//      Seq("DthreePath1", "DthreePath2")
-//    val queries =
-//      Seq("DtriangleEdge1", "DtriangleEdge2", "DtriangleEdge3")
-//    val queries =
-//      Seq("DtriangleEdge2")
+    val queries = Seq("t50")
 
     queries.foreach { query =>
 //      CountTableCache.reset()
       val command1 =
-        s"-q $query -t 43200 -d ${data} -e $executeMode -u ${queryType} -s 100000 -c A -p Single"
+        s"-q $query -t 43200 -d ${data} -e $executeMode -u ${queryType} -s 100000 -c A -p $platform"
 
       ExpEntry.main(command1.split("\\s"))
     }

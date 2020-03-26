@@ -129,7 +129,6 @@ case class HyperTree(val V: Array[HyperNode], val E: Array[HyperEdge])
     V.map(_.g.E().size).max
   }
 
-  //TODO: test
   def fractionHyperStarWidth(rootId: Int): Double = {
     val relatedEdges = E.filter { e =>
       e.u.id == rootId || e.v.id == rootId

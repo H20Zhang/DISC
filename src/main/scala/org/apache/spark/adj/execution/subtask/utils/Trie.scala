@@ -71,10 +71,10 @@ class ArrayTrie(neighbors: Array[Int],
   override def nextLevel(binding: ArraySegment,
                          inputArraySegment: ArraySegment): Unit = {
 
-//    var start = rootBegin
-//    var end = rootEnd
-    var start = 0
-    var end = 0
+    var start = rootBegin
+    var end = rootEnd
+//    var start = 0
+//    var end = 0
     var id = 0
     var i = 0
     val bindingLevel = binding.size
@@ -137,13 +137,17 @@ class ArrayTrie(neighbors: Array[Int],
     while (i < bindingLevel) {
 
       if (i == 0) {
-        pos = rootLevelMap.get(binding(i))
+        pos = rootLevelMap.getOrDefault(binding(i), -1)
       } else {
         pos = BSearch.search(values, binding(i), start, end)
       }
 
       if (pos == -1) {
-        return emptyArray
+        inputArraySegment.array = values
+        inputArraySegment.begin = start
+        inputArraySegment.end = start
+        inputArraySegment.size = 0
+        return inputArraySegment
       }
 
       id = neighbors(pos)

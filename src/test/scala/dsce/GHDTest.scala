@@ -71,11 +71,13 @@ class GHDTest extends FunSuite {
     val ghds = dmls.map { dml =>
       val schemas = ExpQueryHelper.dmlToSchemas(dml)
 
-      println(s"dml:${dml}")
+      val time1 = System.currentTimeMillis()
       val decomposer = new RelationDecomposer(schemas)
       val optimalGHD =
         decomposer.decomposeTree().head
+      val time2 =System.currentTimeMillis()
 
+      print(s"dml:${dml}-time:${time2-time1}ms")
       println(optimalGHD)
       optimalGHD
     }

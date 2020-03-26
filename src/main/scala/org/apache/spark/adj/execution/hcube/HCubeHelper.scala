@@ -38,9 +38,7 @@ class HCubeHelper(@transient query: HCubePlan) extends Serializable {
   }
 
   def genShareForRelation(id: RelationID): Array[Array[Int]] = {
-
     val schema = query.idForRelation(id).schema
-    println(s"schema:${schema}")
     genShareForAttrs(schema.attrIDs)
   }
 
@@ -51,7 +49,6 @@ class HCubeHelper(@transient query: HCubePlan) extends Serializable {
 
     val attrIDs = shareSpace.keys.toArray
     val shareSpaceVector = shareSpace.values.toArray
-
     val relations = query.relations
     val taskPartitioner = new HCubePartitioner(shareSpaceVector)
     val partitioners =

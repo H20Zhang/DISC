@@ -45,11 +45,12 @@ case class MultiplyAggregateExec(
   lazy val countTablesRelation = eagerCountTables.map(_.execute())
   lazy val countTableRelationForLazyCountTables =
     lazyCountTables.map(_._2.map(_.execute()))
+
   lazy val edgeRelations = edges.map(_.execute())
   lazy val edgeRelationsForLazyCountTables =
     lazyCountTables.map(_._1.map(_.execute()))
-  lazy val relationsForHCube = countTablesRelation ++ countTableRelationForLazyCountTables
-    .flatMap(f => f) ++ edgeRelations ++ edgeRelationsForLazyCountTables
+  lazy val relationsForHCube = countTablesRelation ++ edgeRelations ++ edgeRelationsForLazyCountTables
+    .flatMap(f => f) ++ countTableRelationForLazyCountTables
     .flatMap(f => f)
   lazy val countAttrId = schema.attrIDs.diff(coreAttrIds).head
 
@@ -73,8 +74,10 @@ case class MultiplyAggregateExec(
       Conf.defaultConf().taskNum
     )
 
-    println(s"share:${shareComputer.optimalShare()._1}")
-    shareComputer.optimalShare()._1
+//    println(s"share:${shareComputer.optimalShare()._1}")
+
+    val share = shareComputer.optimalShare()._1
+    share
   }
 
   //generate the sub-count table using hcube+leapfrogAggregate
@@ -132,21 +135,12 @@ case class MultiplyAggregateExec(
       }
       .map(f => Row.fromSeq(f))
 
-//    LongType
-
     val fields = schema.attrIDs.map(
       attrId => StructField(catalog.getAttribute(attrId), LongType)
     )
-
     val dfSchema = StructType(fields)
-
-//    println(s"dfSchema:${dfSchema}")
-
     val spark = SparkSingle.getSparkSession()
-
     val subCountTable = spark.createDataFrame(rowRdd, dfSchema)
-
-//    println(s"number of partition:${subCountTable.rdd.getNumPartitions}")
 
     subCountTable
   }
@@ -189,9 +183,6 @@ case class MultiplyAggregateExec(
   override def execute(): Relation = {
 
     val df = genSubCountTable()
-//    import org.apache.spark.sql.functions._
-//    df.agg(sum(catalog.getAttribute(countAttrId))).show()
-
     aggregateSubCountTable(df)
   }
 
@@ -301,7 +292,7 @@ case class SumAggregateExec(schema: RelationSchema,
     relationSchema.name
   }
 
-  //aggregate the sub-count table
+  //aggregate the count table
   def aggregateCountTable(tables: Seq[String],
                           coefficients: Seq[Double]): DataFrame = {
 

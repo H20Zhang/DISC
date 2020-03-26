@@ -18,7 +18,6 @@ import org.apache.spark.dsce.optimization.aggregate.{
 import org.apache.spark.dsce.optimization.subgraph.SubgraphCountLogicalRule
 import org.apache.spark.dsce.util.Fraction
 
-//TODO: debug this
 abstract class Aggregate(childrenOps: Seq[LogicalPlan],
                          coreAttrIds: Seq[AttributeID])
     extends LogicalPlan {

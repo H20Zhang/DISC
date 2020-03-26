@@ -218,28 +218,19 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
         j += 1
       }
 
-//      tries(triePos).nextLevel(curBinding, segmentArrays(i))
-      tries(triePos).nextLevelWithAdjust(curBinding, segmentArrays(i))
+      tries(triePos).nextLevel(curBinding, segmentArrays(i))
+//      tries(triePos).nextLevelWithAdjust(curBinding, segmentArrays(i))
       i += 1
     }
 
 //    new LeapFrogUnaryIterator(segmentArrays)
-//    IntersectionIterator.leapfrogIt(segmentArrays)
-    new IntersectedListIterator(segmentArrays)
+    IntersectionIterator.leapfrogIt(segmentArrays)
+//    new IntersectedListIterator(segmentArrays)
 //    IntersectionIterator.listIt(segmentArrays)
   }
 
   protected val lastIdx = attrSize - 1
   protected var lastIterator = unaryIterators(lastIdx)
-//  override def hasNext: Boolean = {
-//    if (lastIterator.hasNext) {
-//      true
-//    } else {
-//      fixIterators(lastIdx)
-//      lastIterator = unaryIterators(lastIdx)
-//      !hasEnd
-//    }
-//  }
 
   override def hasNext: Boolean = {
     if (!hasEnd) {

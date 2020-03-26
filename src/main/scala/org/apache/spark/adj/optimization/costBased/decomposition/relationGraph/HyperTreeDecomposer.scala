@@ -124,7 +124,7 @@ object HyperTreeDecomposer {
 
       val newExtendableTree =
         new ConcurrentLinkedQueue[(HyperTree, Array[NodeID])]()
-      extendableTree.par
+      extendableTree
         .filter {
           case (hypertree, coveredNodes) =>
             if (coveredNodes.size == numAllNodes) {

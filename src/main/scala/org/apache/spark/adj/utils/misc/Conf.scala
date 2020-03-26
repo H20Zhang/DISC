@@ -47,8 +47,10 @@ class Conf() {
   def setLocalCluster() = {
     //For Cluster
     defaultNumSamples = 100000
-    taskNum = 28
-    numMachine = 28
+//    taskNum = 28
+//    numMachine = 28
+    taskNum = 8
+    numMachine = 8
     commSpeed = 1 * Math.pow(10, 9)
     isYarn = false
     //  in terms of real size
@@ -70,7 +72,6 @@ class Conf() {
 object Conf {
   lazy val conf = {
     new Conf()
-//    loadConf("./src/main/scala/org/apache/spark/adj/adj.utils/misc/default.adj.conf")
   }
 
   def defaultConf() = {

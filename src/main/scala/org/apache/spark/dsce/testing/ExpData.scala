@@ -11,7 +11,7 @@ object ExpData {
     ("reactcome", "reactcome.txt"),
     ("as-caida", "as-caida.txt"),
     ("to", "topology.txt"),
-    ("debug", "debugData.txt")
+    ("debug", "debugData2.txt")
   )
 
   def getDataAddress(data: String) = {

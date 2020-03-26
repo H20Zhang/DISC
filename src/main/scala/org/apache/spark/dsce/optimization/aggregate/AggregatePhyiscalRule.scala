@@ -25,7 +25,6 @@ import org.apache.spark.dsce.util.Graph
 
 import scala.collection.mutable.ArrayBuffer
 
-//TODO: debug this
 class SumAggregateToExecRule extends PhyiscalRule {
   override def apply(plan: LogicalPlan): PhysicalPlan = {
     plan match {

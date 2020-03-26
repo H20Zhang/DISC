@@ -60,14 +60,69 @@ Execute() {
 DEBUGTask() {
   #inputs=(wv ep soc-Slashdot wiki-Talk ego-Twitter wb as lj ok uk soc-lj)
   #patterns=(house threeTriangle solarSquare near5Clique)
-  platform="Dist"
-  executionMode="Count"
-  queryType="Partial"
-  core="A;B"
-  inputs=(wb)
-  patterns=(square)
+#  platform="Dist"
+#  executionMode="Count"
+#  queryType="Partial"
+#  core="A;B"
+#  inputs=(wb)
+#  patterns=(square)
+#
+#  Execute $inputs $patterns $executionMode $queryType $core $platform
 
+#  patterns=(t21)
+  inputs=(ac)
+  patterns=(5profile)
+  executionMode="Count"
+  core="A"
+
+#Induce
+  executeScript=runSpark-logo.sh
+  queryType="Induce"
+  platform="Dist"
   Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local.sh
+  queryType="Induce"
+  platform="Parallel"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local_1.sh
+  queryType="Induce"
+  platform="Single"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+#NonInduce
+  executeScript=runSpark-logo.sh
+  queryType="NonInduce"
+  platform="Dist"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local.sh
+  queryType="NonInduce"
+  platform="Parallel"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local_1.sh
+  queryType="NonInduce"
+  platform="Single"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+#Partial
+  executeScript=runSpark-logo.sh
+  queryType="Partial"
+  platform="Dist"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local.sh
+  queryType="Partial"
+  platform="Parallel"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local_1.sh
+  queryType="Partial"
+  platform="Single"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
 }
 
 ExtraTask() {
@@ -172,8 +227,8 @@ TriangleTask() {
 #  inputs=(ac tp rc fb)
 #  inputs=(ac)
 
-  JAR="./DISC-assembly-0.1_no_share.jar"
-  JAR="./DISC-assembly-0.1_no_merge.jar"
+#  JAR="./DISC-assembly-0.1_no_share.jar"
+#  JAR="./DISC-assembly-0.1_no_merge.jar"
   platform="Parallel"
   inputs=(ac tp rc fb)
   patterns=(5profile)
@@ -362,7 +417,7 @@ echo "---------------DISC---------------"
 #5NodePatternTask_Node
 #5NodePatternTask_Edge
 #6NodePatternTask
-#DEBUGTask
+DEBUGTask
 
 #ScalabilityTask
 #NodePairTask
@@ -377,4 +432,4 @@ echo "---------------DISC---------------"
 #CommTestTask
 #5NodePatternTask_Node
 
-ExtraTask
+#ExtraTask

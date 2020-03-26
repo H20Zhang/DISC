@@ -11,7 +11,6 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
-//TODO: debug it
 class Sampler(relations: Seq[Relation],
               sampleInfos: SampleTaskInfo,
               databaseScaleRatio: Double = 0.25)

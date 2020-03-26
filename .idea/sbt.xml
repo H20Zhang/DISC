@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ScalaSbtSettings">
     <option name="customVMEnabled" value="true" />
-    <option name="customVMPath" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_221.jdk/Contents/Home" />
+    <option name="customVMPath" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home" />
     <option name="linkedExternalProjectsSettings">
       <SbtProjectSettings>
         <option name="allowSbtVersionOverride" value="false" />
@@ -14,7 +14,7 @@
             <option value="$PROJECT_DIR$/project" />
           </set>
         </option>
-        <option name="resolveSbtClassifiers" value="true" />
+        <option name="sbtVersion" value="1.2.8" />
         <option name="useAutoImport" value="true" />
         <option name="useQualifiedModuleNames" value="true" />
         <option name="useSbtShellForBuild" value="true" />

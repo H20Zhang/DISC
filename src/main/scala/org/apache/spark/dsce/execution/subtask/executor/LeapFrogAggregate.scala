@@ -36,9 +36,9 @@ import scala.collection.mutable
 class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
 
   val info = aggTask.info.asInstanceOf[LeapFrogAggregateInfo]
-  val schemas = aggTask.blocks.map(_.schema)
-  val triBlocks = aggTask.tries.map(_.asInstanceOf[TrieHCubeBlock]).toArray
-  val schemaToTrieMap = schemas.zip(triBlocks).toMap
+  val schemas = aggTask.tries.map(_.asInstanceOf[TrieHCubeBlock].schema)
+  val triBlocks = aggTask.tries.map(_.asInstanceOf[TrieHCubeBlock])
+  var schemaToTrieMap = schemas.zip(triBlocks).toMap
 
   //initialization needed
   var eagerTables: Array[BindingAssociatedEagerTable] = _
@@ -49,7 +49,7 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
   def init() = {
 
     //construct leapfrog iterator of instance of hyperedge
-    lf = constructHyperEdgeLeapFrog()
+    lf = constructLF()
 
     //construct eagerTables
     eagerTables = constructEagerTables()
@@ -63,7 +63,7 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
   }
 
   //use TrieConstructedLeapFrogJoin as iterator
-  def constructHyperEdgeLeapFrog() = {
+  def constructLF() = {
 
     //prepare trieConstructedAttributeOrderInfo
     val attrIdsOrder = info.edgeAttrIdsOrder
@@ -81,7 +81,6 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
     )
 
     subTask.execute()
-//    new AggTrieConstructedLeapFrogJoin(subTask)
   }
 
   def constructEagerTables() = {
@@ -102,6 +101,7 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
 
   def constructLazyTables() = {
     val lazyTableInfos = info.lazyTableInfos
+
     lazyTableInfos.map { lazyTableInfo =>
       var lazyTable: AbstractBindingAssociatedLazyTable = null
 
@@ -120,21 +120,16 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
         .containsSlice(lazyTableCore)
 
       if (isCoreConnected && isOrderCompetiable) {
-
         lazyTable = new ConsecutiveNoEagerBindingAssociatedLazyTable(
           lazyTableInfo,
           schemaToTrieMap
         )
-        println(s"lazyTable: CoreConnected")
       } else if (lazyTableInfo.eagerTableInfos.isEmpty) {
         lazyTable =
           new NoEagerBindingAssociatedLazyTable(lazyTableInfo, schemaToTrieMap)
-
-        println(s"lazyTable: eagerTable empty")
       } else {
         lazyTable =
           new BindingAssociatedLazyTable(lazyTableInfo, schemaToTrieMap)
-        println(s"lazyTable: general")
       }
 
       lazyTable.init(
@@ -142,6 +137,7 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
         info.edgeAttrIdsOrder,
         lazyTableInfo.coreAttrIds
       )
+
       lazyTable
     }.toArray
   }
@@ -163,73 +159,99 @@ class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
     val eagerTableNum = eagerTables.size
     var i = 0
 
-//    val counter = Counter.getDefaultCounter()
-
-    if (lazyTableNum == 0 && eagerTableNum == 0) {
-      while (lf.hasNext) {
-//        counter.increment()
-        lf.next()
-        outputTable.increment(1l)
+    while (lf.hasNext) {
+      lf.next()
+      var C = 1l
+      i = 0
+      while (i < lazyTableNum) {
+        C *= lazyTables(i).getCount()
+        i += 1
       }
-    } else if (lazyTableNum == 1 && eagerTableNum == 0) {
-      val theLazyTable = lazyTables(0)
-//      lf.longSize()
-      while (lf.hasNext) {
-//        counter.increment()
-        lf.next()
-        outputTable.increment(theLazyTable.getCount())
+      i = 0
+      while (i < eagerTableNum) {
+        C *= eagerTables(i).getCount()
+        i += 1
       }
-    } else if (lazyTableNum != 0 && eagerTableNum == 0) {
-      while (lf.hasNext) {
-//        counter.increment()
-        lf.next()
-        var C = 1l
-        i = 0
-        while (i < lazyTableNum) {
-          C *= lazyTables(i).getCount()
-          i += 1
-        }
-        outputTable.increment(C)
-      }
-    } else if (lazyTableNum == 0 && eagerTableNum == 1) {
-      while (lf.hasNext) {
-//        counter.increment()
-        val theEagerTable = eagerTables(0)
-        lf.next()
-        outputTable.increment(theEagerTable.getCount())
-      }
-    } else if (lazyTableNum == 0 && eagerTableNum != 0) {
-      while (lf.hasNext) {
-//        counter.increment()
-        lf.next()
-        var C = 1l
-        i = 0
-        while (i < eagerTableNum) {
-          C *= eagerTables(i).getCount()
-          i += 1
-        }
-        outputTable.increment(C)
-      }
-    } else {
-      while (lf.hasNext) {
-//        counter.increment()
-        lf.next()
-        var C = 1l
-        i = 0
-        while (i < lazyTableNum) {
-          C *= lazyTables(i).getCount()
-          i += 1
-        }
-        i = 0
-        while (i < eagerTableNum) {
-          C *= eagerTables(i).getCount()
-          i += 1
-        }
-        outputTable.increment(C)
-      }
+      outputTable.increment(C)
     }
 
     outputTable.toArrays()
+  }
+
+  def debug(): Unit = {
+
+    //LF
+    {
+      //prepare trieConstructedAttributeOrderInfo
+      val lazyTableInfo = info.lazyTableInfos(0)
+      val attrIdsOrder = info.globalAttrIdsOrder
+      //      val attrIdsOrder = info.edgeAttrIdsOrder
+      val trieConstructedAttributeOrderInfo = TrieConstructedAttributeOrderInfo(
+        attrIdsOrder
+      )
+
+      //prepare trieConstructedLeapFrogJoinSubTask
+      val relatedSchemas = info.edges ++ lazyTableInfo.schemas
+      val relatedTries = relatedSchemas.map(schemaToTrieMap)
+      val subTask = new TrieConstructedLeapFrogJoinSubTask(
+        aggTask.shareVector,
+        relatedTries,
+        trieConstructedAttributeOrderInfo
+      )
+
+      println(
+        s"attrIdOrder:${attrIdsOrder.toSeq}, relatedSchemas:${relatedSchemas}"
+      )
+
+      var totalC = 0l
+      val lf = subTask.execute()
+      while (lf.hasNext) {
+//        println(lf.next().toSeq)
+        lf.next()
+        totalC += 1
+      }
+      println(s"lf.totalC:${totalC}")
+    }
+
+    //partialLF
+    {
+      val lf = { //prepare trieConstructedAttributeOrderInfo
+        val attrIdsOrder = info.edgeAttrIdsOrder
+        val trieConstructedAttributeOrderInfo =
+          TrieConstructedAttributeOrderInfo(attrIdsOrder)
+
+        //prepare trieConstructedLeapFrogJoinSubTask
+        val relatedSchemas = info.edges
+        val relatedTries = relatedSchemas.map(schemaToTrieMap)
+        val subTask = new TrieConstructedLeapFrogJoinSubTask(
+          aggTask.shareVector,
+          relatedTries,
+          trieConstructedAttributeOrderInfo
+        )
+
+        subTask.execute()
+      }
+
+      val lazyTableInfo = info.lazyTableInfos(0)
+      val lazyCountTable =
+        new NoEagerBindingAssociatedLazyTable(lazyTableInfo, schemaToTrieMap)
+
+      lazyCountTable.init(
+        lf.getBinding(),
+        info.edgeAttrIdsOrder,
+        lazyTableInfo.coreAttrIds
+      )
+
+      var totalC = 0l
+      while (lf.hasNext) {
+        val intResult = lf.next()
+//        println(s"i-${intResult.toSeq}")
+        totalC += lazyCountTable.getCount()
+      }
+
+      println(s"totalC:${totalC}")
+
+    }
   }
 
 }
@@ -283,7 +305,7 @@ class BindingAssociatedEagerTable(trie: Trie)
 }
 
 abstract class AbstractBindingAssociatedLazyTable(
-  info: LazyTableSubInfo,
+  lazyTableSubInfo: LazyTableSubInfo,
   schemaToTrieMap: Map[RelationSchema, TrieHCubeBlock]
 ) extends BindingAssociatedCountTable {
 
@@ -302,8 +324,6 @@ abstract class AbstractBindingAssociatedLazyTable(
   lazy val eagerTableSize = eagerTables.size
 
   var lruCache: ArrayLongLRUCache = _
-//  var lruKey: mutable.WrappedArray[DataType] = _
-
   val lruKey: LongArrayList = new LongArrayList()
 
   def init(outerBinding: Array[DataType],
@@ -312,17 +332,16 @@ abstract class AbstractBindingAssociatedLazyTable(
 
     this.outerBinding = outerBinding
 
-//    innerBindingSchema
     innerBinding = new Array[DataType](innerBindingSchema.size)
     innerBindingKey = ArraySegment(innerBinding)
     outerBindingToInnerBindingArray =
       innerBindingSchema.map(attrId => outerBindingSchema.indexOf(attrId))
 
-    partialLF = constructPatternIt()
+    partialLF = constructPartialLF()
     eagerTables = constructEagerTables()
+
     lruCache = new ArrayLongLRUCache()
 
-//    lruKey = mutable.WrappedArray.make[Long](innerBinding)
     var i = 0; var size = outerBindingToInnerBindingArray.size
     while (i < size) {
       lruKey.add(0)
@@ -331,16 +350,16 @@ abstract class AbstractBindingAssociatedLazyTable(
     lruKey.trim(size)
   }
 
-  def constructPatternIt(): PartialLeapFrogJoin = {
+  def constructPartialLF(): PartialLeapFrogJoin = {
     //prepare trieConstructedLeapFrogJoinInfo
-    val attrsIdOrder = info.edgeAttrIdsOrder
+    val attrsIdOrder = lazyTableSubInfo.edgeAttrIdsOrder
     val trieConstructedLeapFrogJoinInfo = TrieConstructedAttributeOrderInfo(
       attrsIdOrder
     )
 
     //prepare trieConstructedLeapFrogJoinSubTask
-    val relatedSchemas = info.schemas
-      .diff(info.eagerTableInfos.map(_.schema))
+    val relatedSchemas = lazyTableSubInfo.schemas
+      .diff(lazyTableSubInfo.eagerTableInfos.map(_.schema))
     val relatedTries = relatedSchemas.map(schemaToTrieMap)
     val subTask = new TrieConstructedLeapFrogJoinSubTask(
       null,
@@ -355,7 +374,7 @@ abstract class AbstractBindingAssociatedLazyTable(
   }
 
   def constructEagerTables(): Array[BindingAssociatedEagerTable] = {
-    val eagerTableInfos = info.eagerTableInfos
+    val eagerTableInfos = lazyTableSubInfo.eagerTableInfos
     eagerTableInfos.map { eagerTableInfo =>
       val eagerTable =
         new BindingAssociatedEagerTable(
@@ -363,7 +382,7 @@ abstract class AbstractBindingAssociatedLazyTable(
         )
       eagerTable.init(
         partialLF.getBinding(),
-        info.edgeAttrIdsOrder,
+        lazyTableSubInfo.edgeAttrIdsOrder,
         eagerTableInfo.coreAttrIdsOrder
       )
       eagerTable
@@ -396,6 +415,7 @@ class BindingAssociatedLazyTable(
     while (partialLF.hasNext) {
       partialLF.next()
       var C = 1l
+
       var i = 0
       while (i < eagerTableSize) {
         C *= eagerTables(i).getCount()
@@ -403,17 +423,8 @@ class BindingAssociatedLazyTable(
       }
       totalC += C
     }
-    if (totalC > 5) {
-//      val newKey =
-//        mutable.WrappedArray
-//          .make[DataType](new Array[DataType](innerBindingSize))
-//
-//      var i = 0
-//      while (i < innerBindingSize) {
-//        newKey(i) = innerBinding(i)
-//        i += 1
-//      }
 
+    if (totalC > 5) {
       lruCache.put(lruKey.clone(), totalC)
     }
 
@@ -436,12 +447,6 @@ class NoEagerBindingAssociatedLazyTable(
       i += 1
     }
 
-    var totalC = 0l
-
-//    if (lruCache.contain(lruKey)) {
-//      return lruCache.get(lruKey)
-//    }
-
     val value = lruCache.getOrDefault(lruKey, -1l)
     if (value != -1) {
       return value
@@ -449,21 +454,12 @@ class NoEagerBindingAssociatedLazyTable(
 
     //compute Count Value Online
     partialLF.setPrefix(innerBindingKey)
-
-    totalC = partialLF.longSize()
-
+    val totalC = partialLF.longSize()
     if (totalC > 5) {
-//      val newKey =
-//        mutable.WrappedArray
-//          .make[DataType](new Array[DataType](innerBindingSize))
-//
-//      var i = 0
-//      while (i < innerBindingSize) {
-//        newKey(i) = innerBinding(i)
-//        i += 1
-//      }
       lruCache.put(lruKey.clone(), totalC)
     }
+
+//    totalC = 1l
 
     totalC
   }
@@ -566,7 +562,7 @@ class BindingAssociatedOutputTable extends BindingAssociatedCountTable {
       i += 1
     }
 
-    countTable.getOrDefault(innerBindingKey, 0)
+    countTable.getOrDefault(innerBindingKey, 0l)
   }
 
   def increment(value: DataType): Unit = {
@@ -591,7 +587,7 @@ class BindingAssociatedOutputTable extends BindingAssociatedCountTable {
   }
 
   def finalizeAggregate() = {
-    val oldValue = countTable.getOrDefault(lastInnerBindingKey, 0)
+    val oldValue = countTable.getOrDefault(lastInnerBindingKey, 0l)
     val newValue = oldValue + lastAggregateCount
 
     if (oldValue == 0) {
@@ -746,6 +742,52 @@ class ArrayLongLRUCache(cacheSize: Int = DISCConf.defaultConf().cacheSize)
 //i = 0
 //while (i < lazyTableNum) {
 //C *= lazyTables(i).getCount()
+//i += 1
+//}
+//outputTable.increment(C)
+//}
+//} else {
+//if (lazyTableNum == 0 && eagerTableNum == 0) {
+//
+//while (lf.hasNext) {
+//lf.next()
+//outputTable.increment(1l)
+//}
+//} else if (lazyTableNum == 1 && eagerTableNum == 0) {
+//
+//val theLazyTable = lazyTables(0)
+//while (lf.hasNext) {
+//lf.next()
+//outputTable.increment(theLazyTable.getCount())
+//
+//}
+//} else if (lazyTableNum != 0 && eagerTableNum == 0) {
+//
+//while (lf.hasNext) {
+//lf.next()
+//var C = 1l
+//i = 0
+//while (i < lazyTableNum) {
+//C *= lazyTables(i).getCount()
+//i += 1
+//}
+//outputTable.increment(C)
+//}
+//} else if (lazyTableNum == 0 && eagerTableNum == 1) {
+//
+//while (lf.hasNext) {
+//val theEagerTable = eagerTables(0)
+//lf.next()
+//outputTable.increment(theEagerTable.getCount())
+//}
+//} else if (lazyTableNum == 0 && eagerTableNum != 0) {
+//
+//while (lf.hasNext) {
+//lf.next()
+//var C = 1l
+//i = 0
+//while (i < eagerTableNum) {
+//C *= eagerTables(i).getCount()
 //i += 1
 //}
 //outputTable.increment(C)

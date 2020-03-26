@@ -6,7 +6,6 @@ import org.apache.spark.adj.database.RelationSchema
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-//TODO: few more test needed
 class RelationDecomposer(schemas: Seq[RelationSchema]) {
   def decomposeTree(): IndexedSeq[RelationGHDTree] = {
 
@@ -26,7 +25,7 @@ class RelationDecomposer(schemas: Seq[RelationSchema]) {
       .map(ghd => (ghd.V.toSeq, ghd.E.toSeq))
 
     //construct RelationGHD
-    ghds.par
+    ghds
       .map { t =>
         val edgeToSchema =
           notContainedSchemas.map(f => (f.attrIDs.toSet, f)).toMap
@@ -81,7 +80,6 @@ class RelationDecomposer(schemas: Seq[RelationSchema]) {
       )
   }
 
-  //TODO: test
   def decomposeStar(
     isSingleAttrFactorization: Boolean = true
   ): IndexedSeq[RelationGHDStar] = {

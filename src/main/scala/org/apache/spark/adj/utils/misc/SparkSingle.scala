@@ -48,7 +48,7 @@ object SparkSingle {
       case false =>
         SparkSession
           .builder()
-          .master("local[1]")
+          .master("local[8]")
 //          .config(
 //            "spark.serializer",
 //            "org.apache.spark.serializer.KryoSerializer"

@@ -217,7 +217,7 @@ class ExpQuery(data: String) {
   }
 
   //experiment query
-  private val debugDml = "A-B;B-C;C-D;D-E;E-F;F-A;A-C;B-F;C-E;C-F;D-F;A-G;C-G;"
+  private val debugDml = "A-C;A-D;B-C;B-D;"
 
   //------------------2-node------------------
   //edge

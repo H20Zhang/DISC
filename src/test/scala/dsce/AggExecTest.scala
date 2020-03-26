@@ -1,6 +1,7 @@
 package dsce
 
 import adj.SparkFunSuite
+import org.apache.spark.adj.utils.misc.Conf
 import org.apache.spark.dsce.Query
 import org.apache.spark.dsce.plan.{
   MultiplyAggregateExec,
@@ -110,13 +111,19 @@ class AggExecTest extends SparkFunSuite {
     multiplyAggExec.globalAggregate()
   }
 
-  test("6-node") {
-    val optimizedMultiplyAgg = getOptimizedPlan(dataset, "triangleCore")
+  test("debug") {
+
+//    Conf.defaultConf().setOneCoreLocalCluster()
+    Conf.defaultConf().setLocalCluster()
+
+    val optimizedMultiplyAgg = getOptimizedPlan(dataset, "t23")
+//    val optimizedMultiplyAgg = getOptimizedPlan(dataset, "square")
+//    val optimizedMultiplyAgg = getOptimizedPlan(dataset, "debug")
     println(s"optimizedMultiplyAgg:\n${optimizedMultiplyAgg.prettyString()}")
     val multiplyAggExec =
       optimizedMultiplyAgg.phyiscalPlan().asInstanceOf[MultiplyAggregateExec]
     println(s"PhysicalMultiplyAgg:\n${multiplyAggExec.prettyString()}")
 
-//    multiplyAggExec.globalAggregate()
+    multiplyAggExec.globalAggregate()
   }
 }
