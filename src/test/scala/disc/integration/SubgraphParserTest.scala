@@ -1,6 +1,6 @@
 package disc.integration
 
-import adj.SparkFunSuite
+import disc.SparkFunSuite
 import org.apache.spark.disc.parser.SubgraphParser
 import org.apache.spark.disc.testing.{ExpData, ExpQuery}
 import org.apache.spark.sql.Row

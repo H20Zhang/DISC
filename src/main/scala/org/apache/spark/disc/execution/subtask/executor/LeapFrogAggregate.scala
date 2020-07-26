@@ -1,37 +1,25 @@
 package org.apache.spark.disc.execution.subtask.executor
 
-import java.util
-
 import it.unimi.dsi.fastutil.longs
 import it.unimi.dsi.fastutil.longs.LongArrayList
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
-import org.apache.spark.adj.database.{Catalog, RelationSchema}
-import org.apache.spark.adj.database.Catalog.{AttributeID, DataType}
-import org.apache.spark.adj.execution.hcube.TrieHCubeBlock
-import org.apache.spark.adj.execution.subtask.{
-  TrieConstructedAttributeOrderInfo,
-  TrieConstructedLeapFrogJoinSubTask
-}
-import org.apache.spark.adj.execution.subtask.executor.{
-  LongSizeIterator,
-  PartialLeapFrogJoin,
-  TrieConstructedLeapFrogJoin
-}
-import org.apache.spark.adj.execution.subtask.utils.{
+import org.apache.spark.disc.DISCConf
+import org.apache.spark.disc.catlog.Catalog.{AttributeID, DataType}
+import org.apache.spark.disc.catlog.Schema
+import org.apache.spark.disc.execution.hcube.TrieHCubeBlock
+import org.apache.spark.disc.execution.subtask.utils.{
   ArraySegment,
   LRUCache,
   Trie
 }
-import org.apache.spark.disc.DISCConf
 import org.apache.spark.disc.execution.subtask.{
-  EagerTableSubInfo,
   LazyTableSubInfo,
   LeapFrogAggregateInfo,
-  LeapFrogAggregateSubTask
+  LeapFrogAggregateSubTask,
+  TrieConstructedAttributeOrderInfo,
+  TrieConstructedLeapFrogJoinSubTask
 }
-import org.apache.spark.disc.util.{Counter, Graph}
-
-import scala.collection.mutable
+import org.apache.spark.disc.util.misc.Graph
 
 class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
 
@@ -229,7 +217,7 @@ class BindingAssociatedEagerTable(trie: Trie)
 
 abstract class AbstractBindingAssociatedLazyTable(
   lazyTableSubInfo: LazyTableSubInfo,
-  schemaToTrieMap: Map[RelationSchema, TrieHCubeBlock]
+  schemaToTrieMap: Map[Schema, TrieHCubeBlock]
 ) extends BindingAssociatedCountTable {
 
   //binding conversion related variable
@@ -313,10 +301,9 @@ abstract class AbstractBindingAssociatedLazyTable(
   }
 }
 
-class BindingAssociatedLazyTable(
-  info: LazyTableSubInfo,
-  schemaToTrieMap: Map[RelationSchema, TrieHCubeBlock]
-) extends AbstractBindingAssociatedLazyTable(info, schemaToTrieMap) {
+class BindingAssociatedLazyTable(info: LazyTableSubInfo,
+                                 schemaToTrieMap: Map[Schema, TrieHCubeBlock])
+    extends AbstractBindingAssociatedLazyTable(info, schemaToTrieMap) {
 
   override def getCount(): Long = {
     //update the input binding
@@ -357,7 +344,7 @@ class BindingAssociatedLazyTable(
 
 class NoEagerBindingAssociatedLazyTable(
   info: LazyTableSubInfo,
-  schemaToTrieMap: Map[RelationSchema, TrieHCubeBlock]
+  schemaToTrieMap: Map[Schema, TrieHCubeBlock]
 ) extends AbstractBindingAssociatedLazyTable(info, schemaToTrieMap) {
 
   override def getCount(): Long = {
@@ -387,7 +374,7 @@ class NoEagerBindingAssociatedLazyTable(
 
 class ConsecutiveNoEagerBindingAssociatedLazyTable(
   info: LazyTableSubInfo,
-  schemaToTrieMap: Map[RelationSchema, TrieHCubeBlock]
+  schemaToTrieMap: Map[Schema, TrieHCubeBlock]
 ) extends AbstractBindingAssociatedLazyTable(info, schemaToTrieMap) {
 
   lazy val lastInnerBinding: Array[DataType] =

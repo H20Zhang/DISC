@@ -1,8 +1,8 @@
 package org.apache.spark.disc.testing
 
-import org.apache.spark.adj.utils.misc.Conf
 import org.apache.spark.disc.DISCConf
 import org.apache.spark.disc.DISCConf.{ExecutionMode, QueryType}
+import org.apache.spark.disc.util.misc.Conf
 
 object ExpEntry {
   def main(args: Array[String]): Unit = {
@@ -60,12 +60,6 @@ object ExpEntry {
           case "Parallel" => Conf.defaultConf().setLocalCluster()
           case "Dist"     => Conf.defaultConf().setCluster()
         }
-
-//        if (config.platform) {
-////          Conf.defaultConf().setCluster()
-////          Conf.defaultConf().setOneCoreLocalCluster()
-//          Conf.defaultConf().setLocalCluster()
-//        }
 
         val executor =
           new ExpExecutor(conf)

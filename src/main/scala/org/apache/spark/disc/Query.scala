@@ -1,9 +1,5 @@
 package org.apache.spark.disc
 
-import org.apache.spark.adj.utils.misc.Conf
-import org.apache.spark.adj.utils.misc.Conf.Method.Value
-import org.apache.spark.adj.utils.misc.Conf.{Method, Mode}
-import org.apache.spark.adj.utils.misc.Conf.Mode.{Mode, Value}
 import org.apache.spark.disc.DISCConf.{ExecutionMode, QueryType}
 import org.apache.spark.disc.parser.SubgraphParser
 

@@ -1,12 +1,8 @@
 package disc.integration
 
-import org.apache.spark.adj.optimization.costBased.decomposition.relationGraph.RelationDecomposer
-import org.apache.spark.adj.utils.exp.ExpQueryHelper
-import org.apache.spark.disc.testing.{
-  ExpQuery,
-  ExtraExpEntry,
-  UniqueQueryComputer
-}
+import org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph.RelationDecomposer
+import org.apache.spark.disc.testing.{ExpQuery, ExpQueryHelper}
+import org.apache.spark.disc.util.querygen.{ExtraExpEntry, UniqueQueryComputer}
 import org.scalatest.FunSuite
 
 class GHDTest extends FunSuite {

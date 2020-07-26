@@ -1,6 +1,6 @@
 package disc.integration
 
-import adj.SparkFunSuite
+import disc.SparkFunSuite
 import org.apache.spark.disc.Query
 import org.apache.spark.disc.testing.{ExpData, ExpQuery}
 

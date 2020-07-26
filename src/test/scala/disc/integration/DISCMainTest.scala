@@ -1,8 +1,8 @@
 package disc.integration
 
-import adj.SparkFunSuite
+import disc.SparkFunSuite
 import org.apache.spark.disc.DISCConf.QueryType
-import org.apache.spark.disc.optimization.aggregate.CountTableCache
+import org.apache.spark.disc.optimization.rule_based.aggregate.CountTableCache
 import org.apache.spark.disc.testing.{ExpData, ExpEntry, ExpQuery}
 import org.apache.spark.disc.{DISCConf, Query}
 

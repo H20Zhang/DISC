@@ -1,9 +1,9 @@
 package disc.integration
 
-import adj.SparkFunSuite
+import disc.SparkFunSuite
 import org.apache.spark.disc.DISCConf.QueryType
 import org.apache.spark.disc.testing.{ExpData, ExpQuery}
-import org.apache.spark.disc.util.Fraction
+import org.apache.spark.disc.util.misc.Fraction
 import org.apache.spark.disc.{DISCConf, Query}
 
 class SubgraphCountLogicalRuleTest extends SparkFunSuite {

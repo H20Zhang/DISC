@@ -1,12 +1,10 @@
 package org.apache.spark.disc.testing
 
-import org.apache.spark.adj.plan.PhysicalPlan
-import org.apache.spark.adj.utils.exp.FutureTask
-import org.apache.spark.adj.utils.misc.SparkSingle
-import org.apache.spark.disc.{DISCConf, Query}
 import org.apache.spark.disc.DISCConf.ExecutionMode
-import org.apache.spark.disc.optimization.aggregate.CountTableCache
-import org.apache.spark.disc.util.Counter
+import org.apache.spark.disc.optimization.rule_based.aggregate.CountTableCache
+import org.apache.spark.disc.plan.PhysicalPlan
+import org.apache.spark.disc.util.misc.{Counter, SparkSingle}
+import org.apache.spark.disc.{DISCConf, Query}
 
 import scala.collection.mutable
 

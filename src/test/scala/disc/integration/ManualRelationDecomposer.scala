@@ -1,7 +1,7 @@
 package disc.integration
 
-import adj.SparkFunSuite
-import org.apache.spark.disc.optimization.aggregate.ManualRelationDecomposer
+import disc.SparkFunSuite
+import org.apache.spark.disc.optimization.rule_based.aggregate.ManualRelationDecomposer
 import org.apache.spark.disc.testing.{ExpData, ExpQuery}
 
 class ManualRelationDecomposerTest extends SparkFunSuite {

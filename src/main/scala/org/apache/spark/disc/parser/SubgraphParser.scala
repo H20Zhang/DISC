@@ -1,8 +1,12 @@
 package org.apache.spark.disc.parser
 
-import org.apache.spark.adj.database.Catalog
-import org.apache.spark.adj.plan.{LogicalPlan, UnOptimizedJoin, UnOptimizedScan}
-import org.apache.spark.disc.plan.UnOptimizedSubgraphCount
+import org.apache.spark.disc.catlog.Catalog
+import org.apache.spark.disc.plan.{
+  LogicalPlan,
+  UnOptimizedJoin,
+  UnOptimizedScan,
+  UnOptimizedSubgraphCount
+}
 
 class SubgraphParser {
   import scala.util.parsing.combinator._

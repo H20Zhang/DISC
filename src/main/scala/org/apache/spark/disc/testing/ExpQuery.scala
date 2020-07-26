@@ -1,9 +1,8 @@
 package org.apache.spark.disc.testing
 
-import org.apache.spark.adj.database.{Catalog, Relation}
-import org.apache.spark.adj.execution.misc.DataLoader
-import org.apache.spark.adj.utils.exp.ExpQueryHelper
 import org.apache.spark.disc.DISCConf
+import org.apache.spark.disc.catlog.{Catalog, Relation}
+import org.apache.spark.disc.util.misc.DataLoader
 
 class ExpQuery(data: String) {
 

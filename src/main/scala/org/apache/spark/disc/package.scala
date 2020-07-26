@@ -1,7 +1,7 @@
 package org.apache.spark
 
 import org.apache.log4j.Logger
-import org.apache.spark.adj.database.Catalog
+import org.apache.spark.disc.catlog.Catalog
 import org.jgrapht.graph.{DefaultEdge, DefaultUndirectedGraph}
 
 import scala.collection.mutable
@@ -44,17 +44,6 @@ package object disc {
       .configure("./src/resources/log4j.preperties")
 
     lazy val logger: Logger = Logger.getLogger(this.getClass)
-    //    def info(str:String) = {
-    //      logger.info(str)
-    //    }
-    //
-    //    def debug(str:String) = {
-    //      logger.debug(str)
-    //    }
-    //
-    //    def error(str:String) = {
-    //      logger.error(str)
-    //    }
   }
 
   object Stage extends Enumeration {
@@ -72,10 +61,6 @@ package object disc {
       val catalog = Catalog.defaultCatalog()
 
       val id = catalog.registerAttr(countAttr)
-
-//      println(
-//        s"countAttr:${countAttr}, id:${id}, retrievedCountAttr:${catalog.getAttribute(id)}"
-//      )
 
       id
     }

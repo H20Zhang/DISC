@@ -1,7 +1,7 @@
 package disc.integration
 
-import adj.SparkFunSuite
-import org.apache.spark.adj.utils.misc.Conf
+import disc.SparkFunSuite
+import org.apache.spark.disc.util.misc.Conf
 import org.apache.spark.disc.Query
 import org.apache.spark.disc.plan.{
   MultiplyAggregateExec,

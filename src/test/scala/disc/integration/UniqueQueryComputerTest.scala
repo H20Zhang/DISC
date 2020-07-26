@@ -1,7 +1,7 @@
 package disc.integration
 
-import org.apache.spark.adj.utils.exp.ExpQueryHelper
-import org.apache.spark.disc.testing.UniqueQueryComputer
+import org.apache.spark.disc.testing.ExpQueryHelper
+import org.apache.spark.disc.util.querygen.UniqueQueryComputer
 import org.scalatest.FunSuite
 
 class UniqueQueryComputerTest extends FunSuite {
