@@ -6,7 +6,6 @@ import org.apache.spark.adj.database.RelationSchema
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-//TODO: few more test needed
 class RelationDecomposer(schemas: Seq[RelationSchema]) {
   def decomposeTree(): IndexedSeq[RelationGHDTree] = {
 
@@ -17,10 +16,13 @@ class RelationDecomposer(schemas: Seq[RelationSchema]) {
     val notContainedSchemas = schemas.diff(containedSchemas)
 
     //find the GHD Decomposition for the notContainedSchemas
-    val E = notContainedSchemas.map(f => RelationEdge(f.attrIDs.toSet))
-    val V = E.flatMap(_.attrs).distinct
+    val E = notContainedSchemas.map(f => RelationEdge(f.attrIDs.toSet)).toArray
+    val V = E.flatMap(_.attrs).distinct.toArray
     val graph = RelationGraph(V, E)
-    val ghds = HyperTreeDecomposer.allGHDs(graph)
+    val ghds = HyperTreeDecomposer.genAllGHDs(graph)
+
+    ghds
+      .map(ghd => (ghd.V.toSeq, ghd.E.toSeq))
 
     //construct RelationGHD
     ghds
@@ -46,12 +48,38 @@ class RelationDecomposer(schemas: Seq[RelationSchema]) {
             }
         val connections = t.E.map(e => (e.u.id, e.v.id))
 
-        RelationGHDTree(bags, connections, t.fractionalHyperNodeWidth())
+        RelationGHDTree(
+          bags.toSeq.map(f => (f._1, f._2.toSeq)),
+          connections,
+          t.fractionalHyperNodeWidth()
+        )
       }
-      .sortBy(relationGHD => (relationGHD.fhtw, -relationGHD.E.size))
+      .toArray
+      .sortBy(
+        relationGHD =>
+          (
+            relationGHD.fhtw,
+            -relationGHD.E.size,
+            relationGHD.E
+              .map(
+                f =>
+                  relationGHD
+                    .idToGHDNode(f._1)
+                    .flatMap(f => f.attrIDs)
+                    .distinct
+                    .intersect(
+                      relationGHD
+                        .idToGHDNode(f._2)
+                        .flatMap(f => f.attrIDs)
+                        .distinct
+                    )
+                    .size
+              )
+              .sum
+        )
+      )
   }
 
-  //TODO: test
   def decomposeStar(
     isSingleAttrFactorization: Boolean = true
   ): IndexedSeq[RelationGHDStar] = {
@@ -62,10 +90,10 @@ class RelationDecomposer(schemas: Seq[RelationSchema]) {
     val notContainedSchemas = schemas.diff(containedSchemas)
 
     //find the GHD Decomposition for the notContainedSchemas
-    val E = notContainedSchemas.map(f => RelationEdge(f.attrIDs.toSet))
-    val V = E.flatMap(_.attrs).distinct
+    val E = notContainedSchemas.map(f => RelationEdge(f.attrIDs.toSet)).toArray
+    val V = E.flatMap(_.attrs).distinct.toArray
     val graph = RelationGraph(V, E)
-    val ghds = HyperTreeDecomposer.allGHDs(graph)
+    val ghds = HyperTreeDecomposer.genAllGHDs(graph)
 
     //filter out the HyperStar and construct RelationGHD
     val stars = ghds.par
@@ -126,7 +154,11 @@ class RelationDecomposer(schemas: Seq[RelationSchema]) {
         val root = bagMaps(rootId)
         val leaves = bagMaps.keys.toSeq.diff(Seq(rootId)).map(bagMaps)
 
-        RelationGHDStar(root, leaves, t.fractionHyperStarWidth(rootId))
+        RelationGHDStar(
+          root,
+          leaves.map(_.toSeq),
+          t.fractionHyperStarWidth(rootId)
+        )
       }
       .toArray
 
@@ -144,7 +176,6 @@ class RelationDecomposer(schemas: Seq[RelationSchema]) {
     }
 
   }
-
 }
 
 case class RelationGHDTree(V: Seq[(Int, Seq[RelationSchema])],
@@ -216,6 +247,22 @@ case class RelationGHDTree(V: Seq[(Int, Seq[RelationSchema])],
     }
 
     attrOrders.map(_.toArray)
+  }
+
+  override def toString: String = {
+    s"""
+       |node:${V
+         .map(
+           f =>
+             (
+               f._1,
+               f._2.map(g => g.attrs.mkString("(", ",", ")")).mkString(",")
+           )
+         )
+         .mkString("(", ",", ")")}
+       |edge:${E.mkString("(", ",", ")")}
+       |fhtw:${fhtw}
+       |""".stripMargin
   }
 
 }

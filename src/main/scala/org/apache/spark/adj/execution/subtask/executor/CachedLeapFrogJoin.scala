@@ -70,7 +70,7 @@ class CachedLeapFrogJoin(task: CachedLeapFrogJoinSubTask)
 
       lruCaches(i) = new IntArrayLRUCache(cacheSizes(i))
       lruCacheKeys(i) =
-        mutable.WrappedArray.make[Int](new Array[Int](groupPoses(i)._1.size))
+        mutable.WrappedArray.make[Long](new Array[Long](groupPoses(i)._1.size))
 
       i += 1
     }
@@ -252,7 +252,8 @@ class CachedLeapFrogJoin(task: CachedLeapFrogJoinSubTask)
     }
   }
 
-  class ArrayIt(content: Array[Array[Int]]) extends Iterator[Array[DataType]] {
+  class ArrayIt(content: Array[Array[DataType]])
+      extends Iterator[Array[DataType]] {
     var start = 0
     var end = content.size
 
@@ -266,7 +267,7 @@ class CachedLeapFrogJoin(task: CachedLeapFrogJoinSubTask)
       arr
     }
 
-    override def size: DataType = {
+    override def size: Int = {
       content.size
     }
   }
@@ -276,7 +277,7 @@ class CachedLeapFrogJoin(task: CachedLeapFrogJoinSubTask)
                                   content: Array[Array[DataType]]): Unit = {
 
     val keySize = groupPoses(idx)._1.size
-    val lruKey = mutable.WrappedArray.make[Int](new Array[Int](keySize))
+    val lruKey = mutable.WrappedArray.make[Long](new Array[Long](keySize))
     var i = 0
     while (i < keySize) {
       lruKey(i) = key(i)
@@ -343,13 +344,11 @@ class CachedLeapFrogJoin(task: CachedLeapFrogJoinSubTask)
     throw new Exception("initIterators() is not allowed")
   }
 
-  override protected def fixIterators(idx: DataType): Unit = {
+  override protected def fixIterators(idx: Int): Unit = {
     throw new Exception("fixIterators() is not allowed")
   }
 
-  override protected def constructIthIterator(
-    idx: DataType
-  ): Iterator[DataType] = {
+  override protected def constructIthIterator(idx: Int): Iterator[DataType] = {
     throw new Exception("constructIthIterator() is not allowed")
   }
 
@@ -384,7 +383,7 @@ class PartialLeapFrogJoin(trieTask: TrieConstructedLeapFrogJoinSubTask)
     tries = trieTask.tries.map(_.asInstanceOf[TrieHCubeBlock].content).toArray
   }
 
-  override protected def fixIterators(idx: DataType): Unit = {
+  override protected def fixIterators(idx: Int): Unit = {
 
     if (idx == startPos && firstInitialized != true) {
 

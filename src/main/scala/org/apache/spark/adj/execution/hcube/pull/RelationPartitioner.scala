@@ -26,7 +26,7 @@ class RelationPartitioner(relation: Relation, helper: HCubeHelper) {
     val partitionedRDD = relationRDD.union(sentryRDD).partitionBy(partitioner)
 
     val hcubeBlockRDD = partitionedRDD.mapPartitions { it =>
-      var shareVector: Array[DataType] = null
+      var shareVector: Array[Int] = null
       val content = it.toArray
       val array = new Array[Array[DataType]](content.size - 1)
 
@@ -36,25 +36,13 @@ class RelationPartitioner(relation: Relation, helper: HCubeHelper) {
       while (j < contentSize) {
         val (tuple, isSentry) = content(j)
         if (isSentry) {
-          shareVector = tuple
+          shareVector = tuple.map(_.toInt)
         } else {
           array(i) = tuple
           i += 1
         }
         j += 1
       }
-//
-//      content.foreach {
-//        case (tuple, isSentry) =>
-//          if (isSentry) {
-//            shareVector = tuple
-//          } else {
-//            array(i) = tuple
-//            i += 1
-//          }
-//      }
-
-//        println(s"schema:${schema}, share:${shareVector.toSeq}, content:${array.toSeq}")
 
       Iterator(
         TupleHCubeBlock(schema, shareVector, array).asInstanceOf[HCubeBlock]

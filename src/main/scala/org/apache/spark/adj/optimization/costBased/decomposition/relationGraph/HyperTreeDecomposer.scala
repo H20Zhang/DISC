@@ -1,5 +1,7 @@
 package org.apache.spark.adj.optimization.costBased.decomposition.relationGraph
 
+import java.util.concurrent.ConcurrentLinkedQueue
+
 import org.apache.spark.adj.optimization.costBased.decomposition.graph.Graph._
 import org.apache.spark.adj.optimization.costBased.decomposition.graph.HyperNodeGraph.NHyperNode
 import org.apache.spark.adj.optimization.costBased.decomposition.relationGraph.HyperGraph.HyperNode
@@ -8,121 +10,260 @@ import org.apache.spark.adj.utils.misc.LogAble
 import org.apache.spark.adj.utils.testing.GraphGenerator
 import org.apache.spark.adj.utils.testing.GraphGenerator.PatternName
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.JavaConversions
 
 object HyperTreeDecomposer {
 
+  def genAllGHDs(g: RelationGraph): Array[HyperTree] = {
+//    if (g.E().size > (g.V().size + 2)) {
+    genAllGHDsByEnumeratingNode(g)
+//    } else {
+//      genAllGHDsByEnumeratingEdge(g)
+//    }
+  }
+
   //  Find all GHD decomposition
-  def allGHDs(g: RelationGraph) = {
+  def genAllGHDsByEnumeratingEdge(g: RelationGraph) = {
 
-    var extendableTree = ArrayBuffer[(HyperTree, Seq[RelationEdge])]()
+    var extendableTree = ArrayBuffer[(HyperTree, Array[RelationEdge])]()
     val GHDs = ArrayBuffer[HyperTree]()
-    extendableTree += ((HyperTree(ArrayBuffer(), ArrayBuffer()), g.E()))
-
+    extendableTree += ((HyperTree(Array(), Array()), g.E()))
     var counter = 0
 
     while (!extendableTree.isEmpty) {
 
       counter += 1
 
-      val (hypertree, remainingEdges) = extendableTree.head
-      extendableTree = extendableTree.drop(1)
+      val (hypertree, remainingEdges) = extendableTree.last
+      extendableTree = extendableTree.dropRight(1)
 
-      remainingEdges.isEmpty match {
-        case true => GHDs += hypertree
-        case false => {
-          val newNodes = potentialHyperNodes(g, hypertree, remainingEdges)
-
-          val newTrees = newNodes
-            .map {
-              case (node, edges) =>
-                (hypertree.addHyperNode(node).headOption, edges)
-            }
-            .filter(_._1.nonEmpty)
-            .map(f => (f._1.get, f._2))
-
-          newTrees.foreach(nodeAndedges => extendableTree += nodeAndedges)
-
+      if (remainingEdges.isEmpty) {
+        GHDs += hypertree
+      } else {
+        val newNodes =
+          genPotentialHyperNodesByEnumeratingEdge(g, hypertree, remainingEdges)
+        var i = 0
+        val end = newNodes.size
+        while (i < end) {
+          val (hyperNode, remainingEdges) = newNodes(i)
+          val hypertrees = hypertree.addHyperNode(hyperNode)
+          hypertrees.foreach { hypertree =>
+            extendableTree += ((hypertree, remainingEdges))
+          }
+          i += 1
         }
       }
     }
-
-    GHDs
+    GHDs.toArray
   }
 
   //  Find the hyper-nodes, the graph inside a hyper-node must be connected and node induced graph
-  private def potentialHyperNodes(
+  private def genPotentialHyperNodesByEnumeratingEdge(
     basedGraph: RelationGraph,
     hypertree: HyperTree,
-    remainEdges: Seq[RelationEdge]
-  ): Seq[(HyperNode, Seq[RelationEdge])] = {
+    remainEdges: Array[RelationEdge]
+  ): Array[(HyperNode, Array[RelationEdge])] = {
 
-    val potentialEdgeSets = SeqUtil.subset(remainEdges)
+    var potentialEdgeSets: Array[Array[RelationEdge]] = null
+    if (remainEdges.size == basedGraph.E().size) {
+      potentialEdgeSets = SeqUtil.subset(remainEdges).map(_.toArray).toArray
+      potentialEdgeSets =
+        potentialEdgeSets.filter(arr => arr.contains(basedGraph.E().head))
+    } else {
+      potentialEdgeSets = SeqUtil.subset(remainEdges).map(_.toArray).toArray
+    }
 
-    //    filter the edgeSet that result in disconnected graph
-    var potentialGraphs = potentialEdgeSets
+    var potentialGraphs = potentialEdgeSets.par
       .map(
         edgeSet =>
           RelationGraph(edgeSet.flatMap(f => f.attrs).distinct, edgeSet)
       )
 
-    //    convert the graph into induced graph
-//    potentialGraphs = potentialGraphs
-//      .map(graph => graph.toInducedGraph(basedGraph).E())
-//      .distinct
-//      .map(E => RelationGraph(E.flatMap(_.attrs).distinct, E))
-
-    //    previous node in hypertree must contain new node as subgraph
+    //    hypernodes must be connected and
+    //    previous node in hypertree must not contain new node as subgraph
     potentialGraphs = potentialGraphs
-      .filter(
-        g =>
-          hypertree.V
-            .forall(
-              n =>
-                !g.toInducedGraph(basedGraph).containSubgraph(n.g) && !n.g
-                  .containSubgraph(g.toInducedGraph(basedGraph))
+      .filter { g =>
+        val inducedG = g.toInducedGraph(basedGraph)
+        g.isConnected() && hypertree.V
+          .forall(
+            n =>
+              !inducedG.containSubgraph(n.g) && !n.g
+                .containSubgraph(inducedG)
           )
-      )
+      }
 
-    //    only preserve hypernode that are connected
-    val validGraphs = potentialGraphs.filter {
-      _.isConnected()
+    potentialGraphs
+      .map { g =>
+        val inducedG = g.toInducedGraph(basedGraph)
+        val inducedEdges = inducedG.E()
+        val remainingEdges = remainEdges.diff(g.E())
+        (
+          HyperNode(
+            RelationGraph(inducedEdges.flatMap(_.attrs).distinct, inducedEdges)
+          ),
+          remainingEdges
+        )
+      }
+  }.toArray
+
+  //  Find all GHD decomposition
+  def genAllGHDsByEnumeratingNode(g: RelationGraph) = {
+
+    val numAllEdges = g.E().size
+    val numAllNodes = g.V().size
+    val potentialConnectedInducedSubgraphs =
+      computeConnectedNodeInducedSubgraphs(g)
+
+    var extendableTree = new Array[(HyperTree, Array[NodeID])](1)
+    val GHDs = new ConcurrentLinkedQueue[HyperTree]()
+    extendableTree(0) = ((HyperTree(Array(), Array()), Array()))
+
+    while (!extendableTree.isEmpty) {
+
+      val newExtendableTree =
+        new ConcurrentLinkedQueue[(HyperTree, Array[NodeID])]()
+      extendableTree
+        .filter {
+          case (hypertree, coveredNodes) =>
+            if (coveredNodes.size == numAllNodes) {
+
+              val coveredEdgeSets = mutable.HashSet[RelationEdge]()
+              hypertree.V.foreach { hv =>
+                val E = hv.g.E()
+                E.foreach(e => coveredEdgeSets.add(e))
+              }
+
+              if (coveredEdgeSets.size == numAllEdges) {
+                GHDs.add(hypertree)
+              }
+
+              false
+            } else {
+              true
+            }
+        }
+        .foreach {
+          case (hypertree, coveredNodes) =>
+            val newNodes =
+              genPotentialHyperNodesByEnumeratingNode(
+                g,
+                hypertree,
+                coveredNodes,
+                potentialConnectedInducedSubgraphs
+              )
+
+            newNodes.foreach {
+              case (hyperNode, coveredNodes) =>
+                val hypertrees = hypertree.addHyperNode(hyperNode)
+                hypertrees.foreach { hypertree =>
+                  newExtendableTree.add((hypertree, coveredNodes))
+                }
+            }
+        }
+
+      newExtendableTree.toArray
+      val it = newExtendableTree.iterator()
+      val buffer = ArrayBuffer[(HyperTree, Array[NodeID])]()
+      while (it.hasNext) {
+        buffer += it.next()
+      }
+      extendableTree = buffer.toArray
+
     }
 
-    validGraphs
-      .map(g => (g, remainEdges.diff(g.E())))
-      .filter(_._1.containEdge(remainEdges.head))
-      .map {
-        case (graph, edges) => (graph.toInducedGraph(basedGraph).E(), edges)
-      }
-      .distinct
-      .map {
-        case (e, edges) =>
-          (HyperNode(RelationGraph(e.flatMap(_.attrs).distinct, e)), edges)
-      }
-
-//    hypertree.isEmpty() match {
-//      case true => {
-//        validGraphs
-//          .map(g => (g, remainEdges.diff(g.E())))
-//          .filter(_._1.containEdge(remainEdges.head))
-//          .map{case (graph,edges) => (graph.toInducedGraph(basedGraph).E(), edges)}
-//          .distinct
-//          .map{case(e, edges) => (HyperNode(RelationGraph(e.flatMap(_.attrs).distinct, e)), edges)}
-//      }
-//      case false => {
-//        validGraphs
-//          .map(g => (HyperNode(g), remainEdges.diff(g.E())))
-////          .filter {
-////            case (hypernode, remainingEdge) =>
-////              hypertree.V.exists(
-////                hypernode1 => hypernode.g.containAnyNodes(hypernode1.g.V())
-////              ) // only preserve NHyperNode that are connected to prev HyperTree
-////          }
-//          .filter(_._1.g.containEdge(remainEdges.head)) // select the NHyperNode that contains the first edge of remaining edges to start explore
-//
-//      }
-//    }
+    val it = GHDs.iterator()
+    val buffer = ArrayBuffer[HyperTree]()
+    while (it.hasNext) {
+      buffer += it.next()
+    }
+    buffer.toArray
   }
 
+  private def computeConnectedNodeInducedSubgraphs(
+    basedGraph: RelationGraph
+  ) = {
+    val potentialNodeSets: Array[Array[NodeID]] =
+      SeqUtil.subset(basedGraph.V).map(_.toArray).toArray
+
+    val potentialGraphs = potentialNodeSets
+      .map(nodeSet => basedGraph.nodeInducedSubgraph(nodeSet))
+      .filter { g =>
+        g.isConnected()
+      }
+
+    potentialGraphs
+  }
+
+  //  Find the hyper-nodes, the graph inside a hyper-node must be connected and node induced graph
+  private def genPotentialHyperNodesByEnumeratingNode(
+    basedGraph: RelationGraph,
+    hypertree: HyperTree,
+    coveredNodes: Array[NodeID],
+    connectedNodeInducedSubgraphs: Array[RelationGraph]
+  ): Array[(HyperNode, Array[NodeID])] = {
+
+    var potentialGraphs = connectedNodeInducedSubgraphs
+
+    if (coveredNodes.isEmpty) {
+      potentialGraphs = potentialGraphs.filter { g =>
+        g.V().contains(basedGraph.V.head)
+      }
+    }
+
+    potentialGraphs = potentialGraphs
+      .filter { g =>
+        hypertree.V
+          .forall(
+            n => g.V().diff(n.g.V()).nonEmpty && n.g.V().diff(g.V()).nonEmpty
+          )
+      }
+
+    potentialGraphs
+      .map { g =>
+        val newCoveredNodes = (coveredNodes ++ g.V()).distinct
+        (HyperNode(g), newCoveredNodes)
+      }
+  }
 }
+
+//    while (!extendableTree.isEmpty) {
+//      counter += 1
+//
+//      val (hypertree, coveredNodes) = extendableTree.last
+//      extendableTree = extendableTree.dropRight(1)
+//
+//      if (coveredNodes.size == numAllNodes) {
+//
+//        val coveredEdgeSets = mutable.HashSet[RelationEdge]()
+//        hypertree.V.foreach { hv =>
+//          val E = hv.g.E()
+//          E.foreach(e => coveredEdgeSets.add(e))
+//        }
+//
+//        if (coveredEdgeSets.size == numAllEdges) {
+//          GHDs += hypertree
+//        }
+//      } else {
+//        val newNodes =
+//          genPotentialHyperNodesByEnumeratingNode(
+//            g,
+//            hypertree,
+//            coveredNodes,
+//            potentialConnectedInducedSubgraphs
+//          )
+//
+//        var i = 0
+//        val end = newNodes.size
+//        while (i < end) {
+//          val (hyperNode, coveredNodes) = newNodes(i)
+//          val hypertrees = hypertree.addHyperNode(hyperNode)
+//          hypertrees.foreach { hypertree =>
+//            extendableTree += ((hypertree, coveredNodes))
+//          }
+//          i += 1
+//        }
+//      }
+//
+//    }

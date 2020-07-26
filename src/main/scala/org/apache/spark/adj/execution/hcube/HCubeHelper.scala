@@ -15,7 +15,7 @@ class HCubeHelper(@transient query: HCubePlan) extends Serializable {
 
   def taskPartitioner = new HCubePartitioner(shareSpace.values.toArray)
 
-  def genShareForAttrs(attrsID: Seq[AttributeID]) = {
+  def genShareForAttrs(attrsID: Seq[AttributeID]): Array[Array[Int]] = {
     val attrsShareSpace = attrsID
       .filter(shareSpace.contains)
       .map(attrID => shareSpace.get(attrID).get)
@@ -37,10 +37,8 @@ class HCubeHelper(@transient query: HCubePlan) extends Serializable {
     buffer.toArray
   }
 
-  def genShareForRelation(id: RelationID) = {
-
+  def genShareForRelation(id: RelationID): Array[Array[Int]] = {
     val schema = query.idForRelation(id).schema
-    println(s"schema:${schema}")
     genShareForAttrs(schema.attrIDs)
   }
 
@@ -51,7 +49,6 @@ class HCubeHelper(@transient query: HCubePlan) extends Serializable {
 
     val attrIDs = shareSpace.keys.toArray
     val shareSpaceVector = shareSpace.values.toArray
-
     val relations = query.relations
     val taskPartitioner = new HCubePartitioner(shareSpaceVector)
     val partitioners =
@@ -92,6 +89,6 @@ class HCubeHelper(@transient query: HCubePlan) extends Serializable {
 
   // generate the sentry tuples, which consists of (sentryTuple, isSentryTuple)
   def genSentry(id: RelationID): Seq[(Array[DataType], Boolean)] = {
-    genShareForRelation(id).map((_, true))
+    genShareForRelation(id).map(f => f.map(_.toLong)).map((_, true))
   }
 }

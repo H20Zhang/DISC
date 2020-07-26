@@ -40,20 +40,21 @@ class Catalog extends Serializable {
   }
 
   def addOrReplaceContent(schema: RelationSchema,
-                          content: RDD[Array[DataType]]): Int = {
+                          content: RDD[Array[DataType]]): RelationID = {
     val id = _schemaToID(schema)
     _memoryStore(id) = content
     id
   }
 
-  def add(schema: RelationSchema, dataAdress: String): Int = {
-    val id = add(schema)
+  def registerSchema(schema: RelationSchema, dataAdress: String): RelationID = {
+    val id = registerSchema(schema)
     _diskStore(id) = dataAdress
     id
   }
 
-  def add(schema: RelationSchema, content: RDD[Array[DataType]]): Int = {
-    val id = add(schema)
+  def registerSchema(schema: RelationSchema,
+                     content: RDD[Array[DataType]]): RelationID = {
+    val id = registerSchema(schema)
     _memoryStore(id) = content
     id
   }
@@ -63,8 +64,8 @@ class Catalog extends Serializable {
     _memoryStore(schema.id.get) = content
   }
 
-//  add relation schema to the database
-  def add(schema: RelationSchema): Int = synchronized {
+//  add relation schema to the adj.database
+  def registerSchema(schema: RelationSchema): RelationID = synchronized {
 
     if (_nameToSchema.contains(schema.name)) {
       throw new Exception(s"Relation${schema.name} is duplicated ")
@@ -81,15 +82,15 @@ class Catalog extends Serializable {
 
         relationIDCount += 1
 
-        schema.attrs.foreach(add)
+        schema.attrs.foreach(registerAttr)
 
         id
       }
     }
   }
 
-//  add attribute to database
-  def add(attribute: Attribute): Int = {
+//  add attribute to adj.database
+  def registerAttr(attribute: Attribute): AttributeID = {
 
     _attributeToID.get(attribute) match {
       case Some(id) => id
@@ -146,9 +147,10 @@ class Catalog extends Serializable {
 
 object Catalog extends Serializable {
   var _catalog = new Catalog
+  val NotExists: DataType = 0
 
   type Attribute = String
-  type DataType = Int
+  type DataType = Long
   type AttributeID = Int
   type RelationID = Int
 

@@ -1,4 +1,6 @@
 package org.apache.spark.adj.execution.subtask.utils;
+import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
+
 import java.util.LinkedHashMap;
 import java.util.Collection;
 import java.util.Map;
@@ -20,7 +22,7 @@ import java.util.ArrayList;
  * Multi-licensed: EPL / LGPL / GPL / AL / BSD.
  */
 public class LRUCache<K, V> {
-    private static final float hashTableLoadFactor = 0.75f;
+    private static final float hashTableLoadFactor = 0.5f;
     private LinkedHashMap<K, V> map;
     private int cacheSize;
 
@@ -35,6 +37,7 @@ public class LRUCache<K, V> {
         this.cacheSize = cacheSize;
         int hashTableCapacity = (int) Math
                 .ceil(cacheSize / hashTableLoadFactor) + 1;
+
         map = new LinkedHashMap<K, V>(hashTableCapacity, hashTableLoadFactor,
                 true) {
             // (an anonymous inner class)
@@ -58,6 +61,22 @@ public class LRUCache<K, V> {
      */
     public V get(K key) {
         return map.get(key);
+    }
+
+    public V getOrDefault(K key, V value) {
+        return map.getOrDefault(key, value);
+    }
+
+    /**
+     * Check if an entry is contained in the cache.<br>
+     *
+     * @param key
+     *            the key whose associated value is to be returned.
+     * @return the value associated to this key, or null if no value with this
+     *         key exists in the cache.
+     */
+    public Boolean contain(K key) {
+        return map.containsKey(key);
     }
 
     /**

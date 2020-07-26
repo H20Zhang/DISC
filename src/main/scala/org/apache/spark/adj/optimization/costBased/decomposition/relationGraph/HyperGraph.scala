@@ -28,7 +28,7 @@ object HyperGraph {
 
     val id = g.id
     //    Construct induced hyper-node according to the nodeset of current hypernode
-    def toInducedHyperNode(edges: Seq[RelationEdge]): HyperNode = {
+    def toInducedHyperNode(edges: Array[RelationEdge]): HyperNode = {
       val newG = g.toInducedGraph(edges)
       HyperNode(newG)
     }
@@ -46,7 +46,7 @@ object HyperGraph {
 }
 
 // We regard GHD as a special kinds of hypertree
-case class HyperTree(val V: Seq[HyperNode], val E: Seq[HyperEdge])
+case class HyperTree(val V: Array[HyperNode], val E: Array[HyperEdge])
     extends HyperGraph(V, E) {
 
   private lazy val vToLocalIdMap = V.zipWithIndex.toMap
@@ -55,32 +55,28 @@ case class HyperTree(val V: Seq[HyperNode], val E: Seq[HyperEdge])
   private lazy val h =
     GraphBuilder.newGraph(he.flatMap(f => ArrayBuffer(f._1, f._2)).distinct, he)
 
-  def addHyperNode(hyperNode: HyperNode): Seq[HyperTree] = {
+  def addHyperNode(hyperNode: HyperNode): Array[HyperTree] = {
 
     if (isEmpty()) {
-      return Seq(HyperTree(V :+ hyperNode, E))
+      return Array(HyperTree(V :+ hyperNode, E))
     }
 
-    val potentialHyperEdges = V
-      .filter { node1 =>
-        node1.g.containAnyNodes(hyperNode.g.V())
+    var i = 0
+    val end = V.size
+    val hypertreeBuffer = ArrayBuffer[HyperTree]()
+    while (i < end) {
+      val node = V(i)
+      if (node.g.containAnyNodes(hyperNode.g.V())) {
+        val newEdge = HyperEdge(node, hyperNode)
+        val newTree = HyperTree(V :+ hyperNode, E :+ newEdge)
+        if (newTree.isGHD()) {
+          hypertreeBuffer += newTree
+        }
       }
-      .map(node => HyperEdge(node, hyperNode))
-
-    val hypertreeList = potentialHyperEdges
-      .map { hyperedge =>
-        HyperTree(V :+ hyperNode, E :+ hyperedge)
-      }
-
-    val validHyperTreeList = hypertreeList.filter { hypertree =>
-      hypertree.isGHD()
+      i += 1
     }
 
-    if (validHyperTreeList.isEmpty) {
-      Seq()
-    } else {
-      validHyperTreeList
-    }
+    hypertreeBuffer.toArray
   }
 
   def isEmpty(): Boolean = {
@@ -89,7 +85,8 @@ case class HyperTree(val V: Seq[HyperNode], val E: Seq[HyperEdge])
 
   //    determine whether current hypertree is a GHD
   def isGHD(): Boolean = {
-    h.isTree() && satisfiesRunningPathProperty()
+//    h.isTree() &&
+    satisfiesRunningPathProperty()
   }
 
   //  Determine whether current GHD satisfies running path property
@@ -132,15 +129,10 @@ case class HyperTree(val V: Seq[HyperNode], val E: Seq[HyperEdge])
     V.map(_.g.E().size).max
   }
 
-  //TODO: test
   def fractionHyperStarWidth(rootId: Int): Double = {
     val relatedEdges = E.filter { e =>
       e.u.id == rootId || e.v.id == rootId
     }
-
-//    if (relatedEdges.isEmpty) {
-//      println(s"root:${rootId}, invalid star:${toString}")
-//    }
 
     relatedEdges.map { e =>
       val Vs = e.v.g.V() ++ e.u.g.V()

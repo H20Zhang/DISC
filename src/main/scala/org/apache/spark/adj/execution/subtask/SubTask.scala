@@ -1,6 +1,6 @@
 package org.apache.spark.adj.execution.subtask
 
-import org.apache.spark.adj.database.Catalog
+import org.apache.spark.adj.database.{Catalog, RelationSchema}
 import org.apache.spark.adj.database.Catalog.{Attribute, AttributeID, DataType}
 import org.apache.spark.adj.execution.hcube.{
   HCubeBlock,
@@ -58,7 +58,7 @@ class LeapFrogJoinSubTask(_shareVector: Array[Int],
 
   override def execute() = {
     val leapfrog = new LeapFrogJoin(this)
-//    leapfrog.init()
+//    adj.leapfrog.init()
     leapfrog
   }
 }

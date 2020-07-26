@@ -1,22 +1,405 @@
 #!/usr/bin/env bash
 
-prefix="/hzhang/data"
-JAR="./ADJ-assembly-0.1.1.jar"
 
-#timeout=21600
-timeout=21600
+#DISC options
+mainClass=org.apache.spark.disc.testing.ExpEntry
+prefix="/hzhang/benu/data"
+JAR="./DISC-assembly-0.1.jar"
+timeout=86400
 executeScript=runSpark-logo.sh
-#executeScript=runSpark-logo-local.sh
-querys=(triangle fourClique fiveClique house threeTriangle near5Clique fiveCliqueMinusOne)
+cacheSize=1000000
 numExecutors=28
-numSamples=100000
+#executeScript=runSpark-logo-local.sh
 
-Test() {
 
-  method=$1
-  isCommOnly=$2
-  taskNum=$3
+
+TestScalability() {
+  ks=(1 2 4 8 12 16)
+  inputs=$1
+  patterns=$2
+  executionMode=$3
+  queryType=$4
+  core=$5
+  platform=$6
+  # shellcheck disable=SC2068
+  for j in ${patterns[@]}; do
+    for i in ${inputs[@]}; do
+      for k in ${ks[@]}; do
+    input=$i
+    inputFile="${prefix}/${input}"
+    query=$j
+    echo "$executeScript --num-executors $k --class $mainClass $JAR -d ${inputFile} -q $query  -e $executionMode -u $queryType -c $core -s $cacheSize  -t $timeout -p $platform"
+    $executeScript --num-executors $k --class $mainClass $JAR -d ${inputFile} -q $query  -e $executionMode -u $queryType -c $core -s $cacheSize  -t $timeout -p $platform
+      done
+    done
+  done
+}
+
+
+
+Execute() {
+  inputs=$1
+  patterns=$2
+  executionMode=$3
+  queryType=$4
+  core=$5
+  platform=$6
+  # shellcheck disable=SC2068
+  for j in ${patterns[@]}; do
+    for i in ${inputs[@]}; do
+    input=$i
+    inputFile="${prefix}/${input}"
+    query=$j
+    echo "$executeScript --class $mainClass $JAR -d ${inputFile} -q $query  -e $executionMode -u $queryType -c $core -s $cacheSize  -t $timeout -p $platform"
+    $executeScript --class $mainClass $JAR -d ${inputFile} -q $query  -e $executionMode -u $queryType -c $core -s $cacheSize  -t $timeout -p $platform
+
+    done
+  done
+}
+
+DEBUGTask() {
+  #inputs=(wv ep soc-Slashdot wiki-Talk ego-Twitter wb as lj ok uk soc-lj)
+  #patterns=(house threeTriangle solarSquare near5Clique)
+#  platform="Dist"
+#  executionMode="Count"
+#  queryType="Partial"
+#  core="A;B"
+#  inputs=(wb)
+#  patterns=(square)
+#
+#  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+#  patterns=(t21)
+  inputs=(ac)
+  patterns=(5profile)
+  executionMode="Count"
+  core="A"
+
+  #Partial
+  executeScript=runSpark-logo.sh
+  queryType="Partial"
+  platform="Dist"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local.sh
+  queryType="Partial"
+  platform="Parallel"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local_1.sh
+  queryType="Partial"
+  platform="Single"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  #NonInduce
+  executeScript=runSpark-logo.sh
+  queryType="NonInduce"
+  platform="Dist"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local.sh
+  queryType="NonInduce"
+  platform="Parallel"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local_1.sh
+  queryType="NonInduce"
+  platform="Single"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  #Induce
+  executeScript=runSpark-logo.sh
+  queryType="Induce"
+  platform="Dist"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local.sh
+  queryType="Induce"
+  platform="Parallel"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local_1.sh
+  queryType="Induce"
+  platform="Single"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+}
+
+ExtraTask() {
+  #inputs=(wv ep soc-Slashdot wiki-Talk ego-Twitter wb as lj ok uk soc-lj)
+  #patterns=(house threeTriangle solarSquare near5Clique)
+#  platform="Dist"
+#  executionMode="Count"
+#  queryType="Partial"
+#  core="A;B"
+#  inputs=(wb)
+#  patterns=(square)
+  executeScript=runSpark-logo-local.sh
+  mainClass=org.apache.spark.disc.testing.ExtraExpEntry
+  $executeScript --class $mainClass $JAR 6
+  $executeScript --class $mainClass $JAR 7
+  $executeScript --class $mainClass $JAR 8
+}
+
+TriangleTask() {
+#  inputs=(wv ep soc-Slashdot wiki-Talk ego-Twitter wb as lj soc-lj ok uk)
+#  inputs=(ego-Twitter wb as soc-lj ok uk)
+#  patterns=(house threeTriangle solarSquare near5Clique)
+
+  platform="Dist"
+  inputs=(wb as soc-lj ok uk)
+#  inputs=(wb)
+  patterns=(triangle)
+  executionMode="Count"
+  queryType="Partial"
+  core="A"
+
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+}
+
+5NodePatternTask_Node() {
+#  inputs=(wv ep soc-Slashdot wiki-Talk ego-Twitter wb as lj soc-lj ok uk)
+#  inputs=(ego-Twitter wb as soc-lj ok uk)
+#  patterns=(house threeTriangle solarSquare near5Clique)
+
+  platform="Dist"
+  executionMode="Count"
+  queryType="Partial"
+  core="A"
+
+#  inputs=(wb)
+#  patterns=(house)
+
+  inputs=(soc-lj)
+  patterns=(house threeTriangle solarSquare near5Clique)
+
+#  inputs=(soc-lj)
+#  patterns=(d1 d2 d3 d4 d5 d6 d7 d8)
+
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+}
+
+5NodePatternTask_Edge() {
+  #inputs=(wv ep soc-Slashdot wiki-Talk ego-Twitter wb as lj soc-lj ok uk)
+  platform="Dist"
+  inputs=(ego-Twitter wb as lj soc-lj ok uk)
+  patterns=(house threeTriangle near5Clique)
+  executionMode="Count"
+  queryType="NonInduce"
+  core="A;B"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  patterns=(solarSquare)
+  inputs=(ego-Twitter wb as lj soc-lj)
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+}
+
+6NodePatternTask() {
+#  inputs=(soc-Slashdot wiki-Talk ego-Twitter)
+#  patterns=(quadTriangle triangleCore twinCSquare twinClique4 starofDavidPlus)
+  platform="Dist"
+  patterns=(quadTriangle triangleCore twinCSquare twinClique4)
+  executionMode="Count"
+  queryType="NonInduce"
+  core="A"
+  inputs=(ego-Twitter wb as)
+
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+}
+
+4ProfileTask() {
+  #inputs=(wv ep soc-Slashdot wiki-Talk ego-Twitter wb as lj soc-lj ok uk)
+#  inputs=(wb as lj soc-lj ok)
+#  inputs=(ac tp rc fb)
+  platform="Dist"
+  inputs=(ac)
+#  inputs=(ego-Twitter wb as soc-lj)
+
+#  patterns=(4profile)
+  patterns=(fiveCycle)
+  executionMode="Count"
+#  queryType="Induce"
+  queryType="Partial"
+  core="A"
+  executeScript=runSpark-logo-local_1.sh
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+  executeScript=runSpark-logo.sh
+}
+
+5ProfileTask() {
+#  inputs=(ac tp rc fb)
+#  inputs=(ac)
+
+#  JAR="./DISC-assembly-0.1_no_share.jar"
+#  JAR="./DISC-assembly-0.1_no_merge.jar"
+  platform="Parallel"
+  inputs=(ac tp rc fb)
+  patterns=(5profile)
+  executionMode="Count"
+  queryType="Induce"
+  core="A"
+#  executeScript=runSpark-logo-local_1.sh
+  executeScript=runSpark-logo-local.sh
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+  executeScript=runSpark-logo.sh
+}
+
+
+5EdgeTask() {
+  #inputs=(wv ep soc-Slashdot wiki-Talk ego-Twitter wb as lj soc-lj ok uk)
+  JAR="./DISC-assembly-0.1_no_share.jar"
+  JAR="./DISC-assembly-0.1_no_merge.jar"
+  platform="Parallel"
+  inputs=(ac tp rc fb)
+  patterns=(5edge)
+  cacheSize=1000000
+  executionMode="Count"
+  queryType="Induce"
+  core="A;B"
+  executeScript=runSpark-logo-local.sh
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+  executeScript=runSpark-logo.sh
+}
+
+StatisticTask() {
+  inputs=(ac tp rc fb)
+  executionMode="Count"
+  core="A"
+  platform="Parallel"
+
+#  queryType="NonInduce"
+#  patterns=(edge wedge triangle threePath threeStar triangleEdge chordalSquare fourClique square)
+#  Execute $inputs $patterns $executionMode $queryType $core
+
+
+#  queryType="Partial"
+#  patterns=(wedge triangle fourClique)
+#  Execute $inputs $patterns $executionMode $queryType $core
+
+#  queryType="Partial"
+#  patterns=(edge triangle wedge threePath square chordalSquare fourClique fiveClique)
+#  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local.sh
+  queryType="Induce"
+  patterns=(threePath threeStar square triangleEdge chordalSquare fourClique)
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+  executeScript=runSpark-logo.sh
+}
+
+ScalabilityTask() {
+  inputs=(as)
+  platform="Dist"
+  executionMode="Count"
+  core="A"
+
+  queryType="Induce"
+  patterns=(house threeTriangle solarSquare near5Clique g1 g2 g3 g4 triangle)
+
+  TestScalability $inputs $patterns $executionMode $queryType $core $platform
+}
+
+NodePairTask() {
+#  inputs=(ego-Twitter wb as soc-lj ok uk)
+  inputs=(uk)
+#  inputs=(ego-Twitter)
+  splitNum=300
+  mainClass=org.apache.spark.disc.testing.tool.NodePairComputer
+  # shellcheck disable=SC2068
+
+    for i in ${inputs[@]}; do
+      input=$i
+      inputFile="${prefix}/${input}"
+
+      echo "$executeScript --class $mainClass $JAR ${inputFile} ${splitNum}"
+      $executeScript --class $mainClass $JAR ${inputFile} ${splitNum}
+    done
+}
+
+PlanGenerationTask() {
+  #inputs=(wv ep soc-Slashdot wiki-Talk ego-Twitter wb as lj soc-lj ok uk)
+
+#  inputs=(ac)
+#  inputs=(ego-Twitter wb as soc-lj)
+
+  platform="Dist"
+
+#  inputs=(ac)
+#  patterns=(showplan)
+#  core="A"
+#  cacheSize=100000
+#  executionMode="ShowPlan"
+#  queryType="Induce"
+#  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+
+  inputs=(ac)
+  patterns=(4profile)
+  core="A"
+  cacheSize=100000
+  executionMode="ShowPlan"
+  queryType="Induce"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  inputs=(ac)
+  patterns=(5profile)
+  core="A"
+  cacheSize=100000
+  executionMode="ShowPlan"
+  queryType="Induce"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+
+  inputs=(ac)
+  patterns=(5edge)
+  core="A;B"
+  cacheSize=100000
+  executionMode="ShowPlan"
+  queryType="Induce"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+#  inputs=(ac)
+#  patterns=(triangle)
+#  core="A"
+#  cacheSize=100000
+#  executionMode="ShowPlan"
+#  queryType="Induce"
+#  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  inputs=(ac)
+  patterns=(house threeTriangle solarSquare near5Clique)
+  core="A"
+  cacheSize=100000
+  executionMode="ShowPlan"
+  queryType="NonInduce"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+#
+  inputs=(ac)
+  patterns=(house threeTriangle solarSquare near5Clique)
+  core="A;B"
+  cacheSize=100000
+  executionMode="ShowPlan"
+  queryType="NonInduce"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+#
+  inputs=(ac)
+  patterns=(quadTriangle triangleCore twinCSquare twinClique4)
+  core="A"
+  cacheSize=100000
+  executionMode="ShowPlan"
+  queryType="NonInduce"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+}
+
+CommTestTask() {
+#  input=(wb)
+  input=(wb as soc-lj ok uk)
+  querys=(triangle eTriangle square fourClique house threeTriangle solarSquare near5Clique)
+#  querys=(triangle eTriangle square fourClique)
+  method=MergedHCube
+  isCommOnly=CommOnly
+  taskNum=196
   mainClass=org.apache.spark.adj.utils.exp.ExpEntry
+  numSamples=100000
 
   # shellcheck disable=SC2068
   for i in ${input[@]}; do
@@ -25,492 +408,30 @@ Test() {
     for query in ${querys[@]}; do
       echo "----------------------------------"
       echo executing $i $query $k
-
-      #        SECONDS=0
       $executeScript --num-executors $numExecutors --class $mainClass $JAR -q ${query} -t $timeout -d ${file} -c $isCommOnly -m $method -n $taskNum -s $numSamples
-
-      #        duration=$SECONDS
-      #        echo "executing $executeScript  --num-executors 32  --class $mainClass $JAR -q ${query} -t $timeout -d ${file} -c $isCommOnly -m $method with $duration seconds elapsed."
     done
   done
 }
 
-TestScalability() {
-  ks=(1 2 4 8 16 28)
-  method=$1
-  isCommOnly=$2
-  taskNum=$3
-  mainClass=org.apache.spark.adj.utils.exp.ExpEntry
-  #  executeScript=runSpark-logo-vcore.sh
 
-  # shellcheck disable=SC2068
-  for k in ${ks[@]}; do
-    for i in ${input[@]}; do
-      data=$i
-      file="${prefix}/${data}"
-      for query in ${querys[@]}; do
-        echo "----------------------------------"
-        echo executing $i $query $k
-        $executeScript --num-executors $k --class $mainClass $JAR -q ${query} -t $timeout -d ${file} -c $isCommOnly -m $method -n $taskNum -s $numSamples
-      done
-    done
-  done
-}
+echo "---------------DISC---------------"
 
-ConvertWebGraph() {
-  input=$1
-  output=$2
-  mainClass=org.apache.spark.adj.utils.misc.WebGraphConverter
-  $executeScript --num-executors $numExecutors --class $mainClass $JAR $input $output
-}
+5NodePatternTask_Node
+#5NodePatternTask_Edge
+#6NodePatternTask
+#DEBUGTask
 
-#methods=(CacheHCube, Factorize, PullHCube, MergedHCube, PushHCube, ADJ, SPARKSQL)
-#input=(as lj webB wikiT en orkut)
-#modes=(ShowPlan CommOnly Count)
-#querys=(triangle fourClique fiveClique house threeTriangle near5Clique fiveCliqueMinusOne triangleEdge square chordalSquare threePath)
+#ScalabilityTask
+#NodePairTask
+#4ProfileTask
 
-#input=(as)
-#querys=(triangle fourClique fiveClique house threeTriangle near5Clique fiveCliqueMinusOne)
-#Test PushHCube false
-#Test PushHCube true
+#PlanGenerationTask
+#TriangleTask
 
-#input=(as)
-#querys=(triangle fourClique fiveClique)
-#Test MergedHCube false
-#Test MergedHCube true
+#StatisticTask
+#5EdgeTask
+#5ProfileTask
+#CommTestTask
+#5NodePatternTask_Node
 
-#input=(webB)
-#querys=(threeTriangle near5Clique)
-#Test CacheHCube false 196
-
-#input=(orkut)
-#querys=(triangle)
-#Test MergedHCube false 196
-
-#input=(lj)
-#querys=(near5Clique)
-#Test PushHCube false 1536
-
-#input=(orkut)
-#querys=(fiveClique)
-#Test MergedHCube false 196
-
-#input=(orkut)
-#querys=(fiveClique)
-#Test MergedHCube false 196
-#
-#input=(wikiT)
-#querys=(triangle)
-#Test SPARKSQL false 196
-
-#input=(lj)
-#querys=(threeTriangle)
-#Test ADJ false 196
-#
-#input=(orkut)
-#querys=(near5Clique threeTriangle)
-#Test CacheHCube false 196
-
-#input=(lj)
-#querys=(fiveClique)
-#Test PushHCube false 196
-
-#input=(lj)
-#querys=(near5Clique)
-#TestScalability ADJ false 196
-#
-#input=(lj)
-#querys=(threeTriangle)
-#TestScalability ADJ false 196
-
-#For Comparing Push-Pull-Merge
-#input=(as lj webB wikiT orkut)
-#querys=(fourClique)
-#Test PushHCube true 196
-#
-#input=(as lj webB wikiT orkut)
-#querys=(fourClique)
-#Test PullHCube true 196
-#
-#input=(as lj webB wikiT orkut)
-#querys=(fourClique)
-#Test MergedHCube true 196
-#
-#input=(as lj webB wikiT orkut)
-#querys=(fourClique)
-#Test PushHCube false 196
-#
-#input=(as lj webB wikiT orkut)
-#querys=(fourClique)
-#Test PullHCube false 196
-#
-#input=(as lj webB wikiT orkut)
-#querys=(fourClique)
-#Test MergedHCube false 196
-
-#For Effectiveness of Optimizer
-#input=(webB as)
-#querys=(house threeTriangle near5Clique)
-#Test ADJ false 196
-#
-#input=(webB as)
-#querys=(house threeTriangle near5Clique)
-#Test CacheHCube false 196
-
-#input=(lj orkut)
-#querys=(house threeTriangle near5Clique)
-#Test MergedHCube true 196
-#
-#input=(lj)
-#querys=(near5Clique)
-#Test MergedHCube false 196
-
-#input=(as)
-#querys=(house threeTriangle near5Clique)
-#Test ADJ false 196
-#
-#input=(as)
-#querys=(house threeTriangle near5Clique)
-#Test CacheHCube false 196
-#
-#input=(as)
-#querys=(house threeTriangle near5Clique)
-#Test PushHCube false 196
-
-#input=(as orkut)
-#querys=(house threeTriangle near5Clique)
-#Test MergedHCube ShowPlan 196
-#
-#input=(as)
-#querys=(house threeTriangle near5Clique)
-#Test ADJ ShowPlan 196
-#
-#input=(as)
-#querys=(house threeTriangle near5Clique)
-#Test MergedHCube CommOnly 196
-
-#input=(as)
-#querys=(near5Clique)
-#Test ADJ ShowPlan 196
-#
-#input=(as)
-#querys=(near5Clique)
-#Test ADJ CommOnly 196
-#
-#input=(as)
-#querys=(near5Clique)
-#Test ADJ Count 196
-#
-#input=(lj)
-#querys=(triangle)
-#TestScalability MergedHCube Count 196
-#
-#input=(lj)
-#querys=(fourClique)
-#TestScalability MergedHCube Count 196
-
-#input=(lj)
-#querys=(fiveClique)
-#TestScalability MergedHCube Count 196
-
-#input=(lj)
-#querys=(house)
-#TestScalability ADJ Count 196
-
-#ConvertWebGraph /hzhang/data/webGraph/enwiki-2013-nat /hzhang/data/en
-
-#input=(en)
-#querys=(triangle)
-#Test MergedHCube Count 196
-
-#input=(as lj webB wikiT en orkut)
-#querys=(chordalSquare triangleEdge threePath)
-#Test ADJ Count 196
-#
-#input=(as lj webB wikiT en orkut)
-#querys=(square)
-#Test CacheHCube Count 196
-
-#input=(en)
-#querys=(triangle fourClique fiveClique)
-#Test MergedHCube Count 196
-#
-#input=(en)
-#querys=(triangle fourClique fiveClique)
-#Test PullHCube Count 196
-#
-#input=(en)
-#querys=(triangle fourClique fiveClique)
-#Test PushHCube Count 196
-#
-#input=(en)
-#querys=(triangle fourClique fiveClique)
-#Test CacheHCube Count 196
-#
-#
-#input=(en)
-#querys=(triangle fourClique fiveClique)
-#Test MergedHCube CommOnly 196
-#
-#input=(en)
-#querys=(triangle fourClique fiveClique)
-#Test PullHCube CommOnly 196
-#
-#input=(en)
-#querys=(triangle fourClique fiveClique)
-#Test PullHCube CommOnly 196
-
-#timeout=43200
-#input=(as)
-#querys=(near5Clique threeTriangle)
-#Test MergedHCube Count 196
-
-#input=(as)
-#querys=(near5Clique)
-#Test PushHCube CommOnly 196
-#
-#input=(lj)
-#querys=(triangle)
-#TestScalability MergedHCube Count 196
-#
-#input=(lj)
-#querys=(house)
-#TestScalability ADJ Count 196
-#
-#input=(lj)
-#querys=(triangle)
-#TestScalability MergedHCube Count 196
-#
-#input=(lj)
-#querys=(house)
-#TestScalability ADJ Count 196
-
-#timeout=10080
-#input=(lj)
-#querys=(fiveClique)
-#TestScalability MergedHCube Count 196
-
-#for (( i = 0; i < 5; i++ )); do
-#
-#echo $i
-#done
-
-#
-#
-# shellcheck disable=SC1073
-#for (( i = 0; i < 5; i++ )); do
-#numSamples=100
-#input=(lj)
-#querys=(house)
-#Test ADJ ShowPlan 196
-#
-#numSamples=1000
-#input=(lj)
-#querys=(house)
-#Test ADJ ShowPlan 196
-#
-#numSamples=10000
-#input=(lj)
-#querys=(house)
-#Test ADJ ShowPlan 196
-#
-#numSamples=100000
-#input=(lj)
-#querys=(house)
-#Test ADJ ShowPlan 196
-#
-#numSamples=1000000
-#input=(lj)
-#querys=(house)
-#Test ADJ ShowPlan 196
-#
-#numSamples=10000000
-#input=(lj)
-#querys=(house)
-#Test ADJ ShowPlan 196
-#done
-#
-#for (( i = 0; i < 5; i++ )); do
-#numSamples=100
-#input=(lj)
-#querys=(threeTriangle)
-#Test ADJ ShowPlan 196
-#
-#numSamples=1000
-#input=(lj)
-#querys=(threeTriangle)
-#Test ADJ ShowPlan 196
-#
-#numSamples=10000
-#input=(lj)
-#querys=(threeTriangle)
-#Test ADJ ShowPlan 196
-#
-#numSamples=100000
-#input=(lj)
-#querys=(threeTriangle)
-#Test ADJ ShowPlan 196
-#
-#numSamples=1000000
-#input=(lj)
-#querys=(threeTriangle)
-#Test ADJ ShowPlan 196
-#
-#numSamples=10000000
-#input=(lj)
-#querys=(threeTriangle)
-#Test ADJ ShowPlan 196
-#done
-
-#input=(lj)
-#querys=(house threeTriangle near5Clique)
-#
-#for ((i = 0; i < 5; i++)); do
-#  echo "iteration-${i}"
-#  numSamples=200
-#  echo "samples size -${numSamples}"
-#  Test ADJ ShowPlan 196
-#
-#  numSamples=500
-#  echo "samples size -${numSamples}"
-#  Test ADJ ShowPlan 196
-#
-#  numSamples=1000
-#  echo "samples size -${numSamples}"
-#  Test ADJ ShowPlan 196
-#
-#  numSamples=10000
-#  echo "samples size -${numSamples}"
-#  Test ADJ ShowPlan 196
-#
-#  numSamples=100000
-#  echo "samples size -${numSamples}"
-#  Test ADJ ShowPlan 196
-#
-#  numSamples=1000000
-#  echo "samples size -${numSamples}"
-#  Test ADJ ShowPlan 196
-#
-#  numSamples=10000000
-#  echo "samples size -${numSamples}"
-#  Test ADJ ShowPlan 196
-#done
-
-
-#sampleTest() {
-#  numSamples=$1
-#  for i in {1..5} ; do
-#  echo "samples size -${numSamples}"
-#  Test ADJ ShowPlan 196
-#  done
-#}
-#
-#input=(lj)
-#querys=(house)
-#sampleTest 200
-#sampleTest 500
-#sampleTest 1000
-#sampleTest 10000
-#sampleTest 100000
-#sampleTest 1000000
-#sampleTest 10000000
-#
-#input=(lj)
-#querys=(threeTriangle)
-#sampleTest 200
-#sampleTest 500
-#sampleTest 1000
-#sampleTest 10000
-#sampleTest 100000
-#sampleTest 1000000
-#sampleTest 10000000
-#
-#input=(lj)
-#querys=(near5Clique)
-#sampleTest 200
-#sampleTest 500
-#sampleTest 1000
-#sampleTest 10000
-#sampleTest 100000
-#sampleTest 1000000
-#sampleTest 10000000
-
-#input=(lj)
-#querys=(house)
-#for i in {1..5} ; do
-#numSamples=200
-#echo "samples size -${numSamples}"
-#Test ADJ ShowPlan 196
-#done
-#
-#for i in {1..5} ; do
-#numSamples=500
-#echo "samples size -${numSamples}"
-#Test ADJ ShowPlan 196
-#done
-#
-#for i in {1..5} ; do
-#numSamples=1000
-#echo "samples size -${numSamples}"
-#Test ADJ ShowPlan 196
-#done
-#
-#for i in {1..5} ; do
-#input=(lj)
-#querys=(house)
-#numSamples=10000
-#echo "samples size -${numSamples}"
-#Test ADJ ShowPlan 196
-#done
-#
-#for i in {1..5} ; do
-#input=(lj)
-#querys=(house)
-#numSamples=100000
-#echo "samples size -${numSamples}"
-#Test ADJ ShowPlan 196
-#done
-#
-#for i in {1..5} ; do
-#input=(lj)
-#querys=(house)
-#numSamples=1000000
-#echo "samples size -${numSamples}"
-#Test ADJ ShowPlan 196
-#done
-#
-#for i in {1..5} ; do
-#input=(lj)
-#querys=(house)
-#numSamples=10000000
-#echo "samples size -${numSamples}"
-#Test ADJ ShowPlan 196
-#done
-
-#input=(lj)
-#querys=(near5Clique)
-#Test ADJ ShowPlan 196
-
-#input=(lj)
-#querys=(threeTriangle near5Clique)
-#TestScalability ADJ CommOnly 196
-
-#timeout=20000
-#input=(lj)
-#querys=(fiveClique)
-#TestScalability MergedHCube Count 196
-
-
-#input=(as)
-#querys=(house)
-#Test MergedHCube ShowPlan 196
-
-#input=(as)
-#querys=(threeTriangle near5Clique)
-#numSamples=100000
-#echo "samples size -${numSamples}"
-#Test ADJ ShowPlan 196
-
-input=(en)
-querys=(triangle)
-Test SPARKSQL Count 196
+#ExtraTask

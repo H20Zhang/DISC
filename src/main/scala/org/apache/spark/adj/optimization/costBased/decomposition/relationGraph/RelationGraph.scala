@@ -5,18 +5,27 @@ import org.apache.spark.adj.optimization.costBased.decomposition.graph.Graph.Nod
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class RelationGraph(_id: Int, V: Seq[NodeID], E: Seq[RelationEdge]) {
+class RelationGraph(_id: Int, V: Array[NodeID], E: Array[RelationEdge]) {
 
   //to change
   val id = _id
 
-  def V(): Seq[NodeID] = V
-  def E(): Seq[RelationEdge] = E
+  def V(): Array[NodeID] = V
+  def E(): Array[RelationEdge] = E
+
+  def nodeInducedSubgraph(nodes: Array[NodeID]): RelationGraph = {
+    val inducedEdges = E.filter { edge =>
+      edge.attrs.diff(nodes.toSet).isEmpty
+    }
+
+    RelationGraph(nodes, inducedEdges)
+  }
+
   def toInducedGraph(baseGraph: RelationGraph): RelationGraph = {
     toInducedGraph(baseGraph.E)
   }
 
-  def toInducedGraph(edges: Seq[RelationEdge],
+  def toInducedGraph(edges: Array[RelationEdge],
                      isIdChange: Boolean = false): RelationGraph = {
     val inducedEdges = edges.filter { edge =>
       val nodes = edge.attrs
@@ -33,8 +42,8 @@ class RelationGraph(_id: Int, V: Seq[NodeID], E: Seq[RelationEdge]) {
 
   def isConnected(): Boolean = {
 
-    val visited = mutable.Set[NodeID]()
-    val next = mutable.Set[NodeID]()
+    val visited = mutable.HashSet[NodeID]()
+    val next = mutable.HashSet[NodeID]()
 
     //find the next for first nodeid
     next += V.head
@@ -46,11 +55,23 @@ class RelationGraph(_id: Int, V: Seq[NodeID], E: Seq[RelationEdge]) {
       next ++= findNext(cur)
     }
 
-    def findNext(nodeId: NodeID): Set[Int] = {
-      E.filter(e => e.attrs.contains(nodeId))
-        .flatMap(_.attrs)
-        .toSet
-        .diff(visited)
+    def findNext(nodeId: NodeID): mutable.HashSet[Int] = {
+      val nextSet = mutable.HashSet[Int]()
+      var i = 0
+      val end = E.size
+      while (i < end) {
+        val e = E(i)
+        if (e.attrs.contains(nodeId)) {
+          e.attrs.foreach { nextNode =>
+            if (!visited.contains(nextNode)) {
+              nextSet += nextNode
+            }
+          }
+        }
+        i += 1
+      }
+
+      nextSet
     }
 
 //    println(s"visited:${visited}")
@@ -61,7 +82,7 @@ class RelationGraph(_id: Int, V: Seq[NodeID], E: Seq[RelationEdge]) {
 
   def containNode(nodeID: NodeID): Boolean = V.contains(nodeID)
   def containEdge(edge: RelationEdge): Boolean = E.contains(edge)
-  def containAnyNodes(nodes: Seq[NodeID]): Boolean = nodes.exists(containNode)
+  def containAnyNodes(nodes: Array[NodeID]): Boolean = nodes.exists(containNode)
   def width(): Double = WidthCalculator.width(this)
   def containSubgraph(subgraph: RelationGraph): Boolean = {
     subgraph.V.forall(containNode) && subgraph.E.forall(containEdge)
@@ -75,7 +96,7 @@ class RelationGraph(_id: Int, V: Seq[NodeID], E: Seq[RelationEdge]) {
 object RelationGraph {
   var id = 0
 
-  def apply(V: Seq[NodeID], E: Seq[RelationEdge]) = {
+  def apply(V: Array[NodeID], E: Array[RelationEdge]) = {
     val graph = new RelationGraph(id, V, E)
     id += 1
     graph

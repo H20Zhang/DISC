@@ -31,6 +31,11 @@ class PushHCube(@transient query: HCubePlan, info: TaskInfo)
   val schemas = relations.map(_.schema)
   val keyToSchema = schemas.map(f => (f.id.get, f)).toMap
 
+  def nonNegativeMod(x: Long, mod: Int): Int = {
+    val rawMod = x % mod
+    rawMod + (if (rawMod < 0) mod else 0) toInt
+  }
+
   def genCordinateRDD(relation: Relation) = {
 
     //init
@@ -54,13 +59,14 @@ class PushHCube(@transient query: HCubePlan, info: TaskInfo)
 //    println(s"all tuples:${relation.rdd.collect().map(_.toSeq).toSeq}")
     rdd.flatMap { tuple =>
       //find the hash values for each attribute of the tuple
-      val hashValues = new Array[DataType](tupleSize)
+      val hashValues = new Array[Int](tupleSize)
       var i = 0
       while (i < tupleSize) {
-        hashValues(i) = Utils.nonNegativeMod(
+        hashValues(i) = nonNegativeMod(
           tuple(i),
           shareSpaceVector(attrIdsLocalPosToGlobalPos(i))
         )
+
         i += 1
       }
 

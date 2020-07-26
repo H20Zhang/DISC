@@ -13,6 +13,11 @@ class HCubePartitioner(shareSpaceVector: Array[Int]) extends Partitioner {
     .toArray
   val _numPartitions = shareSpaceVector.product
 
+  def nonNegativeModForLong(x: Long, mod: Int): Int = {
+    val rawMod = x % mod
+    rawMod + (if (rawMod < 0) mod else 0) toInt
+  }
+
   override def numPartitions: Int = _numPartitions
 
   override def getPartition(key: Any): Int = key match {
@@ -21,6 +26,16 @@ class HCubePartitioner(shareSpaceVector: Array[Int]) extends Partitioner {
       var hashValue = 0
       while (i < artiy) {
         val ithHashValue = Utils.nonNegativeMod(array(i), shareSpaceVector(i))
+        hashValue += (ithHashValue * productFactor(i))
+        i += 1
+      }
+      hashValue
+    }
+    case array: Array[Long] => {
+      var i = 0
+      var hashValue = 0
+      while (i < artiy) {
+        val ithHashValue = nonNegativeModForLong(array(i), shareSpaceVector(i))
         hashValue += (ithHashValue * productFactor(i))
         i += 1
       }

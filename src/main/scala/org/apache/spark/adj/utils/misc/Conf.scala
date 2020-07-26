@@ -11,20 +11,12 @@ import scala.collection.mutable
 class Conf() {
 
   //For Single Machine
-//  var taskNum = 4
-//  var numMachine = 4
-//  var defaultNumSamples = 100
-//  val commSpeed = 1 * Math.pow(10, 7)
-//  val ADJHCubeMemoryBudget = 5 * Math.pow(10, 8)
-
-  //For Cluster
-  var defaultNumSamples = 100000
-  var taskNum = 7 * 28
-  var numMachine = 7 * 28
-  val commSpeed = 1 * Math.pow(10, 9)
-
-//  in terms of real size
-  val ADJHCubeMemoryBudget = 4.5 * Math.pow(10, 8)
+  var taskNum = 4
+  var numMachine = 4
+  var defaultNumSamples = 100
+  var commSpeed = 1 * Math.pow(10, 7)
+  var ADJHCubeMemoryBudget = 5 * Math.pow(10, 8)
+  var isYarn = false
 
   var method = Method.UnOptimizedHCube
   var query = ""
@@ -32,21 +24,54 @@ class Conf() {
   var mode = Mode.Count
   var data = ""
   var totalCacheSize = 100000
-  var isYarn = false
+
   val partitionSpeed = numMachine * Math.pow(10, 5)
 
   //in terms of cardinality
   val mergeHCubeMemoryBudget = 5 * Math.pow(10, 7)
-  val pushHCubeMemoryBudget = 3 * Math.pow(10, 7)
+  val pushHCubeMemoryBudget = 5 * Math.pow(10, 7)
 
   def getTaskNum(): Int = taskNum
   def getMethod() = method
+  def setCluster() = {
+    //For Cluster
+    defaultNumSamples = 100000
+    taskNum = 7 * 28
+    numMachine = 7 * 28
+    commSpeed = 1 * Math.pow(10, 9)
+    isYarn = true
+    //  in terms of real size
+    ADJHCubeMemoryBudget = 4.5 * Math.pow(10, 8)
+  }
+
+  def setLocalCluster() = {
+    //For Cluster
+    defaultNumSamples = 100000
+//    taskNum = 28
+//    numMachine = 28
+    taskNum = 16
+    numMachine = 16
+    commSpeed = 1 * Math.pow(10, 9)
+    isYarn = false
+    //  in terms of real size
+    ADJHCubeMemoryBudget = 4.5 * Math.pow(10, 8)
+  }
+
+  def setOneCoreLocalCluster() = {
+    //For Cluster
+    defaultNumSamples = 100000
+    taskNum = 1
+    numMachine = 1
+    commSpeed = 1 * Math.pow(10, 9)
+    isYarn = false
+    //  in terms of real size
+    ADJHCubeMemoryBudget = 4.5 * Math.pow(10, 8)
+  }
 }
 
 object Conf {
   lazy val conf = {
     new Conf()
-//    loadConf("./src/main/scala/org/apache/spark/adj/utils/misc/default.conf")
   }
 
   def defaultConf() = {

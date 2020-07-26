@@ -13,15 +13,16 @@ class DataLoader(partitionSize: Int = Conf.defaultConf().getTaskNum()) {
 
     val relationRDD = rawDataRDD
       .map { f =>
-        var res: Array[Int] = null
+        var res: Array[Long] = null
         if (!f.startsWith("#") && !f.startsWith("%")) {
           val splittedString = f.split("\\s")
-          res = splittedString.map(_.toInt)
+          res = splittedString.map(_.toLong)
         }
         res
       }
       .filter(f => f != null)
       .map(f => (f(0), f(1)))
+      .filter(f => f._1 != f._2)
       .flatMap(f => Iterator(f, f.swap))
       .distinct()
       .map(f => Array(f._1, f._2))

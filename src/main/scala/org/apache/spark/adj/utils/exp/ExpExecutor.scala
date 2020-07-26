@@ -59,9 +59,11 @@ class ExpQuery(data: String) {
 
   val rdd = new DataLoader().csv(data)
 
-  def getSchema(q: String) = {
+  def getDml(q: String) = {
     val dml = q match {
+      case "wedge"              => wedgeDml
       case "triangle"           => triangleDml
+      case "eTriangle"          => eTriangleDml
       case "chordalSquare"      => chordalSquareDml
       case "fourClique"         => fourCliqueDml
       case "fiveClique"         => fiveCliqueDml
@@ -84,6 +86,11 @@ class ExpQuery(data: String) {
 
     assert(dml.endsWith(";"))
 
+    dml
+  }
+
+  def getSchema(q: String) = {
+    val dml = getDml(q)
     ExpQueryHelper.dmlToSchemas(dml)
   }
 
@@ -96,12 +103,17 @@ class ExpQuery(data: String) {
   def getQuery(q: String) = {
     val schemas = getSchema(q)
     schemas.foreach(schema => Catalog.defaultCatalog().setContent(schema, rdd))
+
     val query0 =
       s"Join ${schemas.map(schema => s"${schema.name};").reduce(_ + _).dropRight(1)}"
     query0
   }
 
   //experiment query
+
+  //wedge
+  val wedgeDml = "A-B;B-C;"
+
   //triangle
   val triangleDml = "A-B;B-C;C-A;"
 
@@ -112,13 +124,16 @@ class ExpQuery(data: String) {
   val fiveCliqueDml = "A-B;B-C;C-D;D-E;E-A;A-C;A-D;B-D;B-E;C-E;"
 
   //  house
-  val houseDml = "A-B;B-C;C-D;D-E;E-A;B-E;"
+  private val houseDml = "A-B;B-C;C-D;D-E;E-A;B-E;"
 
   //  threeTriangle
-  val threeTriangleDml = "A-B;B-C;C-D;D-E;E-A;B-E;C-E;"
+  private val threeTriangleDml = "A-B;B-C;C-D;D-E;E-A;B-E;C-E;"
+
+  //  solarSquare
+  private val solarSquareDml = "A-B;B-C;C-D;D-E;E-A;A-D;B-E;C-E;"
 
   //  near5Clique
-  val near5CliqueSchemaDml = "A-B;B-C;C-D;D-E;E-A;B-E;B-D;C-E;"
+  private val near5CliqueSchemaDml = "A-B;B-C;C-D;D-E;E-A;B-E;B-D;C-E;"
 
   //  fiveCliqueMinusOne, A-D removed
   val fiveCliqueMinusOneDml = "A-B;B-C;C-D;D-E;E-A;A-C;B-D;B-E;C-E;"
@@ -131,11 +146,11 @@ class ExpQuery(data: String) {
   //  barbell
   val b313Dml = "A-B;B-C;C-A;C-D;D-E;D-F;E-F;"
 
-  //  solarSquare
-  val solarSquareDml = "A-B;B-C;C-D;D-A;A-E;B-E;C-E;D-E;"
-
   //triangleEdge
   val triangleEdgeDml = "A-B;B-C;C-A;C-D;"
+
+  //ExtraEdgetriangle
+  val eTriangleDml = "A-B;B-C;A-C;A-C;"
 
   //square
   val squareDml = "A-B;B-C;C-D;D-A;"
@@ -176,6 +191,53 @@ object ExpQueryHelper {
 
     schemas
   }
+
+  //we use a very simple dml like "A-B; A-C; A-D;".
+  def dmlToNotIncludedEdgeSchemas(dml: String): Seq[RelationSchema] = {
+    val catalog = Catalog.defaultCatalog()
+    val pattern = "(([A-Z])-([A-Z]);)".r
+    val edges = pattern
+      .findAllMatchIn(dml)
+      .toArray
+      .map { f =>
+        val src = f.subgroups(1)
+        val dst = f.subgroups(2)
+        (src, dst)
+      }
+    val nodes = edges.flatMap(f => Seq(f._1, f._2)).distinct
+    val allEdges = nodes.combinations(2).toSeq.map(f => (f(0), f(1)))
+    val sortedEdges = edges.map {
+      case (u, v) =>
+        if (u > v) {
+          (v, u)
+        } else {
+          (u, v)
+        }
+    }.distinct
+    val sortedAllEdges = allEdges.map {
+      case (u, v) =>
+        if (u > v) {
+          (v, u)
+        } else {
+          (u, v)
+        }
+    }.distinct
+
+    val diffEdges = sortedAllEdges.diff(sortedEdges)
+
+    val notIncludedEdgesSchemas = diffEdges.map {
+      case (u, v) =>
+        val id = catalog.nextRelationID()
+        RelationSchema(s"N${id}", Seq(u, v))
+    }
+
+    notIncludedEdgesSchemas.foreach { f =>
+      f.register()
+    }
+
+    notIncludedEdgesSchemas
+  }
+
 }
 
 class FutureTask[T](f: => Future[T]) extends TimerTask {

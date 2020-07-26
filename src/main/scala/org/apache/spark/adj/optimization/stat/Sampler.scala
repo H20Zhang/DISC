@@ -1,6 +1,6 @@
 package org.apache.spark.adj.optimization.stat
 
-import org.apache.spark.adj.database.Catalog.AttributeID
+import org.apache.spark.adj.database.Catalog.{AttributeID, DataType}
 import org.apache.spark.adj.database.{Relation, RelationSchema}
 import org.apache.spark.adj.execution.subtask.SubTaskFactory
 import org.apache.spark.adj.optimization.costBased.comp.EnumShareComputer
@@ -11,7 +11,6 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
-//TODO: debug it
 class Sampler(relations: Seq[Relation],
               sampleInfos: SampleTaskInfo,
               databaseScaleRatio: Double = 0.25)
@@ -76,7 +75,7 @@ class Sampler(relations: Seq[Relation],
     val samples = sampleRDD.collect()
     val filterSetPerAttr = sampleSchema.attrIDs.zipWithIndex.map {
       case (_, idx) =>
-        val mutableSet = mutable.HashSet[Int]()
+        val mutableSet = mutable.HashSet[DataType]()
         samples.foreach { tuple =>
           mutableSet.add(tuple(idx))
         }
@@ -165,7 +164,7 @@ class Sampler(relations: Seq[Relation],
         //can be set larger to improve the accuracy on the skewed dataset
         var rawSamplesCount = numSamples * 10
 
-        var rawSamples = ArrayBuffer[Array[Int]]()
+        var rawSamples = ArrayBuffer[Array[DataType]]()
 
         //get raw sampleRDD
         while (i < rawSamplesCount && iterator.hasNext) {
@@ -284,7 +283,7 @@ class Sampler(relations: Seq[Relation],
     )
   }
 
-  //Generate a relation that only contains a single attr from the database
+  //Generate a relation that only contains a single attr from the adj.database
   private def genAttrRelation(attrID: AttributeID): Relation = {
     val relatedRelations = relations.filter { relation =>
       relation.schema.attrIDs.contains(attrID)

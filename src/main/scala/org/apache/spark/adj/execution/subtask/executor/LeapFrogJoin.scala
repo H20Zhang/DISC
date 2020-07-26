@@ -1,12 +1,13 @@
 package org.apache.spark.adj.execution.subtask.executor
 
-import org.apache.spark.adj.database.Catalog.DataType
+import org.apache.spark.adj.database.Catalog.{AttributeID, DataType}
 import org.apache.spark.adj.execution.subtask.LeapFrogJoinSubTask
 import org.apache.spark.adj.execution.subtask.utils.{
   ArraySegment,
   ArrayTrie,
   IntersectedListIterator,
   IntersectionIterator,
+  LeapFrogUnaryIterator,
   Trie
 }
 
@@ -60,7 +61,7 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
         case (schema, schemaPos) =>
           val relativeOrder = attrOrders.filter(schema.containAttribute)
           val attrPos = relativeOrder.indexOf(curAttr)
-          val partialBindingPos = new Array[DataType](attrPos)
+          val partialBindingPos = new Array[AttributeID](attrPos)
           val partialBinding = ArraySegment(new Array[DataType](attrPos))
 
           var i = 0
@@ -197,7 +198,7 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
 
   //construct the unary iterator for the i-th attribute given prefix consisting of 0 to i-1th attribute
   //Noted: this class could return empty unary iterator
-  protected def constructIthIterator(idx: Int) = {
+  protected def constructIthIterator(idx: Int): Iterator[DataType] = {
 
     val (prefixPosForEachRelation, segmentArrays) = relevantRelationForAttrMap(
       idx
@@ -217,19 +218,23 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
         j += 1
       }
 
-//      tries(triePos).nextLevel(curBinding, segmentArrays(i))
-      tries(triePos).nextLevelWithAdjust(curBinding, segmentArrays(i))
+      tries(triePos).nextLevel(curBinding, segmentArrays(i))
+//      tries(triePos).nextLevelWithAdjust(curBinding, segmentArrays(i))
       i += 1
     }
 
+//    new LeapFrogUnaryIterator(segmentArrays)
     IntersectionIterator.leapfrogIt(segmentArrays)
+//    new IntersectedListIterator(segmentArrays)
+//    IntersectionIterator.listIt(segmentArrays)
   }
 
   protected val lastIdx = attrSize - 1
   protected var lastIterator = unaryIterators(lastIdx)
+
   override def hasNext: Boolean = {
     if (!hasEnd) {
-      lastIterator = unaryIterators(lastIdx)
+      //      lastIterator = unaryIterators(lastIdx)
       //check if last iterator hasNext, if not, trying to produce new last iterator
       if (lastIterator.hasNext) {
         return true
@@ -242,6 +247,11 @@ class LeapFrogJoin(subJoins: LeapFrogJoinSubTask)
       !hasEnd
     }
 
+  }
+
+  //return the underlying binding array
+  def getBinding(): Array[DataType] = {
+    binding
   }
 
   override def next(): Array[DataType] = {
