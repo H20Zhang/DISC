@@ -8,10 +8,10 @@ import org.apache.spark.adj.database.Catalog.{
 import org.apache.spark.adj.database.{Catalog, Relation, RelationSchema}
 import org.apache.spark.adj.utils.misc.Conf
 import org.apache.spark.adj.utils.misc.Conf.Method
-import org.apache.spark.dsce.optimization.Rule
+import org.apache.spark.disc.optimization.Rule
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.DataType
-import org.apache.spark.dsce.optimization.LogicalRule
+import org.apache.spark.disc.optimization.LogicalRule
 
 trait LogicalPlan extends Serializable {
   val catalog = Catalog.defaultCatalog()

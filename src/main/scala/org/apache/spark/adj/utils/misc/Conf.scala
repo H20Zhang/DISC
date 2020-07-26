@@ -49,8 +49,8 @@ class Conf() {
     defaultNumSamples = 100000
 //    taskNum = 28
 //    numMachine = 28
-    taskNum = 8
-    numMachine = 8
+    taskNum = 16
+    numMachine = 16
     commSpeed = 1 * Math.pow(10, 9)
     isYarn = false
     //  in terms of real size

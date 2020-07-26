@@ -2,7 +2,7 @@
 
 
 #DISC options
-mainClass=org.apache.spark.dsce.testing.ExpEntry
+mainClass=org.apache.spark.disc.testing.ExpEntry
 prefix="/hzhang/benu/data"
 JAR="./DISC-assembly-0.1.jar"
 timeout=86400
@@ -75,39 +75,7 @@ DEBUGTask() {
   executionMode="Count"
   core="A"
 
-#Induce
-  executeScript=runSpark-logo.sh
-  queryType="Induce"
-  platform="Dist"
-  Execute $inputs $patterns $executionMode $queryType $core $platform
-
-  executeScript=runSpark-logo-local.sh
-  queryType="Induce"
-  platform="Parallel"
-  Execute $inputs $patterns $executionMode $queryType $core $platform
-
-  executeScript=runSpark-logo-local_1.sh
-  queryType="Induce"
-  platform="Single"
-  Execute $inputs $patterns $executionMode $queryType $core $platform
-
-#NonInduce
-  executeScript=runSpark-logo.sh
-  queryType="NonInduce"
-  platform="Dist"
-  Execute $inputs $patterns $executionMode $queryType $core $platform
-
-  executeScript=runSpark-logo-local.sh
-  queryType="NonInduce"
-  platform="Parallel"
-  Execute $inputs $patterns $executionMode $queryType $core $platform
-
-  executeScript=runSpark-logo-local_1.sh
-  queryType="NonInduce"
-  platform="Single"
-  Execute $inputs $patterns $executionMode $queryType $core $platform
-
-#Partial
+  #Partial
   executeScript=runSpark-logo.sh
   queryType="Partial"
   platform="Dist"
@@ -123,6 +91,37 @@ DEBUGTask() {
   platform="Single"
   Execute $inputs $patterns $executionMode $queryType $core $platform
 
+  #NonInduce
+  executeScript=runSpark-logo.sh
+  queryType="NonInduce"
+  platform="Dist"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local.sh
+  queryType="NonInduce"
+  platform="Parallel"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local_1.sh
+  queryType="NonInduce"
+  platform="Single"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  #Induce
+  executeScript=runSpark-logo.sh
+  queryType="Induce"
+  platform="Dist"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local.sh
+  queryType="Induce"
+  platform="Parallel"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
+
+  executeScript=runSpark-logo-local_1.sh
+  queryType="Induce"
+  platform="Single"
+  Execute $inputs $patterns $executionMode $queryType $core $platform
 }
 
 ExtraTask() {
@@ -135,7 +134,7 @@ ExtraTask() {
 #  inputs=(wb)
 #  patterns=(square)
   executeScript=runSpark-logo-local.sh
-  mainClass=org.apache.spark.dsce.testing.ExtraExpEntry
+  mainClass=org.apache.spark.disc.testing.ExtraExpEntry
   $executeScript --class $mainClass $JAR 6
   $executeScript --class $mainClass $JAR 7
   $executeScript --class $mainClass $JAR 8
@@ -167,11 +166,14 @@ TriangleTask() {
   queryType="Partial"
   core="A"
 
-  inputs=(wb)
-  patterns=(house)
+#  inputs=(wb)
+#  patterns=(house)
 
-#  inputs=(wb as soc-lj ok uk)
-#  patterns=(house threeTriangle near5Clique)
+  inputs=(soc-lj)
+  patterns=(house threeTriangle solarSquare near5Clique)
+
+#  inputs=(soc-lj)
+#  patterns=(d1 d2 d3 d4 d5 d6 d7 d8)
 
   Execute $inputs $patterns $executionMode $queryType $core $platform
 }
@@ -301,7 +303,7 @@ NodePairTask() {
   inputs=(uk)
 #  inputs=(ego-Twitter)
   splitNum=300
-  mainClass=org.apache.spark.dsce.testing.tool.NodePairComputer
+  mainClass=org.apache.spark.disc.testing.tool.NodePairComputer
   # shellcheck disable=SC2068
 
     for i in ${inputs[@]}; do
@@ -414,10 +416,10 @@ CommTestTask() {
 
 echo "---------------DISC---------------"
 
-#5NodePatternTask_Node
+5NodePatternTask_Node
 #5NodePatternTask_Edge
 #6NodePatternTask
-DEBUGTask
+#DEBUGTask
 
 #ScalabilityTask
 #NodePairTask
