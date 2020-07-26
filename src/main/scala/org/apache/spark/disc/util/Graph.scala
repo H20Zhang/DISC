@@ -1,8 +1,8 @@
 package org.apache.spark.disc.util
 
-import org.apache.spark.disc.deprecated.optimization.subgraph.graph.GraphUtil
 import org.apache.spark.disc.{ADJList, Edge, NodeID}
 import org.jgrapht.alg.connectivity.ConnectivityInspector
+import org.jgrapht.alg.isomorphism.GraphIsoUtil
 import org.jgrapht.graph.{DefaultEdge, DefaultUndirectedGraph}
 
 import scala.collection.mutable
@@ -141,7 +141,7 @@ class Graph(val V: Seq[NodeID], val E: Seq[Edge]) {
   }
 
   def findIsomorphism(p: Graph) = {
-    GraphUtil.findIsomorphism(getJGraphGraph(), p.getJGraphGraph())
+    GraphIsoUtil.findIsomorphism(getJGraphGraph(), p.getJGraphGraph())
   }
 
   def findAutomorphism() = {
