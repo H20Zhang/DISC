@@ -1,20 +1,24 @@
 package org.apache.spark.disc.testing
 
-import org.apache.spark.disc.DISCConf.ExecutionMode
 import org.apache.spark.disc.optimization.rule_based.aggregate.CountTableCache
 import org.apache.spark.disc.plan.PhysicalPlan
-import org.apache.spark.disc.util.misc.{Counter, SparkSingle}
-import org.apache.spark.disc.{DISCConf, Query}
+import org.apache.spark.disc.util.misc.{
+  Conf,
+  Counter,
+  ExecutionMode,
+  SparkSingle
+}
+import org.apache.spark.disc.SubgraphCounting
 
 import scala.collection.mutable
 
-class ExpExecutor(conf: DISCConf) {
+class ExpExecutor(conf: Conf) {
 
   def execute() = {
 
     val data = conf.data
     val query = conf.query
-    val timeout = conf.timeOut
+    val timeout = conf.TIMEOUT
     val executionMode = conf.executionMode
     val queryType = conf.queryType
 
@@ -67,14 +71,16 @@ class ExpExecutor(conf: DISCConf) {
             case ExecutionMode.ShowPlan =>
               val time1 = System.currentTimeMillis()
               println(
-                Query.optimizedPhyiscalPlan(expQuery.getQuery(q)).prettyString()
+                SubgraphCounting
+                  .optimizedPhyiscalPlan(expQuery.getQuery(q))
+                  .prettyString()
               )
               val time2 = System.currentTimeMillis()
               println(
                 s"elapse time:${(time2 - time1)}-count:${count}-data:${data}-query:${q}-timeout:${timeout}-executionMode:${executionMode}-queryType:${queryType}"
               )
             case ExecutionMode.Count =>
-              count = Query.count(expQuery.getQuery(q))
+              count = SubgraphCounting.count(expQuery.getQuery(q))
           }
         }
 
@@ -102,14 +108,16 @@ class ExpExecutor(conf: DISCConf) {
             case ExecutionMode.ShowPlan =>
               val time1 = System.currentTimeMillis()
               println(
-                Query.optimizedPhyiscalPlan(expQuery.getQuery(q)).prettyString()
+                SubgraphCounting
+                  .optimizedPhyiscalPlan(expQuery.getQuery(q))
+                  .prettyString()
               )
               val time2 = System.currentTimeMillis()
               println(
                 s"elapse time:${(time2 - time1)}-count:${count}-data:${data}-query:${q}-timeout:${timeout}-executionMode:${executionMode}-queryType:${queryType}"
               )
             case ExecutionMode.Count =>
-              count = Query.count(expQuery.getQuery(q))
+              count = SubgraphCounting.count(expQuery.getQuery(q))
           }
         }
 
@@ -126,7 +134,9 @@ class ExpExecutor(conf: DISCConf) {
             case ExecutionMode.ShowPlan =>
               val time1 = System.currentTimeMillis()
               println(
-                Query.optimizedPhyiscalPlan(expQuery.getQuery(q)).prettyString()
+                SubgraphCounting
+                  .optimizedPhyiscalPlan(expQuery.getQuery(q))
+                  .prettyString()
               )
               val time2 = System.currentTimeMillis()
               println(
@@ -134,7 +144,7 @@ class ExpExecutor(conf: DISCConf) {
               )
             case ExecutionMode.Count =>
               val time1 = System.currentTimeMillis()
-              count = Query.count(expQuery.getQuery(q))
+              count = SubgraphCounting.count(expQuery.getQuery(q))
               val time2 = System.currentTimeMillis()
               println(
                 s"elapse time:${(time2 - time1)}-count:${count}-data:${data}-query:${q}-timeout:${timeout}-executionMode:${executionMode}-queryType:${queryType}"
@@ -162,10 +172,12 @@ class ExpExecutor(conf: DISCConf) {
           executionMode match {
             case ExecutionMode.ShowPlan =>
               println(
-                Query.optimizedPhyiscalPlan(expQuery.getQuery(q)).prettyString()
+                SubgraphCounting
+                  .optimizedPhyiscalPlan(expQuery.getQuery(q))
+                  .prettyString()
               )
             case ExecutionMode.Count =>
-              count = Query.count(expQuery.getQuery(q))
+              count = SubgraphCounting.count(expQuery.getQuery(q))
           }
 
           numInstanceMap(q) = count
@@ -222,7 +234,7 @@ class ExpExecutor(conf: DISCConf) {
         executionMode match {
           case ExecutionMode.ShowPlan =>
             println(
-              Query
+              SubgraphCounting
                 .optimizedPhyiscalPlan(expQuery.getQuery(query))
                 .prettyString()
 //              Query
@@ -230,7 +242,7 @@ class ExpExecutor(conf: DISCConf) {
 //                .prettyString()
             )
           case ExecutionMode.Count =>
-            count = Query.count(expQuery.getQuery(query))
+            count = SubgraphCounting.count(expQuery.getQuery(query))
         }
 
         val time2 = System.currentTimeMillis()

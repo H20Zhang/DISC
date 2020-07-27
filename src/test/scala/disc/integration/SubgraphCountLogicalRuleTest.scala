@@ -1,10 +1,9 @@
 package disc.integration
 
 import disc.SparkFunSuite
-import org.apache.spark.disc.DISCConf.QueryType
 import org.apache.spark.disc.testing.{ExpData, ExpQuery}
-import org.apache.spark.disc.util.misc.Fraction
-import org.apache.spark.disc.{DISCConf, Query}
+import org.apache.spark.disc.util.misc.{Conf, Fraction, QueryType}
+import org.apache.spark.disc.SubgraphCounting
 
 class SubgraphCountLogicalRuleTest extends SparkFunSuite {
 
@@ -13,11 +12,11 @@ class SubgraphCountLogicalRuleTest extends SparkFunSuite {
   def getEquation(dataset: String, query: String) = {
     val data = ExpData.getDataAddress(dataset)
     val dmlString = new ExpQuery(data) getQuery (query)
-    Query.unOptimizedPlan(dmlString).optimize()
+    SubgraphCounting.unOptimizedPlan(dmlString).optimize()
   }
 
   test("debug") {
-    DISCConf.defaultConf().queryType = QueryType.Debug
+    Conf.defaultConf().queryType = QueryType.Debug
 //    val queries = Seq("DthreePath1", "DthreePath2")
     val queries = Seq("t39")
     queries.foreach { query =>
@@ -31,7 +30,7 @@ class SubgraphCountLogicalRuleTest extends SparkFunSuite {
   }
 
   test("3-node") {
-    DISCConf.defaultConf().queryType = QueryType.Debug
+    Conf.defaultConf().queryType = QueryType.Debug
     val queries = Seq("wedge", "triangle")
     queries.foreach { query =>
       val plan = getEquation(dataset, query)
@@ -44,7 +43,7 @@ class SubgraphCountLogicalRuleTest extends SparkFunSuite {
   }
 
   test("4-node") {
-    DISCConf.defaultConf().queryType = QueryType.Debug
+    Conf.defaultConf().queryType = QueryType.Debug
     val queries = Seq(
       "threePath",
       "threeStar",

@@ -1,13 +1,12 @@
 package org.apache.spark.disc.testing
 
-import org.apache.spark.disc.DISCConf
 import org.apache.spark.disc.catlog.{Catalog, Relation}
-import org.apache.spark.disc.util.misc.DataLoader
+import org.apache.spark.disc.util.misc.{Conf, EdgeLoader}
 
 class ExpQuery(data: String) {
 
-  lazy val rdd = new DataLoader().csv(data)
-  val core = DISCConf.defaultConf().core
+  lazy val rdd = new EdgeLoader().csv(data)
+  val core = Conf.defaultConf().core
 
   def getDml(q: String) = {
     val dml = q match {

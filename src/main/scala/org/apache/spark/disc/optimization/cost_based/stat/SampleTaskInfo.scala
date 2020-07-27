@@ -18,8 +18,7 @@ case class SampleTaskInfo(parameterTaskInfos: Seq[SampleParameterTaskInfo])
 case class SampleParameterTaskInfo(prevHyperNodes: Set[Int],
                                    curHyperNodes: Int,
                                    ghd: RelationGHDTree,
-                                   totalSamples: Int =
-                                     Conf.defaultConf().defaultNumSamples) {
+                                   totalSamples: Int = 100000) {
 
   //common parameters
   val allSchemas = ghd.schemas

@@ -1,10 +1,10 @@
 package disc.integration
 
 import disc.SparkFunSuite
-import org.apache.spark.disc.DISCConf.QueryType
 import org.apache.spark.disc.optimization.rule_based.aggregate.CountTableCache
 import org.apache.spark.disc.testing.{ExpData, ExpEntry, ExpQuery}
-import org.apache.spark.disc.{DISCConf, Query}
+import org.apache.spark.disc.util.misc.{Conf, QueryType}
+import org.apache.spark.disc.{SubgraphCounting}
 
 class DISCMainTest extends SparkFunSuite {
 
@@ -19,20 +19,20 @@ class DISCMainTest extends SparkFunSuite {
   def getPhyiscalPlan(dataset: String, query: String) = {
     val data = ExpData.getDataAddress(dataset)
     val dmlString = new ExpQuery(data) getQuery (query)
-    Query.optimizedPhyiscalPlan(dmlString)
+    SubgraphCounting.optimizedPhyiscalPlan(dmlString)
   }
 
   def getLogicalPlan(dataset: String, query: String) = {
     val data = ExpData.getDataAddress(dataset)
     val dmlString = new ExpQuery(data) getQuery (query)
-    Query.optimizedLogicalPlan(dmlString)
+    SubgraphCounting.optimizedLogicalPlan(dmlString)
   }
 
   test("expEntry") {
     val data = ExpData.getDataAddress(dataset)
     val executeMode = "Count"
     //    val executeMode = "ShowPlan"
-    val queryType = "Partial"
+    val queryType = "HOM"
 
 //    val platform = "Single"
     val platform = "Parallel"
@@ -62,8 +62,8 @@ class DISCMainTest extends SparkFunSuite {
     //check if whole pipeline can basically work
 
     val queries = Seq("wedge", "triangle")
-    val discConf = DISCConf.defaultConf()
-    discConf.queryType = QueryType.Induce
+    val discConf = Conf.defaultConf()
+    discConf.queryType = QueryType.InducedISO
 
     queries.foreach { query =>
       val plan = getPhyiscalPlan(dataset, query)
@@ -88,8 +88,8 @@ class DISCMainTest extends SparkFunSuite {
       "chordalSquare",
       "fourClique"
     )
-    val discConf = DISCConf.defaultConf()
-    discConf.queryType = QueryType.Induce
+    val discConf = Conf.defaultConf()
+    discConf.queryType = QueryType.InducedISO
 
     queries.foreach { query =>
       val plan = getPhyiscalPlan(dataset, query)
@@ -105,8 +105,8 @@ class DISCMainTest extends SparkFunSuite {
   //check if whole pipeline can basically work
   test("5-node") {
     //    val queries = Seq("wedge", "triangle")
-    val discConf = DISCConf.defaultConf()
-    discConf.queryType = QueryType.NonInduce
+    val discConf = Conf.defaultConf()
+    discConf.queryType = QueryType.ISO
 
     val queries = Seq("house", "threeTriangle", "solarSquare", "near5Clique")
 //    val queries = Seq("solarSquare")
@@ -127,8 +127,8 @@ class DISCMainTest extends SparkFunSuite {
   //check if whole pipeline can basically work
   test("6-node") {
 //    val queries = Seq("wedge", "triangle")
-    val discConf = DISCConf.defaultConf()
-    discConf.queryType = QueryType.NonInduce
+    val discConf = Conf.defaultConf()
+    discConf.queryType = QueryType.ISO
 
     val queries = Seq(
       "quadTriangle",

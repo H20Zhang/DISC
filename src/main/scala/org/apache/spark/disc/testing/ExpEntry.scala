@@ -1,8 +1,6 @@
 package org.apache.spark.disc.testing
 
-import org.apache.spark.disc.DISCConf
-import org.apache.spark.disc.DISCConf.{ExecutionMode, QueryType}
-import org.apache.spark.disc.util.misc.Conf
+import org.apache.spark.disc.util.misc.{Conf, ExecutionMode, QueryType}
 
 object ExpEntry {
   def main(args: Array[String]): Unit = {
@@ -46,13 +44,13 @@ object ExpEntry {
     // OParser.parse returns Option[Config]
     OParser.parse(parser1, args, DISCConfig()) match {
       case Some(config) =>
-        val conf = DISCConf.defaultConf()
+        val conf = Conf.defaultConf()
         conf.data = config.data
         conf.queryType = QueryType.withName(config.queryType)
         conf.executionMode = ExecutionMode.withName(config.executionMode)
         conf.core = config.core
         conf.query = config.query
-        conf.timeOut = config.timeout
+        conf.TIMEOUT = config.timeout
         conf.cacheSize = config.cacheSize
 
         config.platform match {

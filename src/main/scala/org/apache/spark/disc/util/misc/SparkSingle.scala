@@ -17,7 +17,7 @@ object SparkSingle {
   //        .config("spark.memory.offHeap.enabled","true")
   //        .config("spark.memory.offHeap.size","500M")
 
-  var isCluster = Conf.defaultConf().isYarn
+  var isCluster = Conf.defaultConf().IS_YARN
   var appName = "ADJ"
 
   private def getSparkInternal() = {
@@ -40,7 +40,10 @@ object SparkSingle {
           .config("spark.shuffle.file.buffer", "1M")
           .config("adj.conf spark.network.timeout", "10000000")
           .config("spark.yarn.maxAppAttempts", "1")
-          .config("spark.sql.shuffle.partitions", Conf.defaultConf().numMachine)
+          .config(
+            "spark.sql.shuffle.partitions",
+            Conf.defaultConf().NUM_MACHINE
+          )
           //          .config("spark.kryo.registrationRequired","true")
           .getOrCreate()
       case false =>
@@ -60,7 +63,10 @@ object SparkSingle {
           .config("spark.shuffle.file.buffer", "1M")
           .config("spark.kryo.unsafe", "true")
           .config("adj.conf spark.network.timeout", "10000000")
-          .config("spark.sql.shuffle.partitions", Conf.defaultConf().numMachine)
+          .config(
+            "spark.sql.shuffle.partitions",
+            Conf.defaultConf().NUM_MACHINE
+          )
           .config("spark.sql.autoBroadcastJoinThreshold", "10485760")
           //        .config("spark.kryo.registrationRequired","true")
           .getOrCreate()

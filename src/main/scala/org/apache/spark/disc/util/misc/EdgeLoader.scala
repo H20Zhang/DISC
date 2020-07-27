@@ -1,10 +1,9 @@
 package org.apache.spark.disc.util.misc
 
-class DataLoader(partitionSize: Int = Conf.defaultConf().getTaskNum()) {
+class EdgeLoader(partitionSize: Int = Conf.defaultConf().NUM_PARTITION) {
 
   lazy val (_, sc) = SparkSingle.getSpark()
   lazy val spark = SparkSingle.getSparkSession()
-//  var partitionSize = 4
 
   def csv(dataAddress: String) = {
     val rawDataRDD = sc.textFile(dataAddress).repartition(partitionSize)

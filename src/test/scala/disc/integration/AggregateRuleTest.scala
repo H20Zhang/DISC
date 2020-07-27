@@ -1,7 +1,7 @@
 package disc.integration
 
 import disc.SparkFunSuite
-import org.apache.spark.disc.Query
+import org.apache.spark.disc.SubgraphCounting
 import org.apache.spark.disc.testing.{ExpData, ExpQuery}
 
 class AggregateRuleTest extends SparkFunSuite {
@@ -11,7 +11,7 @@ class AggregateRuleTest extends SparkFunSuite {
   def getPlan(dataset: String, query: String) = {
     val data = ExpData.getDataAddress(dataset)
     val dmlString = new ExpQuery(data) getQuery (query)
-    Query.optimizedPhyiscalPlan(dmlString)
+    SubgraphCounting.optimizedPhyiscalPlan(dmlString)
   }
 
   test("wedge") {

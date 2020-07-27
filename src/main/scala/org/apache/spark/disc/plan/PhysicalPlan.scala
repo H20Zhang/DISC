@@ -11,7 +11,7 @@ import org.apache.spark.disc.execution.hcube.{TrieHCubeBlock, TupleHCubeBlock}
 import org.apache.spark.disc.execution.subtask._
 import org.apache.spark.disc.catlog.Catalog.{AttributeID, DataType}
 import org.apache.spark.disc.catlog.{Catalog, Relation, Schema}
-import org.apache.spark.disc.util.misc.DataLoader
+import org.apache.spark.disc.util.misc.EdgeLoader
 import org.apache.spark.rdd.RDD
 
 //physical adj.plan is the adj.plan that describe the distributed execution process
@@ -260,7 +260,7 @@ abstract class ScanExec(schema: Schema) extends PhysicalPlan {
 case class DiskScanExec(schema: Schema, dataAddress: String)
     extends ScanExec(schema) {
   override def execute(): Relation = {
-    val loader = new DataLoader()
+    val loader = new EdgeLoader()
     Relation(schema, loader.csv(dataAddress))
   }
 

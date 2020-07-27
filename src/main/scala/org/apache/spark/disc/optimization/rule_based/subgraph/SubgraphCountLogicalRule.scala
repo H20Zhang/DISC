@@ -6,8 +6,8 @@ import org.apache.spark.disc.optimization.rule_based.subgraph.Element.State
 import org.apache.spark.disc.optimization.rule_based.subgraph
 import org.apache.spark.disc.optimization.rule_based.LogicalRule
 import org.apache.spark.disc.plan._
-import org.apache.spark.disc.util.misc.Fraction
-import org.apache.spark.disc.{DISCConf, plan}
+import org.apache.spark.disc.util.misc.{Conf, Fraction, QueryType}
+import org.apache.spark.disc.plan
 
 class SubgraphCountLogicalRule() extends LogicalRule {
 
@@ -46,7 +46,7 @@ class SubgraphCountLogicalRule() extends LogicalRule {
 
   def optimizeEquation(eq: Equation): Equation = {
 
-    val discConf = DISCConf.defaultConf()
+    val conf = Conf.defaultConf()
 
     //add rule
 
@@ -56,8 +56,8 @@ class SubgraphCountLogicalRule() extends LogicalRule {
     val rule3 = new NonInduceToPartialRule
     val rule4 = new CliqueOptimizeRule
 
-    discConf.queryType match {
-      case org.apache.spark.disc.DISCConf.QueryType.Induce => {
+    conf.queryType match {
+      case QueryType.InducedISO => {
         ruleExecutor.addRule(rule1)
         ruleExecutor.addRule(rule2)
 //        new ByPassRule(State.Induced, State.NonInduced)
@@ -66,20 +66,20 @@ class SubgraphCountLogicalRule() extends LogicalRule {
 
       }
 
-      case org.apache.spark.disc.DISCConf.QueryType.NonInduce => {
+      case QueryType.ISO => {
         ruleExecutor.addRule(rule1)
         ruleExecutor.addRule(new ByPassRule(State.Induced, State.NonInduced))
         ruleExecutor.addRule(rule3)
         ruleExecutor.addRule(rule4)
       }
 
-      case org.apache.spark.disc.DISCConf.QueryType.Partial => {
+      case QueryType.HOM => {
         ruleExecutor.addRule(rule1)
         ruleExecutor.addRule(new ByPassRule(State.Induced, State.NonInduced))
         ruleExecutor.addRule(new ByPassRule(State.NonInduced, State.Partial))
         ruleExecutor.addRule(rule4)
       }
-      case org.apache.spark.disc.DISCConf.QueryType.Debug => {
+      case QueryType.Debug => {
         ruleExecutor.addRule(rule1)
         ruleExecutor.addRule(rule2)
         ruleExecutor.addRule(new ByPassRule(State.NonInduced, State.Partial))

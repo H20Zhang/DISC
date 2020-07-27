@@ -129,7 +129,7 @@ class Sampler(relations: Seq[Relation],
     val sampleAttr = sampleParameterTaskInfo.sampleQueryAttrOrder
     val numSamples = sampleParameterTaskInfo.totalSamples / Conf
       .defaultConf()
-      .numMachine
+      .NUM_MACHINE
     val attrIdToPreserve = sampleParameterTaskInfo.sampledRelationSchema.attrIDs
       .map(sampleAttr.indexOf)
       .toArray
@@ -137,7 +137,7 @@ class Sampler(relations: Seq[Relation],
     //compute shares
     val shareComputer = new EnumShareComputer(
       sampleQuery.map(_.schema),
-      Conf.defaultConf().numMachine
+      Conf.defaultConf().NUM_MACHINE
     )
     val share = shareComputer.optimalShare()._1
 
@@ -208,7 +208,7 @@ class Sampler(relations: Seq[Relation],
     //compute shares
     val shareComputer = new EnumShareComputer(
       testQuery.map(_.schema),
-      Conf.defaultConf().numMachine
+      Conf.defaultConf().NUM_MACHINE
     )
     val share = shareComputer.optimalShare()._1
 

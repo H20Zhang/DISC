@@ -1,9 +1,8 @@
 package org.apache.spark.disc
 
-import org.apache.spark.disc.DISCConf.{ExecutionMode, QueryType}
 import org.apache.spark.disc.parser.SubgraphParser
 
-object Query {
+object SubgraphCounting {
   def unOptimizedPlan(dml: String) = {
     val parser = new SubgraphParser()
     parser.parseDml(dml)
@@ -29,19 +28,26 @@ object Query {
     physicalPlan
   }
 
-  def count(dml: String) = {
-
-//    val time1 = System.currentTimeMillis()
+  def get(dml: String) = {
 
     val physicalPlan = optimizedPhyiscalPlan(dml)
 
     println(physicalPlan.prettyString())
 
-    //execute physical adj.plan
-    val outputSize = physicalPlan.count()
+    //execute physical plan
+    val output = physicalPlan.execute()
 
-//    val time2 = System.currentTimeMillis()
-//    println(s"time:${(time2 - time1) / 1000}")
+    output
+  }
+
+  def count(dml: String) = {
+
+    val physicalPlan = optimizedPhyiscalPlan(dml)
+
+    println(physicalPlan.prettyString())
+
+    //execute physical plan
+    val outputSize = physicalPlan.count()
 
     outputSize
   }

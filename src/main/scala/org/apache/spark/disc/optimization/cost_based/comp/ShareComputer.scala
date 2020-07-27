@@ -4,7 +4,6 @@ import org.apache.spark.disc.catlog.Catalog.AttributeID
 import org.apache.spark.disc.catlog.Schema
 import org.apache.spark.disc.optimization.cost_based.stat.Statistic
 import org.apache.spark.disc.util.misc.Conf
-import org.apache.spark.disc.util.misc.Conf.Method
 
 import scala.collection.mutable.ArrayBuffer
 //
@@ -30,19 +29,11 @@ class EnumShareComputer(schemas: Seq[Schema],
     var optimalShare = optimalShareAndCost._1
     var optimalLoad = optimalShareAndCost._3
 
-    var maximalLoad = 0.0
-
-    Conf.defaultConf().method match {
-      case Method.MergedHCube =>
-        maximalLoad = Conf.defaultConf().mergeHCubeMemoryBudget
-      case Method.PullHCube =>
-        maximalLoad = Conf.defaultConf().mergeHCubeMemoryBudget
-      case _ => maximalLoad = Conf.defaultConf().pushHCubeMemoryBudget
-    }
+    var maximalLoad = Conf.defaultConf().HCUBE_MEMORY_BUDGET
 
     while (optimalLoad > maximalLoad) {
       numTask = (numTask * 2).toInt
-      Conf.defaultConf().taskNum = numTask
+      Conf.defaultConf().NUM_PARTITION = numTask
       optimalShareAndCost = optimalShareAndLoadAndCost()
       optimalShare = optimalShareAndCost._1
       optimalLoad = optimalShareAndCost._3
@@ -82,7 +73,7 @@ class EnumShareComputer(schemas: Seq[Schema],
       }.sum
 
 //      val totalTask = share.product
-      val load = communicationCost.toDouble / share.product
+      val load = (communicationCost.toDouble / share.product) * 10 //10 Bytes per edge
 
       if (load == minLoad && share.sum < shareSum) {
         minLoad = load
@@ -251,7 +242,7 @@ class NonLinearShareComputer(schemas: Seq[Schema],
     val initialPointScript = attrIdsWithIdx
       .map {
         case (_, idx) =>
-          s"${Math.pow(Conf.defaultConf().numMachine, 1.0 / attrIds.size)};"
+          s"${Math.pow(Conf.defaultConf().NUM_MACHINE, 1.0 / attrIds.size)};"
       }
       .reduce(_ + _)
       .dropRight(1)
@@ -259,7 +250,7 @@ class NonLinearShareComputer(schemas: Seq[Schema],
     val machineNumConstraintScript = attrIdsWithIdx
       .map { case (_, idx) => s"x(${idx})*" }
       .reduce(_ + _)
-      .dropRight(1) + s" - ${Conf.defaultConf().numMachine};"
+      .dropRight(1) + s" - ${Conf.defaultConf().NUM_MACHINE};"
 
     val octaveScript =
       s"""
@@ -342,7 +333,7 @@ class NonLinearShareComputer(schemas: Seq[Schema],
     }
 
     roundedShareMaps = roundedShareMaps.filter { share =>
-      share.values.product > Conf.defaultConf().numMachine
+      share.values.product > Conf.defaultConf().NUM_MACHINE
     }
 
     val optimalRoundedShareMap = roundedShareMaps

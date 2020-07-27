@@ -3,7 +3,6 @@ package org.apache.spark.disc.execution.subtask.executor
 import it.unimi.dsi.fastutil.longs
 import it.unimi.dsi.fastutil.longs.LongArrayList
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
-import org.apache.spark.disc.DISCConf
 import org.apache.spark.disc.catlog.Catalog.{AttributeID, DataType}
 import org.apache.spark.disc.catlog.Schema
 import org.apache.spark.disc.execution.hcube.TrieHCubeBlock
@@ -19,7 +18,7 @@ import org.apache.spark.disc.execution.subtask.{
   TrieConstructedAttributeOrderInfo,
   TrieConstructedLeapFrogJoinSubTask
 }
-import org.apache.spark.disc.util.misc.Graph
+import org.apache.spark.disc.util.misc.{Conf, Graph}
 
 class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {
 
@@ -547,7 +546,7 @@ class BindingAssociatedOutputTable extends BindingAssociatedCountTable {
   }
 }
 
-class ArrayLongLRUCache(cacheSize: Int = DISCConf.defaultConf().cacheSize)
+class ArrayLongLRUCache(cacheSize: Int = Conf.defaultConf().cacheSize)
     extends LRUCache[LongArrayList, DataType](cacheSize) {
   def apply(key: LongArrayList): DataType =
     get(key)

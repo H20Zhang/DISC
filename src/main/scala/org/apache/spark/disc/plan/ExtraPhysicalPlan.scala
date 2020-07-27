@@ -63,7 +63,7 @@ case class MultiplyAggregateExec(
 
     val shareComputer = new EnumShareComputer(
       relationsForHCube.map(_.schema),
-      Conf.defaultConf().taskNum
+      Conf.defaultConf().NUM_PARTITION
     )
 
 //    println(s"share:${shareComputer.optimalShare()._1}")

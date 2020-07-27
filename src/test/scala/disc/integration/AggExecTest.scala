@@ -2,7 +2,7 @@ package disc.integration
 
 import disc.SparkFunSuite
 import org.apache.spark.disc.util.misc.Conf
-import org.apache.spark.disc.Query
+import org.apache.spark.disc.SubgraphCounting
 import org.apache.spark.disc.plan.{
   MultiplyAggregateExec,
   UnOptimizedCountAggregate,
@@ -18,7 +18,9 @@ class AggExecTest extends SparkFunSuite {
     val data = ExpData.getDataAddress(dataset)
     val dmlString = query
     val dml = new ExpQuery(data) getQuery (dmlString)
-    val plan = Query.unOptimizedPlan(dml).asInstanceOf[UnOptimizedSubgraphCount]
+    val plan = SubgraphCounting
+      .unOptimizedPlan(dml)
+      .asInstanceOf[UnOptimizedSubgraphCount]
     val unOptimizedCountAgg =
       UnOptimizedCountAggregate(plan.edge, plan.coreAttrIds)
     unOptimizedCountAgg.optimize().optimize()

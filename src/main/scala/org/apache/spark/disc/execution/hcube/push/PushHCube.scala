@@ -115,7 +115,7 @@ class PushHCube(@transient query: HCubePlan, info: TaskInfo)
     val rdds = relationsWithLocation
 
     //generate RDD[SubTask]
-    sc.union(rdds).groupByKey(Conf.defaultConf().taskNum).map {
+    sc.union(rdds).groupByKey(Conf.defaultConf().NUM_PARTITION).map {
       case (key, tuples) =>
         val localShare = partitioner.getShare(key)
         val allSchemas = keyToSchema.values.toArray

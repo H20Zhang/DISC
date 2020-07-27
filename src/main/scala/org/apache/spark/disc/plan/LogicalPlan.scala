@@ -4,7 +4,6 @@ import org.apache.spark.disc.catlog.Catalog.Attribute
 import org.apache.spark.disc.catlog.{Catalog, Schema}
 import org.apache.spark.disc.optimization.rule_based.Rule
 import org.apache.spark.disc.util.misc.Conf
-import org.apache.spark.disc.util.misc.Conf.Method
 
 trait LogicalPlan extends Serializable {
   val catalog = Catalog.defaultCatalog()
@@ -117,15 +116,7 @@ case class UnOptimizedJoin(childrenOps: Seq[LogicalPlan])
 
   def optimize(): LogicalPlan = {
     val inputs = childrenOps.map(_.optimize())
-    import Method._
-    conf.method match {
-      case UnOptimizedHCube => UnCostOptimizedHCubeJoin(inputs)
-      case PushHCube        => CostOptimizedPushHCubeJoin(inputs)
-      case PullHCube        => CostOptimizedPullHCubeJoin(inputs)
-      case MergedHCube      => CostOptimizedMergedHCubeJoin(inputs)
-      case Factorize        => CostOptimizedHCubeFactorizedJoin(inputs)
-      case _                => throw new Exception(s"not such method supported ${conf.method}")
-    }
+    CostOptimizedMergedHCubeJoin(inputs)
   }
 
   override def phyiscalPlan(): PhysicalPlan = {

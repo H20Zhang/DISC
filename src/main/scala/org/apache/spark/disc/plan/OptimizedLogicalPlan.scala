@@ -36,13 +36,13 @@ case class UnCostOptimizedHCubeJoin(childrenOps: Seq[LogicalPlan])
 
 case class CostOptimizedMergedHCubeJoin(childrenOps: Seq[LogicalPlan],
                                         task: Int =
-                                          Conf.defaultConf().getTaskNum())
+                                          Conf.defaultConf().NUM_PARTITION)
     extends Join(childrenOps) {
 
   var share: Map[AttributeID, Int] = Map()
   var attrOrder: Array[AttributeID] = Array()
   val statistic = Statistic.defaultStatistic()
-  var numTask = Conf.defaultConf().taskNum
+  var numTask = Conf.defaultConf().NUM_PARTITION
 
   init()
 
@@ -64,7 +64,7 @@ case class CostOptimizedMergedHCubeJoin(childrenOps: Seq[LogicalPlan],
     val shareComputer = new EnumShareComputer(schemas, task)
     share = shareComputer.optimalShare()._1
 
-    numTask = Conf.defaultConf().taskNum
+    numTask = Conf.defaultConf().NUM_PARTITION
     val catlog = Catalog.defaultCatalog()
 
     println(
@@ -99,13 +99,13 @@ case class CostOptimizedMergedHCubeJoin(childrenOps: Seq[LogicalPlan],
 
 case class CostOptimizedPushHCubeJoin(childrenOps: Seq[LogicalPlan],
                                       task: Int =
-                                        Conf.defaultConf().getTaskNum())
+                                        Conf.defaultConf().NUM_PARTITION)
     extends Join(childrenOps) {
 
   var share: Map[AttributeID, Int] = Map()
   var attrOrder: Array[AttributeID] = Array()
   val statistic = Statistic.defaultStatistic()
-  var numTask = Conf.defaultConf().taskNum
+  var numTask = Conf.defaultConf().NUM_PARTITION
 
   init()
 
@@ -127,7 +127,7 @@ case class CostOptimizedPushHCubeJoin(childrenOps: Seq[LogicalPlan],
     val shareComputer = new EnumShareComputer(schemas, task)
     share = shareComputer.optimalShare()._1
 
-    numTask = Conf.defaultConf().taskNum
+    numTask = Conf.defaultConf().NUM_PARTITION
 
     val catlog = Catalog.defaultCatalog()
 
@@ -163,7 +163,7 @@ case class CostOptimizedPushHCubeJoin(childrenOps: Seq[LogicalPlan],
 
 case class CostOptimizedPullHCubeJoin(childrenOps: Seq[LogicalPlan],
                                       task: Int =
-                                        Conf.defaultConf().getTaskNum())
+                                        Conf.defaultConf().NUM_PARTITION)
     extends Join(childrenOps) {
 
   var share: Map[AttributeID, Int] = Map()
@@ -223,7 +223,7 @@ case class CostOptimizedPullHCubeJoin(childrenOps: Seq[LogicalPlan],
 
 case class CostOptimizedHCubeFactorizedJoin(childrenOps: Seq[LogicalPlan],
                                             task: Int =
-                                              Conf.defaultConf().getTaskNum())
+                                              Conf.defaultConf().NUM_PARTITION)
     extends Join(childrenOps) {
 
   var share: Map[AttributeID, Int] = Map()
