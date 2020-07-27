@@ -46,39 +46,3 @@ object Query {
     outputSize
   }
 }
-
-class DISCConf() {
-  var queryType = QueryType.NonInduce
-  var query = ""
-  var timeOut = 43200
-  var executionMode = ExecutionMode.Count
-  var data = ""
-  var cacheSize = 10000000
-  var isYarn = false
-  var core = "A"
-  val mergeHCubeMemoryBudget = 5 * Math.pow(10, 7)
-}
-
-object DISCConf {
-  lazy val conf = {
-    new DISCConf()
-    //    loadConf("./src/main/scala/org/apache/spark/adj/adj.utils/misc/default.adj.conf")
-  }
-
-  def defaultConf() = {
-    conf
-  }
-
-  object QueryType extends Enumeration {
-    type QueryType = Value
-    val Induce, NonInduce, Partial, Debug =
-      Value
-  }
-
-  object ExecutionMode extends Enumeration {
-    type ExecutionMode = Value
-    val ShowPlan, CommOnly, Count =
-      Value
-  }
-
-}
