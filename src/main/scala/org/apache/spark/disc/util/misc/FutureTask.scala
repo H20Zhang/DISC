@@ -1,4 +1,4 @@
-package org.apache.spark.disc.testing
+package org.apache.spark.disc.util.misc
 
 import java.util.concurrent.CancellationException
 import java.util.{Timer, TimerTask}

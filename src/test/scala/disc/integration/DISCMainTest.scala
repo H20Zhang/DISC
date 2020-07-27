@@ -2,7 +2,7 @@ package disc.integration
 
 import disc.SparkFunSuite
 import org.apache.spark.disc.optimization.rule_based.aggregate.CountTableCache
-import org.apache.spark.disc.testing.{ExpData, ExpEntry, ExpQuery}
+import org.apache.spark.disc.testing.{ExpData, ExpQuery}
 import org.apache.spark.disc.util.misc.{Conf, QueryType}
 import org.apache.spark.disc.{SubgraphCounting}
 
@@ -42,9 +42,9 @@ class DISCMainTest extends SparkFunSuite {
     queries.foreach { query =>
 //      CountTableCache.reset()
       val command1 =
-        s"-q $query -t 43200 -d ${data} -e $executeMode -u ${queryType} -s 100000 -c A -p $platform"
+        s"-q $query -d ${data} -e $executeMode -u ${queryType} -c A -p $platform"
 
-      ExpEntry.main(command1.split("\\s"))
+      SubgraphCounting.main(command1.split("\\s"))
     }
   }
 

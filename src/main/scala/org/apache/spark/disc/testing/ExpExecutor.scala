@@ -6,6 +6,7 @@ import org.apache.spark.disc.util.misc.{
   Conf,
   Counter,
   ExecutionMode,
+  FutureTask,
   SparkSingle
 }
 import org.apache.spark.disc.SubgraphCounting

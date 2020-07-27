@@ -546,7 +546,7 @@ class BindingAssociatedOutputTable extends BindingAssociatedCountTable {
   }
 }
 
-class ArrayLongLRUCache(cacheSize: Int = Conf.defaultConf().cacheSize)
+class ArrayLongLRUCache(cacheSize: Int = Conf.defaultConf().CACHE_SIZE)
     extends LRUCache[LongArrayList, DataType](cacheSize) {
   def apply(key: LongArrayList): DataType =
     get(key)

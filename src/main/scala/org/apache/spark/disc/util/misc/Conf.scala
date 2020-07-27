@@ -5,14 +5,15 @@ import java.util.Properties
 
 import scala.io.Source
 
-class Conf() {
+case class Conf() {
 
   //Environment Related Parameter
   var NUM_PARTITION = 4 //numbers of partitions (this is only a minimal value, the numbers of partition will automatically increase in case of large datasets)
-  var NUM_MACHINE = 4 //numbers of machines
+  var NUM_CORE = 4 //numbers of cores
   var TIMEOUT = 43200 // timeout in terms of seconds
   var HCUBE_MEMORY_BUDGET = 5 * Math.pow(10, 8) //memory budget allocated for each partition in terms of Bytes
   var IS_YARN = false // whether running the system on yarn or locally
+  var CACHE_SIZE = 10000000 //default cache size for LRU
 
   //Query Related Parameters
   var data = ""
@@ -20,7 +21,6 @@ class Conf() {
   var core = "A"
   var queryType = QueryType.ISO
   var executionMode = ExecutionMode.Count
-  var cacheSize = 10000000
 
   def load() = {
     val url = "disc.properties"
@@ -34,32 +34,33 @@ class Conf() {
     }
 
     NUM_PARTITION = properties.getProperty("NUM_PARTITION").toInt
-    NUM_MACHINE = properties.getProperty("NUM_MACHINE").toInt
+    NUM_CORE = properties.getProperty("NUM_CORE").toInt
     TIMEOUT = properties.getProperty("TIMEOUT").toInt
     HCUBE_MEMORY_BUDGET = properties
       .getProperty("HCUBE_MEMORY_BUDGET")
       .toDouble * Math.pow(10, 6)
     IS_YARN = properties.getProperty("IS_YARN").toBoolean
+    CACHE_SIZE = properties.getProperty("CACHE_SIZE").toInt
   }
 
   def setCluster() = {
     //For Cluster
     NUM_PARTITION = 7 * 28
-    NUM_MACHINE = 7 * 28
+    NUM_CORE = 7 * 28
     IS_YARN = true
   }
 
   def setLocalCluster() = {
     //For Parallel
     NUM_PARTITION = 16
-    NUM_MACHINE = 16
+    NUM_CORE = 16
     IS_YARN = false
   }
 
   def setOneCoreLocalCluster() = {
     //For Single
     NUM_PARTITION = 1
-    NUM_MACHINE = 1
+    NUM_CORE = 1
     IS_YARN = false
   }
 }
@@ -84,6 +85,6 @@ object QueryType extends Enumeration {
 
 object ExecutionMode extends Enumeration {
   type ExecutionMode = Value
-  val ShowPlan, CommOnly, Count =
+  val ShowPlan, Count, Exec, Debug =
     Value
 }

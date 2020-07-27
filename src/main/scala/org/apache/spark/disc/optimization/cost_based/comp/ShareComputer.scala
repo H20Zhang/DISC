@@ -242,7 +242,7 @@ class NonLinearShareComputer(schemas: Seq[Schema],
     val initialPointScript = attrIdsWithIdx
       .map {
         case (_, idx) =>
-          s"${Math.pow(Conf.defaultConf().NUM_MACHINE, 1.0 / attrIds.size)};"
+          s"${Math.pow(Conf.defaultConf().NUM_CORE, 1.0 / attrIds.size)};"
       }
       .reduce(_ + _)
       .dropRight(1)
@@ -250,7 +250,7 @@ class NonLinearShareComputer(schemas: Seq[Schema],
     val machineNumConstraintScript = attrIdsWithIdx
       .map { case (_, idx) => s"x(${idx})*" }
       .reduce(_ + _)
-      .dropRight(1) + s" - ${Conf.defaultConf().NUM_MACHINE};"
+      .dropRight(1) + s" - ${Conf.defaultConf().NUM_CORE};"
 
     val octaveScript =
       s"""
@@ -333,7 +333,7 @@ class NonLinearShareComputer(schemas: Seq[Schema],
     }
 
     roundedShareMaps = roundedShareMaps.filter { share =>
-      share.values.product > Conf.defaultConf().NUM_MACHINE
+      share.values.product > Conf.defaultConf().NUM_CORE
     }
 
     val optimalRoundedShareMap = roundedShareMaps
