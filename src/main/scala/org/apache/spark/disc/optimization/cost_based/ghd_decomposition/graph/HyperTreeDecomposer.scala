@@ -1,10 +1,9 @@
-package org.apache.spark.disc.optimization.cost_based.decomposition.graph
+package org.apache.spark.disc.optimization.cost_based.ghd_decomposition.graph
 
-import org.apache.spark.disc.optimization.cost_based.decomposition.graph.Graph._
-import org.apache.spark.disc.optimization.cost_based.decomposition.graph.HyperNodeGraph.NHyperNode
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.graph.Graph._
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.graph.HyperNodeGraph.NHyperNode
 import org.apache.spark.disc.util.extension.ArrayUtil
 import org.apache.spark.disc.util.misc.LogAble
-
 
 import scala.collection.mutable.ArrayBuffer
 

@@ -2,13 +2,12 @@ package org.apache.spark.disc.execution.subtask.executor
 
 import org.apache.spark.disc.catlog.Catalog.DataType
 import org.apache.spark.disc.execution.hcube.TrieHCubeBlock
+import org.apache.spark.disc.execution.subtask.utils.{ArraySegment, LRUCache}
 import org.apache.spark.disc.execution.subtask.{
   CachedLeapFrogJoinSubTask,
-  LeapFrogJoinSubTask,
   TrieConstructedAttributeOrderInfo,
   TrieConstructedLeapFrogJoinSubTask
 }
-import org.apache.spark.disc.execution.subtask.utils.{ArraySegment, LRUCache}
 
 import scala.collection.mutable
 

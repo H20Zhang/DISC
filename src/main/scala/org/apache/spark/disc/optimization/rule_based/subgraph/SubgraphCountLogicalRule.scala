@@ -2,12 +2,11 @@ package org.apache.spark.disc.optimization.rule_based.subgraph
 
 import org.apache.spark.disc.catlog.Catalog.AttributeID
 import org.apache.spark.disc.catlog.Schema
+import org.apache.spark.disc.optimization.rule_based.{LogicalRule, subgraph}
 import org.apache.spark.disc.optimization.rule_based.subgraph.Element.State
-import org.apache.spark.disc.optimization.rule_based.subgraph
-import org.apache.spark.disc.optimization.rule_based.LogicalRule
+import org.apache.spark.disc.plan
 import org.apache.spark.disc.plan._
 import org.apache.spark.disc.util.misc.{Conf, Fraction, QueryType}
-import org.apache.spark.disc.plan
 
 class SubgraphCountLogicalRule() extends LogicalRule {
 
@@ -60,7 +59,6 @@ class SubgraphCountLogicalRule() extends LogicalRule {
       case QueryType.InducedISO => {
         ruleExecutor.addRule(rule1)
         ruleExecutor.addRule(rule2)
-//        new ByPassRule(State.Induced, State.NonInduced)
         ruleExecutor.addRule(rule3)
         ruleExecutor.addRule(rule4)
 
@@ -83,15 +81,10 @@ class SubgraphCountLogicalRule() extends LogicalRule {
         ruleExecutor.addRule(rule1)
         ruleExecutor.addRule(rule2)
         ruleExecutor.addRule(new ByPassRule(State.NonInduced, State.Partial))
-//        ruleExecutor.addRule(rule4)
       }
     }
 
     val optimizedRule = ruleExecutor.applyAllRulesTillFix(eq)
-
-//    val ruleExecutor2 = new EquationTransformer
-//    ruleExecutor2.addRule(rule4)
-//    val optimizedRule2 = ruleExecutor2.applyAllRulesTillFix(optimizedRule1)
     optimizedRule
       .simplify()
   }
@@ -108,11 +101,6 @@ class SubgraphCountLogicalRule() extends LogicalRule {
       }
       .flatMap(f => Seq(f, (f._1.swap, f._2)))
       .toMap
-
-//    println(EToSchemaMap)
-//    println(
-//      s"edgeSchemas:${edgeSchema}, notIncludedEdgesSchemas:${notExistedEdgeSchema}"
-//    )
 
     val countAggregates = body.map { element =>
       val schemas = element.E.filter { case (u, v) => v > u }.map(EToSchemaMap)

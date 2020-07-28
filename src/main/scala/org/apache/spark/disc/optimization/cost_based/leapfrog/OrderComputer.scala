@@ -1,8 +1,8 @@
-package org.apache.spark.disc.optimization.cost_based.comp
+package org.apache.spark.disc.optimization.cost_based.leapfrog
 
 import org.apache.spark.disc.catlog.Catalog.AttributeID
 import org.apache.spark.disc.catlog.Schema
-import org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph.RelationDecomposer
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph.RelationDecomposer
 import org.apache.spark.disc.optimization.cost_based.stat.Statistic
 
 case class AttrOrderCostModel(attrIdOrder: Array[AttributeID],

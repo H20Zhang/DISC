@@ -1,11 +1,12 @@
 package org.apache.spark.disc.optimization.rule_based.aggregate
 
-import org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph.{
+import org.apache.spark.disc.catlog.Catalog.AttributeID
+import org.apache.spark.disc.catlog.{Catalog, Schema}
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph.{
+  ManualGHDDecomposer,
   RelationDecomposer,
   RelationGHDTree
 }
-import org.apache.spark.disc.catlog.Catalog.AttributeID
-import org.apache.spark.disc.catlog.{Catalog, Schema}
 import org.apache.spark.disc.optimization.rule_based.LogicalRule
 import org.apache.spark.disc.optimization.rule_based.subgraph.Pattern
 import org.apache.spark.disc.plan
@@ -27,7 +28,7 @@ class CountAggregateToMultiplyAggregateRule extends LogicalRule {
 
     def findOptimalGHD: RelationGHDTree = {
 
-      val manualRelationGHDDecomposer = new ManualRelationDecomposer(schemas)
+      val manualRelationGHDDecomposer = new ManualGHDDecomposer(schemas)
       val manualGHDs = manualRelationGHDDecomposer.decomposeTree()
 
       if (manualGHDs.nonEmpty) {

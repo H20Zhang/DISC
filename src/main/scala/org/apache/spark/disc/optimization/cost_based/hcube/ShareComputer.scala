@@ -1,4 +1,4 @@
-package org.apache.spark.disc.optimization.cost_based.comp
+package org.apache.spark.disc.optimization.cost_based.hcube
 
 import org.apache.spark.disc.catlog.Catalog.AttributeID
 import org.apache.spark.disc.catlog.Schema
@@ -6,7 +6,7 @@ import org.apache.spark.disc.optimization.cost_based.stat.Statistic
 import org.apache.spark.disc.util.misc.Conf
 
 import scala.collection.mutable.ArrayBuffer
-//
+
 class EnumShareComputer(schemas: Seq[Schema],
                         tasks: Int,
                         statistic: Statistic = Statistic.defaultStatistic()) {
@@ -72,7 +72,6 @@ class EnumShareComputer(schemas: Seq[Schema],
           multiplyFactor * cardinality
       }.sum
 
-//      val totalTask = share.product
       val load = (communicationCost.toDouble / share.product) * 10 //10 Bytes per edge
 
       if (load == minLoad && share.sum < shareSum) {
@@ -101,8 +100,6 @@ class EnumShareComputer(schemas: Seq[Schema],
   * @param length: number of attributes
   */
 class ShareEnumerator(attributes: Seq[AttributeID], tasks: Int) {
-
-  //  val pGenerator = new PGenerator(maxP,length, p = { f => f.product > minP})
 
   val length = attributes.size
 
@@ -147,8 +144,6 @@ class NonLinearShareComputer(schemas: Seq[Schema],
 
   def optimalShare(): Map[AttributeID, Int] = {
     val script = genOctaveScript()
-
-//    println(s"octaveScript:${script}")
     val rawShare = performOptimization(script)
     val share = roundOctaveResult(rawShare)
     share
@@ -170,19 +165,11 @@ class NonLinearShareComputer(schemas: Seq[Schema],
       }
       .sum
 
-//    cost
     if ((cost / share.values.product) < memoryBudget) {
       cost
     } else {
 
-//      println(s"invalidShare:${share} with cost:${cost}")
-
-//      println(
-//        s"schemas:${schemas}, cardinality:${cardinalities}, problematic shareMap:${share}, budget:${memoryBudget}, estimate load:${(cost / share.values.product)}"
-//      )
-
       Double.MaxValue
-//      cost
     }
   }
 
@@ -285,8 +272,6 @@ class NonLinearShareComputer(schemas: Seq[Schema],
     val pw = new PrintWriter(tempFile)
     pw.write(script)
     pw.close
-
-//    println(s"octave script:${script}")
 
     import sys.process._
     val result = "octave -qf ./tempFile.m" !!

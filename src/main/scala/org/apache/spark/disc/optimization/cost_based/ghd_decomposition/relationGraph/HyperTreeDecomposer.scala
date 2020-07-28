@@ -1,15 +1,13 @@
-package org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph
+package org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph
 
 import java.util.concurrent.ConcurrentLinkedQueue
 
-import org.apache.spark.disc.optimization.cost_based.decomposition.graph.Graph._
-import org.apache.spark.disc.optimization.cost_based.decomposition.graph.HyperNodeGraph.NHyperNode
-import org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph.HyperGraph.HyperNode
-import org.apache.spark.disc.util.extension.{ArrayUtil, SeqUtil}
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.graph.Graph._
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph.HyperGraph.HyperNode
+import org.apache.spark.disc.util.extension.SeqUtil
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.JavaConversions
 
 object HyperTreeDecomposer {
 

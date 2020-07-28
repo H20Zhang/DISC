@@ -1,7 +1,7 @@
 package org.apache.spark.disc.execution.hcube.pull
 
 import org.apache.spark.Partitioner
-import org.apache.spark.disc.execution.hcube.{HCubeBlock, TupleHCubeBlock}
+import org.apache.spark.disc.execution.hcube.HCubeBlock
 import org.apache.spark.rdd.RDD
 
 import scala.reflect.ClassTag

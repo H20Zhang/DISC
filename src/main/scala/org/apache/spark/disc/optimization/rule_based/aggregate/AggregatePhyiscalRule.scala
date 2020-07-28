@@ -1,14 +1,13 @@
 package org.apache.spark.disc.optimization.rule_based.aggregate
 
-import org.apache.spark.disc.optimization.cost_based.comp.OrderComputer
-import org.apache.spark.disc.optimization.cost_based.stat.Statistic
 import org.apache.spark.disc.catlog.Catalog.AttributeID
 import org.apache.spark.disc.execution.subtask.{
   EagerTableSubInfo,
   LazyTableSubInfo,
   LeapFrogAggregateInfo
 }
-
+import org.apache.spark.disc.optimization.cost_based.leapfrog.OrderComputer
+import org.apache.spark.disc.optimization.cost_based.stat.Statistic
 import org.apache.spark.disc.optimization.rule_based.PhyiscalRule
 import org.apache.spark.disc.plan._
 import org.apache.spark.disc.util.misc.Graph

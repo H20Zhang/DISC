@@ -5,9 +5,7 @@ import org.apache.spark.disc.execution.subtask.LeapFrogJoinSubTask
 import org.apache.spark.disc.execution.subtask.utils.{
   ArraySegment,
   ArrayTrie,
-  IntersectedListIterator,
   IntersectionIterator,
-  LeapFrogUnaryIterator,
   Trie
 }
 

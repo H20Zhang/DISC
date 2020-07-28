@@ -1,22 +1,10 @@
 package org.apache.spark.disc.execution.subtask
 
-import org.apache.spark.disc.catlog.{Catalog, Schema}
 import org.apache.spark.disc.catlog.Catalog.{Attribute, AttributeID, DataType}
-import org.apache.spark.disc.execution.hcube.{
-  HCubeBlock,
-  TrieHCubeBlock,
-  TupleHCubeBlock
-}
-import org.apache.spark.disc.execution.subtask.executor.{
-  CachedLeapFrogJoin,
-  FactorizedLeapFrogJoin,
-  GHDJoin,
-  LeapFrogAggregate,
-  LeapFrogJoin,
-  LongSizeIterator,
-  TrieConstructedLeapFrogJoin
-}
-import org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph.RelationGHDTree
+import org.apache.spark.disc.catlog.{Catalog, Schema}
+import org.apache.spark.disc.execution.hcube.{HCubeBlock, TupleHCubeBlock}
+import org.apache.spark.disc.execution.subtask.executor._
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph.RelationGHDTree
 
 import scala.collection.mutable.ArrayBuffer
 

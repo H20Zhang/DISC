@@ -2,19 +2,16 @@ package org.apache.spark.disc.execution.hcube.push
 
 import org.apache.spark.disc.catlog.Catalog.DataType
 import org.apache.spark.disc.catlog.Relation
+import org.apache.spark.disc.execution.hcube.pull.HCubePlan
 import org.apache.spark.disc.execution.hcube.{
   HCube,
   HCubeHelper,
   HCubePartitioner,
   TupleHCubeBlock
 }
-import org.apache.spark.disc.execution.hcube.pull.HCubePlan
 import org.apache.spark.disc.execution.subtask.{SubTask, TaskInfo}
 import org.apache.spark.disc.util.misc.{Conf, SparkSingle}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.util.Utils
-
-import scala.collection.mutable.ArrayBuffer
 
 class PushHCube(@transient query: HCubePlan, info: TaskInfo)
     extends HCube

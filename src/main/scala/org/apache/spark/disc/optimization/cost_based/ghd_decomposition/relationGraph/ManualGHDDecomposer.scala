@@ -1,10 +1,9 @@
-package org.apache.spark.disc.optimization.rule_based.aggregate
+package org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph
 
-import org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph.RelationGHDTree
 import org.apache.spark.disc.catlog.{Catalog, Schema}
 import org.apache.spark.disc.util.misc.Graph
 
-class ManualRelationDecomposer(schemas: Seq[Schema]) {
+class ManualGHDDecomposer(schemas: Seq[Schema]) {
 
   def decomposeTree(): IndexedSeq[RelationGHDTree] = {
 
@@ -17,8 +16,6 @@ class ManualRelationDecomposer(schemas: Seq[Schema]) {
       Seq(quadTriangleRule, triangleCoreRule, twinCSquareRule, twinClique4Rule)
 
     val inputGraph = schemasToGraph()
-
-//    println(s"rules:$rules")
     val availableGHDGraph =
       rules.map(f => (stringToGraph(f._1), f._2))
 
@@ -153,10 +150,4 @@ class ManualRelationDecomposer(schemas: Seq[Schema]) {
        |V(1[A-B;A-C;F-A;B-C;B-F;C-F;],2[C-D;C-E;C-F;D-E;D-F;E-F;])
        |E(1-2;)
        |""".stripMargin
-
-  //starofDavidPlus
-//  private val starofDavidPlusGraph =
-//    "A-B;B-C;C-D;D-E;E-F;F-A;A-C;A-E;B-D;B-F;C-E;C-F;D-F;"
-//  private val starofDavidPlusGHD = ""
-
 }

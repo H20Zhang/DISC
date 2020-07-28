@@ -3,8 +3,7 @@ package org.apache.spark.disc.optimization.cost_based.stat
 import org.apache.spark.disc.catlog.Catalog.{AttributeID, DataType}
 import org.apache.spark.disc.catlog.{Relation, Schema}
 import org.apache.spark.disc.execution.subtask.SubTaskFactory
-import org.apache.spark.disc.optimization.cost_based.comp.EnumShareComputer
-import org.apache.spark.disc.plan.InMemoryScanExec
+import org.apache.spark.disc.optimization.cost_based.hcube.EnumShareComputer
 import org.apache.spark.disc.plan
 import org.apache.spark.disc.plan.{InMemoryScanExec, MergedHCubeLeapJoinExec}
 import org.apache.spark.disc.util.misc.{Conf, SparkSingle}

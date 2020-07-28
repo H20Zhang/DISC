@@ -19,14 +19,6 @@ class Pattern(V: Seq[NodeID], E: Seq[Edge], val C: Seq[NodeID])
 
         if (C.toSet == p2.C.toSet) {
           val constraints = C.zip(p2.C).toMap
-
-          //    filter the mappings that violate matchedNodes
-//          println(
-//            s"V:${V}, E:${E}, C:${C.toList}, V2:${p2.V}, E2:${p2.E}, C2:${p2.C}"
-//          )
-//          println(s"mapping:${mappings}")
-//          println(s"constraints:${constraints}")
-
           val validMappings = mappings.filter { mapping =>
             C.forall(nodeID => mapping(nodeID) == constraints(nodeID))
           }
@@ -106,8 +98,6 @@ case class Equation(head: Element, body: Seq[Element]) {
     }
 
     Equation(head, optimizedBody2)
-
-//    this
   }
 
   def transformWithRule(rule: SubgraphCountRule) = {

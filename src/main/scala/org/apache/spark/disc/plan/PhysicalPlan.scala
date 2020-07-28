@@ -1,5 +1,7 @@
 package org.apache.spark.disc.plan
 
+import org.apache.spark.disc.catlog.Catalog.{AttributeID, DataType}
+import org.apache.spark.disc.catlog.{Catalog, Relation, Schema}
 import org.apache.spark.disc.execution.hcube.pull.{
   HCubePlan,
   PartitionedRelation,
@@ -9,14 +11,12 @@ import org.apache.spark.disc.execution.hcube.push.PushHCube
 import org.apache.spark.disc.execution.hcube.utils.TriePreConstructor
 import org.apache.spark.disc.execution.hcube.{TrieHCubeBlock, TupleHCubeBlock}
 import org.apache.spark.disc.execution.subtask._
-import org.apache.spark.disc.catlog.Catalog.{AttributeID, DataType}
-import org.apache.spark.disc.catlog.{Catalog, Relation, Schema}
-import org.apache.spark.disc.optimization.cost_based.comp.EnumShareComputer
+import org.apache.spark.disc.optimization.cost_based.hcube.EnumShareComputer
 import org.apache.spark.disc.optimization.cost_based.stat.Statistic
 import org.apache.spark.disc.util.misc.{Conf, EdgeLoader, Fraction, SparkSingle}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.types.{LongType, StructField, StructType}
+import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.storage.StorageLevel
 
 //physical adj.plan is the adj.plan that describe the distributed execution process

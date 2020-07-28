@@ -9,7 +9,7 @@ import org.apache.spark.disc.execution.subtask.{
   GHDJoinSubTask,
   LeapFrogJoinSubTask
 }
-import org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph.RelationGHDTree
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph.RelationGHDTree
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer

@@ -1,10 +1,9 @@
 package disc.integration
 
-import disc.SparkFunSuite
+import disc.util.{ExpData, ExpQuery, SparkFunSuite}
 import org.apache.spark.disc.optimization.rule_based.aggregate.CountTableCache
-import org.apache.spark.disc.testing.{ExpData, ExpQuery}
 import org.apache.spark.disc.util.misc.{Conf, QueryType}
-import org.apache.spark.disc.{SubgraphCounting}
+import org.apache.spark.disc.SubgraphCounting
 
 class DISCMainTest extends SparkFunSuite {
 
@@ -17,15 +16,17 @@ class DISCMainTest extends SparkFunSuite {
   val dataset = "eu"
 
   def getPhyiscalPlan(dataset: String, query: String) = {
+    val conf = Conf.defaultConf()
     val data = ExpData.getDataAddress(dataset)
-    val dmlString = new ExpQuery(data) getQuery (query)
-    SubgraphCounting.optimizedPhyiscalPlan(dmlString)
+//    val dmlString = new ExpQuery(data) getQuery (query)
+    SubgraphCounting.phyiscalPlan(data, query, conf.orbit, conf.queryType)
   }
 
   def getLogicalPlan(dataset: String, query: String) = {
+    val conf = Conf.defaultConf()
     val data = ExpData.getDataAddress(dataset)
-    val dmlString = new ExpQuery(data) getQuery (query)
-    SubgraphCounting.optimizedLogicalPlan(dmlString)
+//    val dmlString = new ExpQuery(data) getQuery (query)
+    SubgraphCounting.logicalPlan(data, query, conf.orbit, conf.queryType)
   }
 
   test("expEntry") {
@@ -37,7 +38,9 @@ class DISCMainTest extends SparkFunSuite {
 //    val platform = "Single"
     val platform = "Parallel"
 
-    val queries = Seq("t50")
+    val expQuery = new ExpQuery(data)
+
+    val queries = Seq("t50").map(f => expQuery.getDml(f))
 
     queries.foreach { query =>
 //      CountTableCache.reset()

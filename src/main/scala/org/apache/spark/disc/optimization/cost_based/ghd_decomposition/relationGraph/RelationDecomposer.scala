@@ -1,9 +1,8 @@
-package org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph
+package org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph
 
-import org.apache.spark.disc.catlog.Catalog.{AttributeID, RelationID}
+import org.apache.spark.disc.catlog.Catalog.AttributeID
 import org.apache.spark.disc.catlog.Schema
 
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 class RelationDecomposer(schemas: Seq[Schema]) {

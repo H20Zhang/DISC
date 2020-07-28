@@ -1,17 +1,11 @@
-package org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph
+package org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph
 
-import org.apache.spark.disc.optimization.cost_based.decomposition.graph.Graph._
-import org.apache.spark.disc.optimization.cost_based.decomposition.graph.{
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.graph.Graph._
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.graph.{
   Graph,
   GraphBuilder
 }
-import org.apache.spark.disc.optimization.cost_based.decomposition.graph.HyperNodeGraph.{
-  NHyperEdge,
-  NHyperEdgeSet,
-  NHyperNode,
-  NHyperNodeSet
-}
-import org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph.HyperGraph.{
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph.HyperGraph.{
   HyperEdge,
   HyperNode
 }

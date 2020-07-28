@@ -1,8 +1,8 @@
-package org.apache.spark.disc.testing
+package org.apache.spark.disc.util.misc
 
 import org.apache.spark.disc.catlog.{Catalog, Schema}
 
-object ExpQueryHelper {
+object QueryHelper {
 
   //we use a very simple dml like "A-B; A-C; A-D;".
   def dmlToSchemas(dml: String): Seq[Schema] = {

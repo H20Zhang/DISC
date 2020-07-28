@@ -1,4 +1,4 @@
-package disc
+package disc.util
 
 import org.apache.spark.disc.util.misc.SparkSingle
 import org.scalatest.{BeforeAndAfterAll, FunSuite}

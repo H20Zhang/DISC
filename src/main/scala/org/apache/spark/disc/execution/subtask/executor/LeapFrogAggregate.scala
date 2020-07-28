@@ -11,13 +11,7 @@ import org.apache.spark.disc.execution.subtask.utils.{
   LRUCache,
   Trie
 }
-import org.apache.spark.disc.execution.subtask.{
-  LazyTableSubInfo,
-  LeapFrogAggregateInfo,
-  LeapFrogAggregateSubTask,
-  TrieConstructedAttributeOrderInfo,
-  TrieConstructedLeapFrogJoinSubTask
-}
+import org.apache.spark.disc.execution.subtask._
 import org.apache.spark.disc.util.misc.{Conf, Graph}
 
 class LeapFrogAggregate(aggTask: LeapFrogAggregateSubTask) {

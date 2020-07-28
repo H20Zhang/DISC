@@ -18,7 +18,7 @@ case class Conf() {
   //Query Related Parameters
   var data = ""
   var query = ""
-  var core = "A"
+  var orbit = "A"
   var queryType = QueryType.ISO
   var executionMode = ExecutionMode.Count
 

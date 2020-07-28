@@ -1,10 +1,8 @@
-package org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph
+package org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph
 
 import cern.colt.matrix.impl.DenseDoubleMatrix2D
 import com.joptimizer.optimizers.{LPOptimizationRequest, LPPrimalDualMethod}
-import org.apache.spark.disc.optimization.cost_based.decomposition.graph.Graph._
 
-import scala.collection.mutable
 import scala.math.BigDecimal.RoundingMode
 
 object WidthCalculator {

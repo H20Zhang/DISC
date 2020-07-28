@@ -1,4 +1,4 @@
-package org.apache.spark.disc.testing
+package disc.util
 
 object ExpData {
 

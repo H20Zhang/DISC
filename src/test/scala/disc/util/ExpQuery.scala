@@ -1,12 +1,12 @@
-package org.apache.spark.disc.testing
+package disc.util
 
 import org.apache.spark.disc.catlog.{Catalog, Relation}
-import org.apache.spark.disc.util.misc.{Conf, EdgeLoader}
+import org.apache.spark.disc.util.misc.{Conf, EdgeLoader, QueryHelper}
 
 class ExpQuery(data: String) {
 
   lazy val rdd = new EdgeLoader().csv(data)
-  val core = Conf.defaultConf().core
+  val core = Conf.defaultConf().orbit
 
   def getDml(q: String) = {
     val dml = q match {
@@ -192,12 +192,12 @@ class ExpQuery(data: String) {
 
   def getSchema(q: String) = {
     val dml = getDml(q)
-    ExpQueryHelper.dmlToSchemas(dml)
+    QueryHelper.dmlToSchemas(dml)
   }
 
   def getNotIncludedEdgesSchema(q: String) = {
     val dml = getDml(q)
-    ExpQueryHelper.dmlToNotIncludedEdgeSchemas(dml)
+    QueryHelper.dmlToNotIncludedEdgeSchemas(dml)
   }
 
   def getRelations(q: String) = {

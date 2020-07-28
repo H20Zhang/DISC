@@ -3,12 +3,11 @@ package org.apache.spark.disc.optimization.cost_based.stat
 import org.apache.spark.disc.catlog.Catalog.AttributeID
 import org.apache.spark.disc.catlog.Schema
 import org.apache.spark.disc.execution.subtask.TaskInfo
-import org.apache.spark.disc.optimization.cost_based.comp.{
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph.RelationGHDTree
+import org.apache.spark.disc.optimization.cost_based.leapfrog.{
   AttrOrderCostModel,
   OrderComputer
 }
-import org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph.RelationGHDTree
-import org.apache.spark.disc.util.misc.Conf
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath
 import org.jgrapht.graph.{DefaultEdge, DefaultUndirectedGraph}
 

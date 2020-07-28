@@ -1,6 +1,6 @@
 package org.apache.spark.disc.optimization.rule_based.subgraph
 
-import org.apache.spark.disc.optimization.cost_based.decomposition.graph.Graph.NodeID
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.graph.Graph.NodeID
 import org.apache.spark.disc.optimization.rule_based.subgraph
 import org.apache.spark.disc.optimization.rule_based.subgraph.Element.State
 import org.apache.spark.disc.util.misc.Fraction
@@ -28,7 +28,6 @@ class EquationTransformer {
     var appliedEq = eq
     var isChanged = true
     var count = Int.MaxValue
-//    println(s"equation:${eq}")
 
     while (isChanged && count > 0) {
       val oldEq = appliedEq
@@ -40,8 +39,6 @@ class EquationTransformer {
       }
 
       count -= 1
-
-//      println(s"appliedEq:${appliedEq}")
     }
 
     appliedEq
@@ -194,8 +191,6 @@ class NonInduceToPartialRule extends SubgraphCountRule {
     nodeCollapseSets = nodeCollapseSets.filter { nodeCollapseSet =>
       nodeCollapseSet.size != V.size
     }
-
-//    println(s"nodeCollapseSets:${nodeCollapseSets}")
 
     val nodeCollapseMaps = nodeCollapseSets.map { nodeCollapseSet =>
       nodeCollapseSet.flatMap { sameColorSet =>

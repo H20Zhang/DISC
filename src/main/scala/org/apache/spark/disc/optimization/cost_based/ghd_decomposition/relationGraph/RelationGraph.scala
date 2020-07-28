@@ -1,9 +1,8 @@
-package org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph
+package org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph
 
-import org.apache.spark.disc.optimization.cost_based.decomposition.graph.Graph.NodeID
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.graph.Graph.NodeID
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 class RelationGraph(_id: Int, V: Array[NodeID], E: Array[RelationEdge]) {
 

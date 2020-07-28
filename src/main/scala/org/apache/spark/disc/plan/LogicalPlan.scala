@@ -3,8 +3,8 @@ package org.apache.spark.disc.plan
 import org.apache.spark.disc.CountAttrCounter
 import org.apache.spark.disc.catlog.Catalog.{Attribute, AttributeID}
 import org.apache.spark.disc.catlog.{Catalog, Schema}
-import org.apache.spark.disc.optimization.cost_based.comp.{
-  EnumShareComputer,
+import org.apache.spark.disc.optimization.cost_based.hcube.EnumShareComputer
+import org.apache.spark.disc.optimization.cost_based.leapfrog.{
   FactorizeOrderComputer,
   OrderComputer
 }

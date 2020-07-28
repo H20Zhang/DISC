@@ -1,8 +1,7 @@
 package org.apache.spark.disc.util.querygen
 
-import org.apache.spark.disc.optimization.cost_based.decomposition.relationGraph.RelationDecomposer
-import org.apache.spark.disc.testing.ExpQueryHelper
-import org.apache.spark.disc.util.misc.SparkSingle
+import org.apache.spark.disc.optimization.cost_based.ghd_decomposition.relationGraph.RelationDecomposer
+import org.apache.spark.disc.util.misc.{QueryHelper, SparkSingle}
 
 object ExtraExpEntry {
 
@@ -37,7 +36,7 @@ object ExtraExpEntry {
 
     val ghds = dmlRDD
       .map { dml =>
-        val schemas = ExpQueryHelper.dmlToSchemas(dml)
+        val schemas = QueryHelper.dmlToSchemas(dml)
         val decomposer = new RelationDecomposer(schemas)
         val optimalGHD =
           decomposer.decomposeTree().head

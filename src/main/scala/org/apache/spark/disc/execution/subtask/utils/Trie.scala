@@ -2,12 +2,6 @@ package org.apache.spark.disc.execution.subtask.utils
 
 import java.util.Comparator
 
-import gnu.trove.map.hash.{
-  TIntIntHashMap,
-  TIntObjectHashMap,
-  TLongIntHashMap,
-  TLongLongHashMap
-}
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap
 import org.apache.spark.disc.catlog.Catalog.DataType
 

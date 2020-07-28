@@ -1,6 +1,6 @@
 package disc.integration
 
-import org.apache.spark.disc.testing.ExpQueryHelper
+import org.apache.spark.disc.util.misc.QueryHelper
 import org.apache.spark.disc.util.querygen.UniqueQueryComputer
 import org.scalatest.FunSuite
 
@@ -39,7 +39,7 @@ class UniqueQueryComputerTest extends FunSuite {
     }
 
     dmls.foreach { dml =>
-      val schemas = ExpQueryHelper.dmlToSchemas(dml)
+      val schemas = QueryHelper.dmlToSchemas(dml)
       println(schemas)
     }
     println(s"numPattern:${patterns.size}")

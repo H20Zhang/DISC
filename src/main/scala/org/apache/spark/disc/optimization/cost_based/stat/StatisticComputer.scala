@@ -1,8 +1,7 @@
 package org.apache.spark.disc.optimization.cost_based.stat
 
-import org.apache.spark.disc.catlog.Catalog.{Attribute, AttributeID}
+import org.apache.spark.disc.catlog.Catalog.AttributeID
 import org.apache.spark.disc.catlog.{Relation, Schema}
-import org.apache.spark.disc.execution.subtask.TaskInfo
 import org.apache.spark.disc.util.extension.SeqUtil
 
 import scala.collection.mutable

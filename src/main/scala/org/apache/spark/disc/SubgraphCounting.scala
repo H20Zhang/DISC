@@ -1,17 +1,40 @@
 package org.apache.spark.disc
 
 import org.apache.spark.disc.parser.SubgraphParser
-import org.apache.spark.disc.testing.ExpExecutor
-import org.apache.spark.disc.util.misc.{Conf, ExecutionMode, QueryType}
+import org.apache.spark.disc.util.misc.QueryType.QueryType
+import org.apache.spark.disc.util.misc._
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 object SubgraphCounting {
-  def unOptimizedPlan(dml: String) = {
-    val parser = new SubgraphParser()
-    parser.parseDml(dml)
+
+  def prepare(data: String,
+              dml: String,
+              orbit: String,
+              queryType: QueryType) = {
+    val conf = Conf.defaultConf()
+
+    conf.data = data
+    conf.query = dml
+    conf.orbit = orbit
+    conf.queryType = queryType
+
+    val preparer = new DatasetPreparer(data)
+    preparer.getInternalQuery(dml)
   }
 
-  def optimizedLogicalPlan(dml: String) = {
-    var plan = unOptimizedPlan(dml)
+  def parse(data: String, dml: String, orbit: String, queryType: QueryType) = {
+    val internalQuery = prepare(data, dml, orbit, queryType)
+    val parser = new SubgraphParser()
+    parser.parseDml(internalQuery)
+  }
+
+  def logicalPlan(data: String,
+                  dml: String,
+                  orbit: String,
+                  queryType: QueryType) = {
+    var plan = parse(data, dml, orbit, queryType)
 
     //optimize 1 -- decompose SumAgg over a series of countAgg
     plan = plan.optimize()
@@ -22,17 +45,20 @@ object SubgraphCounting {
     plan
   }
 
-  def optimizedPhyiscalPlan(dml: String) = {
-    var plan = optimizedLogicalPlan(dml)
+  def phyiscalPlan(data: String,
+                   dml: String,
+                   orbit: String,
+                   queryType: QueryType) = {
+    var plan = logicalPlan(data, dml, orbit, queryType)
     //optimize 3 -- physical plan
     val physicalPlan = plan.phyiscalPlan()
 
     physicalPlan
   }
 
-  def get(dml: String) = {
+  def get(data: String, dml: String, orbit: String, queryType: QueryType) = {
 
-    val physicalPlan = optimizedPhyiscalPlan(dml)
+    val physicalPlan = phyiscalPlan(data, dml, orbit, queryType)
 
     println(physicalPlan.prettyString())
 
@@ -42,9 +68,9 @@ object SubgraphCounting {
     output
   }
 
-  def count(dml: String) = {
+  def count(data: String, dml: String, orbit: String, queryType: QueryType) = {
 
-    val physicalPlan = optimizedPhyiscalPlan(dml)
+    val physicalPlan = phyiscalPlan(data, dml, orbit, queryType)
 
     println(physicalPlan.prettyString())
 
@@ -65,6 +91,7 @@ object SubgraphCounting {
                            core: String = "A",
                            platform: String = "Dist")
 
+    //parser for args
     val builder = OParser.builder[InputConfig]
     val parser1 = {
       import builder._
@@ -97,14 +124,15 @@ object SubgraphCounting {
       )
     }
 
-    // OParser.parse returns Option[Config]
+    //parse the args
+    val conf = Conf.defaultConf()
+
     OParser.parse(parser1, args, InputConfig()) match {
       case Some(config) =>
-        val conf = Conf.defaultConf()
         conf.data = config.data
         conf.queryType = QueryType.withName(config.queryType)
         conf.executionMode = ExecutionMode.withName(config.executionMode)
-        conf.core = config.core
+        conf.orbit = config.core
         conf.query = config.query
 
         config.platform match {
@@ -112,12 +140,41 @@ object SubgraphCounting {
           case "Parallel" => Conf.defaultConf().setLocalCluster()
           case "Dist"     => Conf.defaultConf().setCluster()
         }
-
-        val executor =
-          new ExpExecutor(conf)
-        executor.execute()
       case _ =>
       // arguments are bad, error message will have been displayed
     }
+
+    //execute the query
+    SparkSingle.appName =
+      s"DISC-data:${conf.data}-query:${conf.query}-executionMode:${conf.executionMode}-queryType:${conf.queryType}"
+
+    val someTask = FutureTask.schedule(conf.TIMEOUT seconds) {
+      SparkSingle.getSparkContext().cancelAllJobs()
+      println(s"timeout after ${conf.TIMEOUT} seconds")
+    }
+
+    var count = 0l
+    val time1 = System.currentTimeMillis()
+    conf.executionMode match {
+      case ExecutionMode.ShowPlan =>
+        println(
+          SubgraphCounting
+            .phyiscalPlan(conf.data, conf.query, conf.orbit, conf.queryType)
+            .prettyString()
+        )
+      case ExecutionMode.Count =>
+        count = SubgraphCounting.count(
+          conf.data,
+          conf.query,
+          conf.orbit,
+          conf.queryType
+        )
+    }
+
+    val time2 = System.currentTimeMillis()
+    println(
+      s"elapse time:${(time2 - time1)}-count:${count}-data:${conf.data}-query:${conf.query}-executionMode:${conf.executionMode}-queryType:${conf.queryType}"
+    )
+
   }
 }
