@@ -36,10 +36,10 @@ object SubgraphCounting {
                   queryType: QueryType) = {
     var plan = parse(data, dml, orbit, queryType)
 
-    //optimize 1 -- decompose SumAgg over a series of countAgg
+    //optimize 1 -- convert InducedISO,ISO -> HOM
     plan = plan.optimize()
 
-    //optimize 2 -- decompose each countAgg into a series of MultiplyAgg
+    //optimize 2 -- aggregation push down
     plan = plan.optimize()
 
     plan
@@ -50,7 +50,8 @@ object SubgraphCounting {
                    orbit: String,
                    queryType: QueryType) = {
     var plan = logicalPlan(data, dml, orbit, queryType)
-    //optimize 3 -- physical plan
+
+    //optimize 3 -- multi-hcube optimization, and other cost-based optimization
     val physicalPlan = plan.phyiscalPlan()
 
     physicalPlan
@@ -98,7 +99,6 @@ object SubgraphCounting {
       OParser.sequence(
         programName("DISC"),
         head("DISC", "0.1"),
-        // option -f, --foo
         opt[String]('q', "query")
           .action((x, c) => c.copy(query = x))
           .text("pattern graph, i.e. 'A-B;B-C;A-C'"),
@@ -136,12 +136,16 @@ object SubgraphCounting {
         conf.query = config.query
 
         config.platform match {
-          case "Single"   => Conf.defaultConf().setOneCoreLocalCluster()
-          case "Parallel" => Conf.defaultConf().setLocalCluster()
-          case "Dist"     => Conf.defaultConf().setCluster()
+          case "Parallel" => {
+            val url = "disc_local.properties"
+            Conf.defaultConf().load(url)
+          }
+          case "Dist" => {
+            val url = "disc_yarn.properties"
+            Conf.defaultConf().load(url)
+          }
         }
-      case _ =>
-      // arguments are bad, error message will have been displayed
+      case _ => // arguments are bad, error message will have been displayed
     }
 
     //execute the query

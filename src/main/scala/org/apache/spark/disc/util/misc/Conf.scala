@@ -22,8 +22,7 @@ case class Conf() {
   var queryType = QueryType.ISO
   var executionMode = ExecutionMode.Count
 
-  def load() = {
-    val url = "disc.properties"
+  def load(url: String) = {
     val properties: Properties = new Properties()
 
     if (url != null) {
@@ -42,33 +41,13 @@ case class Conf() {
     IS_YARN = properties.getProperty("IS_YARN").toBoolean
     CACHE_SIZE = properties.getProperty("CACHE_SIZE").toInt
   }
-
-  def setCluster() = {
-    //For Cluster
-    NUM_PARTITION = 7 * 28
-    NUM_CORE = 7 * 28
-    IS_YARN = true
-  }
-
-  def setLocalCluster() = {
-    //For Parallel
-    NUM_PARTITION = 16
-    NUM_CORE = 16
-    IS_YARN = false
-  }
-
-  def setOneCoreLocalCluster() = {
-    //For Single
-    NUM_PARTITION = 1
-    NUM_CORE = 1
-    IS_YARN = false
-  }
 }
 
 object Conf {
   lazy val conf = {
     val _conf = new Conf()
-    _conf.load()
+    val url = "disc_local.properties"
+    _conf.load(url)
     _conf
   }
 
