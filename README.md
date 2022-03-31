@@ -150,9 +150,23 @@ After an compiled DISC library has been obtained, The main class you will intera
   SubgraphCounting.count(pathToData, query, orbit, queryType)
 ```
 
-## Contact 
+## Citation
+```
+@article{zhang2020distributed,
+title={Distributed subgraph counting: a general approach},
+author={Zhang, Hao and Yu, Jeffrey Xu and Zhang, Yikai and Zhao, Kangfei and Cheng, Hong},
+journal={Proceedings of the VLDB Endowment},
+volume={13},
+number={12},
+pages={2493--2507},
+year={2020},
+publisher={VLDB Endowment}
+}
+```
 
+## Contact
 [Hao Zhang](mailto:zhanghaowuda12@gmail.com)
+
 
 
 
