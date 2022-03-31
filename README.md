@@ -40,9 +40,9 @@ Run following scripts to get an glimpse of DISC. It should just work.
 
 ### Prerequisite
 
-You need to install Spark 2.4.3 on your cluster or your machine.
+You need to install Spark 2.4.5 on your cluster or your machine.
 
-An copy of Spark 2.4.3 is included.
+An copy of Spark 2.4.5 is included.
 
 ### Input Format
 
