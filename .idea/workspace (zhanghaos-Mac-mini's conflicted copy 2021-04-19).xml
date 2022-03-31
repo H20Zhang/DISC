@@ -1,0 +1,1941 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="GraphFrameTest" />
+    </artifacts-to-build>
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b08b817a-7650-4861-9fbb-cc46ad7efa6c" name="Default" comment="clean5">
+      <change afterPath="$PROJECT_DIR$/query/4node/q1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/4node/q2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/4node/q3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/4node/q4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/4node/q5" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/4node/q6" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q10" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q11" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q12" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q13" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q14" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q15" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q16" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q17" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q18" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q19" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q20" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q21" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q5" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q6" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q7" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q8" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/5node/q9" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q10" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q100" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q101" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q102" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q103" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q104" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q105" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q106" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q107" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q108" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q109" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q11" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q110" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q111" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q112" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q12" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q13" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q14" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q15" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q16" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q17" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q18" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q19" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q20" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q21" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q22" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q23" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q24" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q25" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q26" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q27" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q28" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q29" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q30" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q31" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q32" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q33" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q34" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q35" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q36" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q37" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q38" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q39" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q40" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q41" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q42" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q43" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q44" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q45" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q46" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q47" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q48" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q49" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q5" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q50" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q51" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q52" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q53" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q54" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q55" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q56" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q57" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q58" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q59" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q6" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q60" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q61" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q62" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q63" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q64" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q65" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q66" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q67" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q68" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q69" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q7" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q70" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q71" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q72" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q73" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q74" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q75" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q76" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q77" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q78" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q79" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q8" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q80" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q81" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q82" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q83" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q84" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q85" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q86" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q87" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q88" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q89" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q9" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q90" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q91" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q92" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q93" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q94" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q95" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q96" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q97" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q98" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/6node/q99" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q10" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q100" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q101" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q102" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q103" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q104" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q105" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q106" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q107" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q108" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q109" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q11" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q110" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q111" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q112" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q113" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q114" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q115" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q116" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q117" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q118" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q119" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q12" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q120" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q121" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q122" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q123" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q124" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q125" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q126" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q127" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q128" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q129" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q13" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q130" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q131" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q132" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q133" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q134" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q135" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q136" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q137" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q138" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q139" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q14" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q140" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q141" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q142" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q143" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q144" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q145" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q146" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q147" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q148" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q149" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q15" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q150" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q151" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q152" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q153" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q154" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q155" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q156" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q157" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q158" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q159" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q16" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q160" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q161" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q162" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q163" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q164" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q165" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q166" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q167" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q168" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q169" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q17" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q170" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q171" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q172" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q173" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q174" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q175" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q176" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q177" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q178" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q179" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q18" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q180" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q181" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q182" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q183" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q184" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q185" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q186" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q187" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q188" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q189" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q19" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q190" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q191" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q192" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q193" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q194" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q195" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q196" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q197" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q198" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q199" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q20" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q200" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q201" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q202" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q203" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q204" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q205" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q206" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q207" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q208" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q209" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q21" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q210" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q211" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q212" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q213" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q214" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q215" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q216" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q217" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q218" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q219" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q22" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q220" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q221" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q222" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q223" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q224" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q225" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q226" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q227" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q228" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q229" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q23" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q230" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q231" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q232" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q233" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q234" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q235" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q236" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q237" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q238" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q239" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q24" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q240" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q241" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q242" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q243" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q244" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q245" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q246" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q247" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q248" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q249" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q25" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q250" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q251" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q252" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q253" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q254" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q255" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q256" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q257" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q258" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q259" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q26" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q260" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q261" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q262" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q263" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q264" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q265" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q266" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q267" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q268" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q269" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q27" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q270" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q271" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q272" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q273" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q274" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q275" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q276" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q277" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q278" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q279" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q28" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q280" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q281" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q282" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q283" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q284" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q285" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q286" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q287" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q288" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q289" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q29" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q290" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q291" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q292" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q293" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q294" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q295" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q296" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q297" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q298" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q299" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q30" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q300" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q301" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q302" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q303" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q304" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q305" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q306" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q307" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q308" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q309" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q31" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q310" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q311" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q312" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q313" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q314" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q315" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q316" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q317" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q318" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q319" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q32" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q320" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q321" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q322" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q323" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q324" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q325" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q326" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q327" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q328" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q329" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q33" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q330" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q331" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q332" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q333" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q334" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q335" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q336" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q337" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q338" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q339" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q34" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q340" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q341" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q342" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q343" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q344" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q345" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q346" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q347" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q348" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q349" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q35" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q350" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q351" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q352" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q353" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q354" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q355" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q356" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q357" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q358" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q359" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q36" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q360" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q361" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q362" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q363" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q364" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q365" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q366" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q367" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q368" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q369" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q37" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q370" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q371" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q372" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q373" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q374" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q375" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q376" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q377" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q378" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q379" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q38" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q380" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q381" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q382" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q383" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q384" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q385" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q386" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q387" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q388" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q389" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q39" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q390" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q391" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q392" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q393" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q394" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q395" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q396" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q397" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q398" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q399" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q40" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q400" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q401" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q402" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q403" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q404" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q405" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q406" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q407" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q408" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q409" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q41" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q410" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q411" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q412" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q413" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q414" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q415" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q416" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q417" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q418" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q419" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q42" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q420" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q421" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q422" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q423" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q424" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q425" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q426" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q427" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q428" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q429" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q43" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q430" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q431" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q432" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q433" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q434" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q435" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q436" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q437" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q438" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q439" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q44" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q440" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q441" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q442" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q443" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q444" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q445" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q446" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q447" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q448" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q449" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q45" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q450" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q451" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q452" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q453" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q454" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q455" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q456" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q457" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q458" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q459" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q46" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q460" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q461" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q462" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q463" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q464" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q465" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q466" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q467" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q468" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q469" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q47" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q470" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q471" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q472" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q473" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q474" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q475" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q476" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q477" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q478" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q479" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q48" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q480" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q481" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q482" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q483" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q484" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q485" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q486" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q487" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q488" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q489" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q49" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q490" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q491" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q492" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q493" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q494" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q495" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q496" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q497" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q498" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q499" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q5" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q50" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q500" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q501" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q502" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q503" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q504" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q505" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q506" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q507" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q508" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q509" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q51" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q510" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q511" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q512" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q513" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q514" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q515" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q516" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q517" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q518" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q519" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q52" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q520" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q521" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q522" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q523" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q524" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q525" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q526" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q527" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q528" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q529" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q53" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q530" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q531" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q532" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q533" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q534" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q535" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q536" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q537" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q538" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q539" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q54" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q540" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q541" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q542" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q543" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q544" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q545" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q546" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q547" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q548" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q549" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q55" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q550" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q551" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q552" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q553" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q554" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q555" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q556" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q557" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q558" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q559" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q56" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q560" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q561" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q562" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q563" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q564" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q565" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q566" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q567" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q568" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q569" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q57" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q570" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q571" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q572" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q573" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q574" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q575" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q576" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q577" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q578" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q579" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q58" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q580" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q581" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q582" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q583" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q584" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q585" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q586" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q587" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q588" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q589" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q59" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q590" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q591" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q592" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q593" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q594" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q595" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q596" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q597" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q598" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q599" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q6" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q60" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q600" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q601" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q602" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q603" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q604" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q605" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q606" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q607" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q608" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q609" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q61" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q610" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q611" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q612" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q613" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q614" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q615" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q616" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q617" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q618" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q619" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q62" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q620" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q621" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q622" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q623" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q624" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q625" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q626" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q627" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q628" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q629" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q63" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q630" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q631" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q632" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q633" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q634" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q635" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q636" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q637" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q638" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q639" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q64" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q640" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q641" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q642" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q643" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q644" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q645" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q646" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q647" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q648" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q649" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q65" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q650" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q651" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q652" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q653" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q654" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q655" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q656" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q657" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q658" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q659" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q66" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q660" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q661" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q662" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q663" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q664" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q665" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q666" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q667" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q668" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q669" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q67" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q670" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q671" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q672" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q673" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q674" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q675" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q676" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q677" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q678" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q679" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q68" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q680" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q681" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q682" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q683" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q684" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q685" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q686" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q687" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q688" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q689" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q69" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q690" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q691" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q692" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q693" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q694" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q695" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q696" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q697" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q698" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q699" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q7" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q70" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q700" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q701" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q702" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q703" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q704" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q705" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q706" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q707" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q708" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q709" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q71" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q710" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q711" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q712" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q713" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q714" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q715" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q716" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q717" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q718" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q719" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q72" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q720" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q721" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q722" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q723" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q724" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q725" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q726" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q727" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q728" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q729" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q73" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q730" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q731" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q732" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q733" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q734" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q735" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q736" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q737" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q738" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q739" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q74" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q740" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q741" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q742" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q743" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q744" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q745" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q746" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q747" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q748" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q749" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q75" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q750" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q751" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q752" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q753" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q754" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q755" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q756" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q757" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q758" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q759" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q76" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q760" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q761" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q762" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q763" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q764" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q765" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q766" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q767" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q768" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q769" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q77" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q770" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q771" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q772" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q773" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q774" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q775" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q776" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q777" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q778" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q779" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q78" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q780" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q781" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q782" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q783" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q784" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q785" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q786" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q787" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q788" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q789" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q79" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q790" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q791" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q792" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q793" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q794" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q795" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q796" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q797" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q798" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q799" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q8" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q80" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q800" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q801" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q802" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q803" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q804" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q805" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q806" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q807" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q808" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q809" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q81" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q810" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q811" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q812" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q813" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q814" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q815" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q816" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q817" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q818" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q819" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q82" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q820" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q821" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q822" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q823" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q824" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q825" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q826" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q827" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q828" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q829" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q83" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q830" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q831" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q832" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q833" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q834" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q835" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q836" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q837" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q838" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q839" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q84" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q840" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q841" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q842" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q843" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q844" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q845" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q846" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q847" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q848" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q849" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q85" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q850" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q851" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q852" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q853" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q86" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q87" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q88" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q89" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q9" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q90" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q91" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q92" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q93" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q94" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q95" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q96" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q97" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q98" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/query/7node/q99" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/script/disc.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sbt.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sbt.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/script/test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/script/test.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/org/apache/spark/disc/SubgraphCounting.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/org/apache/spark/disc/SubgraphCounting.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/disc/integration/DISCMainTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/disc/integration/DISCMainTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/disc/integration/UniqueQueryComputerTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/disc/integration/UniqueQueryComputerTest.scala" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeStyleSettingsInfer">
+    <option name="done" value="true" />
+  </component>
+  <component name="DaemonCodeAnalyzer">
+    <disable_hints>
+      <file url="file://$PROJECT_DIR$/build.sbt" />
+    </disable_hints>
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="false" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="DefaultGradleProjectSettings">
+    <option name="testRunner" value="GRADLE" />
+    <option name="delegatedBuild" value="true" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="SBT">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="DISC" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Scala Class" />
+        <option value="Scala Trait" />
+        <option value="Package Object" />
+        <option value="package-info" />
+        <option value="Scala Object" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/master" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/build.sbt" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="vmOptionsForImporter" value="-Xmx768m" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="1" />
+  </component>
+  <component name="ProjectId" id="1PjskVPjmilzwkZer6Or66xUQGJ" />
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>CollectionsScala</id>
+          </State>
+          <State>
+            <id>GeneralScala</id>
+          </State>
+          <State>
+            <id>OtherCollectionsScala</id>
+          </State>
+          <State>
+            <id>RegExp</id>
+          </State>
+          <State>
+            <id>SQL</id>
+          </State>
+          <State>
+            <id>Scala</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>Less</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="SearchEverywhereHistoryKey" value="{&#9;null&#9;null" />
+    <property name="ToolWindowDatabase.ShowToolbar" value="false" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="add_unversioned_files" value="true" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_directory_selection" value="$PROJECT_DIR$/src/main/scala/org/apache/spark/adj/execution/subtask" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="project.structure.last.edited" value="Global Libraries" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="run.code.analysis.last.selected.profile" value="aDefault" />
+    <property name="settings.editor.selected.configurable" value="sbt.project.settings.configurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="org.apache.spark.adj.execution.subtask" />
+      <recent name="org.apache.spark.adj.internal.rdd.loader" />
+      <recent name="org.apache.spark.Logo.Plan.LogicalPlan.Structure" />
+      <recent name="org.apache.spark.Logo.utlis" />
+      <recent name="" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/src/it/scala" />
+      <recent name="$PROJECT_DIR$/src/it/scala/utils" />
+      <recent name="$PROJECT_DIR$/script" />
+      <recent name="$PROJECT_DIR$/script/upload" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.dsce.parser" />
+      <recent name="org.apache.spark.adj.utils.decomposition.relationGraph" />
+      <recent name="org.apache.spark.adj.utils.decomposition" />
+      <recent name="org.apache.spark.Logo.Experiment" />
+      <recent name="org.apache.spark.Logo.UnderLying.utlis" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/scala/org/apache/spark/disc/util/misc" />
+      <recent name="$PROJECT_DIR$/src/main/scala/org/apache/spark/disc/util/conf" />
+      <recent name="$PROJECT_DIR$/src/it/scala" />
+      <recent name="$PROJECT_DIR$/script/upload" />
+      <recent name="$PROJECT_DIR$/script" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Remote.Debug sbt shell">
+    <configuration default="true" type="Applet">
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="TestNG">
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+      <option name="PROGRAM_PARAMETERS" />
+      <predefined_log_file enabled="true" id="idea.log" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TriangleEfficientTest" type="Application" factoryName="Application" temporary="true">
+      <option name="MAIN_CLASS_NAME" value="org.apache.spark.Logo.Experiment.TriangleEfficientTest" />
+      <module name="logo" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="hzhang.framework.test.exp.entry.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Debug SBT Shell" type="Remote" temporary="true">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="127.0.0.1" />
+      <option name="PORT" value="59227" />
+      <option name="AUTO_RESTART" value="false" />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="59227" />
+        <option name="LOCAL" value="false" />
+      </RunnerSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="Debug sbt shell" type="Remote" activateToolWindowBeforeRun="false" singleton="true" temporary="true">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="52391" />
+      <option name="AUTO_RESTART" value="false" />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="52391" />
+        <option name="LOCAL" value="false" />
+      </RunnerSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="Scala Console" type="ScalaScriptConsoleRunConfiguration" factoryName="Scala Console" temporary="true" show_console_on_std_err="false" show_console_on_std_out="false">
+      <module name="ADJ" />
+      <option name="allowRunningInParallel" value="false" />
+      <option name="javaOptions" value="-Djline.terminal=NONE" />
+      <option name="myConsoleArgs" value="" />
+      <option name="selectedOptions">
+        <set />
+      </option>
+      <option name="workingDirectory" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.TriangleEfficientTest" />
+      <item itemvalue="Remote.Debug SBT Shell" />
+      <item itemvalue="Remote.Debug sbt shell" />
+      <item itemvalue="Scala REPL.Scala Console" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Scala REPL.Scala Console" />
+        <item itemvalue="Remote.Debug sbt shell" />
+        <item itemvalue="Remote.Debug SBT Shell" />
+        <item itemvalue="Application.TriangleEfficientTest" />
+        <item itemvalue="Scala REPL.Scala Console" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ScalaProjectSettings">
+    <option name="dontCacheCompoundTypes" value="true" />
+    <option name="treatDocCommentAsBlockComment" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration>$USER_HOME$/.subversion</configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b08b817a-7650-4861-9fbb-cc46ad7efa6c" name="Default" comment="" />
+      <created>1509353119686</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1509353119686</updated>
+      <workItem from="1509353121181" duration="676000" />
+      <workItem from="1509353875512" duration="10081000" />
+      <workItem from="1509371807767" duration="602000" />
+      <workItem from="1509437806998" duration="3131000" />
+      <workItem from="1509448390307" duration="3384000" />
+      <workItem from="1509452508355" duration="1529000" />
+      <workItem from="1509512728638" duration="620000" />
+      <workItem from="1509786618954" duration="7559000" />
+      <workItem from="1509933406079" duration="4111000" />
+      <workItem from="1509974575313" duration="564000" />
+      <workItem from="1509976612372" duration="581000" />
+      <workItem from="1510044398021" duration="10770000" />
+      <workItem from="1510193653916" duration="348000" />
+      <workItem from="1510194290132" duration="633000" />
+      <workItem from="1510380308008" duration="6937000" />
+      <workItem from="1510405166213" duration="374000" />
+      <workItem from="1510540594991" duration="1464000" />
+      <workItem from="1510555680328" duration="10978000" />
+      <workItem from="1510582926721" duration="288000" />
+      <workItem from="1510585222296" duration="870000" />
+      <workItem from="1510642498488" duration="635000" />
+      <workItem from="1510647239418" duration="30195000" />
+      <workItem from="1510908939323" duration="6389000" />
+      <workItem from="1511084906173" duration="104000" />
+      <workItem from="1511085084946" duration="85000" />
+      <workItem from="1511085250084" duration="78000" />
+      <workItem from="1511085371459" duration="131000" />
+      <workItem from="1511326098367" duration="603000" />
+      <workItem from="1511333877276" duration="253000" />
+      <workItem from="1511579482556" duration="7210000" />
+      <workItem from="1511594527861" duration="86000" />
+      <workItem from="1511595127126" duration="22000" />
+      <workItem from="1511763844984" duration="7486000" />
+      <workItem from="1511869044029" duration="7366000" />
+      <workItem from="1512302201020" duration="1695000" />
+      <workItem from="1512712193629" duration="21000" />
+      <workItem from="1512803734973" duration="574000" />
+      <workItem from="1512888284445" duration="68841000" />
+      <workItem from="1514972164533" duration="74000" />
+      <workItem from="1515051812297" duration="10961000" />
+      <workItem from="1515075443719" duration="234000" />
+      <workItem from="1515075714852" duration="569000" />
+      <workItem from="1515076492862" duration="231000" />
+      <workItem from="1515076730155" duration="555000" />
+      <workItem from="1515077339312" duration="70000" />
+      <workItem from="1515077415133" duration="2919000" />
+      <workItem from="1515233579349" duration="30687000" />
+      <workItem from="1515657313985" duration="39827000" />
+      <workItem from="1515910285596" duration="80403000" />
+      <workItem from="1516417351826" duration="25000" />
+      <workItem from="1516417458129" duration="436000" />
+      <workItem from="1516595680945" duration="48549000" />
+      <workItem from="1516970016422" duration="4943000" />
+      <workItem from="1517198100965" duration="17000" />
+      <workItem from="1517198171113" duration="4556000" />
+      <workItem from="1517210844976" duration="12527000" />
+      <workItem from="1517225970417" duration="245000" />
+      <workItem from="1517226269967" duration="9918000" />
+      <workItem from="1517290304696" duration="12000" />
+      <workItem from="1517309688491" duration="4059000" />
+      <workItem from="1517389691675" duration="19000" />
+      <workItem from="1517398514741" duration="9657000" />
+      <workItem from="1517460768899" duration="2910000" />
+      <workItem from="1517539303639" duration="280000" />
+      <workItem from="1517541724087" duration="27523000" />
+      <workItem from="1517585909519" duration="15597000" />
+      <workItem from="1517659461699" duration="13221000" />
+      <workItem from="1517677094410" duration="3095000" />
+      <workItem from="1517994049686" duration="1375000" />
+      <workItem from="1518054879886" duration="714000" />
+      <workItem from="1518055860727" duration="584000" />
+      <workItem from="1518078119200" duration="1677000" />
+      <workItem from="1518351746987" duration="8095000" />
+      <workItem from="1518360165908" duration="1221000" />
+      <workItem from="1518401588411" duration="847000" />
+      <workItem from="1518418191414" duration="299000" />
+      <workItem from="1518479062804" duration="1898000" />
+      <workItem from="1518485494733" duration="4304000" />
+      <workItem from="1518843384973" duration="157000" />
+      <workItem from="1518914312523" duration="122000" />
+      <workItem from="1519616974456" duration="21386000" />
+      <workItem from="1519654217467" duration="284000" />
+      <workItem from="1519734678003" duration="4582000" />
+      <workItem from="1519744515277" duration="8623000" />
+      <workItem from="1519958460706" duration="878000" />
+      <workItem from="1520256883902" duration="9614000" />
+      <workItem from="1520325166322" duration="4943000" />
+      <workItem from="1520507499071" duration="8385000" />
+      <workItem from="1520570903833" duration="4644000" />
+      <workItem from="1520657535336" duration="465000" />
+      <workItem from="1520658037252" duration="221000" />
+      <workItem from="1520658297895" duration="34000" />
+      <workItem from="1520658365298" duration="549000" />
+      <workItem from="1520658955142" duration="1217000" />
+      <workItem from="1520663217735" duration="13000" />
+      <workItem from="1520663308442" duration="155000" />
+      <workItem from="1520663498477" duration="223000" />
+      <workItem from="1520737715846" duration="4738000" />
+      <workItem from="1520743316142" duration="6527000" />
+      <workItem from="1520776944873" duration="5303000" />
+      <workItem from="1520784349597" duration="685000" />
+      <workItem from="1566170355568" duration="65000" />
+      <workItem from="1566170450091" duration="24000" />
+      <workItem from="1566170499545" duration="384000" />
+      <workItem from="1566170972979" duration="1756000" />
+      <workItem from="1566398991474" duration="67000" />
+      <workItem from="1566399101287" duration="429000" />
+      <workItem from="1566836840704" duration="454000" />
+    </task>
+    <task id="LOCAL-00011" summary="Logo Script One Step prelimary testing finish, further testing required">
+      <created>1510914847477</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1510914847478</updated>
+    </task>
+    <task id="LOCAL-00012" summary="triangle Counting Test Complete, need to implement LogoBlock's ability">
+      <created>1511792340349</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1511792340349</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Composite LogoBlock Still need to finish">
+      <created>1511876640774</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1511876640775</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Composite LogoBlock Still need to finish">
+      <created>1512303607741</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1512303607741</updated>
+    </task>
+    <task id="LOCAL-00015" summary="CompositeLogoBlock assemble and iterator waiting to fninish">
+      <created>1512962789050</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1512962789050</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Work has been decomposed into TODO, waiting to finish TODO">
+      <created>1512994804027</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1512994804027</updated>
+    </task>
+    <task id="LOCAL-00017" summary="implement the assemble and iterator method, later we need to finish the testing and then optimize the layout of the code">
+      <created>1513239539629</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1513239539629</updated>
+    </task>
+    <task id="LOCAL-00018" summary="implement the assemble and iterator method, later we need to finish the testing and then optimize the layout of the code">
+      <created>1513245144658</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1513245144658</updated>
+    </task>
+    <task id="LOCAL-00019" summary="needs continuing testing">
+      <created>1513332211766</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1513332211766</updated>
+    </task>
+    <task id="LOCAL-00020" summary="needs further integrate PatternLogoBlock with previous LogoBuild code">
+      <created>1513341273574</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1513341273575</updated>
+    </task>
+    <task id="LOCAL-00021" summary="plan for this week's work, which is shown in TODO">
+      <created>1513590505544</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1513590505544</updated>
+    </task>
+    <task id="LOCAL-00022" summary="huge change, many test required, split function into logical part, and physical part">
+      <created>1513739860065</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1513739860065</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Initial test passed, more test required">
+      <created>1513749609390</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1513749609390</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Initial test passed, more test required, distributed enviornment debug triangle">
+      <created>1513766002042</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1513766002042</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Initial test passed, more test required, distributed enviornment debug triangle">
+      <created>1514886432232</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1514886432232</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Initial test passed, more test required, distributed enviornment debug triangle">
+      <created>1514972031033</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1514972031033</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Initial test passed, more test required, distributed enviornment debug triangle">
+      <created>1515062698613</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1515062698614</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Initial test passed, more test required, distributed enviornment debug triangle">
+      <created>1515411043221</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1515411043221</updated>
+    </task>
+    <task id="LOCAL-00029" summary="more testing needed on complex pattern and pattern with filtering condition">
+      <created>1515573569023</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1515573569023</updated>
+    </task>
+    <task id="LOCAL-00030" summary="more testing needed on complex pattern and pattern with filtering condition">
+      <created>1515662586593</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1515662586594</updated>
+    </task>
+    <task id="LOCAL-00031" summary="more testing needed on complex pattern and pattern with filtering condition">
+      <created>1515775918764</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1515775918764</updated>
+    </task>
+    <task id="LOCAL-00032" summary="implementing testing pattern">
+      <created>1515930757876</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1515930757877</updated>
+    </task>
+    <task id="LOCAL-00033" summary="implementing testing pattern">
+      <created>1516083279046</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1516083279046</updated>
+    </task>
+    <task id="LOCAL-00034" summary="implementing testing pattern">
+      <created>1516286797168</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1516286797168</updated>
+    </task>
+    <task id="LOCAL-00035" summary="implementing testing pattern">
+      <created>1516340010345</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1516340010345</updated>
+    </task>
+    <task id="LOCAL-00036" summary="implementing testing pattern">
+      <created>1516797774460</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1516797774461</updated>
+    </task>
+    <task id="LOCAL-00037" summary="implementing testing pattern">
+      <created>1516804088471</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1516804088471</updated>
+    </task>
+    <task id="LOCAL-00038" summary="implementing compact list">
+      <created>1517213180282</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1517213180283</updated>
+    </task>
+    <task id="LOCAL-00039" summary="implementing compact list">
+      <created>1517218089710</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1517218089710</updated>
+    </task>
+    <task id="LOCAL-00040" summary="implementing compact list">
+      <created>1517220540082</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1517220540082</updated>
+    </task>
+    <task id="LOCAL-00041" summary="implementing compact list">
+      <created>1517313996773</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1517313996773</updated>
+    </task>
+    <task id="LOCAL-00042" summary="implementing compact list">
+      <created>1517406586427</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1517406586427</updated>
+    </task>
+    <task id="LOCAL-00043" summary="implementing compact list">
+      <created>1517410319784</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1517410319784</updated>
+    </task>
+    <task id="LOCAL-00044" summary="implementing compact list">
+      <created>1517585041877</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1517585041878</updated>
+    </task>
+    <task id="LOCAL-00045" summary="implementing compact list">
+      <created>1517796642206</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1517796642206</updated>
+    </task>
+    <task id="LOCAL-00046" summary="implementing compact list">
+      <created>1518358816114</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1518358816114</updated>
+    </task>
+    <task id="LOCAL-00047" summary="implementing compact list">
+      <created>1518488818683</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1518488818683</updated>
+    </task>
+    <task id="LOCAL-00048" summary="Code Optimize">
+      <created>1519654031491</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1519654031491</updated>
+    </task>
+    <task id="LOCAL-00049" summary="Code Optimize">
+      <created>1519738788895</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1519738788895</updated>
+    </task>
+    <task id="LOCAL-00050" summary="Code Optimize">
+      <created>1520265762832</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1520265762837</updated>
+    </task>
+    <task id="LOCAL-00051" summary="Code Optimize">
+      <created>1520330414299</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1520330414301</updated>
+    </task>
+    <task id="LOCAL-00052" summary="Code Optimize">
+      <created>1520517236635</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1520517236635</updated>
+    </task>
+    <task id="LOCAL-00053" summary="Code Optimize">
+      <created>1520642181607</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1520642181608</updated>
+    </task>
+    <task id="LOCAL-00054" summary="Code Optimize">
+      <created>1520659896484</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1520659896487</updated>
+    </task>
+    <task id="LOCAL-00055" summary="Code Optimize">
+      <created>1520660222439</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1520660222439</updated>
+    </task>
+    <task id="LOCAL-00056" summary="Code Optimize">
+      <created>1520742347501</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1520742347503</updated>
+    </task>
+    <task id="LOCAL-00057" summary="Code Optimize">
+      <created>1520742415310</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1520742415310</updated>
+    </task>
+    <task id="LOCAL-00058" summary="Code Optimize">
+      <created>1520754152579</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1520754152580</updated>
+    </task>
+    <task id="LOCAL-00059" summary="Code Optimize">
+      <created>1520779477475</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1520779477477</updated>
+    </task>
+    <option name="localTasksCounter" value="60" />
+    <servers />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="Refactor Complete" />
+    <MESSAGE value="Performance Optimization Complete" />
+    <MESSAGE value="CacheLeapFrogJoin Complete" />
+    <MESSAGE value="Sampling Process Completed" />
+    <MESSAGE value="First Refractor" />
+    <MESSAGE value="Second Refractor" />
+    <MESSAGE value="Add DSCE" />
+    <MESSAGE value="Preliminary Implementation of CountAggregateDecomposer" />
+    <MESSAGE value="Before LeapFrogAggregate Implementation" />
+    <MESSAGE value="Refracture" />
+    <MESSAGE value="Change DataType to Long" />
+    <MESSAGE value="Optimize" />
+    <MESSAGE value="Optimize 1" />
+    <MESSAGE value="Submit Version of DISC" />
+    <MESSAGE value="GHD Optimized" />
+    <MESSAGE value="Finish One Bug in Trie.scala" />
+    <MESSAGE value="Solve one bug in Trie.scala" />
+    <MESSAGE value="Back Up" />
+    <MESSAGE value="clean" />
+    <MESSAGE value="clean1" />
+    <MESSAGE value="clean2" />
+    <MESSAGE value="clean2.5" />
+    <MESSAGE value="clean3---make file based configuration" />
+    <MESSAGE value="clean4" />
+    <MESSAGE value="clean5" />
+    <option name="LAST_COMMIT_MESSAGE" value="clean5" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1597" y="397" key="#Notifications" timestamp="1595748140127">
+      <screen x="0" y="23" width="2560" height="1009" />
+    </state>
+    <state x="1597" y="397" key="#Notifications/0.23.2560.1009/2560.-369.1080.1897@0.23.2560.1009" timestamp="1595748140127" />
+    <state x="1444" y="300" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog" timestamp="1595925025596">
+      <screen x="0" y="23" width="2560" height="1009" />
+    </state>
+    <state x="1444" y="300" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog/0.23.2560.1009/2560.-369.1080.1897@0.23.2560.1009" timestamp="1595925025596" />
+    <state x="1272" y="459" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog" timestamp="1595751798605">
+      <screen x="0" y="23" width="2560" height="1009" />
+    </state>
+    <state x="1272" y="459" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog/0.23.2560.1009/2560.-369.1080.1897@0.23.2560.1009" timestamp="1595751798605" />
+    <state x="1596" y="23" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1595852180723">
+      <screen x="0" y="23" width="2560" height="1009" />
+    </state>
+    <state x="1596" y="23" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.23.2560.1009/2560.-369.1080.1897@0.23.2560.1009" timestamp="1595852180723" />
+    <state x="1444" y="281" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1595750365463">
+      <screen x="0" y="23" width="2560" height="1009" />
+    </state>
+    <state x="1444" y="281" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.23.2560.1009/2560.-369.1080.1897@0.23.2560.1009" timestamp="1595750365463" />
+    <state x="1418" y="369" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1" timestamp="1595749955832">
+      <screen x="0" y="23" width="2560" height="1009" />
+    </state>
+    <state x="1418" y="369" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.23.2560.1009/2560.-369.1080.1897@0.23.2560.1009" timestamp="1595749955832" />
+    <state x="827" y="102" key="CommitChangelistDialog2" timestamp="1595928202831">
+      <screen x="0" y="23" width="2560" height="1009" />
+    </state>
+    <state x="827" y="102" key="CommitChangelistDialog2/0.23.2560.1009/2560.-369.1080.1897@0.23.2560.1009" timestamp="1595928202831" />
+    <state x="1109" y="371" width="764" height="491" key="MultipleFileMergeDialog" timestamp="1595747618381">
+      <screen x="0" y="23" width="2560" height="1009" />
+    </state>
+    <state x="1109" y="371" width="764" height="491" key="MultipleFileMergeDialog/0.23.2560.1009/2560.-369.1080.1897@0.23.2560.1009" timestamp="1595747618381" />
+    <state x="953" y="123" width="1507" height="809" key="ShowDiffWithBranchDialog" timestamp="1595748102017">
+      <screen x="0" y="23" width="2560" height="1009" />
+    </state>
+    <state x="953" y="123" width="1507" height="809" key="ShowDiffWithBranchDialog/0.23.2560.1009/2560.-369.1080.1897@0.23.2560.1009" timestamp="1595748102017" />
+    <state x="1127" y="259" key="com.intellij.openapi.vcs.changes.SpecificFilesViewDialog" timestamp="1595747583150">
+      <screen x="0" y="23" width="2560" height="1009" />
+    </state>
+    <state x="1127" y="259" key="com.intellij.openapi.vcs.changes.SpecificFilesViewDialog/0.23.2560.1009/2560.-369.1080.1897@0.23.2560.1009" timestamp="1595747583150" />
+    <state x="2560" y="-369" width="1080" height="949" key="dock-window-1" timestamp="1595924073399">
+      <screen x="2560" y="-369" width="1080" height="1897" />
+    </state>
+    <state x="2560" y="-369" width="1080" height="949" key="dock-window-1/0.23.2560.1009/2560.-369.1080.1897@0.23.2560.1009" timestamp="1595924073399" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_221.jdk/Contents/Home/src.zip!/java/util/LinkedHashMap.java</url>
+          <line>438</line>
+          <option name="timeStamp" value="78" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/main/scala/org/apache/spark/disc/execution/subtask/executor/CachedLeapFrogJoin.scala</url>
+          <line>365</line>
+          <option name="timeStamp" value="84" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="java-exception">
+          <dependency leave-enabled="true" master-id="0" />
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

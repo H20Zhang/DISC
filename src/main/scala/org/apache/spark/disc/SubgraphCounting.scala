@@ -1,11 +1,13 @@
 package org.apache.spark.disc
 
+import java.io.{BufferedWriter, File, FileWriter}
+
 import org.apache.spark.disc.parser.SubgraphParser
 import org.apache.spark.disc.util.misc.QueryType.QueryType
 import org.apache.spark.disc.util.misc._
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.io.Source
 
 object SubgraphCounting {
 
@@ -57,16 +59,44 @@ object SubgraphCounting {
     physicalPlan
   }
 
-  def get(data: String, dml: String, orbit: String, queryType: QueryType) = {
+  def rdd(data: String,
+          pattern: String,
+          orbit: String,
+          queryType: QueryType) = {
 
-    val physicalPlan = phyiscalPlan(data, dml, orbit, queryType)
+    val physicalPlan = phyiscalPlan(data, pattern, orbit, queryType)
 
     println(physicalPlan.prettyString())
 
     //execute physical plan
     val output = physicalPlan.execute()
 
-    output
+    output.rdd
+  }
+
+  def result(data: String,
+            pattern: String,
+            orbit: String,
+            queryType: QueryType,
+            outputPath: String) = {
+
+    val spark = SparkSingle.getSparkSession()
+
+    import spark.implicits._
+
+    val physicalPlan = phyiscalPlan(data, pattern, orbit, queryType)
+
+    println(physicalPlan.prettyString())
+
+    //execute physical plan
+    val output = physicalPlan.execute()
+
+    val csvContent = output.rdd.collect().sortBy(f => f(0)).map(_.mkString(",")).mkString("\n")
+
+    val file = new File(outputPath)
+    val bw = new BufferedWriter(new FileWriter(file))
+    bw.write(csvContent)
+    bw.close()
   }
 
   def count(data: String, dml: String, orbit: String, queryType: QueryType) = {
@@ -87,10 +117,11 @@ object SubgraphCounting {
 
     case class InputConfig(query: String = "",
                            data: String = "",
+                           output: String = "",
                            executionMode: String = "Count",
                            queryType: String = "ISO",
                            core: String = "A",
-                           platform: String = "Dist")
+                           platform: String = "")
 
     //parser for args
     val builder = OParser.builder[InputConfig]
@@ -104,11 +135,14 @@ object SubgraphCounting {
           .text("pattern graph, i.e. 'A-B;B-C;A-C'"),
         opt[String]('d', "data")
           .action((x, c) => c.copy(data = x))
-          .text("path to data graph"),
+          .text("input path of data graph"),
+        opt[String]('o', "output")
+          .action((x, c) => c.copy(output = x))
+          .text("output path"),
         opt[String]('e', "executionMode")
           .action((x, c) => c.copy(executionMode = x))
           .text(
-            "[ShowPlan|Count|Exec] (ShowPlan: show the query plan, Count: show sum of count, Exec: execute and output counts of query)"
+            "[ShowPlan|Count|Result] (ShowPlan: show the query plan, Count: show sum of count, Result: execute and output counts of query)"
           ),
         opt[String]('u', "queryType")
           .action((x, c) => c.copy(queryType = x))
@@ -118,9 +152,9 @@ object SubgraphCounting {
         opt[String]('c', "orbit")
           .action((x, c) => c.copy(core = x))
           .text("orbit, i.e., A"),
-        opt[String]('p', "platform")
+        opt[String]('p', "environment")
           .action((x, c) => c.copy(platform = x))
-          .text("[Single|Parallel|Dist]")
+          .text("path to environment configuration")
       )
     }
 
@@ -134,17 +168,20 @@ object SubgraphCounting {
         conf.executionMode = ExecutionMode.withName(config.executionMode)
         conf.orbit = config.core
         conf.query = config.query
+        conf.output = config.output
+//        val url = config.platform
+        val url = config.platform match {
+          case "Local" => {
+            "disc_local.properties"
 
-        config.platform match {
-          case "Parallel" => {
-            val url = "disc_local.properties"
-            Conf.defaultConf().load(url)
           }
-          case "Dist" => {
-            val url = "disc_yarn.properties"
-            Conf.defaultConf().load(url)
+          case "Yarn" => {
+            "disc_yarn.properties"
           }
         }
+        Conf.defaultConf().load(url)
+
+
       case _ => // arguments are bad, error message will have been displayed
     }
 
@@ -173,6 +210,14 @@ object SubgraphCounting {
           conf.orbit,
           conf.queryType
         )
+      case ExecutionMode.Result =>
+        SubgraphCounting.result(
+          conf.data,
+          conf.query,
+          conf.orbit,
+          conf.queryType,
+          conf.output
+        )
     }
 
     val time2 = System.currentTimeMillis()
@@ -182,3 +227,5 @@ object SubgraphCounting {
 
   }
 }
+
+

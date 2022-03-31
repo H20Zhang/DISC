@@ -3,7 +3,7 @@ package disc.integration
 import disc.util.{ExpData, ExpQuery, SparkFunSuite}
 import org.apache.spark.disc.optimization.rule_based.aggregate.CountTableCache
 import org.apache.spark.disc.util.misc.{Conf, QueryType}
-import org.apache.spark.disc.SubgraphCounting
+import org.apache.spark.disc.{BatchSubgraphCounting, SubgraphCounting}
 
 class DISCMainTest extends SparkFunSuite {
 
@@ -31,24 +31,41 @@ class DISCMainTest extends SparkFunSuite {
 
   test("expEntry") {
     val data = ExpData.getDataAddress(dataset)
-    val executeMode = "Count"
+    val outputPath = "./examples/out.csv"
+    val executeMode = "Result"
+//    val executeMode = "Count"
     //    val executeMode = "ShowPlan"
     val queryType = "HOM"
 
 //    val platform = "Single"
-    val platform = "Parallel"
+    val platform = "Local"
 
     val expQuery = new ExpQuery(data)
 
-    val queries = Seq("t50").map(f => expQuery.getDml(f))
+    val queries = Seq("t1").map(f => expQuery.getDml(f))
 
     queries.foreach { query =>
 //      CountTableCache.reset()
       val command1 =
-        s"-q $query -d ${data} -e $executeMode -u ${queryType} -c A -p $platform"
+        s"-q $query -d ${data} -o ${outputPath} -e $executeMode -u ${queryType} -c A -p $platform"
 
       SubgraphCounting.main(command1.split("\\s"))
     }
+  }
+
+  test("BatchSubgraphCounting"){
+    val data = ExpData.getDataAddress(dataset)
+    val outputPrefix = "./examples/"
+    val executeMode = "Result"
+    val queryType = "HOM"
+    val platform = "disc_local.properties"
+    val queryFile = "./examples/query.txt"
+    val orbit = "A"
+
+    val command1 =
+      s"-b ${queryFile} -d ${data} -o ${outputPrefix} -e $executeMode -u ${queryType} -c ${orbit} -p $platform"
+
+    BatchSubgraphCounting.main(command1.split("\\s"))
   }
 
   //check if whole pipeline can be compiled

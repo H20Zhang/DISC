@@ -1,0 +1,2 @@
+t50 A-D;A-E;B-C;B-D;B-E;C-D;C-E;
+t51 A-B;A-C;A-D;A-E;B-C;B-D;B-E;C-D;

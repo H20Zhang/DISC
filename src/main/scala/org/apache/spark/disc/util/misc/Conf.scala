@@ -17,10 +17,12 @@ case class Conf() {
 
   //Query Related Parameters
   var data = ""
+  var output = ""
   var query = ""
   var orbit = "A"
   var queryType = QueryType.ISO
   var executionMode = ExecutionMode.Count
+
 
   def load(url: String) = {
     val properties: Properties = new Properties()
@@ -46,8 +48,8 @@ case class Conf() {
 object Conf {
   lazy val conf = {
     val _conf = new Conf()
-    val url = "disc_local.properties"
-    _conf.load(url)
+//    val url = "disc_local.properties"
+//    _conf.load(url)
     _conf
   }
 
@@ -64,6 +66,6 @@ object QueryType extends Enumeration {
 
 object ExecutionMode extends Enumeration {
   type ExecutionMode = Value
-  val ShowPlan, Count, Exec, Debug =
+  val ShowPlan, Count, Result, Exec, Debug =
     Value
 }

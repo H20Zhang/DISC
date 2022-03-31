@@ -72,7 +72,7 @@ class SubgraphCountLogicalRule() extends LogicalRule {
       }
 
       case QueryType.HOM => {
-        ruleExecutor.addRule(rule1)
+        ruleExecutor.addRule(new ByPassRule(State.InducedWithSymmetryBreaked, State.Induced))
         ruleExecutor.addRule(new ByPassRule(State.Induced, State.NonInduced))
         ruleExecutor.addRule(new ByPassRule(State.NonInduced, State.Partial))
         ruleExecutor.addRule(rule4)

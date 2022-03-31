@@ -2,7 +2,7 @@
 
 
 #DISC options
-mainClass=org.apache.spark.disc.testing.ExpEntry
+mainClass=org.apache.spark.disc.SubgraphCounting
 prefix="/hzhang/benu/data"
 JAR="./DISC-assembly-0.1.jar"
 timeout=86400
